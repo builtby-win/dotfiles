@@ -1,0 +1,11 @@
+{
+  "hooks": {},
+  "enabledPlugins": {
+    "Notion@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "superpowers@superpowers-marketplace": true,
+    "superpowers-chrome@superpowers-marketplace": true,
+    "serena@claude-plugins-official": true
+  }
+}

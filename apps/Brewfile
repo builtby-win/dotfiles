@@ -1,0 +1,51 @@
+# builtby.win/dotfiles - Brewfile
+# This is a reference list. The setup script installs apps interactively.
+
+# Taps
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+tap "joshmedeski/sesh"
+
+# CLI Tools
+brew "stow"           # Symlink farm manager
+brew "fnm"            # Fast Node Manager
+brew "fzf"            # Fuzzy finder
+brew "ripgrep"        # Fast grep
+brew "bat"            # Better cat
+brew "eza"            # Better ls
+brew "zoxide"         # Smart cd
+brew "diff-so-fancy"  # Better git diffs
+brew "yt-dlp"         # Video downloader
+brew "jq"             # JSON processor
+brew "gh"             # GitHub CLI
+brew "tmux"           # Terminal multiplexer
+brew "sesh"           # Smart tmux session manager
+
+# Terminals & Editors
+cask "ghostty"
+cask "visual-studio-code"
+cask "cursor"
+
+# AI Tools
+brew "claude"         # Claude Code CLI
+
+# Productivity
+cask "raycast"
+cask "1password"
+
+# Browsers
+cask "google-chrome"
+cask "arc"
+cask "orion"
+
+# Dev Tools
+cask "docker"
+cask "figma"
+
+# Communication
+cask "discord"
+
+# Fonts
+cask "font-fira-code"
+cask "font-jetbrains-mono"
+cask "font-sf-mono"
