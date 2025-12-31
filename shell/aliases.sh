@@ -31,6 +31,7 @@ alias d="z"
 # Package managers
 alias pp="pnpm"
 alias po="pnpm run"
+alias ppr="pnpm run"
 
 # Modern CLI replacements (if installed)
 if command -v eza &> /dev/null; then
