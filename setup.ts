@@ -78,39 +78,41 @@ interface App {
   dependencies?: string[]; // Other brew packages to install alongside
   detectCmd?: string;      // Custom command to check if installed (e.g., "command -v claude")
   detectPath?: string;     // Custom path to check if exists (e.g., "/Applications/App.app")
+  desc?: string;           // Short description for info display
+  url?: string;            // Project URL
 }
 
 const APPS: App[] = [
   // Terminals & Editors
-  { name: "Ghostty (terminal)", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app" },
-  { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app" },
-  { name: "Cursor (AI editor)", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], detectPath: "/Applications/Cursor.app" },
+  { name: "Ghostty (terminal)", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org" },
+  { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com" },
+  { name: "Cursor (AI editor)", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh" },
 
   // AI Tools
-  { name: "Claude Code (CLI)", value: "claude", brewName: "claude", configs: ["claude"], detectCmd: "command -v claude" },
-  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], detectCmd: "command -v codex" },
+  { name: "Claude Code (CLI)", value: "claude", brewName: "claude", configs: ["claude"], detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code" },
+  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex" },
 
   // Productivity
-  { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app" },
+  { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com" },
 
   // Browsers
-  { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app" },
-  { name: "Arc", value: "arc", brewName: "arc", cask: true, detectPath: "/Applications/Arc.app" },
-  { name: "Orion", value: "orion", brewName: "orion", cask: true, detectPath: "/Applications/Orion.app" },
+  { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app", desc: "Google's web browser" },
+  { name: "Arc", value: "arc", brewName: "arc", cask: true, detectPath: "/Applications/Arc.app", desc: "Modern browser with spaces & profiles", url: "https://arc.net" },
+  { name: "Orion", value: "orion", brewName: "orion", cask: true, detectPath: "/Applications/Orion.app", desc: "WebKit browser with Chrome/Firefox extension support", url: "https://browser.kagi.com" },
 
   // Dev Tools
-  { name: "Docker", value: "docker", brewName: "docker", cask: true, detectPath: "/Applications/Docker.app" },
-  { name: "Figma", value: "figma", brewName: "figma", cask: true, detectPath: "/Applications/Figma.app" },
-  { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app" },
+  { name: "Docker", value: "docker", brewName: "docker", cask: true, detectPath: "/Applications/Docker.app", desc: "Container runtime for development", url: "https://docker.com" },
+  { name: "Figma", value: "figma", brewName: "figma", cask: true, detectPath: "/Applications/Figma.app", desc: "Collaborative design tool", url: "https://figma.com" },
+  { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app", desc: "Chat for communities", url: "https://discord.com" },
 
   // CLI Tools
-  { name: "tmux (terminal multiplexer)", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf"] },
-  { name: "fzf (fuzzy finder)", value: "fzf", brewName: "fzf" },
-  { name: "ripgrep (fast grep)", value: "ripgrep", brewName: "ripgrep" },
-  { name: "bat (better cat)", value: "bat", brewName: "bat" },
-  { name: "eza (better ls)", value: "eza", brewName: "eza" },
-  { name: "zoxide (smart cd)", value: "zoxide", brewName: "zoxide" },
-  { name: "starship (modern prompt)", value: "starship", brewName: "starship", checked: true },
+  { name: "tmux", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf"], desc: "Terminal multiplexer - split panes, sessions", url: "https://github.com/tmux/tmux" },
+  { name: "fzf", value: "fzf", brewName: "fzf", desc: "Fuzzy finder for files, history, and more", url: "https://github.com/junegunn/fzf" },
+  { name: "ripgrep", value: "ripgrep", brewName: "ripgrep", desc: "Blazing fast grep replacement", url: "https://github.com/BurntSushi/ripgrep" },
+  { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat" },
+  { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza" },
+  { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide" },
+  { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs" },
 ];
 
 // Stow-managed configs
@@ -646,36 +648,59 @@ async function runSetup(): Promise<void> {
   }
   console.log("");
 
+  // Ask if user wants to see what each tool does
+  const showInfo = await confirm({
+    message: "Want to see what each tool does first?",
+    default: false,
+  });
+
+  if (showInfo) {
+    console.log("");
+    console.log(`${colors.cyan}${colors.bold}=== CLI Tools ===${colors.reset}`);
+    for (const app of APPS.filter(a => !a.cask)) {
+      const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
+      console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
+    }
+    console.log("");
+    console.log(`${colors.cyan}${colors.bold}=== Apps ===${colors.reset}`);
+    for (const app of APPS.filter(a => a.cask)) {
+      const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
+      console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
+    }
+    console.log("");
+  }
+
   // Step 1: Select apps to install
   log.step("[1/3] Select apps to install");
   const selectedApps = await checkbox({
     message: "Select apps (space to toggle, enter to confirm):",
     choices: APPS.map((app) => {
       const state = appStates.get(app.value) ?? "not_installed";
+      const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
       if (state === "installed") {
         return {
-          name: `${app.name} ${colors.green}(installed)${colors.reset}`,
+          name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
           value: app.value,
           checked: true,
           disabled: "(already installed)",
         };
       } else if (state === "partial") {
         return {
-          name: `${app.name} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing fun stuff)${colors.reset}`,
+          name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
           value: app.value,
-          checked: true, // pre-select so they install the missing deps
+          checked: true,
           disabled: false,
         };
       } else {
         return {
-          name: app.name,
+          name: `${app.name}${descPart}`,
           value: app.value,
           checked: app.checked ?? false,
           disabled: false,
         };
       }
     }),
-    pageSize: 15,
+    pageSize: 20,
   });
 
   console.log("");

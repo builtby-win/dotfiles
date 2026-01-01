@@ -4,13 +4,19 @@
 # Plugins loaded:
 #   - zsh-autosuggestions: Shows greyed-out command suggestions from history
 #                          Press → (right arrow) or End to accept
-#   - zsh-syntax-highlighting: Colors commands as you type (red = invalid, green = valid)
-#   - vi-mode: Vim keybindings in terminal (Esc for normal mode, i for insert)
-#   - git-auto-fetch: Automatically fetches git repos in background when you cd into them
+#                          https://github.com/zsh-users/zsh-autosuggestions
 #
-# Prompt: Starship (https://starship.rs)
-#   - Shows git branch, status, language versions, command duration, etc.
-#   - Configured via ~/.config/starship.toml
+#   - zsh-syntax-highlighting: Colors commands as you type (red = invalid, green = valid)
+#                              https://github.com/zsh-users/zsh-syntax-highlighting
+#
+#   - zsh-vi-mode: Vim keybindings in terminal (Esc for normal mode, i for insert)
+#                  https://github.com/jeffreytse/zsh-vi-mode
+#
+#   - git-auto-fetch: Automatically fetches git repos in background when you cd into them
+#                     (custom implementation below)
+#
+# Plugin manager: Zinit - https://github.com/zdharma-continuum/zinit
+# Prompt: Starship - https://starship.rs (config: ~/.config/starship.toml)
 
 # Bootstrap zinit if not installed
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -22,18 +28,19 @@ fi
 source "${ZINIT_HOME}/zinit.zsh"
 
 # ─────────────────────────────────────────────────────────────
-# Plugins
+# Plugins (see header for descriptions and links)
 # ─────────────────────────────────────────────────────────────
 
-# Autosuggestions - shows command suggestions from history
-# Use → or End to accept, or Ctrl+→ to accept word
+# zsh-autosuggestions: History-based command suggestions
+# → to accept full suggestion, Ctrl+→ to accept word
 zinit light zsh-users/zsh-autosuggestions
 
-# Syntax highlighting - colors commands as you type
+# zsh-syntax-highlighting: Real-time command validation
+# Green = valid command, Red = invalid/not found
 zinit light zsh-users/zsh-syntax-highlighting
 
-# Vi mode - vim keybindings in terminal
-# Esc = normal mode, i = insert mode, v = visual mode
+# zsh-vi-mode: Vim keybindings in terminal
+# Esc = normal mode, i = insert, v = visual, / = search
 zinit light jeffreytse/zsh-vi-mode
 
 # ─────────────────────────────────────────────────────────────
