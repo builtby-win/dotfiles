@@ -1,13 +1,11 @@
 # Shell aliases
 # builtby.win/dotfiles
+#
+# Note: Directory navigation (.., ..., etc.) is handled by
+# setopt AUTO_CD in zinit.sh - no aliases needed!
 
-# Directory navigation (from oh-my-zsh)
-alias -- -='cd -'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-
+# Quick shortcuts
+alias -- -='cd -'  # Go to previous directory
 alias fuck="rm -rf"
 # Reload shell config
 alias rc="source ~/.zshrc"

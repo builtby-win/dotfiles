@@ -18,7 +18,37 @@
 # Plugin manager: Zinit - https://github.com/zdharma-continuum/zinit
 # Prompt: Starship - https://starship.rs (config: ~/.config/starship.toml)
 
+# ─────────────────────────────────────────────────────────────
+# Zsh options (replaces oh-my-zsh defaults)
+# ─────────────────────────────────────────────────────────────
+setopt AUTO_CD              # Type directory name to cd into it (e.g., `..` instead of `cd ..`)
+setopt AUTO_PUSHD           # Push directories onto stack for `cd -N` navigation
+setopt PUSHD_IGNORE_DUPS    # Don't push duplicates onto directory stack
+setopt PUSHD_SILENT         # Don't print directory stack after pushd/popd
+
+# ─────────────────────────────────────────────────────────────
+# Completion system
+# ─────────────────────────────────────────────────────────────
+autoload -Uz compinit
+compinit
+
+# Menu-style completion with highlighting
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'  # Case-insensitive matching
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"    # Colored completion
+
+# Tab = next completion, Shift-Tab = previous completion
+bindkey '^I' menu-complete
+bindkey "${terminfo[kcbt]}" reverse-menu-complete
+
+# In menu selection mode: Tab/Shift-Tab navigate without exiting
+zmodload zsh/complist
+bindkey -M menuselect '^I' menu-complete
+bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete
+
+# ─────────────────────────────────────────────────────────────
 # Bootstrap zinit if not installed
+# ─────────────────────────────────────────────────────────────
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 if [[ ! -d "$ZINIT_HOME" ]]; then
   print -P "%F{33}Installing zinit...%f"
