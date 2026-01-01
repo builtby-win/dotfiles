@@ -1,6 +1,13 @@
 # Shell aliases
 # builtby.win/dotfiles
 
+# Directory navigation (from oh-my-zsh)
+alias -- -='cd -'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+
 alias fuck="rm -rf"
 # Reload shell config
 alias rc="source ~/.zshrc"
