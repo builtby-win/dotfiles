@@ -5,8 +5,13 @@
 # Get the directory where this script lives
 DOTFILES_SHELL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
-# Source oh-my-zsh config
-[[ -f "$DOTFILES_SHELL_DIR/oh-my-zsh.sh" ]] && source "$DOTFILES_SHELL_DIR/oh-my-zsh.sh"
+# Source zinit config (lightweight plugin manager + starship prompt)
+# Falls back to oh-my-zsh if zinit.sh doesn't exist (for backwards compatibility)
+if [[ -f "$DOTFILES_SHELL_DIR/zinit.sh" ]]; then
+  source "$DOTFILES_SHELL_DIR/zinit.sh"
+elif [[ -f "$DOTFILES_SHELL_DIR/oh-my-zsh.sh" ]]; then
+  source "$DOTFILES_SHELL_DIR/oh-my-zsh.sh"
+fi
 
 # Source aliases
 [[ -f "$DOTFILES_SHELL_DIR/aliases.sh" ]] && source "$DOTFILES_SHELL_DIR/aliases.sh"
@@ -33,3 +38,6 @@ fi
 
 # Cargo/Rust
 [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+
+# Local/personal config (gitignored - for machine-specific stuff)
+[[ -f "$DOTFILES_SHELL_DIR/local.sh" ]] && source "$DOTFILES_SHELL_DIR/local.sh"

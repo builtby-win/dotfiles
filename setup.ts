@@ -110,11 +110,12 @@ const APPS: App[] = [
   { name: "bat (better cat)", value: "bat", brewName: "bat" },
   { name: "eza (better ls)", value: "eza", brewName: "eza" },
   { name: "zoxide (smart cd)", value: "zoxide", brewName: "zoxide" },
+  { name: "starship (modern prompt)", value: "starship", brewName: "starship", checked: true },
 ];
 
 // Stow-managed configs
 const STOW_CONFIGS = [
-  { name: "Shell config (oh-my-zsh, aliases, functions)", value: "zsh", checked: true },
+  { name: "Shell config (zinit, starship, aliases)", value: "zsh", checked: true },
   { name: "Tmux (vim-style bindings, mouse support)", value: "tmux", checked: true },
   { name: "Karabiner Elements (key remapping)", value: "karabiner", checked: true },
   { name: "Ghostty (terminal config)", value: "ghostty", checked: true },
@@ -328,7 +329,7 @@ function writeDotfilesPath(): void {
 
 // Map stow package names to their target files (for conflict detection)
 const STOW_TARGETS: Record<string, string[]> = {
-  zsh: [".zshrc"],
+  zsh: [".zshrc", ".config/starship.toml"],
   tmux: [".tmux.conf"],
   karabiner: [".config/karabiner/karabiner.json"],
   ghostty: [".config/ghostty/config"],

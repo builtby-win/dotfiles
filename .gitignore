@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 .backup-manifest.json
 pnpm-lock.yaml
+
+# Local/personal configs (not committed)
+shell/local.sh
