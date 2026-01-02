@@ -49,3 +49,14 @@ fi
 if command -v bat &> /dev/null; then
   alias cat="bat"
 fi
+
+# Smart tmux - auto-names sessions after current directory
+# Usage: `tmux` in ~/code/myproject creates session named "myproject"
+tmux() {
+  if [[ $# -eq 0 ]]; then
+    local session_name="${PWD##*/}"
+    command tmux new-session -A -s "$session_name"
+  else
+    command tmux "$@"
+  fi
+}

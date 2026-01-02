@@ -7,7 +7,7 @@
                 },
                 "rules": [
                     {
-                        "description": "jk simultaneously → Ctrl+a (tmux prefix) in terminals",
+                        "description": "jk simultaneously → Ctrl+. (tmux prefix) in terminals",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -35,7 +35,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "a",
+                                        "key_code": "period",
                                         "modifiers": ["control"]
                                     }
                                 ],
