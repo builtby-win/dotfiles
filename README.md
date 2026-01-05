@@ -60,6 +60,93 @@ ppr        # pnpm run
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` that learns your habits | [GitHub](https://github.com/ajeetdsouza/zoxide) |
 | [tmux](https://github.com/tmux/tmux) | Terminal multiplexer (split panes, sessions) | [GitHub](https://github.com/tmux/tmux) |
 
+### Tmux Usage
+
+Prefix key: `Ctrl+.` (or `jk` in terminals via Karabiner)
+
+#### Ghostty Integration
+
+When using tmux with Ghostty and mouse mode enabled (`set -g mouse on`):
+- **Cmd+Click links**: Use `Cmd+Shift+Click` (Shift bypasses tmux)
+- **Copy text**: Use `Cmd+Shift+Drag` to select, then `Cmd+C`
+- **Alternative**: Use tmux copy mode (see below)
+
+#### Session Management
+
+| Binding | Action |
+|---------|--------|
+| `Leader+Space` | Session picker (sesh) - browse/create sessions |
+| `Leader+t` | Session picker (alternative) |
+| `Leader+T` | Quick switch to last session |
+| `Leader+Tab` | Toggle between last 2 sessions |
+| `Alt+(` / `Alt+)` | Previous/next session |
+| `Leader+q` | Detach from session |
+
+#### Pane Navigation & Splits
+
+| Binding | Action |
+|---------|--------|
+| `Leader+h/j/k/l` | Select pane (vim style) |
+| `Alt+h/j/k/l` | Select pane (no prefix) |
+| `Leader+d` | Split vertical (side by side) |
+| `Leader+D` | Split horizontal (stacked) |
+| `Leader+w` | Close pane |
+| `Alt+\` | Split vertical (no prefix) |
+| `Alt+-` | Split horizontal (no prefix) |
+| `Leader+-` | Shrink pane |
+| `Leader+=` | Grow pane |
+| `Alt+Arrows` | Resize pane (no prefix) |
+
+#### Window Navigation
+
+| Binding | Action |
+|---------|--------|
+| `Alt+1-9` | Switch to window 1-9 |
+| `Alt+c` | New window |
+
+#### Copy Mode (Vim Style)
+
+| Binding | Action |
+|---------|--------|
+| `Leader+c` | Enter copy mode |
+| `h/j/k/l` | Navigate in copy mode |
+| `v` | Start selection |
+| `V` | Select whole lines |
+| `y` | Yank/copy and exit |
+| `q` | Quit copy mode |
+| `/` | Search forward |
+| `n` / `N` | Next/previous search result |
+
+#### Other
+
+| Binding | Action |
+|---------|--------|
+| `Leader+p` | Command palette (searchable keybindings) |
+| `Leader+r` | Reload tmux config |
+| `Leader+z` | Zoom/unzoom pane |
+
+### Karabiner Elements Keybindings
+
+Custom keyboard shortcuts for improved workflow:
+
+| Binding | Action |
+|---------|--------|
+| `;;` (double semicolon) | Open AltTab window switcher (Ctrl+Opt+Tab) |
+| `jk` (simultaneous in terminals) | Tmux prefix (Ctrl+.) |
+| `f` in sesh search | Enable fuzzy search mode |
+| `Esc` in sesh search | Return to navigation mode (j/k) |
+| `Caps Lock` | Control key |
+| `Fn` key | Control key |
+| `Delete` (forward delete) | Escape |
+
+**External Keyboard (Windows layout)**:
+- Left Alt → Command
+- Left Windows → Option
+- Right Alt → Command
+- Menu key → Hyper (Ctrl+Opt+Shift+Cmd)
+
+**Note**: Karabiner config is managed via `./scripts/sync-karabiner.sh` (not stow) because Karabiner rewrites its own config file.
+
 ### Apps (Optional)
 
 | Category | Apps |

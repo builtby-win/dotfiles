@@ -2,8 +2,72 @@
     "profiles": [
         {
             "complex_modifications": {
-                "parameters": { "basic.simultaneous_threshold_milliseconds": 150 },
+                "parameters": { "basic.simultaneous_threshold_milliseconds": 50 },
                 "rules": [
+                    {
+                        "description": "Double-tap ; (semicolon) → AltTab window switcher (Ctrl+Opt+Tab)",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "semicolon_pressed_once",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "semicolon",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "tab",
+                                        "modifiers": ["left_control", "left_option"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "semicolon",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "semicolon"
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "semicolon_pressed_once",
+                                            "value": 1
+                                        }
+                                    }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "semicolon_pressed_once",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "semicolon_pressed_once",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "parameters": {
+                                    "basic.to_delayed_action_delay_milliseconds": 200
+                                },
+                                "type": "basic"
+                            }
+                        ]
+                    },
                     {
                         "description": "jk simultaneously → Ctrl+. (tmux prefix) in terminals",
                         "manipulators": [
@@ -28,7 +92,8 @@
                                     ],
                                     "simultaneous_options": {
                                         "key_down_order": "insensitive",
-                                        "key_up_order": "insensitive"
+                                        "key_up_order": "insensitive",
+                                        "detect_key_down_uninterruptedly": true
                                     }
                                 },
                                 "to": [
@@ -37,6 +102,58 @@
                                         "modifiers": ["control"]
                                     }
                                 ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "bundle_identifiers": [
+                                            "com.mitchellh.ghostty",
+                                            "com.googlecode.iterm2",
+                                            "com.apple.Terminal",
+                                            "dev.warp.Warp-Stable",
+                                            "net.kovidgoyal.kitty",
+                                            "io.alacritty"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "j_pressed",
+                                            "value": 1
+                                        }
+                                    }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_invoked": [
+                                        {
+                                            "key_code": "j"
+                                        },
+                                        {
+                                            "set_variable": {
+                                                "name": "j_pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "j_pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "parameters": {
+                                    "basic.to_delayed_action_delay_milliseconds": 138
+                                },
                                 "type": "basic"
                             }
                         ]
