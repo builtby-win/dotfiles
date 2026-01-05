@@ -152,7 +152,7 @@
                                     ]
                                 },
                                 "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 138
+                                    "basic.to_delayed_action_delay_milliseconds": 50
                                 },
                                 "type": "basic"
                             }

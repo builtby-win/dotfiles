@@ -82,6 +82,13 @@ When using tmux with Ghostty and mouse mode enabled (`set -g mouse on`):
 | `Alt+(` / `Alt+)` | Previous/next session |
 | `Leader+q` | Detach from session |
 
+**Sesh picker navigation**:
+- `j`/`k` - Navigate up/down in list (default mode)
+- `f` - Enable fuzzy search mode (allows typing j/k/x)
+- `Esc` - Close sesh (or exit search mode if searching)
+- `x` - Kill selected session
+- `Ctrl+A/T/G/X` - Switch between all/tmux/configs/zoxide views
+
 #### Pane Navigation & Splits
 
 | Binding | Action |
