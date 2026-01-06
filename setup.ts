@@ -86,14 +86,25 @@ const APPS: App[] = [
   // Terminals & Editors
   { name: "Ghostty (terminal)", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org" },
   { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com" },
-  { name: "Cursor (AI editor)", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh" },
+  { name: "Cursor (AI editor)", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh" },
 
   // AI Tools
-  { name: "Claude Code (CLI)", value: "claude", brewName: "claude", configs: ["claude"], detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code" },
-  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex" },
+  { name: "Claude Code (CLI)", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code" },
+  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex" },
 
   // Productivity
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com" },
+  { name: "Velja", value: "velja", brewName: "velja", cask: true, detectPath: "/Applications/Velja.app", desc: "Browser picker - choose which browser opens links", url: "https://sindresorhus.com/velja" },
+  { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app" },
+  { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice" },
+  { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai" },
+
+  // Input
+  { name: "Karabiner Elements", value: "karabiner-elements", brewName: "karabiner-elements", cask: true, detectPath: "/Applications/Karabiner-Elements.app", desc: "Powerful keyboard customization", url: "https://karabiner-elements.pqrs.org" },
+  { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app" },
+
+  // Security
+  { name: "Bitwarden", value: "bitwarden", brewName: "bitwarden", cask: true, detectPath: "/Applications/Bitwarden.app", desc: "Open source password manager", url: "https://bitwarden.com" },
 
   // Browsers
   { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app", desc: "Google's web browser" },
@@ -121,6 +132,7 @@ const STOW_CONFIGS = [
   { name: "Tmux (vim-style bindings, mouse support)", value: "tmux", checked: true },
   { name: "Karabiner Elements (key remapping)", value: "karabiner", checked: true },
   { name: "Ghostty (terminal config)", value: "ghostty", checked: true },
+  { name: "Mackup (app settings backup to iCloud)", value: "mackup", checked: true },
 ];
 
 // AI tool configs (template-based)
@@ -335,6 +347,7 @@ const STOW_TARGETS: Record<string, string[]> = {
   tmux: [".tmux.conf"],
   karabiner: [".config/karabiner/karabiner.json"],
   ghostty: [".config/ghostty/config"],
+  mackup: [".mackup.cfg"],
 };
 
 async function setupStowConfigs(configs: string[]): Promise<void> {

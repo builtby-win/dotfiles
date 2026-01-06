@@ -156,14 +156,33 @@ Custom keyboard shortcuts for improved workflow:
 
 ### Apps (Optional)
 
-| Category | Apps |
-|----------|------|
-| Terminals | [Ghostty](https://ghostty.org) |
-| Editors | [VS Code](https://code.visualstudio.com), [Cursor](https://cursor.sh) |
-| AI Tools | [Claude Code](https://claude.ai/code), [Codex CLI](https://github.com/openai/codex) |
-| Productivity | [Raycast](https://raycast.com) |
-| Browsers | Chrome, [Arc](https://arc.net), [Orion](https://browser.kagi.com) |
-| Dev | [Docker](https://docker.com), Figma, Discord |
+All apps can be installed via `brew install --cask <name>` or through the interactive setup.
+
+| App | Description | Install |
+|-----|-------------|---------|
+| [Ghostty](https://ghostty.org) | GPU-accelerated terminal by Mitchell Hashimoto | `brew install --cask ghostty` |
+| [VS Code](https://code.visualstudio.com) | Popular code editor by Microsoft | `brew install --cask visual-studio-code` |
+| [Cursor](https://cursor.sh) | AI-first code editor (VS Code fork) | `brew install --cask cursor` |
+| [Raycast](https://raycast.com) | Spotlight replacement with extensions | `brew install --cask raycast` |
+| [AltTab](https://alt-tab-macos.netlify.app) | Windows-style alt-tab window switcher | `brew install --cask alt-tab` |
+| [Ice](https://github.com/jordanbaird/Ice) | Menu bar management - hide icons | `brew install --cask jordanbaird-ice` |
+| [BetterTouchTool](https://folivora.ai) | Customize trackpad, keyboard, Touch Bar, window snapping | `brew install --cask bettertouchtool` |
+| [LinearMouse](https://linearmouse.app) | Per-device mouse/trackpad settings, disable acceleration | `brew install --cask linearmouse` |
+| [Velja](https://sindresorhus.com/velja) | Browser picker - choose which browser opens each link | `brew install --cask velja` |
+| [Karabiner Elements](https://karabiner-elements.pqrs.org) | Powerful keyboard customization and remapping | `brew install --cask karabiner-elements` |
+| [Bitwarden](https://bitwarden.com) | Open source password manager | `brew install --cask bitwarden` |
+| [Arc](https://arc.net) | Modern browser with spaces & profiles | `brew install --cask arc` |
+| [Orion](https://browser.kagi.com) | WebKit browser with Chrome/Firefox extension support | `brew install --cask orion` |
+| [Docker](https://docker.com) | Container runtime for development | `brew install --cask docker` |
+| [Figma](https://figma.com) | Collaborative design tool | `brew install --cask figma` |
+| [Discord](https://discord.com) | Chat for communities | `brew install --cask discord` |
+
+### AI Tools
+
+| Tool | Description | Install |
+|------|-------------|---------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Anthropic's AI coding assistant for terminal | `brew install claude` |
+| [Codex CLI](https://github.com/openai/codex) | OpenAI's coding assistant CLI | `npm install -g @openai/codex` |
 
 ### AI Tool Configs
 

@@ -8,12 +8,14 @@ tap "joshmedeski/sesh"
 
 # CLI Tools
 brew "stow"           # Symlink farm manager
+brew "mackup"         # App settings backup
 brew "fnm"            # Fast Node Manager
 brew "fzf"            # Fuzzy finder
 brew "ripgrep"        # Fast grep
 brew "bat"            # Better cat
 brew "eza"            # Better ls
 brew "zoxide"         # Smart cd
+brew "starship"       # Fast shell prompt
 brew "diff-so-fancy"  # Better git diffs
 brew "yt-dlp"         # Video downloader
 brew "jq"             # JSON processor
@@ -31,12 +33,22 @@ brew "claude"         # Claude Code CLI
 
 # Productivity
 cask "raycast"
-cask "1password"
+cask "velja"            # Browser picker
+cask "alt-tab"          # Windows-style alt-tab
+cask "jordanbaird-ice"  # Menu bar management
+cask "linearmouse"      # Mouse customization
+cask "bettertouchtool"  # Trackpad/keyboard customization
+
+# Security
+cask "bitwarden"        # Password manager
 
 # Browsers
 cask "google-chrome"
 cask "arc"
 cask "orion"
+
+# Input & Window Management
+cask "karabiner-elements"  # Keyboard customization
 
 # Dev Tools
 cask "docker"
