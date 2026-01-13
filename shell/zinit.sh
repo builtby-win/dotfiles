@@ -30,7 +30,16 @@ setopt PUSHD_SILENT         # Don't print directory stack after pushd/popd
 # Completion system
 # ─────────────────────────────────────────────────────────────
 autoload -Uz compinit
-compinit
+# Optimize completion init: check if dump file is fresh (< 24h)
+if [[ -f "${ZDOTDIR:-$HOME}/.zcompdump" ]]; then
+  if [[ $(date +%s) -lt $(($(stat -f %m "${ZDOTDIR:-$HOME}/.zcompdump") + 86400)) ]]; then
+    compinit -C
+  else
+    compinit
+  fi
+else
+  compinit
+fi
 
 # Menu-style completion with highlighting
 zstyle ':completion:*' menu select
@@ -39,12 +48,12 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"    # Colored completion
 
 # Tab = next completion, Shift-Tab = previous completion
 bindkey '^I' menu-complete
-bindkey "${terminfo[kcbt]}" reverse-menu-complete
+[[ -n "${terminfo[kcbt]}" ]] && bindkey "${terminfo[kcbt]}" reverse-menu-complete
 
 # In menu selection mode: Tab/Shift-Tab navigate without exiting
 zmodload zsh/complist
 bindkey -M menuselect '^I' menu-complete
-bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete
+[[ -n "${terminfo[kcbt]}" ]] && bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete
 
 # ─────────────────────────────────────────────────────────────
 # Bootstrap zinit if not installed
@@ -108,7 +117,16 @@ add-zsh-hook chpwd _git_auto_fetch
 # Starship prompt
 # ─────────────────────────────────────────────────────────────
 if command -v starship &> /dev/null; then
-  eval "$(starship init zsh)"
+  if [[ -n "$DOTFILES_CACHE_DIR" ]]; then
+    STARSHIP_CACHE="$DOTFILES_CACHE_DIR/starship-init.zsh"
+  else
+    STARSHIP_CACHE="${ZDOTDIR:-$HOME}/.starship-init.zsh"
+  fi
+  
+  if [[ ! -f "$STARSHIP_CACHE" ]] || [[ "$(command -v starship)" -nt "$STARSHIP_CACHE" ]]; then
+    starship init zsh > "$STARSHIP_CACHE"
+  fi
+  source "$STARSHIP_CACHE"
 else
   # Fallback to simple prompt if starship not installed
   PROMPT='%F{blue}%~%f %F{green}❯%f '

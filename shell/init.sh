@@ -4,14 +4,11 @@
 
 # Get the directory where this script lives
 DOTFILES_SHELL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+DOTFILES_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles"
+mkdir -p "$DOTFILES_CACHE_DIR"
 
-# Source zinit config (lightweight plugin manager + starship prompt)
-# Falls back to oh-my-zsh if zinit.sh doesn't exist (for backwards compatibility)
-if [[ -f "$DOTFILES_SHELL_DIR/zinit.sh" ]]; then
-  source "$DOTFILES_SHELL_DIR/zinit.sh"
-elif [[ -f "$DOTFILES_SHELL_DIR/oh-my-zsh.sh" ]]; then
-  source "$DOTFILES_SHELL_DIR/oh-my-zsh.sh"
-fi
+# Local/personal config (early - for PATH/fpath setup)
+[[ -f "$DOTFILES_SHELL_DIR/local.sh" ]] && source "$DOTFILES_SHELL_DIR/local.sh"
 
 # Source aliases
 [[ -f "$DOTFILES_SHELL_DIR/aliases.sh" ]] && source "$DOTFILES_SHELL_DIR/aliases.sh"
@@ -21,9 +18,18 @@ fi
 
 # Homebrew
 if [[ "$(uname -m)" == "arm64" ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null
+  BREW_PATH="/opt/homebrew/bin/brew"
 else
-  eval "$(/usr/local/bin/brew shellenv)" 2>/dev/null
+  BREW_PATH="/usr/local/bin/brew"
+fi
+
+if [[ -f "$BREW_PATH" ]]; then
+  BREW_ENV_CACHE="$DOTFILES_CACHE_DIR/brew-shellenv.zsh"
+  # Cache brew shellenv if it doesn't exist or brew executable is newer
+  if [[ ! -f "$BREW_ENV_CACHE" ]] || [[ "$BREW_PATH" -nt "$BREW_ENV_CACHE" ]]; then
+    "$BREW_PATH" shellenv > "$BREW_ENV_CACHE"
+  fi
+  source "$BREW_ENV_CACHE"
 fi
 
 # fnm (Fast Node Manager)
@@ -39,5 +45,11 @@ fi
 # Cargo/Rust
 [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
-# Local/personal config (gitignored - for machine-specific stuff)
-[[ -f "$DOTFILES_SHELL_DIR/local.sh" ]] && source "$DOTFILES_SHELL_DIR/local.sh"
+# Source zinit config (lightweight plugin manager + starship prompt)
+# Falls back to oh-my-zsh if zinit.sh doesn't exist (for backwards compatibility)
+# Loaded LAST to ensure all fpaths are set before compinit and plugins wrap correctly
+if [[ -f "$DOTFILES_SHELL_DIR/zinit.sh" ]]; then
+  source "$DOTFILES_SHELL_DIR/zinit.sh"
+elif [[ -f "$DOTFILES_SHELL_DIR/oh-my-zsh.sh" ]]; then
+  source "$DOTFILES_SHELL_DIR/oh-my-zsh.sh"
+fi
