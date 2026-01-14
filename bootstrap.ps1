@@ -1,5 +1,21 @@
 $ErrorActionPreference = 'Stop'
 
+# 0. Permissions & Policy Checks
+try {
+    # Allow scripts to run in this process
+    Set-ExecutionPolicy Bypass -Scope Process -Force -ErrorAction SilentlyContinue
+    # Allow scripts to run for this user persistently (fixes common "running scripts is disabled" errors)
+    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force -ErrorAction SilentlyContinue
+} catch {
+    # Ignore if we can't change it (e.g. Group Policy), but proceed
+}
+
+function Test-Administrator {
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($user)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
 function Print-Banner {
     Write-Host ""
     Write-Host "  ╔═══════════════════════════════════════════╗" -ForegroundColor Cyan
@@ -24,6 +40,13 @@ function Print-Error {
 }
 
 Print-Banner
+
+if (-not (Test-Administrator)) {
+    Print-Error "This script requires Administrator privileges to install packages."
+    Write-Host "  Please right-click your terminal and select 'Run as Administrator'," -ForegroundColor Yellow
+    Write-Host "  then run this command again." -ForegroundColor Yellow
+    exit 1
+}
 
 # 1. Install Directory
 $DefaultDir = "$HOME\dotfiles"
