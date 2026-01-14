@@ -13,9 +13,11 @@ We provide a dedicated setup script for Windows that handles everything.
 1. **Open PowerShell as Administrator**
    (Right-click Start Menu -> Terminal (Admin) / PowerShell (Admin))
 
-2. **Install Git** (if missing)
+2. **Install Git & Node.js** (if missing)
    ```powershell
    winget install --id Git.Git -e --source winget
+   winget install --id OpenJS.NodeJS.LTS -e --source winget
+   # Restart your terminal after installation to refresh your PATH
    ```
 
 3. **Clone the repository**
@@ -24,7 +26,12 @@ We provide a dedicated setup script for Windows that handles everything.
    cd dotfiles
    ```
 
-4. **Run the Windows Setup**
+4. **Install Dependencies**
+   ```powershell
+   npm install
+   ```
+
+5. **Run the Windows Setup**
    ```powershell
    npx tsx setup-windows.ts
    ```
