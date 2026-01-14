@@ -20,7 +20,7 @@ We provide a dedicated setup script for Windows that handles everything.
 
 3. **Clone the repository**
    ```powershell
-   git clone https://github.com/builtbywin/dotfiles.git
+   git clone https://github.com/builtby-win/dotfiles.git
    cd dotfiles
    ```
 
@@ -59,7 +59,7 @@ If you prefer a standard Unix environment (bash/zsh, standard file paths), use W
 4. **Clone & Setup inside WSL:**
    * Run the *standard* setup script (not the windows one):
    ```bash
-   git clone https://github.com/builtbywin/dotfiles.git
+   git clone https://github.com/builtby-win/dotfiles.git
    cd dotfiles
    ./setup.ts
    ```
