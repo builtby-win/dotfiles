@@ -4,9 +4,14 @@ My personal dotfiles with a fast shell setup, AI tool configs, and curated app l
 
 ## Quick Install
 
+**For macOS / Linux:**
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
 ```
+
+**For Windows:**
+See our [Windows Setup Guide](WINDOWS_README.md) for native PowerShell and WSL instructions.
 
 This will:
 1. Ask where to clone the dotfiles

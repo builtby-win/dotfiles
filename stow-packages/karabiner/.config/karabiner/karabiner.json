@@ -176,6 +176,33 @@
                                         }
                                     }
                                 ],
+                                "to_delayed_action": {
+                                    "to_if_invoked": [
+                                        {
+                                            "key_code": "j"
+                                        },
+                                        {
+                                            "set_variable": {
+                                                "name": "j_pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_canceled": [
+                                        {
+                                            "key_code": "j"
+                                        },
+                                        {
+                                            "set_variable": {
+                                                "name": "j_pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "parameters": {
+                                    "basic.to_delayed_action_delay_milliseconds": 150
+                                },
                                 "type": "basic"
                             },
                             {

@@ -1,8 +1,9 @@
 # Shell aliases
 # builtby.win/dotfiles
 #
-# Note: Directory navigation (.., ..., etc.) is handled by
-# setopt AUTO_CD in zinit.sh - no aliases needed!
+# Note: Directory navigation is handled in zinit.sh:
+#   - AUTO_CD: type `..` to cd up (no `cd` needed)
+#   - rationalise-dot: `...` expands to `../..` as you type
 
 # Quick shortcuts
 alias -- -='cd -'  # Go to previous directory
