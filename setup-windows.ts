@@ -195,6 +195,12 @@ async function installPackages(apps: string[]): Promise<void> {
   log.step("Installing packages...");
 
   for (const app of selected) {
+    // 0. Check if already in PATH (avoid double install if bootstrap did it)
+    if (runCommand(`where.exe ${app.chocoName}`, true) || runCommand(`where.exe ${app.value}`, true)) {
+       log.success(`${app.name} found in PATH`);
+       continue;
+    }
+
     // 1. Try Chocolatey first
     if (isPackageInstalled(app.chocoName)) {
       log.success(`${app.name} already installed (via Choco)`);

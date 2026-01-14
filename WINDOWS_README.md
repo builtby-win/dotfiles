@@ -13,30 +13,18 @@ We provide a dedicated setup script for Windows that handles everything.
 1. **Open PowerShell as Administrator**
    (Right-click Start Menu -> Terminal (Admin) / PowerShell (Admin))
 
-2. **Install Git & Node.js** (if missing)
+2. **Run the Bootstrap Script**
    ```powershell
-   winget install --id Git.Git -e --source winget
-   winget install --id OpenJS.NodeJS.LTS -e --source winget
-   # Restart your terminal after installation to refresh your PATH
+   irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | iex
    ```
 
-3. **Clone the repository**
-   ```powershell
-   git clone https://github.com/builtby-win/dotfiles.git
-   cd dotfiles
-   ```
+This will:
+* Install **Git** and **fnm** (Node.js manager) if missing.
+* Clone the repository to `~\dotfiles`.
+* Install **Node.js** and dependencies.
+* Run the interactive configuration setup.
 
-4. **Install Dependencies**
-   ```powershell
-   npm install
-   ```
-
-5. **Run the Windows Setup**
-   ```powershell
-   npx tsx setup-windows.ts
-   ```
-
-### What does the script do?
+### What does the setup do?
 * **Installs Package Managers:** Checks for Chocolatey and installs it if missing.
 * **Installs Apps:**
   * **Dev:** `git`, `node`, `fnm`, `vscode`, `cursor`
