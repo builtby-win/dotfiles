@@ -13,13 +13,18 @@ We provide a dedicated setup script for Windows that handles everything.
 1. **Open PowerShell as Administrator**
    (Right-click Start Menu -> Terminal (Admin) / PowerShell (Admin))
 
-2. **Clone the repository**
+2. **Install Git** (if missing)
+   ```powershell
+   winget install --id Git.Git -e --source winget
+   ```
+
+3. **Clone the repository**
    ```powershell
    git clone https://github.com/builtbywin/dotfiles.git
    cd dotfiles
    ```
 
-3. **Run the Windows Setup**
+4. **Run the Windows Setup**
    ```powershell
    npx tsx setup-windows.ts
    ```

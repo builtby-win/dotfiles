@@ -2,6 +2,14 @@
 
 My personal dotfiles with a fast shell setup, AI tool configs, and curated app list.
 
+## Prerequisites
+
+**Git** is required to clone and manage these dotfiles.
+
+- **macOS:** Git is usually installed automatically when you run it. If not, run `xcode-select --install` or `brew install git`.
+- **Windows:** Run `winget install Git.Git` in PowerShell.
+- **Linux:** Install via your package manager (e.g., `sudo apt install git`).
+
 ## Quick Install
 
 **For macOS / Linux:**

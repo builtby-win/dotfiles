@@ -49,6 +49,43 @@ DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
 
 echo ""
 
+# Ensure Git is installed
+if ! command -v git &> /dev/null; then
+  print_step "Git not found. Attempting to install..."
+  
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    if command -v brew &> /dev/null; then
+      print_step "Installing Git via Homebrew..."
+      brew install git
+    else
+      print_warning "Git is required. A dialog may appear to install Xcode Command Line Tools."
+      print_warning "If not, run: xcode-select --install"
+      # This usually triggers the OS prompt
+      git --version || true
+      print_error "Please install Git/Xcode Tools and run this script again."
+      exit 1
+    fi
+  elif [ -f /etc/debian_version ]; then
+    print_step "Installing Git via apt..."
+    sudo apt-get update && sudo apt-get install -y git
+  elif [ -f /etc/arch-release ]; then
+    print_step "Installing Git via pacman..."
+    sudo pacman -S --noconfirm git
+  elif [ -f /etc/fedora-release ]; then
+    print_step "Installing Git via dnf..."
+    sudo dnf install -y git
+  else
+    print_error "Could not install Git automatically. Please install Git and run this script again."
+    exit 1
+  fi
+  
+  if ! command -v git &> /dev/null; then
+    print_error "Git installation failed. Please install manually."
+    exit 1
+  fi
+  print_success "Git installed"
+fi
+
 # Clone or update repo
 if [ -d "$DOTFILES_DIR/.git" ]; then
   print_step "Updating existing dotfiles..."
