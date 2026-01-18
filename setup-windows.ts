@@ -407,24 +407,31 @@ async function runSetup(): Promise<void> {
   }
 
   // 2. Select Apps
+  const appsChoices = APPS.map(app => ({
+    name: `${app.name} ${colors.dim}(${app.desc})${colors.reset}`,
+    value: app.value,
+    checked: app.checked || false
+  }));
+  
   const selectedApps = await checkbox({
-    message: "Select apps to install:",
-    choices: APPS.map(app => ({
-      name: `${app.name} ${colors.dim}(${app.desc})${colors.reset}`,
-      value: app.value,
-      checked: app.checked || false
-    })),
-    pageSize: 15
+    message: `Select apps to install ${colors.dim}[${appsChoices.length} items]${colors.reset}:`,
+    choices: appsChoices,
+    pageSize: 15,
+    loop: false,
   });
 
   // 3. Select Configs
+  const configChoices = CONFIGS.map(c => ({
+    name: c.name,
+    value: c.value,
+    checked: true
+  }));
+  
   const selectedConfigs = await checkbox({
-    message: "Select configs to link:",
-    choices: CONFIGS.map(c => ({
-      name: c.name,
-      value: c.value,
-      checked: true
-    }))
+    message: `Select configs to link ${colors.dim}[${configChoices.length} items]${colors.reset}:`,
+    choices: configChoices,
+    pageSize: 15,
+    loop: false,
   });
 
   // 4. Confirm

@@ -3,7 +3,7 @@
 #
 # Note: Directory navigation is handled in zinit.sh:
 #   - AUTO_CD: type `..` to cd up (no `cd` needed)
-#   - rationalise-dot: `...` expands to `../..` as you type
+#   - rationalise-dot: `...` → `../..`, `....` → `../../..`, etc as you type
 
 # Quick shortcuts
 alias -- -='cd -'  # Go to previous directory

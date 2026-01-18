@@ -181,7 +181,6 @@ All apps can be installed via `brew install --cask <name>` or through the intera
 | [Ice](https://github.com/jordanbaird/Ice) | Menu bar management - hide icons | `brew install --cask jordanbaird-ice` |
 | [BetterTouchTool](https://folivora.ai) | Customize trackpad, keyboard, Touch Bar, window snapping | `brew install --cask bettertouchtool` |
 | [LinearMouse](https://linearmouse.app) | Per-device mouse/trackpad settings, disable acceleration | `brew install --cask linearmouse` |
-| [Velja](https://sindresorhus.com/velja) | Browser picker - choose which browser opens each link | `brew install --cask velja` |
 | [Karabiner Elements](https://karabiner-elements.pqrs.org) | Powerful keyboard customization and remapping | `brew install --cask karabiner-elements` |
 | [Bitwarden](https://bitwarden.com) | Open source password manager | `brew install --cask bitwarden` |
 | [Arc](https://arc.net) | Modern browser with spaces & profiles | `brew install --cask arc` |

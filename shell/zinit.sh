@@ -27,6 +27,19 @@ setopt PUSHD_IGNORE_DUPS    # Don't push duplicates onto directory stack
 setopt PUSHD_SILENT         # Don't print directory stack after pushd/popd
 
 # ─────────────────────────────────────────────────────────────
+# Dot expansion (... → cd ../.., .... → cd ../../.., etc)
+# ─────────────────────────────────────────────────────────────
+rationalise-dot() {
+  if [[ $LBUFFER = *.. ]]; then
+    LBUFFER+=/..
+  else
+    LBUFFER+=.
+  fi
+}
+zle -N rationalise-dot
+bindkey . rationalise-dot
+
+# ─────────────────────────────────────────────────────────────
 # Completion system
 # ─────────────────────────────────────────────────────────────
 autoload -Uz compinit

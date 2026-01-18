@@ -336,7 +336,6 @@ const APPS: App[] = [
 
   // Productivity
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com" },
-  { name: "Velja", value: "velja", brewName: "velja", cask: true, detectPath: "/Applications/Velja.app", desc: "Browser picker - choose which browser opens links", url: "https://sindresorhus.com/velja" },
   { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app" },
   { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice" },
   { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai" },
@@ -1305,42 +1304,45 @@ async function runSetup(): Promise<void> {
     // Step 1: Select apps to install
     if (currentStep === 1) {
       log.step("[1/3] Select apps to install");
+      const appsChoices = [
+        {
+          name: `${colors.yellow}↩ Back to menu${colors.reset}`,
+          value: "__back__",
+          checked: false,
+        },
+        ...APPS.map((app) => {
+          const state = appStates.get(app.value) ?? "not_installed";
+          const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
+          if (state === "installed") {
+            return {
+              name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
+              value: app.value,
+              checked: true,
+              disabled: "(already installed)",
+            };
+          } else if (state === "partial") {
+            return {
+              name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
+              value: app.value,
+              checked: true,
+              disabled: false,
+            };
+          } else {
+            return {
+              name: `${app.name}${descPart}`,
+              value: app.value,
+              checked: app.checked ?? false,
+              disabled: false,
+            };
+          }
+        }),
+      ];
+      
       selectedApps = await checkbox({
-        message: "Select apps (space to toggle, enter to confirm):",
-        choices: [
-          {
-            name: `${colors.yellow}↩ Back to menu${colors.reset}`,
-            value: "__back__",
-            checked: false,
-          },
-          ...APPS.map((app) => {
-            const state = appStates.get(app.value) ?? "not_installed";
-            const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
-            if (state === "installed") {
-              return {
-                name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
-                value: app.value,
-                checked: true,
-                disabled: "(already installed)",
-              };
-            } else if (state === "partial") {
-              return {
-                name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
-                value: app.value,
-                checked: true,
-                disabled: false,
-              };
-            } else {
-              return {
-                name: `${app.name}${descPart}`,
-                value: app.value,
-                checked: app.checked ?? false,
-                disabled: false,
-              };
-            }
-          }),
-        ],
+        message: `Select apps (space to toggle, enter to confirm) ${colors.dim}[${appsChoices.length - 1} items]${colors.reset}:`,
+        choices: appsChoices,
         pageSize: 20,
+        loop: false,
       });
 
       if (selectedApps.includes("__back__")) {
@@ -1355,24 +1357,28 @@ async function runSetup(): Promise<void> {
     // Step 2: Select stow-managed configs
     if (currentStep === 2) {
       log.step("[2/3] Select configs to stow");
+      const stowChoices = [
+        {
+          name: `${colors.yellow}↩ Back to step 1${colors.reset}`,
+          value: "__back__",
+          checked: false,
+        },
+        ...STOW_CONFIGS.map((config) => {
+          const installed = installedConfigs.has(config.value);
+          return {
+            name: installed ? `${config.name} ${colors.green}(installed)${colors.reset}` : config.name,
+            value: config.value,
+            checked: installed ? true : (config.checked ?? false),
+            disabled: installed ? "(already installed)" : false,
+          };
+        }),
+      ];
+      
       selectedStowConfigs = await checkbox({
-        message: "Select configs to install (managed via stow):",
-        choices: [
-          {
-            name: `${colors.yellow}↩ Back to step 1${colors.reset}`,
-            value: "__back__",
-            checked: false,
-          },
-          ...STOW_CONFIGS.map((config) => {
-            const installed = installedConfigs.has(config.value);
-            return {
-              name: installed ? `${config.name} ${colors.green}(installed)${colors.reset}` : config.name,
-              value: config.value,
-              checked: installed ? true : (config.checked ?? false),
-              disabled: installed ? "(already installed)" : false,
-            };
-          }),
-        ],
+        message: `Select configs to install ${colors.dim}[${stowChoices.length - 1} items]${colors.reset}:`,
+        choices: stowChoices,
+        pageSize: 20,
+        loop: false,
       });
 
       if (selectedStowConfigs.includes("__back__")) {
