@@ -43,11 +43,7 @@ print_banner
 
 # Ask for install location
 echo -e "Where should we install the dotfiles? ${CYAN}(press enter for ~/dotfiles)${NC}"
-if [ -t 0 ]; then
-  read -r -p "> " DOTFILES_DIR
-else
-  echo "Running non-interactively, using default ~/dotfiles"
-fi
+read -r -p "> " DOTFILES_DIR
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
 
