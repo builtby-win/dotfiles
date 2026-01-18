@@ -247,4 +247,14 @@ echo ""
 
 # Run the TypeScript setup
 print_debug "Running setup script: pnpm exec tsx setup.ts $DOTFILES_DIR"
-pnpm exec tsx setup.ts "$DOTFILES_DIR" || { print_error "Setup script failed at line $LINENO"; exit 1; }
+set +e  # Disable exit-on-error for interactive setup
+pnpm exec tsx setup.ts "$DOTFILES_DIR"
+exit_code=$?
+set -e  # Re-enable exit-on-error
+
+if [ $exit_code -ne 0 ] && [ $exit_code -ne 130 ]; then
+  print_error "Setup script exited with code $exit_code"
+  exit $exit_code
+fi
+
+print_success "Setup complete!"
