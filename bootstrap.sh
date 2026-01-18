@@ -248,7 +248,7 @@ echo ""
 # Run the TypeScript setup
 print_debug "Running setup script: pnpm exec tsx setup.ts $DOTFILES_DIR"
 set +e  # Disable exit-on-error for interactive setup
-pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty
+pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty > /dev/tty 2>&1
 exit_code=$?
 set -e  # Re-enable exit-on-error
 
