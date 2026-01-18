@@ -1295,85 +1295,147 @@ async function runSetup(): Promise<void> {
     console.log("");
   }
 
-  // Step 1: Select apps to install
-  log.step("[1/3] Select apps to install");
-  const selectedApps = await checkbox({
-    message: "Select apps (space to toggle, enter to confirm):",
-    choices: APPS.map((app) => {
-      const state = appStates.get(app.value) ?? "not_installed";
-      const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
-      if (state === "installed") {
-        return {
-          name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
-          value: app.value,
-          checked: true,
-          disabled: "(already installed)",
-        };
-      } else if (state === "partial") {
-        return {
-          name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
-          value: app.value,
-          checked: true,
-          disabled: false,
-        };
-      } else {
-        return {
-          name: `${app.name}${descPart}`,
-          value: app.value,
-          checked: app.checked ?? false,
-          disabled: false,
-        };
+  let selectedApps: string[] = [];
+  let selectedStowConfigs: string[] = [];
+  let aiConfigs: string[] = [];
+  let currentStep = 1;
+
+  // Step navigation loop
+  while (currentStep >= 1) {
+    // Step 1: Select apps to install
+    if (currentStep === 1) {
+      log.step("[1/3] Select apps to install");
+      selectedApps = await checkbox({
+        message: "Select apps (space to toggle, enter to confirm):",
+        choices: [
+          {
+            name: `${colors.yellow}↩ Back to menu${colors.reset}`,
+            value: "__back__",
+            checked: false,
+          },
+          ...APPS.map((app) => {
+            const state = appStates.get(app.value) ?? "not_installed";
+            const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
+            if (state === "installed") {
+              return {
+                name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
+                value: app.value,
+                checked: true,
+                disabled: "(already installed)",
+              };
+            } else if (state === "partial") {
+              return {
+                name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
+                value: app.value,
+                checked: true,
+                disabled: false,
+              };
+            } else {
+              return {
+                name: `${app.name}${descPart}`,
+                value: app.value,
+                checked: app.checked ?? false,
+                disabled: false,
+              };
+            }
+          }),
+        ],
+        pageSize: 20,
+      });
+
+      if (selectedApps.includes("__back__")) {
+        selectedApps = selectedApps.filter(a => a !== "__back__");
+        return mainMenu();
       }
-    }),
-    pageSize: 20,
-  });
 
-  console.log("");
+      console.log("");
+      currentStep = 2;
+    }
 
-  // Step 2: Select stow-managed configs
-  log.step("[2/3] Select configs to stow");
-  const selectedStowConfigs = await checkbox({
-    message: "Select configs to install (managed via stow):",
-    choices: STOW_CONFIGS.map((config) => {
-      const installed = installedConfigs.has(config.value);
-      return {
-        name: installed ? `${config.name} ${colors.green}(installed)${colors.reset}` : config.name,
-        value: config.value,
-        checked: installed ? true : (config.checked ?? false),
-        disabled: installed ? "(already installed)" : false,
-      };
-    }),
-  });
+    // Step 2: Select stow-managed configs
+    if (currentStep === 2) {
+      log.step("[2/3] Select configs to stow");
+      selectedStowConfigs = await checkbox({
+        message: "Select configs to install (managed via stow):",
+        choices: [
+          {
+            name: `${colors.yellow}↩ Back to step 1${colors.reset}`,
+            value: "__back__",
+            checked: false,
+          },
+          ...STOW_CONFIGS.map((config) => {
+            const installed = installedConfigs.has(config.value);
+            return {
+              name: installed ? `${config.name} ${colors.green}(installed)${colors.reset}` : config.name,
+              value: config.value,
+              checked: installed ? true : (config.checked ?? false),
+              disabled: installed ? "(already installed)" : false,
+            };
+          }),
+        ],
+      });
 
-  // Auto-select AI configs based on app selection
-  const autoSelectedAIConfigs = selectedApps
-    .filter((app) => {
-      const appDef = APPS.find((a) => a.value === app);
-      return appDef?.configs && appDef.configs.length > 0;
-    })
-    .flatMap((app) => APPS.find((a) => a.value === app)?.configs ?? []);
+      if (selectedStowConfigs.includes("__back__")) {
+        selectedStowConfigs = selectedStowConfigs.filter(s => s !== "__back__");
+        console.log("");
+        currentStep = 1;
+        continue;
+      }
 
-  const aiConfigs = [...new Set(autoSelectedAIConfigs)];
+      console.log("");
+      currentStep = 3;
+    }
 
-  if (aiConfigs.length > 0) {
-    log.info(`Auto-selecting configs for: ${aiConfigs.map((c) => AI_CONFIGS[c]?.name).join(", ")}`);
+    // Step 3: Auto-select AI configs and confirm
+    if (currentStep === 3) {
+      // Auto-select AI configs based on app selection
+      const autoSelectedAIConfigs = selectedApps
+        .filter((app) => {
+          const appDef = APPS.find((a) => a.value === app);
+          return appDef?.configs && appDef.configs.length > 0;
+        })
+        .flatMap((app) => APPS.find((a) => a.value === app)?.configs ?? []);
+
+      aiConfigs = [...new Set(autoSelectedAIConfigs)];
+
+      if (aiConfigs.length > 0) {
+        log.info(`Auto-selecting configs for: ${aiConfigs.map((c) => AI_CONFIGS[c]?.name).join(", ")}`);
+      }
+
+      console.log("");
+
+      const proceed = await confirm({
+        message: "Ready to install?",
+        default: true,
+      });
+
+      if (!proceed) {
+        const goBack = await confirm({
+          message: "Go back to edit selections?",
+          default: true,
+        });
+
+        if (goBack) {
+          console.log("");
+          currentStep = 2;
+          continue;
+        } else {
+          console.log("Aborted.");
+          process.exit(0);
+        }
+      }
+
+      console.log("");
+      currentStep = 4;
+    }
+
+    // Step 4: Install everything
+    if (currentStep === 4) {
+      break;
+    }
   }
 
-  console.log("");
-
-  const proceed = await confirm({
-    message: "Ready to install?",
-    default: true,
-  });
-
-  if (!proceed) {
-    console.log("Aborted.");
-    process.exit(0);
-  }
-
-  console.log("");
-
-  // Step 3: Install everything
+  // Step 4: Install everything
   log.step("[3/3] Installing...");
   console.log("");
 
