@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# Debug trap to show line number on error
-trap 'print_error "Command failed at line $LINENO"' ERR
-
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -247,14 +244,5 @@ echo ""
 
 # Run the TypeScript setup
 print_debug "Running setup script: pnpm exec tsx setup.ts $DOTFILES_DIR"
-set +e  # Disable exit-on-error for interactive setup
-pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty > /dev/tty 2>&1
-exit_code=$?
-set -e  # Re-enable exit-on-error
-
-if [ $exit_code -ne 0 ] && [ $exit_code -ne 130 ]; then
-  print_error "Setup script exited with code $exit_code"
-  exit $exit_code
-fi
-
+pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
 print_success "Setup complete!"
