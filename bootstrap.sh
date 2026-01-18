@@ -42,8 +42,12 @@ REPO_URL="https://github.com/builtby-win/dotfiles.git"
 print_banner
 
 # Ask for install location
-echo -e "Where should we install the dotfiles? ${CYAN}(default: ~/dotfiles)${NC}"
-read -r -p "> " DOTFILES_DIR
+echo -e "Where should we install the dotfiles? ${CYAN}(press enter for ~/dotfiles)${NC}"
+if [ -t 0 ]; then
+  read -r -p "> " DOTFILES_DIR
+else
+  echo "Running non-interactively, using default ~/dotfiles"
+fi
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
 
