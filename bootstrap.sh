@@ -50,7 +50,10 @@ print_banner
 
 # Ask for install location
 echo -e "Where should we install the dotfiles? ${CYAN}(press enter for ~/dotfiles)${NC}"
-read -r -p "> " DOTFILES_DIR
+read -r -p "> " DOTFILES_DIR < /dev/tty || {
+  print_error "Cannot read from terminal. Make sure you're running this script interactively."
+  exit 1
+}
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
 print_debug "Install directory: $DOTFILES_DIR"
@@ -116,7 +119,10 @@ elif [ -d "$DOTFILES_DIR" ] && [ "$(ls -A "$DOTFILES_DIR")" ]; then
   print_warning "Directory $DOTFILES_DIR exists and is not empty"
   print_debug "Contents found in $DOTFILES_DIR"
   echo -e "  ${CYAN}[b]${NC}ackup & continue | ${CYAN}[c]${NC}ontinue anyway | ${CYAN}[q]${NC}uit"
-  read -r -p "  > " choice
+  read -r -p "  > " choice < /dev/tty || {
+    print_error "Cannot read from terminal"
+    exit 1
+  }
   case "$choice" in
     b|B)
       backup_dir="${DOTFILES_DIR}.backup.$(date +%Y%m%d%H%M%S)"
