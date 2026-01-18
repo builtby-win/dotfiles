@@ -243,6 +243,13 @@ print_step "[3/3] Running interactive setup..."
 echo ""
 
 # Run the TypeScript setup
-print_debug "Running setup script: pnpm exec tsx setup.ts $DOTFILES_DIR"
-pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
+print_debug "Running setup script..."
+
+# Use local tsx directly to avoid pnpm exec TTY issues in piped executions
+TSX_BIN="./node_modules/.bin/tsx"
+if [ -x "$TSX_BIN" ]; then
+  "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty || true
+else
+  pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
+fi
 print_success "Setup complete!"
