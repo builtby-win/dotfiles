@@ -83,165 +83,33 @@
                                             "io.alacritty"
                                         ],
                                         "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "j_held",
-                                        "type": "variable_if",
-                                        "value": 1
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "delete_or_backspace"
-                                    },
-                                    {
-                                        "key_code": "period",
-                                        "modifiers": ["control"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.mitchellh.ghostty",
-                                            "com.googlecode.iterm2",
-                                            "com.apple.Terminal",
-                                            "dev.warp.Warp-Stable",
-                                            "net.kovidgoyal.kitty",
-                                            "io.alacritty"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "k_held",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "delete_or_backspace"
-                                    },
-                                    {
-                                        "key_code": "period",
-                                        "modifiers": ["control"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.mitchellh.ghostty",
-                                            "com.googlecode.iterm2",
-                                            "com.apple.Terminal",
-                                            "dev.warp.Warp-Stable",
-                                            "net.kovidgoyal.kitty",
-                                            "io.alacritty"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "j_held",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "key_code": "j"
-                                    }
-                                ],
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "j_held",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_delayed_action": {
-                                    "to_if_invoked": [
+                                    "simultaneous": [
                                         {
                                             "key_code": "j"
                                         },
                                         {
-                                            "set_variable": {
-                                                "name": "j_pressed",
-                                                "value": 0
-                                            }
+                                            "key_code": "k"
                                         }
                                     ],
-                                    "to_if_canceled": [
-                                        {
-                                            "key_code": "j"
-                                        },
-                                        {
-                                            "set_variable": {
-                                                "name": "j_pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
-                                "parameters": {
-                                    "basic.to_delayed_action_delay_milliseconds": 150
-                                },
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "bundle_identifiers": [
-                                            "com.mitchellh.ghostty",
-                                            "com.googlecode.iterm2",
-                                            "com.apple.Terminal",
-                                            "dev.warp.Warp-Stable",
-                                            "net.kovidgoyal.kitty",
-                                            "io.alacritty"
-                                        ],
-                                        "type": "frontmost_application_if"
+                                    "simultaneous_options": {
+                                        "key_down_order": "insensitive",
+                                        "key_up_order": "insensitive"
                                     }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
                                     {
-                                        "set_variable": {
-                                            "name": "k_held",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "key_code": "k"
+                                        "key_code": "period",
+                                        "modifiers": [
+                                            "control"
+                                        ]
                                     }
                                 ],
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "k_held",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
+                                "parameters": {
+                                    "basic.simultaneous_threshold_milliseconds": 150
+                                },
                                 "type": "basic"
                             }
                         ]
