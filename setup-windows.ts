@@ -66,6 +66,13 @@ function addToManifest(entry: Omit<BackupEntry, "timestamp">): void {
   saveManifest(manifest);
 }
 
+// Platform support (for cross-platform consistency)
+interface PlatformSupport {
+  macos?: boolean;
+  windows?: boolean;
+  linux?: boolean;
+}
+
 // App Definitions for Windows (Chocolatey)
 interface App {
   name: string;
@@ -74,55 +81,52 @@ interface App {
   checked?: boolean;
   desc?: string;
   detectCmd?: string; // Command to check if installed
+  platforms?: PlatformSupport; // Platform support (Windows-only apps marked explicitly)
 }
 
 const APPS: App[] = [
-  // Core
+  // Core (cross-platform)
   { name: "Git", value: "git", chocoName: "git", checked: true, desc: "Version control" },
-  { name: "PowerShell Core (pwsh)", value: "pwsh", chocoName: "powershell-core", checked: true, desc: "Modern cross-platform PowerShell" },
   { name: "Starship", value: "starship", chocoName: "starship", checked: true, desc: "Fast, customizable shell prompt" },
   
-  // Node / Dev
+  // Windows-specific
+  { name: "PowerShell Core (pwsh)", value: "pwsh", chocoName: "powershell-core", checked: true, desc: "Modern cross-platform PowerShell", platforms: { windows: true, macos: false, linux: false } },
+  { name: "Windows Terminal", value: "terminal", chocoName: "microsoft-windows-terminal", checked: true, desc: "Modern terminal emulator", platforms: { windows: true, macos: false, linux: false } },
+  { name: "PowerToys", value: "powertoys", chocoName: "powertoys", checked: true, desc: "Essential Windows utilities (FancyZones, Run, etc.)", platforms: { windows: true, macos: false, linux: false } },
+  
+  // Node / Dev (cross-platform)
   { name: "fnm (Fast Node Manager)", value: "fnm", chocoName: "fnm", checked: true, desc: "Fast and simple Node.js version manager" },
   
-  // Editors
+  // Editors (cross-platform)
   { name: "Visual Studio Code", value: "vscode", chocoName: "vscode", checked: true, desc: "Code editor" },
   { name: "Cursor", value: "cursor", chocoName: "cursor", desc: "AI code editor (check manual install if choco fails)" },
 
   // Terminals & Multiplexers
-  { name: "Windows Terminal", value: "terminal", chocoName: "microsoft-windows-terminal", checked: true, desc: "Modern terminal emulator" },
+  { name: "Warp Terminal", value: "warp", chocoName: "warp", desc: "Rust-based modern terminal" },
   { name: "Zellij", value: "zellij", chocoName: "zellij", desc: "Terminal workspace (tmux alternative)" },
 
-  // Tools
-  { name: "PowerToys", value: "powertoys", chocoName: "powertoys", checked: true, desc: "Essential Windows utilities (FancyZones, Run, etc.)" },
+  // CLI Tools (cross-platform)
   { name: "Ripgrep", value: "ripgrep", chocoName: "ripgrep", desc: "Fast grep replacement" },
   { name: "Fzf", value: "fzf", chocoName: "fzf", desc: "Fuzzy finder" },
   { name: "Bat", value: "bat", chocoName: "bat", desc: "Cat with syntax highlighting" },
   { name: "Eza", value: "eza", chocoName: "eza", desc: "Modern ls replacement" },
   { name: "Zoxide", value: "zoxide", chocoName: "zoxide", desc: "Smarter cd command" },
   
-  // Browsers
+  // Browsers (cross-platform)
   { name: "Google Chrome", value: "chrome", chocoName: "googlechrome", desc: "Web browser" },
   { name: "Arc Browser", value: "arc", chocoName: "arc", desc: "Modern browser (requires manual install if choco package missing)" },
 
-  // New Additions
-  { name: "Warp Terminal", value: "warp", chocoName: "warp", desc: "Rust-based modern terminal" },
+  // Other
   { name: "Antigravity (Python)", value: "antigravity", chocoName: "python", desc: "Installs Python (required for antigravity)" },
 ];
 
-// Configs to link
+// Configs to link (Windows-only)
 const CONFIGS = [
   { 
     name: "Starship Config", 
     value: "starship", 
     source: join("stow-packages", "zsh", ".config", "starship.toml"), 
     target: join(HOME, ".config", "starship.toml") 
-  },
-  { 
-    name: "Ghostty Config", 
-    value: "ghostty", 
-    source: join("stow-packages", "ghostty", ".config", "ghostty", "config"), 
-    target: join(APPDATA, "ghostty", "config") 
   },
   { 
     name: "Git Ignore", 

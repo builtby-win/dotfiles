@@ -16,6 +16,16 @@ mkdir -p "$DOTFILES_CACHE_DIR"
 # Source functions
 [[ -f "$DOTFILES_SHELL_DIR/functions.sh" ]] && source "$DOTFILES_SHELL_DIR/functions.sh"
 
+# Load optional features based on setup manifest
+# This allows users to opt-in to features like Beads without forcing them to use it
+MANIFEST="$HOME/.config/dotfiles/setup-manifest.json"
+if [[ -f "$MANIFEST" ]]; then
+  # Source beads (bd) global task management - only if user selected it
+  if command -v jq &> /dev/null && jq -e '.features.beads == true' "$MANIFEST" >/dev/null 2>&1; then
+    [[ -f "$DOTFILES_SHELL_DIR/beads.sh" ]] && source "$DOTFILES_SHELL_DIR/beads.sh"
+  fi
+fi
+
 # Homebrew
 if [[ "$(uname -m)" == "arm64" ]]; then
   BREW_PATH="/opt/homebrew/bin/brew"

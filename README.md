@@ -41,6 +41,19 @@ Uses [zinit](https://github.com/zdharma-continuum/zinit) (lightweight plugin man
 | git-auto-fetch | Automatically fetches git repos in background when you cd into them |
 | [Starship](https://starship.rs) | Fast, customizable prompt showing git status, language versions, etc. |
 
+### Optional Features
+
+#### Beads - Global Task Manager
+[Beads](https://github.com/steveyegge/beads) is a global task aggregation tool that lets you organize tasks across multiple repositories. When you enable it during setup, you can:
+
+- Create and organize tasks with a `bd` command
+- Aggregate tasks from all your projects in one place
+- Synchronize tasks across repositories using git
+
+**Installation**: Select "Beads (Global Task Manager)" during setup. It's completely optional - if you don't select it, nothing changes in your shell.
+
+**Usage**: After enabling Beads, run `bd --help` to see available commands.
+
 ### Aliases
 
 ```bash
