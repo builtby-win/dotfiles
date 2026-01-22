@@ -1002,13 +1002,7 @@ function printAdBanner(): void {
   console.log(`${colors.cyan}${colors.bold}  Speed up your workflow even more:${colors.reset}`);
   console.log("");
   console.log(`  ${colors.yellow}→${colors.reset} back2vibing - Focus & productivity for devs`);
-  console.log(`    ${colors.dim}https://back2vibing.com${colors.reset}`);
-  console.log("");
-  console.log(`  ${colors.yellow}→${colors.reset} builtby.win/web - Next.js + tRPC + Prisma starter`);
-  console.log(`    ${colors.dim}https://builtby.win/web${colors.reset}`);
-  console.log("");
-  console.log(`  ${colors.yellow}→${colors.reset} builtby.win/desktop - Electron + React starter`);
-  console.log(`    ${colors.dim}https://builtby.win/desktop${colors.reset}`);
+  console.log(`    ${colors.dim}https://back2vibing.builtby.win${colors.reset}`);
   console.log(`${colors.dim}${"─".repeat(50)}${colors.reset}`);
   console.log("");
 }
