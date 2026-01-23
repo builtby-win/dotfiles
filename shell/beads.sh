@@ -276,6 +276,10 @@ bd-list-repos() {
       fi
     done
   fi
+
+  echo ""
+  echo "All tasks:"
+  (cd "$global_dir" && bd list)
 }
 
 # Interactive: Add repos from zoxide to global beads config
@@ -493,10 +497,26 @@ Prefer quiet output: use --silent or --quiet to avoid verbose output.
 Include cwd metadata only if bd supports it.
 
 If you need to decide which repo to attach the todo to, use fuzzy matching or fzf against bd list output (or configured repos) to select the best match.
+
+IMPORTANT: Output ONLY the command to run. Do not include markdown formatting (like \`\`\`), explanations, or any other text. The output will be directly executed.
 EOF
 )
 
-  ollama run gemma3 "$prompt"
+  local cmd
+  cmd=$(ollama run gemma3 "$prompt")
+  
+  # Clean up markdown code blocks if present
+  cmd=$(echo "$cmd" | sed 's/^```.*//g' | sed 's/^```//g' | sed 's/`//g')
+  
+  # Trim whitespace
+  cmd=$(echo "$cmd" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+  if [[ -n "$cmd" ]]; then
+     echo "Executing: $cmd"
+     eval "$cmd"
+  else
+     echo "Error: No command generated."
+  fi
 }
 
 bt--ensure-bd-init() {
@@ -536,24 +556,24 @@ bt--ensure-global-added() {
 }
 
 bt--add() {
-  local target_type="$1"
-  local target_path="$2"
-  shift 2
+   local target_type="$1"
+   local target_path="$2"
+   shift 2
 
-  bt--parse-input "$@" || return 1
-  bt--ensure-text || return 1
+   bt--parse-input "$@" || return 1
+   bt--ensure-text || return 1
 
-  BT_TARGET_TYPE="$target_type"
-  BT_TARGET_PATH="$target_path"
+   BT_TARGET_TYPE="$target_type"
+   BT_TARGET_PATH="$target_path"
 
-  bt--run-opencode
+   bt--run-opencode && (cd "$BD_GLOBAL_DIR" && bd sync)
 }
 
 bt() {
-  bt--parse-input "$@" || return 1
-  bt--ensure-text || return 1
-  bt--pick-target || return 1
-  bt--run-opencode
+   bt--parse-input "$@" || return 1
+   bt--ensure-text || return 1
+   bt--pick-target || return 1
+   bt--run-opencode && (cd "$BD_GLOBAL_DIR" && bd sync)
 }
 
 # Quick todo: current repo without picker, include cwd metadata
