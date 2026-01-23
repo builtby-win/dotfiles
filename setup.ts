@@ -737,7 +737,12 @@ const STOW_TARGETS: Record<string, string[]> = {
   zsh: [".zshrc", ".config/starship.toml"],
   tmux: [".tmux.conf"],
   karabiner: [".config/karabiner/karabiner.json"],
-  ghostty: [".config/ghostty/config"],
+  ghostty: process.platform === "darwin"
+    ? [
+        ".config/ghostty/config",
+        "Library/Application Support/com.mitchellh.ghostty/config",
+      ]
+    : [".config/ghostty/config"],
   mackup: [".mackup.cfg"],
 };
 
@@ -1051,8 +1056,12 @@ const MERGEABLE_CONFIGS: MergeableConfig[] = [
   {
     name: "Ghostty Terminal",
     description: "GPU-accelerated terminal configuration",
-    userPath: join(HOME, ".config", "ghostty", "config"),
-    dotfilesPath: join(DOTFILES_DIR, "stow-packages", "ghostty", ".config", "ghostty", "config"),
+    userPath: process.platform === "darwin"
+      ? join(HOME, "Library", "Application Support", "com.mitchellh.ghostty", "config")
+      : join(HOME, ".config", "ghostty", "config"),
+    dotfilesPath: process.platform === "darwin"
+      ? join(DOTFILES_DIR, "stow-packages", "ghostty", "Library", "Application Support", "com.mitchellh.ghostty", "config")
+      : join(DOTFILES_DIR, "stow-packages", "ghostty", ".config", "ghostty", "config"),
     type: "config",
   },
 ];
