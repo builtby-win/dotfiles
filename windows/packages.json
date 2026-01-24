@@ -9,6 +9,7 @@
     "Schniz.fnm",
     "gerardog.gsudo",
     "Git.Git",
-    "Neovim.Neovim"
+    "Neovim.Neovim",
+    "Anysphere.Cursor"
   ]
 }

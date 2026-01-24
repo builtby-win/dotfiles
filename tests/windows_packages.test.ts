@@ -21,7 +21,8 @@ describe('Windows Package Manifest (packages.json)', () => {
       'Schniz.fnm',
       'gerardog.gsudo',
       'Git.Git',
-      'Neovim.Neovim'
+      'Neovim.Neovim',
+      'Anysphere.Cursor'
     ];
     
     expect(content.packages).toEqual(expect.arrayContaining(required));
