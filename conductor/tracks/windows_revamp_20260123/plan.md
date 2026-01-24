@@ -46,7 +46,7 @@
     - [x] Create logic to copy/symlink starship.toml to ~/.config/starship.toml
     - [x] Create logic to copy/symlink templates/claude/* to Windows AppData path
     - [x] Create logic to copy/symlink templates/cursor/* to Windows AppData path
-- [ ] Task: Conductor - User Manual Verification 'AI Tools & Configuration' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'AI Tools & Configuration' (Protocol in workflow.md)
 
 ## Phase 4: Interactive Setup & Polish
 - [ ] Task: Update `setup-windows.ts` (Interactive CLI)
