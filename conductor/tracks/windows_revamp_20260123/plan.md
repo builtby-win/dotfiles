@@ -32,10 +32,10 @@
     - [x] Map grep to rg
     - [x] Map sudo to gsudo
     - [x] Implement which equivalent (using Get-Command)
-- [ ] Task: Implement FZF Integration
-    - [ ] Install `PSFzf` module (via `Install-Module`) or configure raw FZF bindings
-    - [ ] Bind `Ctrl+R` to history search
-    - [ ] Bind `Ctrl+T` to file search
+- [x] Task: Implement FZF Integration e0ecad9
+    - [x] Install PSFzf module (via Install-Module) or configure raw FZF bindings
+    - [x] Bind Ctrl+R to history search
+    - [x] Bind Ctrl+T to file search
 - [ ] Task: Conductor - User Manual Verification 'PowerShell Profile & Shell Ergonomics' (Protocol in workflow.md)
 
 ## Phase 3: AI Tools & Configuration
