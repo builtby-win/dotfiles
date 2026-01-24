@@ -4,15 +4,17 @@
   "description": "Winston's dotfiles - shell configs, AI tool settings, and more",
   "type": "module",
   "scripts": {
-    "setup": "pnpm exec tsx setup.ts"
+    "setup": "pnpm exec tsx setup.ts",
+    "test": "vitest run"
   },
   "packageManager": "pnpm@9.15.1",
   "dependencies": {
     "@inquirer/prompts": "^7.2.1"
   },
   "devDependencies": {
+    "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "@types/node": "^22.10.2"
+    "vitest": "^4.0.18"
   }
 }
