@@ -26,12 +26,12 @@
     - [x] Configure Invoke-Expression (&starship init powershell)
     - [x] Configure Invoke-Expression (&zoxide init powershell)
     - [x] Configure fnm env --use-on-cd | Out-String | Invoke-Expression
-- [ ] Task: Implement Unix-like Aliases & Tools
-    - [ ] Map `ls` to `eza` (with arguments like `--icons --git`)
-    - [ ] Map `cat` to `bat`
-    - [ ] Map `grep` to `rg`
-    - [ ] Map `sudo` to `gsudo`
-    - [ ] Implement `which` equivalent (using `Get-Command`)
+- [x] Task: Implement Unix-like Aliases & Tools efa1d8e
+    - [x] Map ls to eza (with arguments like --icons --git)
+    - [x] Map cat to bat
+    - [x] Map grep to rg
+    - [x] Map sudo to gsudo
+    - [x] Implement which equivalent (using Get-Command)
 - [ ] Task: Implement FZF Integration
     - [ ] Install `PSFzf` module (via `Install-Module`) or configure raw FZF bindings
     - [ ] Bind `Ctrl+R` to history search
