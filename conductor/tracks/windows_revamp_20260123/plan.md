@@ -5,11 +5,11 @@
     - [x] Create windows/install.ps1 (Bootstrap)
     - [x] Create windows/packages.json (or similar list for Winget)
     - [x] Create windows/profile/ directory for modular profile scripts
-- [ ] Task: Implement `windows/install.ps1` (Bootstrap Logic)
-    - [ ] Check for and install Winget (if missing/outdated - usually built-in on Win11)
-    - [ ] Check for Git; install via Winget if missing
-    - [ ] Clone/Update dotfiles repo to `$HOME/dotfiles`
-    - [ ] Symlink (or copy) `setup-windows.ts` if needed for the interactive part
+- [x] Task: Implement windows/install.ps1 (Bootstrap Logic) 7001c95
+    - [x] Check for and install Winget (if missing/outdated - usually built-in on Win11)
+    - [x] Check for Git; install via Winget if missing
+    - [x] Clone/Update dotfiles repo to $HOME/dotfiles
+    - [x] Symlink (or copy) setup-windows.ts if needed for the interactive part
 - [ ] Task: Implement Package Installation Logic
     - [ ] Create function to install packages from a list using `winget install -e --id <id>`
     - [ ] Populate package list with: `Starship.Starship`, `ajeetdsouza.zoxide`, `junegunn.fzf`, `BurntSushi.ripgrep.MSVC`, `sharkdp.bat`, `eza-community.eza`, `Schniz.fnm`, `gerardog.gsudo`, `Git.Git`, `Neovim.Neovim`
