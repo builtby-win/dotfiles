@@ -42,10 +42,10 @@
 - [x] Task: Install AI Tools via Winget 63861b6
     - [x] Add Anysphere.Cursor to package list
     - [x] Add Anthropic.Claude (if available) or manual install step/instruction
-- [ ] Task: Symlink/Copy Configurations
-    - [ ] Create logic to copy/symlink `starship.toml` to `~/.config/starship.toml`
-    - [ ] Create logic to copy/symlink `templates/claude/*` to Windows AppData path
-    - [ ] Create logic to copy/symlink `templates/cursor/*` to Windows AppData path
+- [x] Task: Symlink/Copy Configurations 57338f9
+    - [x] Create logic to copy/symlink starship.toml to ~/.config/starship.toml
+    - [x] Create logic to copy/symlink templates/claude/* to Windows AppData path
+    - [x] Create logic to copy/symlink templates/cursor/* to Windows AppData path
 - [ ] Task: Conductor - User Manual Verification 'AI Tools & Configuration' (Protocol in workflow.md)
 
 ## Phase 4: Interactive Setup & Polish
