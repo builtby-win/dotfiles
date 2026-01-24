@@ -14,3 +14,22 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 if (Get-Command fnm -ErrorAction SilentlyContinue) {
     fnm env --use-on-cd | Out-String | Invoke-Expression
 }
+
+# 4. FZF Integration (Fuzzy Finder)
+if (Get-Command fzf -ErrorAction SilentlyContinue) {
+    # CTRL-R - Paste the selected command from history into the command line
+    Set-PSReadLineKeyHandler -Chord 'Ctrl+r' -ScriptBlock {
+        $res = history | Select-Object -ExpandProperty CommandLine | fzf --tac --no-sort --exact
+        if ($res) {
+            [Microsoft.PowerShell.PSConsoleReadLine]::Insert($res)
+        }
+    }
+
+    # CTRL-T - Paste the selected file path into the command line
+    Set-PSReadLineKeyHandler -Chord 'Ctrl+t' -ScriptBlock {
+        $res = fzf
+        if ($res) {
+            [Microsoft.PowerShell.PSConsoleReadLine]::Insert($res)
+        }
+    }
+}
