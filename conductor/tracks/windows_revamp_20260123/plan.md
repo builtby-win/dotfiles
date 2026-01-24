@@ -49,9 +49,9 @@
 - [x] Task: Conductor - User Manual Verification 'AI Tools & Configuration' (Protocol in workflow.md)
 
 ## Phase 4: Interactive Setup & Polish
-- [ ] Task: Update `setup-windows.ts` (Interactive CLI)
-    - [ ] Ensure it calls the PowerShell functions correctly
-    - [ ] Add prompts for optional installations (similar to the Mac setup)
+- [x] Task: Update setup-windows.ts (Interactive CLI) 7c87221
+    - [x] Ensure it calls the PowerShell functions correctly
+    - [x] Add prompts for optional installations (similar to the Mac setup)
 - [ ] Task: Final Integration Test
     - [ ] Verify full end-to-end run of `bootstrap.ps1`
     - [ ] Verify new shell opens with Starship
