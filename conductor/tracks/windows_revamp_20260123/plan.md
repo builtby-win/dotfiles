@@ -17,11 +17,11 @@
 - [x] Task: Conductor - User Manual Verification 'Foundation & Package Management' (Protocol in workflow.md)
 
 ## Phase 2: PowerShell Profile & Shell Ergonomics
-- [ ] Task: Initialize Modular PowerShell Profile
-    - [ ] Create `Microsoft.PowerShell_profile.ps1` entry point that sources other files
-    - [ ] Create `windows/profile/init.ps1` (Starship, Fnm, Zoxide init)
-    - [ ] Create `windows/profile/aliases.ps1` (Unix aliases)
-    - [ ] Create `windows/profile/functions.ps1` (Custom functions)
+- [x] Task: Initialize Modular PowerShell Profile bac5b50
+    - [x] Create Microsoft.PowerShell_profile.ps1 entry point that sources other files
+    - [x] Create windows/profile/init.ps1 (Starship, Fnm, Zoxide init)
+    - [x] Create windows/profile/aliases.ps1 (Unix aliases)
+    - [x] Create windows/profile/functions.ps1 (Custom functions)
 - [ ] Task: Implement Core Integrations
     - [ ] Configure `Invoke-Expression (&starship init powershell)`
     - [ ] Configure `Invoke-Expression (&zoxide init powershell)`
