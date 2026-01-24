@@ -14,7 +14,7 @@
     - [x] Create function to install packages from a list using winget install -e --id <id>
     - [x] Populate package list with: Starship.Starship, ajeetdsouza.zoxide, junegunn.fzf, BurntSushi.ripgrep.MSVC, sharkdp.bat, eza-community.eza, Schniz.fnm, gerardog.gsudo, Git.Git, Neovim.Neovim
     - [x] Verify installation of all core CLI tools
-- [ ] Task: Conductor - User Manual Verification 'Foundation & Package Management' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Foundation & Package Management' (Protocol in workflow.md)
 
 ## Phase 2: PowerShell Profile & Shell Ergonomics
 - [ ] Task: Initialize Modular PowerShell Profile
