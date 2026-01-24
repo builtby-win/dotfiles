@@ -1,9 +1,100 @@
 #!/usr/bin/env npx tsx
 import { checkbox, select, confirm } from "@inquirer/prompts";
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync } from "fs";
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync } from "fs";
 import { join, dirname } from "path";
 import { homedir } from "os";
+import * as manifest from "./lib/manifest";
+
+// ============================================
+// Auto-Detection for Existing Users
+// ============================================
+
+interface DetectedSetup {
+  apps: string[];
+  configs: string[];
+  features: Record<string, boolean>;
+}
+
+/**
+ * Detect what apps/configs/features the user already has installed.
+ * Used for first-run migration when no setup manifest exists.
+ */
+function autoDetectExistingSetup(): DetectedSetup {
+  const detected: DetectedSetup = {
+    apps: [],
+    configs: [],
+    features: {},
+  };
+
+  // Detect installed apps using existing getAppInstallState
+  for (const app of APPS) {
+    const state = getAppInstallState(app);
+    if (state === "installed" || state === "partial") {
+      detected.apps.push(app.value);
+    }
+  }
+
+  // Detect installed stow configs using existing isStowConfigInstalled
+  for (const config of STOW_CONFIGS) {
+    if (isStowConfigInstalled(config.value)) {
+      detected.configs.push(config.value);
+    }
+  }
+
+  // Detect beads feature - check if beads.sh is sourced in user's shell config
+  detected.features.beads = isBeadsFeatureActive();
+
+  return detected;
+}
+
+/**
+ * Check if beads feature is currently active in user's shell config.
+ * Conservative: returns true only if we find explicit evidence.
+ */
+function isBeadsFeatureActive(): boolean {
+  const HOME = homedir();
+  
+  // Check 1: Does ~/.zshrc source beads.sh from our dotfiles?
+  const zshrcPath = join(HOME, ".zshrc");
+  if (existsSync(zshrcPath)) {
+    try {
+      const content = readFileSync(zshrcPath, "utf-8");
+      // Check if it sources our init.sh which would load beads
+      if (content.includes("beads.sh") || content.includes("beads")) {
+        // But also check if there's a manifest with beads enabled already
+        // (this handles the case where they ran setup before but manifest got deleted)
+        return true;
+      }
+    } catch {
+      // Can't read, assume no
+    }
+  }
+
+  // Check 2: Is the beads command available? (npm package installed)
+  try {
+    execSync("command -v bd", { stdio: "pipe", encoding: "utf-8" });
+    return true;
+  } catch {
+    // Not installed
+  }
+
+  // Check 3: Does ~/.global-todos exist? (beads global repo)
+  const globalTodosPath = join(HOME, ".global-todos");
+  if (existsSync(globalTodosPath)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if setup manifest already exists.
+ */
+function manifestExists(): boolean {
+  const manifestPath = manifest.getManifestPath();
+  return existsSync(manifestPath);
+}
 
 // Colors
 const colors = {
@@ -309,6 +400,44 @@ function addToManifest(entry: Omit<BackupEntry, "timestamp">): void {
   saveManifest(manifest);
 }
 
+// Platform detection
+type Platform = "macos" | "windows" | "linux";
+interface PlatformSupport {
+  macos?: boolean;
+  windows?: boolean;
+  linux?: boolean;
+}
+
+function getCurrentPlatform(): Platform {
+  const platform = process.platform;
+  if (platform === "darwin") return "macos";
+  if (platform === "win32") return "windows";
+  return "linux";
+}
+
+function isPlatformSupported(platforms: PlatformSupport | undefined, currentPlatform: Platform): boolean {
+  // If no platforms specified, default to showing (backward compatibility)
+  if (!platforms) return true;
+  // Show if current platform is not explicitly set to false
+  return platforms[currentPlatform] !== false;
+}
+
+// App categories for organized display
+type AppCategory = "cli" | "terminals" | "ai" | "productivity" | "input" | "security" | "browsers" | "devtools";
+
+const CATEGORY_ORDER: AppCategory[] = ["cli", "terminals", "ai", "productivity", "input", "security", "browsers", "devtools"];
+
+const CATEGORY_LABELS: Record<AppCategory, string> = {
+  cli: "CLI Tools",
+  terminals: "Terminals & Editors",
+  ai: "AI Tools",
+  productivity: "Productivity",
+  input: "Input",
+  security: "Security",
+  browsers: "Browsers",
+  devtools: "Dev Tools",
+};
+
 // App definitions with their associated configs
 interface App {
   name: string;
@@ -322,59 +451,78 @@ interface App {
   detectPath?: string;     // Custom path to check if exists (e.g., "/Applications/App.app")
   desc?: string;           // Short description for info display
   url?: string;            // Project URL
+  platforms?: PlatformSupport; // Platform support (default: all platforms)
+  category: AppCategory;   // Category for grouped display
 }
 
 const APPS: App[] = [
+  // CLI Tools
+  { name: "tmux", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf"], desc: "Terminal multiplexer - split panes, sessions", url: "https://github.com/tmux/tmux", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
+  { name: "fzf", value: "fzf", brewName: "fzf", desc: "Fuzzy finder for files, history, and more", url: "https://github.com/junegunn/fzf", category: "cli" },
+  { name: "ripgrep", value: "ripgrep", brewName: "ripgrep", desc: "Blazing fast grep replacement", url: "https://github.com/BurntSushi/ripgrep", category: "cli" },
+  { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat", category: "cli" },
+  { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza", category: "cli" },
+  { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide", category: "cli" },
+  { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", category: "cli" },
+
   // Terminals & Editors
-  { name: "Ghostty (terminal)", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org" },
-  { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com" },
-  { name: "Cursor (AI editor)", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh" },
+  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: true, windows: false }, category: "terminals" },
+  { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com", category: "terminals" },
+  { name: "Cursor", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh", category: "terminals" },
 
   // AI Tools
-  { name: "Claude Code (CLI)", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code" },
-  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex" },
+  { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", category: "ai" },
+  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
 
-  // Productivity
-  { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com" },
-  { name: "Velja", value: "velja", brewName: "velja", cask: true, detectPath: "/Applications/Velja.app", desc: "Browser picker - choose which browser opens links", url: "https://sindresorhus.com/velja" },
-  { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app" },
-  { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice" },
-  { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai" },
+  // Productivity (macOS only)
+  { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
 
-  // Input
-  { name: "Karabiner Elements", value: "karabiner-elements", brewName: "karabiner-elements", cask: true, detectPath: "/Applications/Karabiner-Elements.app", desc: "Powerful keyboard customization", url: "https://karabiner-elements.pqrs.org" },
-  { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app" },
+  // Input (macOS only)
+  { name: "Karabiner Elements", value: "karabiner-elements", brewName: "karabiner-elements", cask: true, detectPath: "/Applications/Karabiner-Elements.app", desc: "Powerful keyboard customization", url: "https://karabiner-elements.pqrs.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
+  { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app", platforms: { macos: true, windows: false, linux: false }, category: "input" },
 
-  // Security
-  { name: "Bitwarden", value: "bitwarden", brewName: "bitwarden", cask: true, detectPath: "/Applications/Bitwarden.app", desc: "Open source password manager", url: "https://bitwarden.com" },
+  // Security (cross-platform)
+  { name: "Bitwarden", value: "bitwarden", brewName: "bitwarden", cask: true, detectPath: "/Applications/Bitwarden.app", desc: "Open source password manager", url: "https://bitwarden.com", category: "security" },
 
-  // Browsers
-  { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app", desc: "Google's web browser" },
-  { name: "Arc", value: "arc", brewName: "arc", cask: true, detectPath: "/Applications/Arc.app", desc: "Modern browser with spaces & profiles", url: "https://arc.net" },
-  { name: "Orion", value: "orion", brewName: "orion", cask: true, detectPath: "/Applications/Orion.app", desc: "WebKit browser with Chrome/Firefox extension support", url: "https://browser.kagi.com" },
+  // Browsers (cross-platform except Orion)
+  { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app", desc: "Google's web browser", url: "https://google.com/chrome", category: "browsers" },
+  { name: "Arc", value: "arc", brewName: "arc", cask: true, detectPath: "/Applications/Arc.app", desc: "Modern browser with spaces & profiles", url: "https://arc.net", platforms: { macos: true, windows: true, linux: false }, category: "browsers" },
+  { name: "Orion", value: "orion", brewName: "orion", cask: true, detectPath: "/Applications/Orion.app", desc: "WebKit browser with Chrome/Firefox extension support", url: "https://browser.kagi.com", platforms: { macos: true, windows: false, linux: false }, category: "browsers" },
 
-  // Dev Tools
-  { name: "Docker", value: "docker", brewName: "docker", cask: true, detectPath: "/Applications/Docker.app", desc: "Container runtime for development", url: "https://docker.com" },
-  { name: "Figma", value: "figma", brewName: "figma", cask: true, detectPath: "/Applications/Figma.app", desc: "Collaborative design tool", url: "https://figma.com" },
-  { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app", desc: "Chat for communities", url: "https://discord.com" },
-
-  // CLI Tools
-  { name: "tmux", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf"], desc: "Terminal multiplexer - split panes, sessions", url: "https://github.com/tmux/tmux" },
-  { name: "fzf", value: "fzf", brewName: "fzf", desc: "Fuzzy finder for files, history, and more", url: "https://github.com/junegunn/fzf" },
-  { name: "ripgrep", value: "ripgrep", brewName: "ripgrep", desc: "Blazing fast grep replacement", url: "https://github.com/BurntSushi/ripgrep" },
-  { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat" },
-  { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza" },
-  { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide" },
-  { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs" },
+  // Dev Tools (cross-platform)
+  { name: "Docker", value: "docker", brewName: "docker", cask: true, detectPath: "/Applications/Docker.app", desc: "Container runtime for development", url: "https://docker.com", category: "devtools" },
+  { name: "Figma", value: "figma", brewName: "figma", cask: true, detectPath: "/Applications/Figma.app", desc: "Collaborative design tool", url: "https://figma.com", category: "devtools" },
+  { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app", desc: "Chat for communities", url: "https://discord.com", category: "devtools" },
 ];
 
 // Stow-managed configs
-const STOW_CONFIGS = [
-  { name: "Shell config (zinit, starship, aliases)", value: "zsh", checked: true },
-  { name: "Tmux (vim-style bindings, mouse support)", value: "tmux", checked: true },
-  { name: "Karabiner Elements (key remapping)", value: "karabiner", checked: true },
-  { name: "Ghostty (terminal config)", value: "ghostty", checked: true },
-  { name: "Mackup (app settings backup to iCloud)", value: "mackup", checked: true },
+interface StowConfig {
+  name: string;
+  value: string;
+  checked?: boolean;
+  platforms?: PlatformSupport;
+  desc?: string;
+}
+
+const STOW_CONFIGS: StowConfig[] = [
+  { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
+  { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "vim-style bindings, mouse support, sesh integration" },
+  { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
+  { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
+  { name: "Mackup", value: "mackup", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Sync app settings to iCloud/Dropbox" },
+];
+
+// Optional features (opt-in, don't load in shell unless selected)
+const OPTIONAL_FEATURES = [
+  { 
+    name: "Beads (Global Task Manager)", 
+    value: "beads", 
+    checked: false,
+    desc: "Global task aggregation across repositories - organize tasks from multiple projects"
+  },
 ];
 
 // AI tool configs (template-based)
@@ -502,8 +650,9 @@ function isStowConfigInstalled(config: string): boolean {
     try {
       const stats = lstatSync(targetPath);
       if (stats.isSymbolicLink()) {
-        const content = readFileSync(targetPath, "utf-8");
-        return content.includes("builtby.win/dotfiles") || content.includes("stow-packages");
+        // Read the symlink path itself, not the file content
+        const linkPath = readlinkSync(targetPath);
+        return linkPath.includes("builtby.win/dotfiles") || linkPath.includes("stow-packages");
       }
     } catch {
       // Not our symlink
@@ -588,7 +737,12 @@ const STOW_TARGETS: Record<string, string[]> = {
   zsh: [".zshrc", ".config/starship.toml"],
   tmux: [".tmux.conf"],
   karabiner: [".config/karabiner/karabiner.json"],
-  ghostty: [".config/ghostty/config"],
+  ghostty: process.platform === "darwin"
+    ? [
+        ".config/ghostty/config",
+        "Library/Application Support/com.mitchellh.ghostty/config",
+      ]
+    : [".config/ghostty/config"],
   mackup: [".mackup.cfg"],
 };
 
@@ -633,8 +787,8 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
         // Check if it's already our symlink
         if (stats.isSymbolicLink()) {
           try {
-            const content = readFileSync(targetPath, "utf-8");
-            if (content.includes("builtby.win/dotfiles") || content.includes(DOTFILES_DIR)) {
+            const linkPath = readlinkSync(targetPath);
+            if (linkPath.includes("builtby.win/dotfiles") || linkPath.includes(DOTFILES_DIR)) {
               log.success(`${config} already configured via stow`);
               continue;
             }
@@ -853,13 +1007,7 @@ function printAdBanner(): void {
   console.log(`${colors.cyan}${colors.bold}  Speed up your workflow even more:${colors.reset}`);
   console.log("");
   console.log(`  ${colors.yellow}→${colors.reset} back2vibing - Focus & productivity for devs`);
-  console.log(`    ${colors.dim}https://back2vibing.com${colors.reset}`);
-  console.log("");
-  console.log(`  ${colors.yellow}→${colors.reset} builtby.win/web - Next.js + tRPC + Prisma starter`);
-  console.log(`    ${colors.dim}https://builtby.win/web${colors.reset}`);
-  console.log("");
-  console.log(`  ${colors.yellow}→${colors.reset} builtby.win/desktop - Electron + React starter`);
-  console.log(`    ${colors.dim}https://builtby.win/desktop${colors.reset}`);
+  console.log(`    ${colors.dim}https://back2vibing.builtby.win${colors.reset}`);
   console.log(`${colors.dim}${"─".repeat(50)}${colors.reset}`);
   console.log("");
 }
@@ -908,8 +1056,12 @@ const MERGEABLE_CONFIGS: MergeableConfig[] = [
   {
     name: "Ghostty Terminal",
     description: "GPU-accelerated terminal configuration",
-    userPath: join(HOME, ".config", "ghostty", "config"),
-    dotfilesPath: join(DOTFILES_DIR, "stow-packages", "ghostty", ".config", "ghostty", "config"),
+    userPath: process.platform === "darwin"
+      ? join(HOME, "Library", "Application Support", "com.mitchellh.ghostty", "config")
+      : join(HOME, ".config", "ghostty", "config"),
+    dotfilesPath: process.platform === "darwin"
+      ? join(DOTFILES_DIR, "stow-packages", "ghostty", "Library", "Application Support", "com.mitchellh.ghostty", "config")
+      : join(DOTFILES_DIR, "stow-packages", "ghostty", ".config", "ghostty", "config"),
     type: "config",
   },
 ];
@@ -1248,16 +1400,21 @@ async function mainMenu(): Promise<void> {
 }
 
 async function runSetup(): Promise<void> {
+  // Filter apps and configs by current platform
+  const currentPlatform = getCurrentPlatform();
+  const platformApps = APPS.filter(app => isPlatformSupported(app.platforms, currentPlatform));
+  const platformStowConfigs = STOW_CONFIGS.filter(config => isPlatformSupported(config.platforms, currentPlatform));
+
   // Check what's already installed
   log.step("Checking installed apps...");
   const appStates = new Map<string, AppInstallState>();
   const installedConfigs = new Set<string>();
 
-  for (const app of APPS) {
+  for (const app of platformApps) {
     appStates.set(app.value, getAppInstallState(app));
   }
 
-  for (const config of STOW_CONFIGS) {
+  for (const config of platformStowConfigs) {
     if (isStowConfigInstalled(config.value)) {
       installedConfigs.add(config.value);
     }
@@ -1273,108 +1430,368 @@ async function runSetup(): Promise<void> {
   }
   console.log("");
 
-  // Ask if user wants to see what each tool does
-  const showInfo = await confirm({
-    message: "Want to see what each tool does first?",
-    default: false,
-  });
+  // ============================================
+  // Auto-Detection for First Run (No Manifest)
+  // ============================================
+  let selectedApps: string[] = [];
+  let selectedStowConfigs: string[] = [];
+  let selectedFeatures: string[] = [];
+  let aiConfigs: string[] = [];
+  let currentStep = 1;
+  let skipToRecap = false;
 
-  if (showInfo) {
-    console.log("");
-    console.log(`${colors.cyan}${colors.bold}=== CLI Tools ===${colors.reset}`);
-    for (const app of APPS.filter(a => !a.cask)) {
-      const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
-      console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
-    }
-    console.log("");
-    console.log(`${colors.cyan}${colors.bold}=== Apps ===${colors.reset}`);
-    for (const app of APPS.filter(a => a.cask)) {
-      const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
-      console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
-    }
-    console.log("");
-  }
+  if (!manifestExists()) {
+    // First run - detect what's already installed
+    const detected = autoDetectExistingSetup();
+    const detectedAppsOnPlatform = detected.apps.filter(a => platformApps.some(p => p.value === a));
+    const detectedConfigsOnPlatform = detected.configs.filter(c => platformStowConfigs.some(p => p.value === c));
+    const detectedFeaturesList = Object.entries(detected.features).filter(([_, v]) => v).map(([k]) => k);
 
-  // Step 1: Select apps to install
-  log.step("[1/3] Select apps to install");
-  const selectedApps = await checkbox({
-    message: "Select apps (space to toggle, enter to confirm):",
-    choices: APPS.map((app) => {
-      const state = appStates.get(app.value) ?? "not_installed";
-      const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
-      if (state === "installed") {
-        return {
-          name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
-          value: app.value,
-          checked: true,
-          disabled: "(already installed)",
-        };
-      } else if (state === "partial") {
-        return {
-          name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
-          value: app.value,
-          checked: true,
-          disabled: false,
-        };
-      } else {
-        return {
-          name: `${app.name}${descPart}`,
-          value: app.value,
-          checked: app.checked ?? false,
-          disabled: false,
-        };
+    const hasDetectedItems = detectedAppsOnPlatform.length > 0 || 
+                             detectedConfigsOnPlatform.length > 0 || 
+                             detectedFeaturesList.length > 0;
+
+    if (hasDetectedItems) {
+      console.log(`${colors.cyan}${colors.bold}🔍 First run detected - found existing setup:${colors.reset}`);
+      console.log("");
+
+      // Show detected apps
+      if (detectedAppsOnPlatform.length > 0) {
+        console.log(`  ${colors.bold}Apps already installed:${colors.reset} ${detectedAppsOnPlatform.length}`);
+        const appNames = detectedAppsOnPlatform
+          .map(v => APPS.find(a => a.value === v)?.name)
+          .filter(Boolean)
+          .join(", ");
+        console.log(`    ${colors.dim}${appNames}${colors.reset}`);
       }
-    }),
-    pageSize: 20,
-  });
 
-  console.log("");
+      // Show detected configs
+      if (detectedConfigsOnPlatform.length > 0) {
+        console.log(`  ${colors.bold}Configs already linked:${colors.reset} ${detectedConfigsOnPlatform.length}`);
+        const configNames = detectedConfigsOnPlatform
+          .map(v => STOW_CONFIGS.find(c => c.value === v)?.name)
+          .filter(Boolean)
+          .join(", ");
+        console.log(`    ${colors.dim}${configNames}${colors.reset}`);
+      }
 
-  // Step 2: Select stow-managed configs
-  log.step("[2/3] Select configs to stow");
-  const selectedStowConfigs = await checkbox({
-    message: "Select configs to install (managed via stow):",
-    choices: STOW_CONFIGS.map((config) => {
-      const installed = installedConfigs.has(config.value);
-      return {
-        name: installed ? `${config.name} ${colors.green}(installed)${colors.reset}` : config.name,
-        value: config.value,
-        checked: installed ? true : (config.checked ?? false),
-        disabled: installed ? "(already installed)" : false,
-      };
-    }),
-  });
+      // Show detected features
+      if (detectedFeaturesList.length > 0) {
+        console.log(`  ${colors.bold}Features detected:${colors.reset} ${detectedFeaturesList.length}`);
+        const featureNames = detectedFeaturesList
+          .map(v => OPTIONAL_FEATURES.find(f => f.value === v)?.name || v)
+          .join(", ");
+        console.log(`    ${colors.dim}${featureNames}${colors.reset}`);
+      }
 
-  // Auto-select AI configs based on app selection
-  const autoSelectedAIConfigs = selectedApps
-    .filter((app) => {
-      const appDef = APPS.find((a) => a.value === app);
-      return appDef?.configs && appDef.configs.length > 0;
-    })
-    .flatMap((app) => APPS.find((a) => a.value === app)?.configs ?? []);
+      console.log("");
 
-  const aiConfigs = [...new Set(autoSelectedAIConfigs)];
+      const useDetected = await select({
+        message: "Should I use these as your settings?",
+        choices: [
+          { name: "Yes, use detected settings", value: "use" },
+          { name: "Let me customize", value: "customize" },
+        ],
+      });
 
-  if (aiConfigs.length > 0) {
-    log.info(`Auto-selecting configs for: ${aiConfigs.map((c) => AI_CONFIGS[c]?.name).join(", ")}`);
+      if (useDetected === "use") {
+        // Pre-populate selections with detected items
+        selectedApps = detectedAppsOnPlatform;
+        selectedStowConfigs = detectedConfigsOnPlatform;
+        selectedFeatures = detectedFeaturesList;
+        skipToRecap = true;
+        currentStep = 4; // Jump to recap step
+        console.log("");
+        log.success("Using detected settings");
+        console.log("");
+      } else {
+        console.log("");
+        log.info("Proceeding to manual selection...");
+        console.log("");
+      }
+    }
   }
 
-  console.log("");
+  // If not skipping, show info and do normal flow
+  if (!skipToRecap) {
+    // Ask if user wants to see what each tool does
+    const showInfo = await confirm({
+      message: "Want to see what each tool does first?",
+      default: false,
+    });
 
-  const proceed = await confirm({
-    message: "Ready to install?",
-    default: true,
-  });
-
-  if (!proceed) {
-    console.log("Aborted.");
-    process.exit(0);
+    if (showInfo) {
+      console.log("");
+      console.log(`${colors.cyan}${colors.bold}=== CLI Tools ===${colors.reset}`);
+      for (const app of platformApps.filter(a => !a.cask)) {
+        const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
+        console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
+      }
+      console.log("");
+      console.log(`${colors.cyan}${colors.bold}=== Apps ===${colors.reset}`);
+      for (const app of platformApps.filter(a => a.cask)) {
+        const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
+        console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
+      }
+      console.log("");
+    }
   }
 
-  console.log("");
+  // Helper: Build categorized choices for apps
+  const buildCategorizedAppChoices = () => {
+    const choices: Array<{ name: string; value: string; checked: boolean; disabled?: string | false }> = [
+      {
+        name: `${colors.yellow}↩ Back to menu${colors.reset}`,
+        value: "__back__",
+        checked: false,
+      },
+    ];
 
-  // Step 3: Install everything
-  log.step("[3/3] Installing...");
+    // Group apps by category
+    for (const category of CATEGORY_ORDER) {
+      const appsInCategory = platformApps.filter(app => app.category === category);
+      if (appsInCategory.length === 0) continue;
+
+      // Add category separator
+      choices.push({
+        name: `${colors.cyan}─── ${CATEGORY_LABELS[category]} ───${colors.reset}`,
+        value: `__separator_${category}__`,
+        checked: false,
+        disabled: " ",
+      });
+
+      // Add apps in this category
+      for (const app of appsInCategory) {
+        const state = appStates.get(app.value) ?? "not_installed";
+        const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
+        if (state === "installed") {
+          choices.push({
+            name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
+            value: app.value,
+            checked: true,
+            disabled: "(already installed)",
+          });
+        } else if (state === "partial") {
+          choices.push({
+            name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
+            value: app.value,
+            checked: true,
+            disabled: false,
+          });
+        } else {
+          choices.push({
+            name: `${app.name}${descPart}`,
+            value: app.value,
+            checked: app.checked ?? false,
+            disabled: false,
+          });
+        }
+      }
+    }
+
+    return choices;
+  };
+
+  const TOTAL_STEPS = 5;
+
+  // Step navigation loop
+  while (currentStep >= 1) {
+    // Step 1: Select apps to install
+    if (currentStep === 1) {
+      log.step(`[Step 1 of ${TOTAL_STEPS}] Select apps to install`);
+      const appsChoices = buildCategorizedAppChoices();
+      
+      selectedApps = await checkbox({
+        message: `Select apps (space to toggle, enter to confirm) ${colors.dim}[${platformApps.length} items]${colors.reset}:`,
+        choices: appsChoices,
+        pageSize: 25,
+        loop: false,
+      });
+
+      // Filter out separators and back
+      selectedApps = selectedApps.filter(a => !a.startsWith("__"));
+      if (appsChoices.find(c => c.value === "__back__" && selectedApps.includes("__back__"))) {
+        return mainMenu();
+      }
+
+      console.log("");
+      currentStep = 2;
+    }
+
+    // Step 2: Select stow-managed configs
+    if (currentStep === 2) {
+      log.step(`[Step 2 of ${TOTAL_STEPS}] Select configs to stow`);
+      const stowChoices = [
+        {
+          name: `${colors.yellow}↩ Back to step 1${colors.reset}`,
+          value: "__back__",
+          checked: false,
+        },
+        ...platformStowConfigs.map((config) => {
+          const installed = installedConfigs.has(config.value);
+          const descPart = config.desc ? ` ${colors.dim}- ${config.desc}${colors.reset}` : "";
+          return {
+            name: installed 
+              ? `${config.name}${descPart} ${colors.green}(installed)${colors.reset}` 
+              : `${config.name}${descPart}`,
+            value: config.value,
+            checked: installed ? true : (config.checked ?? false),
+            disabled: installed ? "(already installed)" : false,
+          };
+        }),
+      ];
+      
+      selectedStowConfigs = await checkbox({
+        message: `Select configs to install ${colors.dim}[${stowChoices.length - 1} items]${colors.reset}:`,
+        choices: stowChoices,
+        pageSize: 20,
+        loop: false,
+      });
+
+      if (selectedStowConfigs.includes("__back__")) {
+        selectedStowConfigs = selectedStowConfigs.filter(s => s !== "__back__");
+        console.log("");
+        currentStep = 1;
+        continue;
+      }
+
+      console.log("");
+      currentStep = 3;
+    }
+
+    // Step 3: Select optional features
+    if (currentStep === 3) {
+      log.step(`[Step 3 of ${TOTAL_STEPS}] Select optional features`);
+      const featureChoices = [
+        {
+          name: `${colors.yellow}↩ Back to step 2${colors.reset}`,
+          value: "__back__",
+          checked: false,
+        },
+        ...OPTIONAL_FEATURES.map((feature) => ({
+          name: feature.desc ? `${feature.name} ${colors.dim}- ${feature.desc}${colors.reset}` : feature.name,
+          value: feature.value,
+          checked: feature.checked ?? false,
+          disabled: false,
+        })),
+      ];
+
+      selectedFeatures = await checkbox({
+        message: `Select optional features ${colors.dim}[${featureChoices.length - 1} items]${colors.reset}:`,
+        choices: featureChoices,
+        pageSize: 20,
+        loop: false,
+      });
+
+      if (selectedFeatures.includes("__back__")) {
+        selectedFeatures = selectedFeatures.filter(f => f !== "__back__");
+        console.log("");
+        currentStep = 2;
+        continue;
+      }
+
+      console.log("");
+      currentStep = 4;
+    }
+
+    // Step 4: Recap and confirm
+    if (currentStep === 4) {
+      // Auto-select AI configs based on app selection
+      const autoSelectedAIConfigs = selectedApps
+        .filter((app) => {
+          const appDef = APPS.find((a) => a.value === app);
+          return appDef?.configs && appDef.configs.length > 0;
+        })
+        .flatMap((app) => APPS.find((a) => a.value === app)?.configs ?? []);
+
+      aiConfigs = [...new Set(autoSelectedAIConfigs)];
+
+      // Show recap screen
+      log.step(`[Step 4 of ${TOTAL_STEPS}] Review your selections`);
+      console.log("");
+
+      // Count what will actually be installed (not already installed)
+      const appsToInstallCount = selectedApps.filter(app => {
+        const state = appStates.get(app);
+        return state === "not_installed" || state === "partial";
+      }).length;
+      const configsToInstallCount = selectedStowConfigs.filter(c => !installedConfigs.has(c)).length;
+
+      // Apps summary
+      console.log(`  ${colors.bold}Apps:${colors.reset} ${selectedApps.length} selected (${appsToInstallCount} to install)`);
+      if (selectedApps.length > 0) {
+        // Group by category for display
+        for (const category of CATEGORY_ORDER) {
+          const appsInCat = selectedApps
+            .map(v => APPS.find(a => a.value === v))
+            .filter((a): a is App => a !== undefined && a.category === category);
+          if (appsInCat.length > 0) {
+            console.log(`    ${colors.dim}${CATEGORY_LABELS[category]}:${colors.reset} ${appsInCat.map(a => a.name).join(", ")}`);
+          }
+        }
+      }
+
+      // Configs summary
+      console.log(`  ${colors.bold}Configs:${colors.reset} ${selectedStowConfigs.length} selected (${configsToInstallCount} to install)`);
+      if (selectedStowConfigs.length > 0) {
+        const configNames = selectedStowConfigs
+          .map(v => STOW_CONFIGS.find(c => c.value === v)?.name)
+          .filter(Boolean)
+          .join(", ");
+        console.log(`    ${colors.dim}${configNames}${colors.reset}`);
+      }
+
+      // Features summary
+      console.log(`  ${colors.bold}Features:${colors.reset} ${selectedFeatures.length} selected`);
+      if (selectedFeatures.length > 0) {
+        const featureNames = selectedFeatures
+          .map(v => OPTIONAL_FEATURES.find(f => f.value === v)?.name)
+          .filter(Boolean)
+          .join(", ");
+        console.log(`    ${colors.dim}${featureNames}${colors.reset}`);
+      }
+
+      // AI configs (auto-selected)
+      if (aiConfigs.length > 0) {
+        console.log(`  ${colors.bold}AI Configs:${colors.reset} ${aiConfigs.length} auto-selected`);
+        console.log(`    ${colors.dim}${aiConfigs.map(c => AI_CONFIGS[c]?.name).join(", ")}${colors.reset}`);
+      }
+
+      console.log("");
+
+      const proceed = await confirm({
+        message: "Proceed with these selections?",
+        default: true,
+      });
+
+      if (!proceed) {
+        const goBack = await confirm({
+          message: "Go back to edit selections?",
+          default: true,
+        });
+
+        if (goBack) {
+          console.log("");
+          currentStep = 3;
+          continue;
+        } else {
+          console.log("Aborted.");
+          process.exit(0);
+        }
+      }
+
+      console.log("");
+      currentStep = 5;
+    }
+
+    // Step 5: Install everything
+    if (currentStep === 5) {
+      break;
+    }
+  }
+
+  // Step 5: Install everything
+  log.step(`[Step 5 of ${TOTAL_STEPS}] Installing...`);
   console.log("");
 
   // Filter: include apps that are not_installed OR partial (need deps)
@@ -1395,6 +1812,20 @@ async function runSetup(): Promise<void> {
 
     await setupAIConfigs(aiConfigs);
   }
+
+  // Save setup manifest (tracks what user selected for features)
+  const setupManifest = manifest.getEmptyManifest();
+  manifest.setInstalledApps(setupManifest, selectedApps);
+  manifest.setInstalledConfigs(setupManifest, selectedStowConfigs);
+  manifest.setFeatures(
+    setupManifest,
+    selectedFeatures.reduce((acc, feature) => {
+      acc[feature] = true;
+      return acc;
+    }, {} as Record<string, boolean>)
+  );
+  manifest.saveManifest(setupManifest);
+  log.success(`Setup manifest saved to ${manifest.getManifestPath()}`);
 
   // Done!
   console.log("");

@@ -27,6 +27,19 @@ setopt PUSHD_IGNORE_DUPS    # Don't push duplicates onto directory stack
 setopt PUSHD_SILENT         # Don't print directory stack after pushd/popd
 
 # ─────────────────────────────────────────────────────────────
+# Dot expansion (... → cd ../.., .... → cd ../../.., etc)
+# ─────────────────────────────────────────────────────────────
+rationalise-dot() {
+  if [[ $LBUFFER = *.. ]]; then
+    LBUFFER+=/..
+  else
+    LBUFFER+=.
+  fi
+}
+zle -N rationalise-dot
+bindkey . rationalise-dot
+
+# ─────────────────────────────────────────────────────────────
 # Completion system
 # ─────────────────────────────────────────────────────────────
 autoload -Uz compinit
@@ -127,6 +140,13 @@ if command -v starship &> /dev/null; then
     starship init zsh > "$STARSHIP_CACHE"
   fi
   source "$STARSHIP_CACHE"
+
+  if [[ -v widgets[zle-keymap-select] ]]; then
+    local keymap_widget="${widgets[zle-keymap-select]#user:}"
+    if [[ "$keymap_widget" == "starship_zle-keymap-select-wrapped" || "$keymap_widget" == "starship_zle-keymap-select" ]]; then
+      zle -N zle-keymap-select starship_zle-keymap-select
+    fi
+  fi
 else
   # Fallback to simple prompt if starship not installed
   PROMPT='%F{blue}%~%f %F{green}❯%f '

@@ -41,6 +41,19 @@ Uses [zinit](https://github.com/zdharma-continuum/zinit) (lightweight plugin man
 | git-auto-fetch | Automatically fetches git repos in background when you cd into them |
 | [Starship](https://starship.rs) | Fast, customizable prompt showing git status, language versions, etc. |
 
+### Optional Features
+
+#### Beads - Global Task Manager
+[Beads](https://github.com/steveyegge/beads) is a global task aggregation tool that lets you organize tasks across multiple repositories. When you enable it during setup, you can:
+
+- Create and organize tasks with a `bd` command
+- Aggregate tasks from all your projects in one place
+- Synchronize tasks across repositories using git
+
+**Installation**: Select "Beads (Global Task Manager)" during setup. It's completely optional - if you don't select it, nothing changes in your shell.
+
+**Usage**: After enabling Beads, run `bd --help` to see available commands.
+
 ### Aliases
 
 ```bash
@@ -181,7 +194,6 @@ All apps can be installed via `brew install --cask <name>` or through the intera
 | [Ice](https://github.com/jordanbaird/Ice) | Menu bar management - hide icons | `brew install --cask jordanbaird-ice` |
 | [BetterTouchTool](https://folivora.ai) | Customize trackpad, keyboard, Touch Bar, window snapping | `brew install --cask bettertouchtool` |
 | [LinearMouse](https://linearmouse.app) | Per-device mouse/trackpad settings, disable acceleration | `brew install --cask linearmouse` |
-| [Velja](https://sindresorhus.com/velja) | Browser picker - choose which browser opens each link | `brew install --cask velja` |
 | [Karabiner Elements](https://karabiner-elements.pqrs.org) | Powerful keyboard customization and remapping | `brew install --cask karabiner-elements` |
 | [Bitwarden](https://bitwarden.com) | Open source password manager | `brew install --cask bitwarden` |
 | [Arc](https://arc.net) | Modern browser with spaces & profiles | `brew install --cask arc` |
