@@ -56,6 +56,6 @@
     - [x] Verify full end-to-end run of bootstrap.ps1
     - [x] Verify new shell opens with Starship
     - [x] Verify all aliases work
-- [ ] Task: Documentation
-    - [ ] Update `WINDOWS_README.md` with new installation instructions
+- [x] Task: Documentation 5e4cdfe
+    - [x] Update WINDOWS_README.md with new installation instructions
 - [ ] Task: Conductor - User Manual Verification 'Interactive Setup & Polish' (Protocol in workflow.md)
