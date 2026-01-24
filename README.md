@@ -170,9 +170,6 @@ Custom keyboard shortcuts for improved workflow:
 | Binding | Action |
 |---------|--------|
 | `;;` (double semicolon) | Open AltTab window switcher (Ctrl+Opt+Tab) |
-| `jk` (simultaneous in terminals) | Tmux prefix (Ctrl+.) |
-| `f` in sesh search | Enable fuzzy search mode |
-| `Esc` in sesh search | Return to navigation mode (j/k) |
 | `Caps Lock` | Control key |
 | `Fn` key | Control key |
 | `Delete` (forward delete) | Escape |
