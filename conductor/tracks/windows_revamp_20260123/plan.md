@@ -16,7 +16,7 @@
     - [x] Verify installation of all core CLI tools
 - [x] Task: Conductor - User Manual Verification 'Foundation & Package Management' (Protocol in workflow.md)
 
-## Phase 2: PowerShell Profile & Shell Ergonomics
+## Phase 2: PowerShell Profile & Shell Ergonomics [checkpoint: c1a905e]
 - [x] Task: Initialize Modular PowerShell Profile bac5b50
     - [x] Create Microsoft.PowerShell_profile.ps1 entry point that sources other files
     - [x] Create windows/profile/init.ps1 (Starship, Fnm, Zoxide init)
@@ -36,7 +36,7 @@
     - [x] Install PSFzf module (via Install-Module) or configure raw FZF bindings
     - [x] Bind Ctrl+R to history search
     - [x] Bind Ctrl+T to file search
-- [~] Task: Conductor - User Manual Verification 'PowerShell Profile & Shell Ergonomics' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'PowerShell Profile & Shell Ergonomics' (Protocol in workflow.md)
 
 ## Phase 3: AI Tools & Configuration
 - [ ] Task: Install AI Tools via Winget
