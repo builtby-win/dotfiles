@@ -58,4 +58,4 @@
     - [x] Verify all aliases work
 - [x] Task: Documentation 5e4cdfe
     - [x] Update WINDOWS_README.md with new installation instructions
-- [ ] Task: Conductor - User Manual Verification 'Interactive Setup & Polish' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Interactive Setup & Polish' (Protocol in workflow.md)
