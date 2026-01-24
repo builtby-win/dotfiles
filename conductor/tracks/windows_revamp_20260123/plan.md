@@ -39,9 +39,9 @@
 - [x] Task: Conductor - User Manual Verification 'PowerShell Profile & Shell Ergonomics' (Protocol in workflow.md)
 
 ## Phase 3: AI Tools & Configuration
-- [ ] Task: Install AI Tools via Winget
-    - [ ] Add `Anysphere.Cursor` to package list
-    - [ ] Add `Anthropic.Claude` (if available) or manual install step/instruction
+- [x] Task: Install AI Tools via Winget 63861b6
+    - [x] Add Anysphere.Cursor to package list
+    - [x] Add Anthropic.Claude (if available) or manual install step/instruction
 - [ ] Task: Symlink/Copy Configurations
     - [ ] Create logic to copy/symlink `starship.toml` to `~/.config/starship.toml`
     - [ ] Create logic to copy/symlink `templates/claude/*` to Windows AppData path
