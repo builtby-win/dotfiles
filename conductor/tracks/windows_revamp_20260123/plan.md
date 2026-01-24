@@ -36,7 +36,7 @@
     - [x] Install PSFzf module (via Install-Module) or configure raw FZF bindings
     - [x] Bind Ctrl+R to history search
     - [x] Bind Ctrl+T to file search
-- [ ] Task: Conductor - User Manual Verification 'PowerShell Profile & Shell Ergonomics' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'PowerShell Profile & Shell Ergonomics' (Protocol in workflow.md)
 
 ## Phase 3: AI Tools & Configuration
 - [ ] Task: Install AI Tools via Winget
