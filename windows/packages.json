@@ -1,0 +1,14 @@
+{
+  "packages": [
+    "Starship.Starship",
+    "ajeetdsouza.zoxide",
+    "junegunn.fzf",
+    "BurntSushi.ripgrep.MSVC",
+    "sharkdp.bat",
+    "eza-community.eza",
+    "Schniz.fnm",
+    "gerardog.gsudo",
+    "Git.Git",
+    "Neovim.Neovim"
+  ]
+}

@@ -30,6 +30,17 @@ if (!(Test-Path $dotfilesDir)) {
     Pop-Location
 }
 
-# 4. Finalizing
+# 4. Install Packages
+Write-Host "Installing core packages via winget..." -ForegroundColor Cyan
+$manifestPath = Join-Path $dotfilesDir "windows/packages.json"
+if (Test-Path $manifestPath) {
+    $manifest = Get-Content $manifestPath | ConvertFrom-Json
+    foreach ($pkg in $manifest.packages) {
+        Write-Host "Installing $pkg..." -ForegroundColor Yellow
+        winget install --id $pkg -e --source winget --silent --accept-package-agreements --accept-source-agreements
+    }
+}
+
+# 5. Finalizing
 Write-Host "✓ Bootstrap complete." -ForegroundColor Green
 Write-Host "Next: Run 'pnpm run setup' (once Node/pnpm are installed in Phase 2)." -ForegroundColor Cyan
