@@ -1,10 +1,10 @@
 # Implementation Plan - Windows Dotfiles Revamp
 
 ## Phase 1: Foundation & Package Management
-- [~] Task: Create windows/ directory structure for PowerShell scripts and configs
-    - [ ] Create windows/install.ps1 (Bootstrap)
-    - [ ] Create windows/packages.json (or similar list for Winget)
-    - [ ] Create windows/profile/ directory for modular profile scripts
+- [x] Task: Create windows/ directory structure for PowerShell scripts and configs 4e76b09
+    - [x] Create windows/install.ps1 (Bootstrap)
+    - [x] Create windows/packages.json (or similar list for Winget)
+    - [x] Create windows/profile/ directory for modular profile scripts
 - [ ] Task: Implement `windows/install.ps1` (Bootstrap Logic)
     - [ ] Check for and install Winget (if missing/outdated - usually built-in on Win11)
     - [ ] Check for Git; install via Winget if missing
