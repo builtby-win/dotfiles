@@ -22,7 +22,7 @@ My personal dotfiles with a fast shell setup, AI tool configs, and curated app l
 - **Advanced Zsh Config:** A curated Zsh setup featuring `zinit` for plugin management and `starship` for a fast, informative prompt.
 - **Tmux Optimization:** An optimized Tmux configuration designed for effective session management and multitasking.
 - **AI Tooling:** Pre-configured settings and hooks for Claude, Codex, and Cursor to enhance AI-assisted workflows.
-- **Windows Support:** A dedicated, high-quality setup for Windows users that matches the ergonomics and functionality of the macOS experience, acknowledging the distinct nature of the two environments.
+- **Windows Support:** A revamped, high-quality native PowerShell setup for Windows that provides a Unix-like experience (aliases, fzf, starship) and matches the ergonomics of the macOS environment.
 
 ## Constraints & Requirements
 - **Platform Specificity:** While supporting both macOS and Windows, the implementations should be distinct and optimized for their respective shells (Zsh vs. PowerShell) rather than forced into a shared logic.
