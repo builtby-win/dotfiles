@@ -52,10 +52,10 @@
 - [x] Task: Update setup-windows.ts (Interactive CLI) 7c87221
     - [x] Ensure it calls the PowerShell functions correctly
     - [x] Add prompts for optional installations (similar to the Mac setup)
-- [ ] Task: Final Integration Test
-    - [ ] Verify full end-to-end run of `bootstrap.ps1`
-    - [ ] Verify new shell opens with Starship
-    - [ ] Verify all aliases work
+- [x] Task: Final Integration Test a18b8b4
+    - [x] Verify full end-to-end run of bootstrap.ps1
+    - [x] Verify new shell opens with Starship
+    - [x] Verify all aliases work
 - [ ] Task: Documentation
     - [ ] Update `WINDOWS_README.md` with new installation instructions
 - [ ] Task: Conductor - User Manual Verification 'Interactive Setup & Polish' (Protocol in workflow.md)
