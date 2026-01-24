@@ -22,10 +22,10 @@
     - [x] Create windows/profile/init.ps1 (Starship, Fnm, Zoxide init)
     - [x] Create windows/profile/aliases.ps1 (Unix aliases)
     - [x] Create windows/profile/functions.ps1 (Custom functions)
-- [ ] Task: Implement Core Integrations
-    - [ ] Configure `Invoke-Expression (&starship init powershell)`
-    - [ ] Configure `Invoke-Expression (&zoxide init powershell)`
-    - [ ] Configure `fnm env --use-on-cd | Out-String | Invoke-Expression`
+- [x] Task: Implement Core Integrations fd758d6
+    - [x] Configure Invoke-Expression (&starship init powershell)
+    - [x] Configure Invoke-Expression (&zoxide init powershell)
+    - [x] Configure fnm env --use-on-cd | Out-String | Invoke-Expression
 - [ ] Task: Implement Unix-like Aliases & Tools
     - [ ] Map `ls` to `eza` (with arguments like `--icons --git`)
     - [ ] Map `cat` to `bat`
