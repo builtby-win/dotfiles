@@ -1,6 +1,6 @@
 # Implementation Plan - Windows Dotfiles Revamp
 
-## Phase 1: Foundation & Package Management
+## Phase 1: Foundation & Package Management [checkpoint: 4f93c89]
 - [x] Task: Create windows/ directory structure for PowerShell scripts and configs 4e76b09
     - [x] Create windows/install.ps1 (Bootstrap)
     - [x] Create windows/packages.json (or similar list for Winget)
@@ -14,7 +14,7 @@
     - [x] Create function to install packages from a list using winget install -e --id <id>
     - [x] Populate package list with: Starship.Starship, ajeetdsouza.zoxide, junegunn.fzf, BurntSushi.ripgrep.MSVC, sharkdp.bat, eza-community.eza, Schniz.fnm, gerardog.gsudo, Git.Git, Neovim.Neovim
     - [x] Verify installation of all core CLI tools
-- [~] Task: Conductor - User Manual Verification 'Foundation & Package Management' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Foundation & Package Management' (Protocol in workflow.md)
 
 ## Phase 2: PowerShell Profile & Shell Ergonomics
 - [ ] Task: Initialize Modular PowerShell Profile
