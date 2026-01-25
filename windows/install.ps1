@@ -6,8 +6,8 @@ Write-Host "Starting Windows Dotfiles Bootstrap..." -ForegroundColor Cyan
 Write-Host "This will:" -ForegroundColor Cyan
 Write-Host " - ensure winget and git are available" -ForegroundColor Cyan
 Write-Host " - clone or update the dotfiles repo" -ForegroundColor Cyan
-Write-Host " - install core packages from windows/packages.json" -ForegroundColor Cyan
 Write-Host " - link starship config and copy AI tool templates" -ForegroundColor Cyan
+Write-Host " - leave optional apps for the interactive setup" -ForegroundColor Cyan
 
 # 1. Check for Winget
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
@@ -35,21 +35,10 @@ if (!(Test-Path $dotfilesDir)) {
     Pop-Location
 }
 
-# 4. Install Packages
-Write-Host "Installing core packages via winget..." -ForegroundColor Cyan
-$manifestPath = Join-Path $dotfilesDir "windows/packages.json"
-if (Test-Path $manifestPath) {
-    $manifest = Get-Content $manifestPath | ConvertFrom-Json
-    foreach ($pkg in $manifest.packages) {
-        Write-Host "Installing $pkg..." -ForegroundColor Yellow
-        winget install --id $pkg -e --source winget --silent --accept-package-agreements --accept-source-agreements
-    }
-}
-
-# 5. Configure Tools
+# 4. Configure Tools
 Write-Host "Configuring tools..." -ForegroundColor Cyan
 
-# 5.1 Starship
+# 4.1 Starship
 $starshipConfigDir = Join-Path $HOME ".config"
 if (!(Test-Path $starshipConfigDir)) { New-Item -ItemType Directory $starshipConfigDir }
 $starshipSource = Join-Path $dotfilesDir "stow-packages/zsh/.config/starship.toml"
@@ -58,7 +47,7 @@ Write-Host "Linking starship.toml..." -ForegroundColor Yellow
 if (Test-Path $starshipDest) { Remove-Item $starshipDest }
 New-Item -ItemType HardLink -Path $starshipDest -Value $starshipSource
 
-# 5.2 AI Tools (Claude & Cursor)
+# 4.2 AI Tools (Claude & Cursor)
 $appData = $env:APPDATA
 $localAppData = $env:LOCALAPPDATA
 
@@ -80,6 +69,6 @@ if (Test-Path $cursorConfigDir) {
     Copy-Item -Path (Join-Path $dotfilesDir "templates/cursor/*") -Destination $cursorConfigDir -Recurse -Force
 }
 
-# 6. Finalizing
+# 5. Finalizing
 Write-Host "OK: Bootstrap complete." -ForegroundColor Green
 Write-Host "Next: Run pnpm run setup after Node/pnpm are installed (Phase 2)." -ForegroundColor Cyan

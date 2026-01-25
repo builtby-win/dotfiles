@@ -9,31 +9,30 @@ This guide describes how to set up your Windows development environment using ou
 
 ## Installation
 
-We provide a single bootstrap command that handles everything: installing Git, Winget, cloning the repo, and setting up your shell.
+We provide a single bootstrap command that handles everything: installing Git, cloning the repo, setting up Node/pnpm, and running the interactive Windows setup.
 
 ### 1. Run the Bootstrap Script
 
 Open **PowerShell as Administrator** and run:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/builtby-win/dotfiles/main/windows/install.ps1'))
+irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | iex
 ```
 
 *Note: Replace `main` with the specific branch name if you are testing a feature branch.*
 
 ### 2. Run the Interactive Setup
 
-Once the bootstrap completes, it will prompt you to run the interactive setup. You can run it manually at any time:
+Once the bootstrap completes, it will run the interactive setup. You can run it manually at any time:
 
-```bash
-cd ~\dotfiles
-pnpm run setup
+```powershell
+cd $HOME\dotfiles
+pnpm exec tsx setup-windows.ts
 ```
 
 This will:
-- Check for updates
-- Link your configuration files (Starship, Ghostty, etc.)
-- Install optional apps
+- Link your configuration files (Starship, templates)
+- Prompt for optional installs (terminals, Cursor, AI CLIs, Python)
 
 ## What's Included
 
@@ -43,10 +42,14 @@ This will:
 - **FZF:** Fuzzy finder history search (`Ctrl+R`) and file search (`Ctrl+T`).
 - **Unix Aliases:** `ls` -> `eza`, `cat` -> `bat`, `grep` -> `rg`, `sudo` -> `gsudo`.
 
-### AI Tools
-- **Cursor:** AI-first code editor.
-- **Claude Code:** Terminal-based AI assistant.
-- **Templates:** Pre-configured settings for both tools.
+### Optional Installs (Prompted)
+- **Terminals:** Warp (beginner-friendly), Windows Terminal, WezTerm, Alacritty
+- **Editor:** Cursor (optional)
+- **AI CLIs:** Gemini CLI, Claude Code, OpenCode
+- **Other:** Python 3 (for `antigravity`)
+
+### Templates
+- Pre-configured settings for AI tools (Claude Code, Cursor)
 
 ## Troubleshooting
 
