@@ -31,6 +31,7 @@ async function runSetup() {
   console.log("");
   console.log(`${colors.cyan}${colors.bold}=== Windows Dotfiles Setup ===${colors.reset}`);
   console.log("This script will configure your Windows environment for AI coding.");
+  console.log("It will install core apps, link shell config, and copy AI tool templates.");
   console.log("");
 
   if (process.platform !== "win32") {
@@ -39,7 +40,7 @@ async function runSetup() {
   }
 
   const proceed = await confirm({
-    message: "Do you want to run the core bootstrap script (windows/install.ps1)?",
+    message: "Run the Windows core setup (windows/install.ps1)?",
     default: true,
   });
 

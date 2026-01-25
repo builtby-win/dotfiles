@@ -3,20 +3,25 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "Starting Windows Dotfiles Bootstrap..." -ForegroundColor Cyan
+Write-Host "This will:" -ForegroundColor Cyan
+Write-Host " - ensure winget and git are available" -ForegroundColor Cyan
+Write-Host " - clone or update the dotfiles repo" -ForegroundColor Cyan
+Write-Host " - install core packages from windows/packages.json" -ForegroundColor Cyan
+Write-Host " - link starship config and copy AI tool templates" -ForegroundColor Cyan
 
 # 1. Check for Winget
 if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
     Write-Host "Winget not found. Please install App Installer from the Microsoft Store." -ForegroundColor Red
     return
 }
-Write-Host "✓ Winget found." -ForegroundColor Green
+Write-Host "OK: Winget found." -ForegroundColor Green
 
 # 2. Check for Git
 if (!(Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Host "Git not found. Installing via winget..." -ForegroundColor Yellow
     winget install --id Git.Git -e --source winget
 }
-Write-Host "✓ Git found." -ForegroundColor Green
+Write-Host "OK: Git found." -ForegroundColor Green
 
 # 3. Clone/Update Dotfiles Repository
 $dotfilesDir = Join-Path $HOME "dotfiles"
@@ -76,5 +81,5 @@ if (Test-Path $cursorConfigDir) {
 }
 
 # 6. Finalizing
-Write-Host "✓ Bootstrap complete." -ForegroundColor Green
-Write-Host "Next: Run 'pnpm run setup' (once Node/pnpm are installed in Phase 2)." -ForegroundColor Cyan
+Write-Host "OK: Bootstrap complete." -ForegroundColor Green
+Write-Host "Next: Run pnpm run setup after Node/pnpm are installed (Phase 2)." -ForegroundColor Cyan
