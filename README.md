@@ -19,7 +19,12 @@ curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap
 ```
 
 **For Windows:**
-See our [Windows Setup Guide](WINDOWS_README.md) for native PowerShell and WSL instructions.
+
+```powershell
+irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | iex
+```
+
+More details in [Windows Setup Guide](WINDOWS_README.md).
 
 This will:
 1. Ask where to clone the dotfiles
