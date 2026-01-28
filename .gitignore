@@ -6,3 +6,4 @@ pnpm-lock.yaml
 
 # Local/personal configs (not committed)
 shell/local.sh
+shell/experimental/

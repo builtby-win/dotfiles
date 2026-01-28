@@ -26,6 +26,11 @@ if [[ -f "$MANIFEST" ]]; then
   fi
 fi
 
+# Experimental / Local features
+if [[ -f "$DOTFILES_SHELL_DIR/experimental/beads.sh" ]]; then
+  source "$DOTFILES_SHELL_DIR/experimental/beads.sh"
+fi
+
 # Homebrew
 if [[ "$(uname -m)" == "arm64" ]]; then
   BREW_PATH="/opt/homebrew/bin/brew"
