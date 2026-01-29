@@ -75,8 +75,6 @@ keybind = global:super+ctrl+alt+shift+enter=toggle_visibility
 
 # Performance optimizations
 # Smooth out rendering for high-throughput tools (Claude Code/Gemini)
-# This respects macOS/Linux vsync to prevent screen tearing.
-fps-limit = 60
 
 # Ensures the GPU picks the most efficient rendering path
 macos-icon-ghost-color = #ffffff
