@@ -39,6 +39,11 @@ rationalise-dot() {
 zle -N rationalise-dot
 bindkey . rationalise-dot
 
+# Fix for zsh-vi-mode: bind dot expansion after it initializes
+function zvm_after_init() {
+  zvm_bindkey insert . rationalise-dot
+}
+
 # ─────────────────────────────────────────────────────────────
 # Completion system
 # ─────────────────────────────────────────────────────────────

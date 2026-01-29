@@ -27,6 +27,7 @@ irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | 
 More details in [Windows Setup Guide](WINDOWS_README.md).
 
 This will:
+
 1. Ask where to clone the dotfiles
 2. Install Homebrew (if needed)
 3. Install fnm + Node.js (if needed)
@@ -38,17 +39,18 @@ This will:
 
 Uses [zinit](https://github.com/zdharma-continuum/zinit) (lightweight plugin manager) + [Starship](https://starship.rs) prompt.
 
-| Component | Description |
-|-----------|-------------|
-| [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | Shows command suggestions from history as you type. Press `→` to accept |
-| [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | Colors commands as you type (green = valid, red = invalid) |
-| [zsh-vi-mode](https://github.com/jeffreytse/zsh-vi-mode) | Vim keybindings in terminal. `Esc` for normal mode, `i` for insert |
-| git-auto-fetch | Automatically fetches git repos in background when you cd into them |
-| [Starship](https://starship.rs) | Fast, customizable prompt showing git status, language versions, etc. |
+| Component                                                                       | Description                                                             |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)         | Shows command suggestions from history as you type. Press `→` to accept |
+| [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | Colors commands as you type (green = valid, red = invalid)              |
+| [zsh-vi-mode](https://github.com/jeffreytse/zsh-vi-mode)                        | Vim keybindings in terminal. `Esc` for normal mode, `i` for insert      |
+| git-auto-fetch                                                                  | Automatically fetches git repos in background when you cd into them     |
+| [Starship](https://starship.rs)                                                 | Fast, customizable prompt showing git status, language versions, etc.   |
 
 ### Optional Features
 
 #### Beads - Global Task Manager
+
 [Beads](https://github.com/steveyegge/beads) is a global task aggregation tool that lets you organize tasks across multiple repositories. When you enable it during setup, you can:
 
 - Create and organize tasks with a `bd` command
@@ -77,19 +79,24 @@ cd         # zoxide (smart cd that learns)
 # Package managers
 pp         # pnpm
 ppr        # pnpm run
+
+# Directory navigation
+..         # cd ..
+...        # cd ../.. (and expands as you type)
+....       # cd ../../.. (works in paths too)
 ```
 
 ### CLI Tools
 
-| Tool | Description | Link |
-|------|-------------|------|
-| [starship](https://starship.rs) | Fast, customizable shell prompt written in Rust | [GitHub](https://github.com/starship/starship) |
-| [fzf](https://github.com/junegunn/fzf) | Fuzzy finder for files, history, and more | [GitHub](https://github.com/junegunn/fzf) |
-| [ripgrep](https://github.com/BurntSushi/ripgrep) | Blazing fast grep replacement | [GitHub](https://github.com/BurntSushi/ripgrep) |
-| [bat](https://github.com/sharkdp/bat) | `cat` with syntax highlighting and git integration | [GitHub](https://github.com/sharkdp/bat) |
-| [eza](https://github.com/eza-community/eza) | Modern `ls` replacement with colors and icons | [GitHub](https://github.com/eza-community/eza) |
-| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` that learns your habits | [GitHub](https://github.com/ajeetdsouza/zoxide) |
-| [tmux](https://github.com/tmux/tmux) | Terminal multiplexer (split panes, sessions) | [GitHub](https://github.com/tmux/tmux) |
+| Tool                                             | Description                                        | Link                                            |
+| ------------------------------------------------ | -------------------------------------------------- | ----------------------------------------------- |
+| [starship](https://starship.rs)                  | Fast, customizable shell prompt written in Rust    | [GitHub](https://github.com/starship/starship)  |
+| [fzf](https://github.com/junegunn/fzf)           | Fuzzy finder for files, history, and more          | [GitHub](https://github.com/junegunn/fzf)       |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | Blazing fast grep replacement                      | [GitHub](https://github.com/BurntSushi/ripgrep) |
+| [bat](https://github.com/sharkdp/bat)            | `cat` with syntax highlighting and git integration | [GitHub](https://github.com/sharkdp/bat)        |
+| [eza](https://github.com/eza-community/eza)      | Modern `ls` replacement with colors and icons      | [GitHub](https://github.com/eza-community/eza)  |
+| [zoxide](https://github.com/ajeetdsouza/zoxide)  | Smarter `cd` that learns your habits               | [GitHub](https://github.com/ajeetdsouza/zoxide) |
+| [tmux](https://github.com/tmux/tmux)             | Terminal multiplexer (split panes, sessions)       | [GitHub](https://github.com/tmux/tmux)          |
 
 ### Tmux Usage
 
@@ -98,22 +105,23 @@ Prefix key: `Ctrl+.` (or `jk` in terminals via Karabiner)
 #### Ghostty Integration
 
 When using tmux with Ghostty and mouse mode enabled (`set -g mouse on`):
+
 - **Cmd+Click links**: Use `Cmd+Shift+Click` (Shift bypasses tmux)
 - **Copy text**: Use `Cmd+Shift+Drag` to select, then `Cmd+C`
 - **Alternative**: Use tmux copy mode (see below)
 
 #### Session Management
 
-| Binding | Action |
-|---------|--------|
-| `Leader+Space` | Session picker (sesh) - browse/create sessions |
-| `Leader+t` | Session picker (alternative) |
-| `Leader+T` | Quick switch to last session |
-| `Leader+Tab` | Toggle between last 2 sessions |
-| `Alt+(` / `Alt+)` | Previous/next session |
-| `Leader+q` | Detach from session |
+| Binding           | Action                                         |
+| ----------------- | ---------------------------------------------- |
+| `Leader+Space`    | Session picker (sesh) - browse/create sessions |
+| `Leader+T`        | Quick switch to last session                   |
+| `Leader+Tab`      | Toggle between last 2 sessions                 |
+| `Alt+(` / `Alt+)` | Previous/next session                          |
+| `Leader+Q`        | Detach from session                            |
 
 **Sesh picker navigation**:
+
 - `j`/`k` - Navigate up/down in list (default mode)
 - `f` - Enable fuzzy search mode (allows typing j/k/x)
 - `Esc` - Close sesh (or exit search mode if searching)
@@ -122,59 +130,76 @@ When using tmux with Ghostty and mouse mode enabled (`set -g mouse on`):
 
 #### Pane Navigation & Splits
 
-| Binding | Action |
-|---------|--------|
-| `Leader+h/j/k/l` | Select pane (vim style) |
-| `Alt+h/j/k/l` | Select pane (no prefix) |
-| `Leader+d` | Split vertical (side by side) |
-| `Leader+D` | Split horizontal (stacked) |
-| `Leader+w` | Close pane |
-| `Alt+\` | Split vertical (no prefix) |
-| `Alt+-` | Split horizontal (no prefix) |
-| `Leader+-` | Shrink pane |
-| `Leader+=` | Grow pane |
-| `Alt+Arrows` | Resize pane (no prefix) |
+| Binding          | Action                        |
+| ---------------- | ----------------------------- |
+| `Leader+h/j/k/l` | Select pane (vim style)       |
+| `Alt+h/j/k/l`    | Select pane (no prefix)       |
+| `Leader+d`       | Split vertical (side by side) |
+| `Leader+D`       | Split horizontal (stacked)    |
+| `Leader+x`       | Close pane                    |
+| `Alt+\`          | Split vertical (no prefix)    |
+| `Alt+-`          | Split horizontal (no prefix)  |
+| `Leader+-`       | Shrink pane                   |
+| `Leader+=`       | Grow pane                     |
+| `Alt+Arrows`     | Resize pane (no prefix)       |
 
 #### Window Navigation
 
-| Binding | Action |
-|---------|--------|
-| `Alt+1-9` | Switch to window 1-9 |
-| `Alt+c` | New window |
+| Binding                 | Action                   |
+| ----------------------- | ------------------------ |
+| `Leader+t`              | New window               |
+| `Leader+w`              | Close window             |
+| `Leader+q` / `Leader+e` | Previous / Next window   |
+| `Alt+1-9`               | Switch to window 1-9     |
+| `Alt+c`                 | New window (alternative) |
 
 #### Copy Mode (Vim Style)
 
-| Binding | Action |
-|---------|--------|
-| `Leader+c` | Enter copy mode |
-| `h/j/k/l` | Navigate in copy mode |
-| `v` | Start selection |
-| `V` | Select whole lines |
-| `y` | Yank/copy and exit |
-| `q` | Quit copy mode |
-| `/` | Search forward |
-| `n` / `N` | Next/previous search result |
+| Binding    | Action                      |
+| ---------- | --------------------------- |
+| `Leader+c` | Enter copy mode             |
+| `h/j/k/l`  | Navigate in copy mode       |
+| `v`        | Start selection             |
+| `V`        | Select whole lines          |
+| `y`        | Yank/copy and exit          |
+| `q`        | Quit copy mode              |
+| `/`        | Search forward              |
+| `n` / `N`  | Next/previous search result |
 
 #### Other
 
-| Binding | Action |
-|---------|--------|
+| Binding    | Action                                   |
+| ---------- | ---------------------------------------- |
 | `Leader+p` | Command palette (searchable keybindings) |
-| `Leader+r` | Reload tmux config |
-| `Leader+z` | Zoom/unzoom pane |
+| `Leader+r` | Reload tmux config                       |
+| `Leader+z` | Zoom/unzoom pane                         |
+
+#### Plugins & Advanced Usage
+
+These plugins are pre-configured to enhance productivity:
+
+| Plugin                                                          | Description                                                                  | Usage                                                                                                  |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [tmux-fingers](https://github.com/Morantron/tmux-fingers)       | **Quick Copy**: Highlights text patterns (files, SHA-1s, etc.) with letters. | Press `Leader+c`. Highlighted matches appear with letters. Type a letter to copy that match.           |
+| [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect)| **Session Saving**: Persists sessions across restarts.                       | Automatic. Manual save: `Leader+Ctrl+s`. Manual restore: `Leader+Ctrl+r`.                              |
+| [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum)| **Auto-Save**: Automatically saves session state every 15 mins.              | Automatic background saving.                                                                           |
+| [tmux-open](https://github.com/tmux-plugins/tmux-open)          | **Quick Open**: Open highlighted files or URLs.                              | In copy mode (`Leader+v`), highlight a file/URL and press `o` to open it (or `Ctrl+o` to edit).        |
+| [tmux-yank](https://github.com/tmux-plugins/tmux-yank)          | **Clipboard**: Better system clipboard integration.                          | In copy mode, `y` copies selection to system clipboard.                                                |
+| [tpm](https://github.com/tmux-plugins/tpm)                      | **Plugin Manager**: Manages these plugins.                                   | `Leader+I` installs plugins. `Leader+U` updates them.                                                  |
 
 ### Karabiner Elements Keybindings
 
 Custom keyboard shortcuts for improved workflow:
 
-| Binding | Action |
-|---------|--------|
-| `;;` (double semicolon) | Open AltTab window switcher (Ctrl+Opt+Tab) |
-| `Caps Lock` | Control key |
-| `Fn` key | Control key |
-| `Delete` (forward delete) | Escape |
+| Binding                   | Action                                     |
+| ------------------------- | ------------------------------------------ |
+| `;;` (double semicolon)   | Open AltTab window switcher (Ctrl+Opt+Tab) |
+| `Caps Lock`               | Control key                                |
+| `Fn` key                  | Control key                                |
+| `Delete` (forward delete) | Escape                                     |
 
 **External Keyboard (Windows layout)**:
+
 - Left Alt → Command
 - Left Windows → Option
 - Right Alt → Command
@@ -186,30 +211,30 @@ Custom keyboard shortcuts for improved workflow:
 
 All apps can be installed via `brew install --cask <name>` or through the interactive setup.
 
-| App | Description | Install |
-|-----|-------------|---------|
-| [Ghostty](https://ghostty.org) | GPU-accelerated terminal by Mitchell Hashimoto | `brew install --cask ghostty` |
-| [VS Code](https://code.visualstudio.com) | Popular code editor by Microsoft | `brew install --cask visual-studio-code` |
-| [Cursor](https://cursor.sh) | AI-first code editor (VS Code fork) | `brew install --cask cursor` |
-| [Raycast](https://raycast.com) | Spotlight replacement with extensions | `brew install --cask raycast` |
-| [AltTab](https://alt-tab-macos.netlify.app) | Windows-style alt-tab window switcher | `brew install --cask alt-tab` |
-| [Ice](https://github.com/jordanbaird/Ice) | Menu bar management - hide icons | `brew install --cask jordanbaird-ice` |
-| [BetterTouchTool](https://folivora.ai) | Customize trackpad, keyboard, Touch Bar, window snapping | `brew install --cask bettertouchtool` |
-| [LinearMouse](https://linearmouse.app) | Per-device mouse/trackpad settings, disable acceleration | `brew install --cask linearmouse` |
-| [Karabiner Elements](https://karabiner-elements.pqrs.org) | Powerful keyboard customization and remapping | `brew install --cask karabiner-elements` |
-| [Bitwarden](https://bitwarden.com) | Open source password manager | `brew install --cask bitwarden` |
-| [Arc](https://arc.net) | Modern browser with spaces & profiles | `brew install --cask arc` |
-| [Orion](https://browser.kagi.com) | WebKit browser with Chrome/Firefox extension support | `brew install --cask orion` |
-| [Docker](https://docker.com) | Container runtime for development | `brew install --cask docker` |
-| [Figma](https://figma.com) | Collaborative design tool | `brew install --cask figma` |
-| [Discord](https://discord.com) | Chat for communities | `brew install --cask discord` |
+| App                                                       | Description                                              | Install                                  |
+| --------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------- |
+| [Ghostty](https://ghostty.org)                            | GPU-accelerated terminal by Mitchell Hashimoto           | `brew install --cask ghostty`            |
+| [VS Code](https://code.visualstudio.com)                  | Popular code editor by Microsoft                         | `brew install --cask visual-studio-code` |
+| [Cursor](https://cursor.sh)                               | AI-first code editor (VS Code fork)                      | `brew install --cask cursor`             |
+| [Raycast](https://raycast.com)                            | Spotlight replacement with extensions                    | `brew install --cask raycast`            |
+| [AltTab](https://alt-tab-macos.netlify.app)               | Windows-style alt-tab window switcher                    | `brew install --cask alt-tab`            |
+| [Ice](https://github.com/jordanbaird/Ice)                 | Menu bar management - hide icons                         | `brew install --cask jordanbaird-ice`    |
+| [BetterTouchTool](https://folivora.ai)                    | Customize trackpad, keyboard, Touch Bar, window snapping | `brew install --cask bettertouchtool`    |
+| [LinearMouse](https://linearmouse.app)                    | Per-device mouse/trackpad settings, disable acceleration | `brew install --cask linearmouse`        |
+| [Karabiner Elements](https://karabiner-elements.pqrs.org) | Powerful keyboard customization and remapping            | `brew install --cask karabiner-elements` |
+| [Bitwarden](https://bitwarden.com)                        | Open source password manager                             | `brew install --cask bitwarden`          |
+| [Arc](https://arc.net)                                    | Modern browser with spaces & profiles                    | `brew install --cask arc`                |
+| [Orion](https://browser.kagi.com)                         | WebKit browser with Chrome/Firefox extension support     | `brew install --cask orion`              |
+| [Docker](https://docker.com)                              | Container runtime for development                        | `brew install --cask docker`             |
+| [Figma](https://figma.com)                                | Collaborative design tool                                | `brew install --cask figma`              |
+| [Discord](https://discord.com)                            | Chat for communities                                     | `brew install --cask discord`            |
 
 ### AI Tools
 
-| Tool | Description | Install |
-|------|-------------|---------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Anthropic's AI coding assistant for terminal | `brew install claude` |
-| [Codex CLI](https://github.com/openai/codex) | OpenAI's coding assistant CLI | `npm install -g @openai/codex` |
+| Tool                                                          | Description                                  | Install                        |
+| ------------------------------------------------------------- | -------------------------------------------- | ------------------------------ |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Anthropic's AI coding assistant for terminal | `brew install claude`          |
+| [Codex CLI](https://github.com/openai/codex)                  | OpenAI's coding assistant CLI                | `npm install -g @openai/codex` |
 
 ### AI Tool Configs
 

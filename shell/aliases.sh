@@ -5,6 +5,19 @@
 #   - AUTO_CD: type `..` to cd up (no `cd` needed)
 #   - rationalise-dot: `...` → `../..`, `....` → `../../..`, etc as you type
 
+# Directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../../'
+
+# Global aliases (allow usage like `ls .../foo`)
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
+
 # Quick shortcuts
 alias -- -='cd -'  # Go to previous directory
 alias fuck="rm -rf"
