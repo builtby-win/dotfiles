@@ -1,0 +1,14 @@
+# Keep tips short and actionable. Lines starting with # are ignored.
+
+Karabiner + tmux: hold j+k to send the tmux prefix (Ctrl+.). Enable with: bb setup karabiner
+Tmux: Leader+Space opens the sesh session picker.
+Tmux: Leader+c triggers tmux-fingers quick copy; Leader+v enters copy mode.
+Tmux: new window is Leader+t or Alt+c.
+Reload tmux config anytime with: tmux source-file ~/.tmux.conf
+Install a single module with: bb setup tmux (or shell, ghostty, karabiner, mackup)
+Show a new tip on demand with: bb tip
+See what you installed with: bb status
+Update dotfiles with: bb update
+Create and enter a folder quickly with: mkcd <dir>
+Extract archives with: extract <file>
+Link AI agent configs into a repo with: agent-link all

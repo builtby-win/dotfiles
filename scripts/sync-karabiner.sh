@@ -10,9 +10,18 @@ KARABINER_DEST="$HOME/.config/karabiner/karabiner.json"
 # Ensure destination directory exists
 mkdir -p "$(dirname "$KARABINER_DEST")"
 
-# Copy the config
-cp "$KARABINER_SOURCE" "$KARABINER_DEST"
-echo "✓ Synced karabiner.json"
+# Copy the config unless destination is a symlink to the source
+if [[ -L "$KARABINER_DEST" ]]; then
+    link_target="$(readlink "$KARABINER_DEST")"
+    if [[ "$link_target" == "$KARABINER_SOURCE" ]]; then
+        echo "✓ karabiner.json already linked"
+    else
+        echo "Warning: karabiner.json is a symlink to $link_target (skipping copy)"
+    fi
+else
+    cp "$KARABINER_SOURCE" "$KARABINER_DEST"
+    echo "✓ Synced karabiner.json"
+fi
 
 # Reload Karabiner Elements
 if pgrep -q Karabiner-Elements; then

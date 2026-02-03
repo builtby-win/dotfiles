@@ -1,60 +1,54 @@
 # Windows Setup Guide
 
-This guide describes how to set up your Windows development environment using our opinionated dotfiles.
+This guide covers Windows setup for these dotfiles.
 
-## Prerequisites
+## Quick install
 
-- **Windows 10/11**
-- **Administrator Access** (required for creating symlinks)
-
-## Installation
-
-We provide a single bootstrap command that handles everything: installing Git, cloning the repo, setting up Node/pnpm, and running the interactive Windows setup.
-
-### 1. Run the Bootstrap Script
-
-Open **PowerShell as Administrator** and run:
+Open PowerShell as Administrator and run:
 
 ```powershell
 irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | iex
 ```
 
-*Note: Replace `main` with the specific branch name if you are testing a feature branch.*
+## After install
 
-### 2. Run the Interactive Setup
-
-Once the bootstrap completes, it will run the interactive setup. You can run it manually at any time:
+Re-run the interactive setup any time:
 
 ```powershell
 cd $HOME\dotfiles
 pnpm exec tsx setup-windows.ts
 ```
 
-This will:
-- Link your configuration files (Starship, templates)
-- Prompt for optional installs (terminals, Cursor, AI CLIs, Python)
+## What gets configured
 
-## What's Included
+- Starship prompt (linked to dotfiles config)
+- PowerShell profile with zoxide, fnm, and fzf keybindings
+- Unix-like aliases (`ls`, `cat`, `grep`, `sudo`)
+- AI tool templates for Claude Code and Cursor
 
-### Core Shell (PowerShell Core)
-- **Starship:** Fast, informative prompt.
-- **Zoxide:** Smarter `cd` command (use `z` to jump to directories).
-- **FZF:** Fuzzy finder history search (`Ctrl+R`) and file search (`Ctrl+T`).
-- **Unix Aliases:** `ls` -> `eza`, `cat` -> `bat`, `grep` -> `rg`, `sudo` -> `gsudo`.
+## Optional installs (prompted)
 
-### Optional Installs (Prompted)
-- **Terminals:** Warp (beginner-friendly), Windows Terminal, WezTerm, Alacritty
-- **Editor:** Cursor (optional)
-- **AI CLIs:** Gemini CLI, Claude Code, OpenCode
-- **Other:** Python 3 (for `antigravity`)
+- Terminals: Warp, Windows Terminal, WezTerm, Alacritty
+- Editor: Cursor
+- AI CLIs: Gemini CLI, Claude Code, OpenCode
+- Other: Python 3
 
-### Templates
-- Pre-configured settings for AI tools (Claude Code, Cursor)
+## Updating
+
+```powershell
+cd $HOME\dotfiles
+git pull
+pnpm exec tsx setup-windows.ts
+```
+
+## Notes
+
+The `bb` helper command is available in zsh on macOS/Linux. On Windows, use the PowerShell commands above.
 
 ## Troubleshooting
 
-**Symlink Errors:**
-If you see errors about "Privilege not held", ensure you are running PowerShell as **Administrator** or have **Developer Mode** enabled in Windows Settings.
+Symlink errors:
+Run PowerShell as Administrator or enable Developer Mode.
 
-**Execution Policy Errors:**
-If scripts refuse to run, execute `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` in PowerShell.
+Execution policy errors:
+Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` in PowerShell.

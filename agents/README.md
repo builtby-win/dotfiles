@@ -5,6 +5,8 @@ This directory contains centralized agent configuration templates that can be sy
 ## Quick Start
 
 ```bash
+# Ensure shell helpers are loaded (bb setup shell)
+
 # In any git repository:
 agent-link              # Interactive: select agents to link
 agent-link claude       # Link just Claude
@@ -15,6 +17,12 @@ agent-update
 
 # Check which repos have which configs
 agent-status
+```
+
+If `agent-link` is not found, ensure your shell config is installed:
+
+```bash
+bb setup shell
 ```
 
 ## Directory Structure

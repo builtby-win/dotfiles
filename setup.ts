@@ -523,6 +523,12 @@ const OPTIONAL_FEATURES = [
     checked: false,
     desc: "Global task aggregation across repositories - organize tasks from multiple projects"
   },
+  {
+    name: "Shell Tips (Daily)",
+    value: "tips",
+    checked: true,
+    desc: "Show a short dotfiles tip once per day when the shell starts"
+  },
 ];
 
 // AI tool configs (template-based)
