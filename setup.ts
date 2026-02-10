@@ -473,6 +473,7 @@ const APPS: App[] = [
   // AI Tools
   { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
   { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
+  { name: "OpenCode", value: "opencode", brewName: "", checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: false, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -578,6 +579,14 @@ function runCommand(cmd: string, silent = false): boolean {
     return true;
   } catch {
     return false;
+  }
+}
+
+function getCommandOutput(cmd: string): string | null {
+  try {
+    return execSync(cmd, { stdio: "pipe", encoding: "utf-8" }).trim();
+  } catch {
+    return null;
   }
 }
 
@@ -861,6 +870,55 @@ function installStarshipOnLinux(): boolean {
   return false;
 }
 
+function installOpenCodeCli(): boolean {
+  if (runCommand("command -v opencode", true)) {
+    log.success("OpenCode already installed");
+    return true;
+  }
+
+  log.info("Installing OpenCode...");
+  ensureLocalBinInPath();
+
+  const installerUrl = "https://opencode.ai/install";
+  if (!runCommand(`curl -fsSL "${installerUrl}" -o /dev/null`, true)) {
+    log.error(`Cannot access ${installerUrl}`);
+    log.error("Third-party URL access is required to install OpenCode");
+    return false;
+  }
+
+  const installCommand = "curl -fsSL https://opencode.ai/install | bash";
+  if (!runCommand(installCommand)) {
+    log.warning("OpenCode installer failed");
+    return false;
+  }
+
+  ensureLocalBinInPath();
+  if (runCommand("command -v opencode", true)) {
+    log.success("OpenCode installed");
+    return true;
+  }
+
+  const localCandidates = [
+    join(HOME, ".local", "bin", "opencode"),
+    join(HOME, ".cargo", "bin", "opencode"),
+    join(HOME, ".nix-profile", "bin", "opencode"),
+  ];
+
+  for (const candidate of localCandidates) {
+    if (!existsSync(candidate)) continue;
+    const candidateDir = dirname(candidate);
+    const currentPath = process.env.PATH ?? "";
+    if (!currentPath.split(":").includes(candidateDir)) {
+      process.env.PATH = currentPath ? `${candidateDir}:${currentPath}` : candidateDir;
+    }
+    log.success("OpenCode installed");
+    return true;
+  }
+
+  log.warning("OpenCode installation completed but binary was not found in PATH");
+  return false;
+}
+
 function installPackage(name: string, cask = false): boolean {
   const platform = getCurrentPlatform();
 
@@ -920,23 +978,23 @@ async function installApps(apps: string[]): Promise<void> {
   if (apps.length === 0) return;
 
   const appsToInstall = APPS.filter((a) => apps.includes(a.value) && a.brewName);
-  if (appsToInstall.length === 0) return;
-
   const platform = getCurrentPlatform();
-  if (platform === "linux") {
-    const manager = getLinuxPackageManager();
-    log.step(`Installing apps via ${manager ?? "Linux package manager"}...`);
-  } else {
-    log.step("Installing apps via Homebrew...");
-  }
+  if (appsToInstall.length > 0) {
+    if (platform === "linux") {
+      const manager = getLinuxPackageManager();
+      log.step(`Installing commands via ${manager ?? "Linux package manager"}...`);
+    } else {
+      log.step("Installing apps via Homebrew...");
+    }
 
-  for (const app of appsToInstall) {
-    installPackage(app.brewName, app.cask);
+    for (const app of appsToInstall) {
+      installPackage(app.brewName, app.cask);
 
-    // Install dependencies
-    if (app.dependencies) {
-      for (const dep of app.dependencies) {
-        installPackage(dep);
+      // Install dependencies
+      if (app.dependencies) {
+        for (const dep of app.dependencies) {
+          installPackage(dep);
+        }
       }
     }
   }
@@ -948,6 +1006,10 @@ async function installApps(apps: string[]): Promise<void> {
     } else {
       log.warning("Failed to install Codex CLI");
     }
+  }
+
+  if (apps.includes("opencode")) {
+    installOpenCodeCli();
   }
 }
 
@@ -1093,6 +1155,53 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
         log.error(`Failed to stow ${config}`);
       }
     }
+  }
+}
+
+async function maybeSetDefaultShellToZsh(selectedStowConfigs: string[]): Promise<void> {
+  const platform = getCurrentPlatform();
+  if (platform === "windows") return;
+  if (!selectedStowConfigs.includes("zsh")) return;
+
+  const currentShell = (process.env.SHELL ?? "").trim();
+  const currentShellName = currentShell.split("/").pop() ?? currentShell;
+  if (currentShellName === "zsh") return;
+
+  const shouldSwitch = await confirm({
+    message: "Set zsh as your default shell (login shell)?",
+    default: true,
+  });
+
+  if (!shouldSwitch) {
+    if (currentShell) {
+      log.info(`Keeping current default shell: ${currentShell}`);
+    }
+    return;
+  }
+
+  let zshPath = getCommandOutput("command -v zsh");
+  if (!zshPath && platform === "linux") {
+    log.info("zsh is not installed. Installing via Linux package manager...");
+    if (!installLinuxPackages(["zsh"])) {
+      log.warning("Could not install zsh automatically");
+      log.warning('Install zsh and run: chsh -s "$(command -v zsh)"');
+      return;
+    }
+    zshPath = getCommandOutput("command -v zsh");
+  }
+
+  if (!zshPath) {
+    log.warning("zsh was not found in PATH");
+    log.warning('Install zsh and run: chsh -s "$(command -v zsh)"');
+    return;
+  }
+
+  if (runCommand(`chsh -s "${zshPath}"`)) {
+    log.success("Default shell changed to zsh");
+    log.info("Open a new terminal or run: exec zsh");
+  } else {
+    log.warning("Could not change default shell automatically");
+    log.warning(`Run manually: chsh -s "${zshPath}"`);
   }
 }
 
@@ -1687,17 +1796,25 @@ async function runSetup(): Promise<void> {
   const currentPlatform = getCurrentPlatform();
   const platformApps = APPS.filter(app => isPlatformSupported(app.platforms, currentPlatform));
   const platformStowConfigs = STOW_CONFIGS.filter(config => isPlatformSupported(config.platforms, currentPlatform));
+  const linuxCommandCategories = new Set<AppCategory>(["cli", "ai"]);
+  const selectableApps = currentPlatform === "linux"
+    ? platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))
+    : platformApps;
+  const selectableStowConfigs = currentPlatform === "linux"
+    ? platformStowConfigs.filter((config) => config.value === "zsh" || config.value === "tmux")
+    : platformStowConfigs;
+  const installItemLabel = currentPlatform === "linux" ? "commands" : "apps";
 
   // Check what's already installed
-  log.step("Checking installed apps...");
+  log.step(`Checking installed ${installItemLabel}...`);
   const appStates = new Map<string, AppInstallState>();
   const installedConfigs = new Set<string>();
 
-  for (const app of platformApps) {
+  for (const app of selectableApps) {
     appStates.set(app.value, getAppInstallState(app));
   }
 
-  for (const config of platformStowConfigs) {
+  for (const config of selectableStowConfigs) {
     if (isStowConfigInstalled(config.value)) {
       installedConfigs.add(config.value);
     }
@@ -1726,8 +1843,8 @@ async function runSetup(): Promise<void> {
   if (!manifestExists()) {
     // First run - detect what's already installed
     const detected = autoDetectExistingSetup();
-    const detectedAppsOnPlatform = detected.apps.filter(a => platformApps.some(p => p.value === a));
-    const detectedConfigsOnPlatform = detected.configs.filter(c => platformStowConfigs.some(p => p.value === c));
+    const detectedAppsOnPlatform = detected.apps.filter(a => selectableApps.some(p => p.value === a));
+    const detectedConfigsOnPlatform = detected.configs.filter(c => selectableStowConfigs.some(p => p.value === c));
     const detectedFeaturesList = Object.entries(detected.features).filter(([_, v]) => v).map(([k]) => k);
 
     const hasDetectedItems = detectedAppsOnPlatform.length > 0 || 
@@ -1740,7 +1857,7 @@ async function runSetup(): Promise<void> {
 
       // Show detected apps
       if (detectedAppsOnPlatform.length > 0) {
-        console.log(`  ${colors.bold}Apps already installed:${colors.reset} ${detectedAppsOnPlatform.length}`);
+        console.log(`  ${colors.bold}${installItemLabel[0].toUpperCase() + installItemLabel.slice(1)} already installed:${colors.reset} ${detectedAppsOnPlatform.length}`);
         const appNames = detectedAppsOnPlatform
           .map(v => APPS.find(a => a.value === v)?.name)
           .filter(Boolean)
@@ -1805,16 +1922,22 @@ async function runSetup(): Promise<void> {
 
     if (showInfo) {
       console.log("");
-      console.log(`${colors.cyan}${colors.bold}=== CLI Tools ===${colors.reset}`);
-      for (const app of platformApps.filter(a => !a.cask)) {
+      if (currentPlatform === "linux") {
+        console.log(`${colors.cyan}${colors.bold}=== Shell Commands ===${colors.reset}`);
+      } else {
+        console.log(`${colors.cyan}${colors.bold}=== CLI Tools ===${colors.reset}`);
+      }
+      for (const app of selectableApps.filter(a => !a.cask)) {
         const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
         console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
       }
-      console.log("");
-      console.log(`${colors.cyan}${colors.bold}=== Apps ===${colors.reset}`);
-      for (const app of platformApps.filter(a => a.cask)) {
-        const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
-        console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
+      if (currentPlatform !== "linux") {
+        console.log("");
+        console.log(`${colors.cyan}${colors.bold}=== Apps ===${colors.reset}`);
+        for (const app of selectableApps.filter(a => a.cask)) {
+          const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
+          console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
+        }
       }
       console.log("");
     }
@@ -1832,7 +1955,7 @@ async function runSetup(): Promise<void> {
 
     // Group apps by category
     for (const category of CATEGORY_ORDER) {
-      const appsInCategory = platformApps.filter(app => app.category === category);
+      const appsInCategory = selectableApps.filter(app => app.category === category);
       if (appsInCategory.length === 0) continue;
 
       // Add category separator
@@ -1881,11 +2004,11 @@ async function runSetup(): Promise<void> {
   while (currentStep >= 1) {
     // Step 1: Select apps to install
     if (currentStep === 1) {
-      log.step(`[Step 1 of ${TOTAL_STEPS}] Select apps to install`);
+      log.step(`[Step 1 of ${TOTAL_STEPS}] Select ${installItemLabel} to install`);
       const appsChoices = buildCategorizedAppChoices();
       
       selectedApps = await checkbox({
-        message: `Select apps (space to toggle, enter to confirm) ${colors.dim}[${platformApps.length} items]${colors.reset}:`,
+        message: `Select ${installItemLabel} (space to toggle, enter to confirm) ${colors.dim}[${selectableApps.length} items]${colors.reset}:`,
         choices: appsChoices,
         pageSize: 25,
         loop: false,
@@ -1910,7 +2033,7 @@ async function runSetup(): Promise<void> {
           value: "__back__",
           checked: false,
         },
-        ...platformStowConfigs.map((config) => {
+        ...selectableStowConfigs.map((config) => {
           const installed = installedConfigs.has(config.value);
           const descPart = config.desc ? ` ${colors.dim}- ${config.desc}${colors.reset}` : "";
           return {
@@ -2001,7 +2124,7 @@ async function runSetup(): Promise<void> {
       const configsToInstallCount = selectedStowConfigs.filter(c => !installedConfigs.has(c)).length;
 
       // Apps summary
-      console.log(`  ${colors.bold}Apps:${colors.reset} ${selectedApps.length} selected (${appsToInstallCount} to install)`);
+      console.log(`  ${colors.bold}${installItemLabel[0].toUpperCase() + installItemLabel.slice(1)}:${colors.reset} ${selectedApps.length} selected (${appsToInstallCount} to install)`);
       if (selectedApps.length > 0) {
         // Group by category for display
         for (const category of CATEGORY_ORDER) {
@@ -2095,6 +2218,8 @@ async function runSetup(): Promise<void> {
 
     await setupAIConfigs(aiConfigs);
   }
+
+  await maybeSetDefaultShellToZsh(selectedStowConfigs);
 
   // Save setup manifest (tracks what user selected for features)
   const setupManifest = manifest.getEmptyManifest();

@@ -7,6 +7,8 @@ describe('Linux bootstrap workflow', () => {
   const linuxBootstrapPath = path.resolve(__dirname, '../bootstrap-linux.sh');
   const readmePath = path.resolve(__dirname, '../README.md');
   const setupPath = path.resolve(__dirname, '../setup.ts');
+  const tipsPath = path.resolve(__dirname, '../shell/tips.txt');
+  const zshrcPath = path.resolve(__dirname, '../stow-packages/zsh/.zshrc');
 
   it('has a dedicated Linux bootstrap script', () => {
     expect(fs.existsSync(linuxBootstrapPath)).toBe(true);
@@ -75,6 +77,22 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('platforms: { macos: true, linux: false, windows: false }');
   });
 
+  it('filters Linux setup suggestions to command-line tools only', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('const linuxCommandCategories = new Set<AppCategory>(["cli", "ai"])');
+    expect(content).toContain('platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))');
+    expect(content).toContain('const selectableStowConfigs = currentPlatform === "linux"');
+    expect(content).toContain('platformStowConfigs.filter((config) => config.value === "zsh" || config.value === "tmux")');
+  });
+
+  it('adds OpenCode CLI install path for Linux', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('name: "OpenCode"');
+    expect(content).toContain('value: "opencode"');
+    expect(content).toContain('detectCmd: "command -v opencode"');
+    expect(content).toContain('curl -fsSL https://opencode.ai/install | bash');
+  });
+
   it('offers shell switch from bash to zsh on Linux', () => {
     const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
     expect(content).toContain('Switch your default shell to zsh for this dotfiles setup?');
@@ -89,9 +107,37 @@ describe('Linux bootstrap workflow', () => {
     expect(content).not.toContain('fnm installed via ${LINUX_PKG_MANAGER}');
   });
 
+  it('keeps startup tips focused on shell tooling', () => {
+    const content = fs.readFileSync(tipsPath, 'utf-8');
+    expect(content).not.toContain('Hammerspoon');
+    expect(content).not.toContain('Karabiner');
+    expect(content).not.toContain('bb setup hammerspoon');
+    expect(content).not.toContain('bb setup karabiner');
+  });
+
+  it('prompts to set zsh as default shell in interactive setup', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('Set zsh as your default shell');
+    expect(content).toContain('chsh -s');
+    expect(content).toContain('installLinuxPackages(["zsh"])');
+  });
+
   it('adds ~/.local/bin to shell PATH for user-installed tools', () => {
     const shellInitPath = path.resolve(__dirname, '../shell/init.sh');
     const content = fs.readFileSync(shellInitPath, 'utf-8');
     expect(content).toContain('$HOME/.local/bin');
+  });
+
+  it('normalizes PNPM_HOME for Linux bootstrap runs', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('ensure_linux_pnpm_home');
+    expect(content).toContain('${XDG_DATA_HOME:-$HOME/.local/share}/pnpm');
+  });
+
+  it('uses portable PNPM_HOME defaults in zshrc', () => {
+    const content = fs.readFileSync(zshrcPath, 'utf-8');
+    expect(content).not.toContain('export PNPM_HOME="/Users/winstonzhao/Library/pnpm"');
+    expect(content).toContain('export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"');
+    expect(content).toContain('export PNPM_HOME="${PNPM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm}"');
   });
 });

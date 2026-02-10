@@ -237,10 +237,34 @@ ensure_local_bin_path() {
   esac
 }
 
+ensure_linux_pnpm_home() {
+  local default_pnpm_home="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+
+  if [[ -z "${PNPM_HOME:-}" ]] || [[ "$PNPM_HOME" == /Users/* ]]; then
+    PNPM_HOME="$default_pnpm_home"
+  fi
+
+  if ! mkdir -p "$PNPM_HOME" 2>/dev/null; then
+    print_warning "PNPM_HOME is not writable (${PNPM_HOME}); using ${default_pnpm_home}"
+    PNPM_HOME="$default_pnpm_home"
+    mkdir -p "$PNPM_HOME" || return 1
+  fi
+
+  export PNPM_HOME
+  case ":$PATH:" in
+    *":$PNPM_HOME:"*) ;;
+    *) export PATH="$PNPM_HOME:$PATH" ;;
+  esac
+}
+
 install_pnpm_without_root() {
   print_step "Installing pnpm..."
 
   ensure_local_bin_path
+  if ! ensure_linux_pnpm_home; then
+    print_error "Could not initialize PNPM_HOME"
+    return 1
+  fi
 
   if command -v corepack >/dev/null 2>&1; then
     if run_install_command corepack enable --install-directory "$HOME/.local/bin" \
@@ -319,6 +343,12 @@ maybe_switch_default_shell_to_zsh() {
 }
 
 ensure_node_and_pnpm() {
+  ensure_local_bin_path
+  if ! ensure_linux_pnpm_home; then
+    print_error "Could not initialize PNPM_HOME"
+    exit 1
+  fi
+
   if ! command -v node >/dev/null 2>&1; then
     print_step "Installing Node.js..."
 
@@ -456,6 +486,10 @@ fi
 if [[ "$INSTALL_JS_DEPS" -eq 1 ]]; then
   echo ""
   print_step "[2/3] Installing JavaScript dependencies..."
+  if ! ensure_linux_pnpm_home; then
+    print_error "Could not initialize PNPM_HOME"
+    exit 1
+  fi
   if ! command -v pnpm >/dev/null 2>&1; then
     print_error "pnpm is required for dependency install"
     print_error "Install Node tooling first or run with --yes"
