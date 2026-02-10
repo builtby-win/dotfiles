@@ -60,7 +60,7 @@ tmux source-file ~/.tmux.conf
 
 | Binding | Action |
 | --- | --- |
-| `Leader+c` | tmux-fingers quick copy |
+| `Leader+f` | tmux-fingers quick copy |
 | `Leader+v` | Enter copy mode |
 | `v` / `y` | Select and copy in copy mode |
 

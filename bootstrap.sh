@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e
 
+if [[ "$(uname -s)" == "Linux" ]]; then
+  SCRIPT_SOURCE="${BASH_SOURCE[0]:-$0}"
+  SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" 2>/dev/null && pwd 2>/dev/null || true)"
+  LINUX_BOOTSTRAP_PATH="$SCRIPT_DIR/bootstrap-linux.sh"
+
+  if [[ -n "$SCRIPT_DIR" && -f "$LINUX_BOOTSTRAP_PATH" ]]; then
+    exec bash "$LINUX_BOOTSTRAP_PATH" "$@"
+  fi
+
+  exec bash -c "$(curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap-linux.sh)"
+fi
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'

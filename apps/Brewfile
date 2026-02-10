@@ -47,6 +47,7 @@ cask "arc"
 cask "orion"
 
 # Input & Window Management
+cask "hammerspoon"         # Automation and hotkeys
 cask "karabiner-elements"  # Keyboard customization
 
 # Dev Tools

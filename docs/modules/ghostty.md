@@ -19,3 +19,4 @@ stow -d "$DOTFILES_DIR/stow-packages" -t "$HOME" ghostty
 - macOS config: `~/Library/Application Support/com.mitchellh.ghostty/config`
 - Linux config: `~/.config/ghostty/config`
 - Restart Ghostty to apply changes
+- The Hammerspoon module uses Ghostty split defaults to build a 4-pane layout (`Hyper+4`)

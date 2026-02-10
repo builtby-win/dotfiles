@@ -481,6 +481,7 @@ const APPS: App[] = [
   { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
 
   // Input (macOS only)
+  { name: "Hammerspoon", value: "hammerspoon", brewName: "hammerspoon", cask: true, detectPath: "/Applications/Hammerspoon.app", desc: "Lua automation and system hotkeys for macOS", url: "https://www.hammerspoon.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
   { name: "Karabiner Elements", value: "karabiner-elements", brewName: "karabiner-elements", cask: true, detectPath: "/Applications/Karabiner-Elements.app", desc: "Powerful keyboard customization", url: "https://karabiner-elements.pqrs.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
   { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app", platforms: { macos: true, windows: false, linux: false }, category: "input" },
 
@@ -510,6 +511,7 @@ interface StowConfig {
 const STOW_CONFIGS: StowConfig[] = [
   { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
   { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "vim-style bindings, mouse support, sesh integration" },
+  { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
   { name: "Mackup", value: "mackup", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Sync app settings to iCloud/Dropbox" },
@@ -579,12 +581,54 @@ function runCommand(cmd: string, silent = false): boolean {
   }
 }
 
-// Cache for installed brew packages (populated once, used many times)
+type LinuxPackageManager = "apt" | "dnf" | "pacman";
+
+let linuxPackageManagerCache: LinuxPackageManager | null | undefined = undefined;
+let aptUpdated = false;
+
+const LINUX_PACKAGE_NAME_OVERRIDES: Record<string, Partial<Record<LinuxPackageManager, string>>> = {
+  "visual-studio-code": { apt: "code", dnf: "code", pacman: "code" },
+  "google-chrome": { apt: "google-chrome-stable", dnf: "google-chrome-stable", pacman: "google-chrome" },
+};
+
+function getLinuxPackageManager(): LinuxPackageManager | null {
+  if (linuxPackageManagerCache !== undefined) return linuxPackageManagerCache;
+
+  if (runCommand("command -v apt-get", true)) {
+    linuxPackageManagerCache = "apt";
+  } else if (runCommand("command -v dnf", true)) {
+    linuxPackageManagerCache = "dnf";
+  } else if (runCommand("command -v pacman", true)) {
+    linuxPackageManagerCache = "pacman";
+  } else {
+    linuxPackageManagerCache = null;
+  }
+
+  return linuxPackageManagerCache;
+}
+
+function getLinuxPackageName(name: string): string | null {
+  const manager = getLinuxPackageManager();
+  if (!manager) return null;
+
+  const override = LINUX_PACKAGE_NAME_OVERRIDES[name]?.[manager];
+  if (override) return override;
+  return name;
+}
+
+// Cache for installed package manager data (populated once, used many times)
 let installedFormulasCache: Set<string> | null = null;
 let installedCasksCache: Set<string> | null = null;
+let installedLinuxPackagesCache: Set<string> | null = null;
 
 function getInstalledFormulas(): Set<string> {
   if (installedFormulasCache) return installedFormulasCache;
+
+  if (getCurrentPlatform() !== "macos") {
+    installedFormulasCache = new Set();
+    return installedFormulasCache;
+  }
+
   try {
     const output = execSync("brew list --formula 2>/dev/null", { encoding: "utf-8" });
     installedFormulasCache = new Set(output.trim().split("\n").filter(Boolean));
@@ -596,6 +640,12 @@ function getInstalledFormulas(): Set<string> {
 
 function getInstalledCasks(): Set<string> {
   if (installedCasksCache) return installedCasksCache;
+
+  if (getCurrentPlatform() !== "macos") {
+    installedCasksCache = new Set();
+    return installedCasksCache;
+  }
+
   try {
     const output = execSync("brew list --cask 2>/dev/null", { encoding: "utf-8" });
     installedCasksCache = new Set(output.trim().split("\n").filter(Boolean));
@@ -605,9 +655,40 @@ function getInstalledCasks(): Set<string> {
   return installedCasksCache;
 }
 
+function getInstalledLinuxPackages(): Set<string> {
+  if (installedLinuxPackagesCache) return installedLinuxPackagesCache;
+
+  if (getCurrentPlatform() !== "linux") {
+    installedLinuxPackagesCache = new Set();
+    return installedLinuxPackagesCache;
+  }
+
+  const manager = getLinuxPackageManager();
+  if (!manager) {
+    installedLinuxPackagesCache = new Set();
+    return installedLinuxPackagesCache;
+  }
+
+  try {
+    const command = manager === "apt"
+      ? "dpkg-query -W -f='${binary:Package}\n'"
+      : manager === "dnf"
+        ? "rpm -qa --qf '%{NAME}\n'"
+        : "pacman -Qq";
+    const output = execSync(command, { encoding: "utf-8" });
+    installedLinuxPackagesCache = new Set(output.trim().split("\n").filter(Boolean));
+  } catch {
+    installedLinuxPackagesCache = new Set();
+  }
+
+  return installedLinuxPackagesCache;
+}
+
 type AppInstallState = "installed" | "partial" | "not_installed";
 
 function getAppInstallState(app: App): AppInstallState {
+  const currentPlatform = getCurrentPlatform();
+
   // Check the main app first
   let mainAppInstalled = false;
 
@@ -619,21 +700,43 @@ function getAppInstallState(app: App): AppInstallState {
   else if (app.detectCmd) {
     mainAppInstalled = runCommand(app.detectCmd, true);
   }
-  // Priority 3: Brew check (using cached results)
+  // Priority 3: Package manager / command checks
   else if (app.brewName) {
-    mainAppInstalled = app.cask
-      ? getInstalledCasks().has(app.brewName)
-      : getInstalledFormulas().has(app.brewName);
+    if (currentPlatform === "linux") {
+      const linuxPackage = getLinuxPackageName(app.brewName);
+      const linuxPackages = getInstalledLinuxPackages();
+      mainAppInstalled = (linuxPackage ? linuxPackages.has(linuxPackage) : false)
+        || runCommand(`command -v ${app.value}`, true)
+        || (linuxPackage ? runCommand(`command -v ${linuxPackage}`, true) : false);
+    } else {
+      mainAppInstalled = app.cask
+        ? getInstalledCasks().has(app.brewName)
+        : getInstalledFormulas().has(app.brewName);
+    }
   }
 
   if (!mainAppInstalled) return "not_installed";
 
   // Check dependencies are also installed
   if (app.dependencies) {
-    const formulas = getInstalledFormulas();
-    for (const dep of app.dependencies) {
-      if (!formulas.has(dep)) {
-        return "partial"; // Main app installed, but missing dependencies
+    if (currentPlatform === "linux") {
+      const linuxPackages = getInstalledLinuxPackages();
+      for (const dep of app.dependencies) {
+        const linuxDep = getLinuxPackageName(dep);
+        if (!linuxDep) {
+          return "partial";
+        }
+        const depInstalled = linuxPackages.has(linuxDep) || runCommand(`command -v ${linuxDep}`, true);
+        if (!depInstalled) {
+          return "partial";
+        }
+      }
+    } else {
+      const formulas = getInstalledFormulas();
+      for (const dep of app.dependencies) {
+        if (!formulas.has(dep)) {
+          return "partial"; // Main app installed, but missing dependencies
+        }
       }
     }
   }
@@ -667,7 +770,68 @@ function isStowConfigInstalled(config: string): boolean {
   });
 }
 
-function installBrewPackage(name: string, cask = false): boolean {
+function installLinuxPackages(packages: string[]): boolean {
+  const manager = getLinuxPackageManager();
+  if (!manager) {
+    log.warning("No supported Linux package manager found (need apt, dnf, or pacman)");
+    return false;
+  }
+
+  const normalizedPackages = [...new Set(packages.filter(Boolean))];
+  if (normalizedPackages.length === 0) return true;
+
+  if (manager === "apt" && !aptUpdated) {
+    if (!runCommand("sudo apt-get update")) {
+      return false;
+    }
+    aptUpdated = true;
+  }
+
+  const command = manager === "apt"
+    ? `sudo apt-get install -y ${normalizedPackages.join(" ")}`
+    : manager === "dnf"
+      ? `sudo dnf install -y ${normalizedPackages.join(" ")}`
+      : `sudo pacman -S --noconfirm --needed ${normalizedPackages.join(" ")}`;
+
+  if (runCommand(command)) {
+    installedLinuxPackagesCache = null;
+    return true;
+  }
+
+  return false;
+}
+
+function installPackage(name: string, cask = false): boolean {
+  const platform = getCurrentPlatform();
+
+  if (platform === "linux") {
+    const linuxPackage = getLinuxPackageName(name);
+    if (!linuxPackage) {
+      log.warning(`No Linux package mapping for ${name}`);
+      return false;
+    }
+
+    const installed = getInstalledLinuxPackages();
+    if (installed.has(linuxPackage) || runCommand(`command -v ${linuxPackage}`, true)) {
+      log.success(`${linuxPackage} already installed`);
+      return true;
+    }
+
+    if (cask) {
+      log.info(`Installing ${linuxPackage} as a regular Linux package`);
+    } else {
+      log.info(`Installing ${linuxPackage}...`);
+    }
+
+    if (installLinuxPackages([linuxPackage])) {
+      log.success(`${linuxPackage} installed`);
+      return true;
+    }
+
+    log.warning(`Failed to install ${linuxPackage}`);
+    return false;
+  }
+
   const checkCmd = cask
     ? `brew list --cask ${name} 2>/dev/null`
     : `brew list ${name} 2>/dev/null`;
@@ -682,10 +846,10 @@ function installBrewPackage(name: string, cask = false): boolean {
   if (runCommand(cmd, true)) {
     log.success(`${name} installed`);
     return true;
-  } else {
-    log.warning(`Failed to install ${name}`);
-    return false;
   }
+
+  log.warning(`Failed to install ${name}`);
+  return false;
 }
 
 async function installApps(apps: string[]): Promise<void> {
@@ -694,15 +858,21 @@ async function installApps(apps: string[]): Promise<void> {
   const appsToInstall = APPS.filter((a) => apps.includes(a.value) && a.brewName);
   if (appsToInstall.length === 0) return;
 
-  log.step("Installing apps via Homebrew...");
+  const platform = getCurrentPlatform();
+  if (platform === "linux") {
+    const manager = getLinuxPackageManager();
+    log.step(`Installing apps via ${manager ?? "Linux package manager"}...`);
+  } else {
+    log.step("Installing apps via Homebrew...");
+  }
 
   for (const app of appsToInstall) {
-    installBrewPackage(app.brewName, app.cask);
+    installPackage(app.brewName, app.cask);
 
     // Install dependencies
     if (app.dependencies) {
       for (const dep of app.dependencies) {
-        installBrewPackage(dep);
+        installPackage(dep);
       }
     }
   }
@@ -721,8 +891,19 @@ function ensureStowInstalled(): boolean {
   if (runCommand("command -v stow", true)) {
     return true;
   }
+
+  if (getCurrentPlatform() === "linux") {
+    log.info("Installing stow via Linux package manager...");
+    if (installLinuxPackages(["stow"])) {
+      log.success("stow installed");
+      return true;
+    }
+    log.error("Failed to install stow via Linux package manager");
+    return false;
+  }
+
   log.info("Installing stow via Homebrew...");
-  if (runCommand("brew install stow", true)) {
+  if (installPackage("stow")) {
     log.success("stow installed");
     return true;
   }
@@ -742,6 +923,7 @@ function writeDotfilesPath(): void {
 const STOW_TARGETS: Record<string, string[]> = {
   zsh: [".zshrc", ".config/starship.toml"],
   tmux: [".tmux.conf"],
+  hammerspoon: [".hammerspoon/init.lua"],
   karabiner: [".config/karabiner/karabiner.json"],
   ghostty: process.platform === "darwin"
     ? [
@@ -850,25 +1032,56 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
   }
 }
 
-function setupTpm(): void {
-  const tpmPath = join(HOME, ".tmux", "plugins", "tpm");
+function installTpmPlugins(tpmPath: string): void {
+  const tmuxConfPath = join(HOME, ".tmux.conf");
+  const installScript = join(tpmPath, "bin", "install_plugins");
 
-  if (existsSync(tpmPath)) {
-    log.success("TPM already installed");
+  if (!existsSync(tmuxConfPath)) {
+    log.warning("~/.tmux.conf not found - skipping TPM plugin install");
     return;
   }
 
-  log.info("Installing TPM (Tmux Plugin Manager)...");
-  const tpmDir = join(HOME, ".tmux", "plugins");
-  if (!existsSync(tpmDir)) {
-    mkdirSync(tpmDir, { recursive: true });
+  if (!existsSync(installScript)) {
+    log.warning("TPM install script not found - skipping plugin install");
+    return;
   }
 
-  if (runCommand(`git clone https://github.com/tmux-plugins/tpm "${tpmPath}"`, true)) {
-    log.success("TPM installed");
-    log.info("To install plugins: open tmux and press Ctrl+a I");
+  log.info("Installing tmux plugins via TPM...");
+  const installed =
+    runCommand(`"${installScript}"`, true) ||
+    runCommand(`bash "${installScript}"`, true);
+
+  if (installed) {
+    log.success("Tmux plugins installed");
   } else {
-    log.warning("Failed to install TPM - you can install manually later");
+    log.warning("Failed to install tmux plugins - you can run prefix + I later");
+  }
+}
+
+function setupTpm(): void {
+  const tpmPath = join(HOME, ".tmux", "plugins", "tpm");
+  let tpmReady = false;
+
+  if (existsSync(tpmPath)) {
+    log.success("TPM already installed");
+    tpmReady = true;
+  } else {
+    log.info("Installing TPM (Tmux Plugin Manager)...");
+    const tpmDir = join(HOME, ".tmux", "plugins");
+    if (!existsSync(tpmDir)) {
+      mkdirSync(tpmDir, { recursive: true });
+    }
+
+    if (runCommand(`git clone https://github.com/tmux-plugins/tpm "${tpmPath}"`, true)) {
+      log.success("TPM installed");
+      tpmReady = true;
+    } else {
+      log.warning("Failed to install TPM - you can install manually later");
+    }
+  }
+
+  if (tpmReady) {
+    installTpmPlugins(tpmPath);
   }
 }
 
@@ -1837,7 +2050,8 @@ async function runSetup(): Promise<void> {
   console.log("");
   console.log(`${colors.green}${colors.bold}✅ Your dotfiles are set up!${colors.reset}`);
   console.log("");
-  console.log(`  To update: ${colors.cyan}cd ${DOTFILES_DIR} && git pull && ./bootstrap.sh${colors.reset}`);
+  const bootstrapCommand = getCurrentPlatform() === "linux" ? "./bootstrap-linux.sh" : "./bootstrap.sh";
+  console.log(`  To update: ${colors.cyan}cd ${DOTFILES_DIR} && git pull && ${bootstrapCommand}${colors.reset}`);
   console.log(`  To revert: ${colors.cyan}cd ${DOTFILES_DIR} && pnpm run setup${colors.reset} → select "Revert"`);
 
   printAdBanner();

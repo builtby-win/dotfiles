@@ -40,19 +40,33 @@ if [[ -f "$DOTFILES_SHELL_DIR/experimental/beads.sh" ]]; then
 fi
 
 # Homebrew
-if [[ "$(uname -m)" == "arm64" ]]; then
+if [[ "$(uname -s)" == "Linux" ]]; then
+  BREW_PATH="/home/linuxbrew/.linuxbrew/bin/brew"
+elif [[ "$(uname -m)" == "arm64" ]]; then
   BREW_PATH="/opt/homebrew/bin/brew"
 else
   BREW_PATH="/usr/local/bin/brew"
 fi
 
+if [[ ! -f "$BREW_PATH" ]] && command -v brew &> /dev/null; then
+  BREW_PATH="$(command -v brew)"
+fi
+
 if [[ -f "$BREW_PATH" ]]; then
-  BREW_ENV_CACHE="$DOTFILES_CACHE_DIR/brew-shellenv.zsh"
+  BREW_CACHE_KEY="${BREW_PATH//\//_}"
+  BREW_ENV_CACHE="$DOTFILES_CACHE_DIR/brew-shellenv-${BREW_CACHE_KEY}.zsh"
   # Cache brew shellenv if it doesn't exist or brew executable is newer
   if [[ ! -f "$BREW_ENV_CACHE" ]] || [[ "$BREW_PATH" -nt "$BREW_ENV_CACHE" ]]; then
     "$BREW_PATH" shellenv > "$BREW_ENV_CACHE"
   fi
   source "$BREW_ENV_CACHE"
+fi
+
+# Auto-attach tmux for SSH sessions (Termius)
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -z "$NO_AUTO_TMUX" ]]; then
+  if command -v tmux &> /dev/null; then
+    command tmux new-session -A -s main
+  fi
 fi
 
 # fnm (Fast Node Manager)
