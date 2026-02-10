@@ -812,118 +812,52 @@ function ensureLocalBinInPath(): void {
 }
 
 function installStarshipOnLinux(): boolean {
-  const isStarshipAvailable = (): boolean => {
-    if (runCommand("command -v starship", true)) {
-      return true;
-    }
-
-    const localCandidates = [
-      join(HOME, ".local", "bin", "starship"),
-      join(HOME, ".cargo", "bin", "starship"),
-      join(HOME, ".nix-profile", "bin", "starship"),
-    ];
-
-    for (const candidate of localCandidates) {
-      if (existsSync(candidate)) {
-        const candidateDir = dirname(candidate);
-        const currentPath = process.env.PATH ?? "";
-        if (!currentPath.split(":").includes(candidateDir)) {
-          process.env.PATH = currentPath ? `${candidateDir}:${currentPath}` : candidateDir;
-        }
-        return true;
-      }
-    }
-
-    return false;
-  };
-
-  const runStarshipInstallCommand = (label: string, command: string): boolean => {
-    log.info(`Trying ${label}...`);
-    if (!runCommand(command)) {
-      return false;
-    }
-    ensureLocalBinInPath();
-    if (isStarshipAvailable()) {
-      log.success("starship installed");
-      return true;
-    }
-    return false;
-  };
-
   if (runCommand("command -v starship", true)) {
     log.success("starship already installed");
     return true;
   }
 
   log.info("Installing starship...");
+  ensureLocalBinInPath();
 
-  if (installLinuxPackages(["starship"]) && isStarshipAvailable()) {
+  const installerUrl = "https://starship.rs/install.sh";
+  if (!runCommand(`curl -fsSL \"${installerUrl}\" -o /dev/null`, true)) {
+    log.error(`Cannot access ${installerUrl}`);
+    log.error("Third-party URL access is required to install starship on Linux");
+    return false;
+  }
+
+  const installCommand = "curl -sS https://starship.rs/install.sh | sh";
+  if (!runCommand(installCommand)) {
+    log.error("Starship installer failed");
+    log.error("Please ensure third-party URLs are reachable and retry");
+    return false;
+  }
+
+  ensureLocalBinInPath();
+  if (runCommand("command -v starship", true)) {
     log.success("starship installed");
     return true;
   }
 
-  const packageManagerAttempts: Array<{ checkCmd: string; label: string; command: string }> = [
-    { checkCmd: "command -v apk", label: "apk", command: "sudo apk add starship" },
-    {
-      checkCmd: "command -v dnf",
-      label: "dnf copr",
-      command: "sudo dnf copr enable -y atim/starship && sudo dnf install -y starship",
-    },
-    {
-      checkCmd: "command -v zypper",
-      label: "zypper",
-      command: "sudo zypper --non-interactive install starship",
-    },
-    {
-      checkCmd: "command -v xbps-install",
-      label: "xbps",
-      command: "sudo xbps-install -S starship",
-    },
-    {
-      checkCmd: "command -v emerge",
-      label: "emerge",
-      command: "sudo emerge app-shells/starship",
-    },
-    {
-      checkCmd: "command -v cargo",
-      label: "cargo",
-      command: "cargo install starship --locked",
-    },
-    {
-      checkCmd: "command -v conda",
-      label: "conda",
-      command: "conda install -y -c conda-forge starship",
-    },
-    {
-      checkCmd: "command -v nix-env",
-      label: "nix",
-      command: "nix-env -iA nixpkgs.starship",
-    },
-    {
-      checkCmd: "command -v brew",
-      label: "linuxbrew",
-      command: "brew install starship",
-    },
+  const localCandidates = [
+    join(HOME, ".local", "bin", "starship"),
+    join(HOME, ".cargo", "bin", "starship"),
+    join(HOME, ".nix-profile", "bin", "starship"),
   ];
 
-  for (const attempt of packageManagerAttempts) {
-    if (!runCommand(attempt.checkCmd, true)) {
-      continue;
+  for (const candidate of localCandidates) {
+    if (!existsSync(candidate)) continue;
+    const candidateDir = dirname(candidate);
+    const currentPath = process.env.PATH ?? "";
+    if (!currentPath.split(":").includes(candidateDir)) {
+      process.env.PATH = currentPath ? `${candidateDir}:${currentPath}` : candidateDir;
     }
-    if (runStarshipInstallCommand(attempt.label, attempt.command)) {
-      return true;
-    }
-  }
-
-  log.info("Falling back to the official starship installer...");
-  ensureLocalBinInPath();
-
-  const installCommand = "curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b \"$HOME/.local/bin\"";
-  if (runStarshipInstallCommand("official installer", installCommand)) {
+    log.success("starship installed");
     return true;
   }
 
-  log.warning("Failed to install starship");
+  log.error("Starship installation completed but binary was not found in PATH");
   return false;
 }
 

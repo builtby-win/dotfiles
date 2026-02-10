@@ -198,15 +198,23 @@ setup_fnm() {
   fi
 
   print_step "Installing fnm (Node version manager)..."
-  if install_linux_packages fnm && command -v fnm >/dev/null 2>&1; then
-    eval "$(fnm env --use-on-cd --shell bash)" || print_warning "Could not initialize fnm"
-    print_success "fnm installed via ${LINUX_PKG_MANAGER}"
+
+  if ! run_install_command bash -c "curl -fsSL https://fnm.vercel.app/install > /dev/null"; then
+    print_error "Cannot access https://fnm.vercel.app/install"
+    print_error "Third-party URL access is required to install fnm on Linux"
     return
   fi
 
-  print_warning "fnm package not available via ${LINUX_PKG_MANAGER}, using upstream installer"
-  if ! run_install_command bash -c "$(curl -fsSL https://fnm.vercel.app/install)"; then
-    print_warning "fnm upstream installer failed"
+  if ! command -v unzip >/dev/null 2>&1; then
+    print_step "Installing unzip (required by fnm installer)..."
+    if ! install_linux_packages unzip || ! command -v unzip >/dev/null 2>&1; then
+      print_error "fnm installer requires unzip but it is not available"
+      return
+    fi
+  fi
+
+  if ! run_install_command bash -c "curl -fsSL https://fnm.vercel.app/install | bash"; then
+    print_error "fnm installer failed"
     return
   fi
 
@@ -218,7 +226,7 @@ setup_fnm() {
     eval "$(fnm env --use-on-cd --shell bash)" || print_warning "Could not initialize fnm"
     print_success "fnm installed"
   else
-    print_warning "fnm not available; will install Node.js directly from ${LINUX_PKG_MANAGER}"
+    print_error "fnm installer completed but fnm was not found in PATH"
   fi
 }
 

@@ -56,21 +56,16 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('npm install -g pnpm --prefix "$HOME/.local"');
   });
 
-  it('supports starship install on Linux with fallback installer', () => {
+  it('installs starship on Linux via official curl installer', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     expect(content).toContain('starship", value: "starship"');
     expect(content).toContain('starship.rs');
     expect(content).toContain('platforms: { macos: true, linux: true, windows: false }');
-    expect(content).toContain('starship.rs/install.sh');
-    expect(content).toContain('cargo install starship --locked');
-    expect(content).toContain('conda install -y -c conda-forge starship');
-    expect(content).toContain('brew install starship');
-    expect(content).toContain('apk add starship');
-    expect(content).toContain('dnf copr enable -y atim/starship');
-    expect(content).toContain('zypper --non-interactive install starship');
-    expect(content).toContain('xbps-install -S starship');
-    expect(content).toContain('nix-env -iA nixpkgs.starship');
-    expect(content).toContain('emerge app-shells/starship');
+    expect(content).toContain('const installerUrl = "https://starship.rs/install.sh"');
+    expect(content).toContain('curl -sS https://starship.rs/install.sh | sh');
+    expect(content).toContain('Cannot access ${installerUrl}');
+    expect(content).not.toContain('dnf copr enable -y atim/starship');
+    expect(content).not.toContain('cargo install starship --locked');
   });
 
   it('keeps unsupported Linux GUI app suggestions out of setup defaults', () => {
@@ -85,6 +80,13 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('Switch your default shell to zsh for this dotfiles setup?');
     expect(content).toContain('chsh -s');
     expect(content).toContain('install_linux_packages zsh');
+  });
+
+  it('installs fnm via official curl installer with URL error message', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('curl -fsSL https://fnm.vercel.app/install | bash');
+    expect(content).toContain('Cannot access https://fnm.vercel.app/install');
+    expect(content).not.toContain('fnm installed via ${LINUX_PKG_MANAGER}');
   });
 
   it('adds ~/.local/bin to shell PATH for user-installed tools', () => {

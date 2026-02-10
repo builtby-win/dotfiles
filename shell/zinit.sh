@@ -49,8 +49,16 @@ function zvm_after_init() {
 # ─────────────────────────────────────────────────────────────
 autoload -Uz compinit
 # Optimize completion init: check if dump file is fresh (< 24h)
-if [[ -f "${ZDOTDIR:-$HOME}/.zcompdump" ]]; then
-  if [[ $(date +%s) -lt $(($(stat -f %m "${ZDOTDIR:-$HOME}/.zcompdump") + 86400)) ]]; then
+zcompdump_file="${ZDOTDIR:-$HOME}/.zcompdump"
+if [[ -f "$zcompdump_file" ]]; then
+  zcompdump_mtime=""
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    zcompdump_mtime=$(stat -f %m "$zcompdump_file" 2>/dev/null)
+  else
+    zcompdump_mtime=$(stat -c %Y "$zcompdump_file" 2>/dev/null)
+  fi
+
+  if [[ "$zcompdump_mtime" == <-> ]] && (( EPOCHSECONDS < zcompdump_mtime + 86400 )); then
     compinit -C
   else
     compinit
