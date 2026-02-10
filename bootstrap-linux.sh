@@ -261,6 +261,55 @@ install_pnpm_without_root() {
   return 1
 }
 
+ensure_zsh_available() {
+  if command -v zsh >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! ask_yes_no "zsh is not installed. Install zsh now?" "y"; then
+    return 1
+  fi
+
+  if install_linux_packages zsh && command -v zsh >/dev/null 2>&1; then
+    return 0
+  fi
+
+  return 1
+}
+
+maybe_switch_default_shell_to_zsh() {
+  if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+    print_debug "Skipping default shell change in --yes mode"
+    return
+  fi
+
+  if [[ "${SHELL##*/}" == "zsh" ]]; then
+    return
+  fi
+
+  if ! ask_yes_no "Switch your default shell to zsh for this dotfiles setup?" "y"; then
+    print_warning "Keeping current default shell: ${SHELL}"
+    return
+  fi
+
+  if ! ensure_zsh_available; then
+    print_warning "Could not install zsh automatically"
+    print_warning "Install zsh and run: chsh -s \"$(command -v zsh)\" \"$USER\""
+    return
+  fi
+
+  local zsh_path
+  zsh_path="$(command -v zsh)"
+
+  if run_install_command chsh -s "$zsh_path" "$USER"; then
+    print_success "Default shell changed to zsh"
+    print_warning "Open a new terminal or run: exec zsh"
+  else
+    print_warning "Could not change default shell automatically"
+    print_warning "Run manually: chsh -s \"$zsh_path\" \"$USER\""
+  fi
+}
+
 ensure_node_and_pnpm() {
   if ! command -v node >/dev/null 2>&1; then
     print_step "Installing Node.js..."
@@ -425,5 +474,7 @@ if [[ "$RUN_INTERACTIVE_SETUP" -eq 1 ]]; then
 else
   print_warning "Skipping interactive setup"
 fi
+
+maybe_switch_default_shell_to_zsh
 
 print_success "Linux setup complete"

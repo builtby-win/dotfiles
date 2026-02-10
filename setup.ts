@@ -463,15 +463,15 @@ const APPS: App[] = [
   { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat", category: "cli" },
   { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza", category: "cli" },
   { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide", category: "cli" },
-  { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", category: "cli" },
+  { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
 
   // Terminals & Editors
-  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: true, windows: false }, category: "terminals" },
-  { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com", category: "terminals" },
-  { name: "Cursor", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh", category: "terminals" },
+  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "Cursor", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
 
   // AI Tools
-  { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", category: "ai" },
+  { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
   { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
 
   // Productivity (macOS only)
@@ -486,17 +486,17 @@ const APPS: App[] = [
   { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app", platforms: { macos: true, windows: false, linux: false }, category: "input" },
 
   // Security (cross-platform)
-  { name: "Bitwarden", value: "bitwarden", brewName: "bitwarden", cask: true, detectPath: "/Applications/Bitwarden.app", desc: "Open source password manager", url: "https://bitwarden.com", category: "security" },
+  { name: "Bitwarden", value: "bitwarden", brewName: "bitwarden", cask: true, detectPath: "/Applications/Bitwarden.app", desc: "Open source password manager", url: "https://bitwarden.com", platforms: { macos: true, linux: false, windows: false }, category: "security" },
 
   // Browsers (cross-platform except Orion)
-  { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app", desc: "Google's web browser", url: "https://google.com/chrome", category: "browsers" },
+  { name: "Google Chrome", value: "chrome", brewName: "google-chrome", cask: true, detectPath: "/Applications/Google Chrome.app", desc: "Google's web browser", url: "https://google.com/chrome", platforms: { macos: true, linux: false, windows: false }, category: "browsers" },
   { name: "Arc", value: "arc", brewName: "arc", cask: true, detectPath: "/Applications/Arc.app", desc: "Modern browser with spaces & profiles", url: "https://arc.net", platforms: { macos: true, windows: true, linux: false }, category: "browsers" },
   { name: "Orion", value: "orion", brewName: "orion", cask: true, detectPath: "/Applications/Orion.app", desc: "WebKit browser with Chrome/Firefox extension support", url: "https://browser.kagi.com", platforms: { macos: true, windows: false, linux: false }, category: "browsers" },
 
   // Dev Tools (cross-platform)
-  { name: "Docker", value: "docker", brewName: "docker", cask: true, detectPath: "/Applications/Docker.app", desc: "Container runtime for development", url: "https://docker.com", category: "devtools" },
-  { name: "Figma", value: "figma", brewName: "figma", cask: true, detectPath: "/Applications/Figma.app", desc: "Collaborative design tool", url: "https://figma.com", category: "devtools" },
-  { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app", desc: "Chat for communities", url: "https://discord.com", category: "devtools" },
+  { name: "Docker", value: "docker", brewName: "docker", cask: true, detectPath: "/Applications/Docker.app", desc: "Container runtime for development", url: "https://docker.com", platforms: { macos: true, linux: false, windows: false }, category: "devtools" },
+  { name: "Figma", value: "figma", brewName: "figma", cask: true, detectPath: "/Applications/Figma.app", desc: "Collaborative design tool", url: "https://figma.com", platforms: { macos: true, linux: false, windows: false }, category: "devtools" },
+  { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app", desc: "Chat for communities", url: "https://discord.com", platforms: { macos: true, linux: false, windows: false }, category: "devtools" },
 ];
 
 // Stow-managed configs
@@ -801,10 +801,140 @@ function installLinuxPackages(packages: string[]): boolean {
   return false;
 }
 
+function ensureLocalBinInPath(): void {
+  const localBin = join(HOME, ".local", "bin");
+  const currentPath = process.env.PATH ?? "";
+  const pathEntries = currentPath.split(":").filter(Boolean);
+
+  if (!pathEntries.includes(localBin)) {
+    process.env.PATH = currentPath ? `${localBin}:${currentPath}` : localBin;
+  }
+}
+
+function installStarshipOnLinux(): boolean {
+  const isStarshipAvailable = (): boolean => {
+    if (runCommand("command -v starship", true)) {
+      return true;
+    }
+
+    const localCandidates = [
+      join(HOME, ".local", "bin", "starship"),
+      join(HOME, ".cargo", "bin", "starship"),
+      join(HOME, ".nix-profile", "bin", "starship"),
+    ];
+
+    for (const candidate of localCandidates) {
+      if (existsSync(candidate)) {
+        const candidateDir = dirname(candidate);
+        const currentPath = process.env.PATH ?? "";
+        if (!currentPath.split(":").includes(candidateDir)) {
+          process.env.PATH = currentPath ? `${candidateDir}:${currentPath}` : candidateDir;
+        }
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const runStarshipInstallCommand = (label: string, command: string): boolean => {
+    log.info(`Trying ${label}...`);
+    if (!runCommand(command)) {
+      return false;
+    }
+    ensureLocalBinInPath();
+    if (isStarshipAvailable()) {
+      log.success("starship installed");
+      return true;
+    }
+    return false;
+  };
+
+  if (runCommand("command -v starship", true)) {
+    log.success("starship already installed");
+    return true;
+  }
+
+  log.info("Installing starship...");
+
+  if (installLinuxPackages(["starship"]) && isStarshipAvailable()) {
+    log.success("starship installed");
+    return true;
+  }
+
+  const packageManagerAttempts: Array<{ checkCmd: string; label: string; command: string }> = [
+    { checkCmd: "command -v apk", label: "apk", command: "sudo apk add starship" },
+    {
+      checkCmd: "command -v dnf",
+      label: "dnf copr",
+      command: "sudo dnf copr enable -y atim/starship && sudo dnf install -y starship",
+    },
+    {
+      checkCmd: "command -v zypper",
+      label: "zypper",
+      command: "sudo zypper --non-interactive install starship",
+    },
+    {
+      checkCmd: "command -v xbps-install",
+      label: "xbps",
+      command: "sudo xbps-install -S starship",
+    },
+    {
+      checkCmd: "command -v emerge",
+      label: "emerge",
+      command: "sudo emerge app-shells/starship",
+    },
+    {
+      checkCmd: "command -v cargo",
+      label: "cargo",
+      command: "cargo install starship --locked",
+    },
+    {
+      checkCmd: "command -v conda",
+      label: "conda",
+      command: "conda install -y -c conda-forge starship",
+    },
+    {
+      checkCmd: "command -v nix-env",
+      label: "nix",
+      command: "nix-env -iA nixpkgs.starship",
+    },
+    {
+      checkCmd: "command -v brew",
+      label: "linuxbrew",
+      command: "brew install starship",
+    },
+  ];
+
+  for (const attempt of packageManagerAttempts) {
+    if (!runCommand(attempt.checkCmd, true)) {
+      continue;
+    }
+    if (runStarshipInstallCommand(attempt.label, attempt.command)) {
+      return true;
+    }
+  }
+
+  log.info("Falling back to the official starship installer...");
+  ensureLocalBinInPath();
+
+  const installCommand = "curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b \"$HOME/.local/bin\"";
+  if (runStarshipInstallCommand("official installer", installCommand)) {
+    return true;
+  }
+
+  log.warning("Failed to install starship");
+  return false;
+}
+
 function installPackage(name: string, cask = false): boolean {
   const platform = getCurrentPlatform();
 
   if (platform === "linux") {
+    if (name === "starship") {
+      return installStarshipOnLinux();
+    }
+
     const linuxPackage = getLinuxPackageName(name);
     if (!linuxPackage) {
       log.warning(`No Linux package mapping for ${name}`);

@@ -10,6 +10,11 @@ mkdir -p "$DOTFILES_CACHE_DIR"
 # Local/personal config (early - for PATH/fpath setup)
 [[ -f "$DOTFILES_SHELL_DIR/local.sh" ]] && source "$DOTFILES_SHELL_DIR/local.sh"
 
+# User-local binaries (used by installers like starship/pnpm fallbacks)
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
 # Source aliases
 [[ -f "$DOTFILES_SHELL_DIR/aliases.sh" ]] && source "$DOTFILES_SHELL_DIR/aliases.sh"
 

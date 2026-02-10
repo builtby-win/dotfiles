@@ -1,6 +1,10 @@
-#!/usr/bin/env sh
+#!/bin/sh
+
+PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH}"
+export PATH
 
 path=$1
+command=$2
 
 if [ -z "$path" ]; then
   printf '%s\n' "shell"
@@ -48,6 +52,12 @@ if command -v git >/dev/null 2>&1; then
 fi
 
 max_len=24
+case "$command" in
+  ssh|*/ssh)
+    label="ssh:${label}"
+    ;;
+esac
+
 if [ ${#label} -gt "$max_len" ]; then
   label=$(printf '%s' "$label" | cut -c1-"$max_len")
 fi

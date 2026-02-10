@@ -75,3 +75,5 @@ keybind = global:super+ctrl+alt+shift+enter=toggle_visibility
 
 # Ensures the GPU picks the most efficient rendering path
 macos-icon-ghost-color = #ffffff
+
+term = xterm-256color
