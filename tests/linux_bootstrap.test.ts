@@ -37,4 +37,22 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('dnf');
     expect(content).toContain('pacman');
   });
+
+  it('prompts before installing system dependencies', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('Install required system packages (git, stow, curl)?');
+    expect(content).toContain('ask_yes_no');
+  });
+
+  it('supports non-interactive mode with --yes', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('--yes');
+    expect(content).toContain('NON_INTERACTIVE=1');
+  });
+
+  it('installs pnpm without requiring system npm global directories', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('corepack');
+    expect(content).toContain('npm install -g pnpm --prefix "$HOME/.local"');
+  });
 });

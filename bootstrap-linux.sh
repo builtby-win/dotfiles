@@ -41,6 +41,78 @@ print_debug() {
 REPO_URL="https://github.com/builtby-win/dotfiles.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd 2>/dev/null || echo "")"
 LINUX_PKG_MANAGER=""
+NON_INTERACTIVE=0
+
+print_usage() {
+  cat <<'EOF'
+Usage: bootstrap-linux.sh [options]
+
+Options:
+  -y, --yes   Run non-interactively (auto-approve all prompts)
+  -h, --help  Show this help message
+EOF
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -y|--yes)
+        NON_INTERACTIVE=1
+        ;;
+      -h|--help)
+        print_usage
+        exit 0
+        ;;
+      *)
+        print_error "Unknown option: $1"
+        print_usage
+        exit 1
+        ;;
+    esac
+    shift
+  done
+}
+
+ask_yes_no() {
+  local prompt="$1"
+  local default_answer="${2:-y}"
+
+  if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+    print_debug "Auto-approving in --yes mode: ${prompt}"
+    return 0
+  fi
+
+  local suffix="[Y/n]"
+  if [[ "$default_answer" == "n" ]]; then
+    suffix="[y/N]"
+  fi
+
+  while true; do
+    read -r -p "${prompt} ${suffix} " response < /dev/tty || return 1
+    response="${response,,}"
+
+    if [[ -z "$response" ]]; then
+      response="$default_answer"
+    fi
+
+    case "$response" in
+      y|yes) return 0 ;;
+      n|no) return 1 ;;
+      *) echo "Please answer y or n." ;;
+    esac
+  done
+}
+
+print_plan() {
+  echo ""
+  print_step "Install plan"
+  echo "  1) Install required system packages (git, stow, curl)"
+  echo "  2) Prepare dotfiles repo (clone or update)"
+  echo "  3) Optionally install Node tooling (fnm/node/pnpm)"
+  echo "  4) Optionally run pnpm install"
+  echo "  5) Optionally run interactive setup.ts"
+  echo ""
+}
 
 detect_package_manager() {
   if command -v apt-get >/dev/null 2>&1; then
@@ -150,6 +222,45 @@ setup_fnm() {
   fi
 }
 
+ensure_local_bin_path() {
+  case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) export PATH="$HOME/.local/bin:$PATH" ;;
+  esac
+}
+
+install_pnpm_without_root() {
+  print_step "Installing pnpm..."
+
+  ensure_local_bin_path
+
+  if command -v corepack >/dev/null 2>&1; then
+    if run_install_command corepack enable --install-directory "$HOME/.local/bin" \
+      && run_install_command corepack prepare pnpm@latest --activate \
+      && command -v pnpm >/dev/null 2>&1; then
+      print_success "pnpm installed via corepack"
+      return 0
+    fi
+
+    print_warning "corepack setup failed, trying other pnpm install methods"
+  fi
+
+  if install_linux_packages pnpm && command -v pnpm >/dev/null 2>&1; then
+    print_success "pnpm installed via ${LINUX_PKG_MANAGER}"
+    return 0
+  fi
+
+  if run_install_command npm install -g pnpm --prefix "$HOME/.local"; then
+    ensure_local_bin_path
+    if command -v pnpm >/dev/null 2>&1; then
+      print_success "pnpm installed in $HOME/.local/bin"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 ensure_node_and_pnpm() {
   if ! command -v node >/dev/null 2>&1; then
     print_step "Installing Node.js..."
@@ -167,8 +278,11 @@ ensure_node_and_pnpm() {
   fi
 
   if ! command -v pnpm >/dev/null 2>&1; then
-    print_step "Installing pnpm..."
-    npm install -g pnpm || { print_error "Failed to install pnpm"; exit 1; }
+    if ! install_pnpm_without_root; then
+      print_error "Failed to install pnpm"
+      print_error "Tried corepack, ${LINUX_PKG_MANAGER}, and npm --prefix $HOME/.local"
+      exit 1
+    fi
   fi
 
   print_success "Node.js and pnpm ready"
@@ -179,15 +293,22 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 1
 fi
 
+parse_args "$@"
+
 print_banner
 detect_package_manager
 print_debug "Detected package manager: ${LINUX_PKG_MANAGER}"
 
-echo -e "Where should we install the dotfiles? ${CYAN}(press enter for ~/dotfiles)${NC}"
-read -r -p "> " DOTFILES_DIR < /dev/tty || {
-  print_error "Cannot read from terminal. Run this script interactively."
-  exit 1
-}
+if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+  DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+  print_debug "Non-interactive mode enabled (--yes)"
+else
+  echo -e "Where should we install the dotfiles? ${CYAN}(press enter for ~/dotfiles)${NC}"
+  read -r -p "> " DOTFILES_DIR < /dev/tty || {
+    print_error "Cannot read from terminal. Run this script interactively."
+    exit 1
+  }
+fi
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
@@ -195,10 +316,38 @@ print_debug "Install directory: ${DOTFILES_DIR}"
 
 mkdir -p "$DOTFILES_DIR" || { print_error "Failed to create ${DOTFILES_DIR}"; exit 1; }
 
-print_step "Ensuring system dependencies..."
-ensure_command git git
-ensure_command stow stow
-ensure_command curl curl
+print_plan
+if ! ask_yes_no "Proceed with this install plan?" "y"; then
+  print_warning "Setup cancelled"
+  exit 0
+fi
+
+INSTALL_SYSTEM_DEPS=1
+INSTALL_DEV_TOOLING=1
+INSTALL_JS_DEPS=1
+RUN_INTERACTIVE_SETUP=1
+
+if [[ "$NON_INTERACTIVE" -ne 1 ]]; then
+  ask_yes_no "Install required system packages (git, stow, curl)?" "y" || INSTALL_SYSTEM_DEPS=0
+  ask_yes_no "Install Node tooling (fnm, node, pnpm) if missing?" "y" || INSTALL_DEV_TOOLING=0
+  ask_yes_no "Run pnpm install in the dotfiles repo?" "y" || INSTALL_JS_DEPS=0
+  ask_yes_no "Run interactive setup.ts now?" "y" || RUN_INTERACTIVE_SETUP=0
+fi
+
+if [[ "$INSTALL_SYSTEM_DEPS" -eq 1 ]]; then
+  print_step "Ensuring system dependencies..."
+  ensure_command git git
+  ensure_command stow stow
+  ensure_command curl curl
+else
+  print_warning "Skipping system dependency installation"
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  print_error "git is required to clone/update dotfiles"
+  print_error "Re-run and allow system package install, or install git manually"
+  exit 1
+fi
 
 print_step "Preparing dotfiles repository..."
 if [[ -d "$DOTFILES_DIR/.git" ]]; then
@@ -238,23 +387,43 @@ fi
 
 cd "$DOTFILES_DIR" || { print_error "Failed to enter ${DOTFILES_DIR}"; exit 1; }
 
-echo ""
-print_step "[1/3] Installing development tooling..."
-setup_fnm
-ensure_node_and_pnpm
-
-echo ""
-print_step "[2/3] Installing JavaScript dependencies..."
-pnpm install --silent || { print_error "pnpm install failed"; exit 1; }
-print_success "Dependencies installed"
-
-echo ""
-print_step "[3/3] Running interactive setup..."
-TSX_BIN="./node_modules/.bin/tsx"
-if [[ -x "$TSX_BIN" ]]; then
-  "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty || true
+if [[ "$INSTALL_DEV_TOOLING" -eq 1 ]]; then
+  echo ""
+  print_step "[1/3] Installing development tooling..."
+  setup_fnm
+  ensure_node_and_pnpm
 else
-  pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  print_warning "Skipping Node tooling installation"
+fi
+
+if [[ "$INSTALL_JS_DEPS" -eq 1 ]]; then
+  echo ""
+  print_step "[2/3] Installing JavaScript dependencies..."
+  if ! command -v pnpm >/dev/null 2>&1; then
+    print_error "pnpm is required for dependency install"
+    print_error "Install Node tooling first or run with --yes"
+    exit 1
+  fi
+  pnpm install --silent || { print_error "pnpm install failed"; exit 1; }
+  print_success "Dependencies installed"
+else
+  print_warning "Skipping pnpm install"
+fi
+
+if [[ "$RUN_INTERACTIVE_SETUP" -eq 1 ]]; then
+  echo ""
+  print_step "[3/3] Running interactive setup..."
+  TSX_BIN="./node_modules/.bin/tsx"
+  if [[ -x "$TSX_BIN" ]]; then
+    "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  elif command -v pnpm >/dev/null 2>&1; then
+    pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  else
+    print_warning "Cannot run setup.ts because pnpm is unavailable"
+    print_warning "Run this later after installing Node tooling"
+  fi
+else
+  print_warning "Skipping interactive setup"
 fi
 
 print_success "Linux setup complete"
