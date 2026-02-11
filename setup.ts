@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlin
 import { join, dirname } from "path";
 import { homedir } from "os";
 import * as manifest from "./lib/manifest";
+import { createLinuxPackageManager, type SystemCommands } from "./lib/linux";
 
 // ============================================
 // Auto-Detection for Existing Users
@@ -590,45 +591,19 @@ function getCommandOutput(cmd: string): string | null {
   }
 }
 
-type LinuxPackageManager = "apt" | "dnf" | "pacman";
-
-let linuxPackageManagerCache: LinuxPackageManager | null | undefined = undefined;
-let aptUpdated = false;
-
-const LINUX_PACKAGE_NAME_OVERRIDES: Record<string, Partial<Record<LinuxPackageManager, string>>> = {
-  "visual-studio-code": { apt: "code", dnf: "code", pacman: "code" },
-  "google-chrome": { apt: "google-chrome-stable", dnf: "google-chrome-stable", pacman: "google-chrome" },
+const systemCommands: SystemCommands = {
+  runCommand,
+  getCommandOutput,
 };
 
-function getLinuxPackageManager(): LinuxPackageManager | null {
-  if (linuxPackageManagerCache !== undefined) return linuxPackageManagerCache;
+const linuxPM = createLinuxPackageManager(systemCommands);
 
-  if (runCommand("command -v apt-get", true)) {
-    linuxPackageManagerCache = "apt";
-  } else if (runCommand("command -v dnf", true)) {
-    linuxPackageManagerCache = "dnf";
-  } else if (runCommand("command -v pacman", true)) {
-    linuxPackageManagerCache = "pacman";
-  } else {
-    linuxPackageManagerCache = null;
-  }
-
-  return linuxPackageManagerCache;
-}
-
-function getLinuxPackageName(name: string): string | null {
-  const manager = getLinuxPackageManager();
-  if (!manager) return null;
-
-  const override = LINUX_PACKAGE_NAME_OVERRIDES[name]?.[manager];
-  if (override) return override;
-  return name;
-}
+function getLinuxPackageManager() { return linuxPM.detect(); }
+function getLinuxPackageName(name: string) { return linuxPM.getPackageName(name); }
 
 // Cache for installed package manager data (populated once, used many times)
 let installedFormulasCache: Set<string> | null = null;
 let installedCasksCache: Set<string> | null = null;
-let installedLinuxPackagesCache: Set<string> | null = null;
 
 function getInstalledFormulas(): Set<string> {
   if (installedFormulasCache) return installedFormulasCache;
@@ -665,32 +640,8 @@ function getInstalledCasks(): Set<string> {
 }
 
 function getInstalledLinuxPackages(): Set<string> {
-  if (installedLinuxPackagesCache) return installedLinuxPackagesCache;
-
-  if (getCurrentPlatform() !== "linux") {
-    installedLinuxPackagesCache = new Set();
-    return installedLinuxPackagesCache;
-  }
-
-  const manager = getLinuxPackageManager();
-  if (!manager) {
-    installedLinuxPackagesCache = new Set();
-    return installedLinuxPackagesCache;
-  }
-
-  try {
-    const command = manager === "apt"
-      ? "dpkg-query -W -f='${binary:Package}\n'"
-      : manager === "dnf"
-        ? "rpm -qa --qf '%{NAME}\n'"
-        : "pacman -Qq";
-    const output = execSync(command, { encoding: "utf-8" });
-    installedLinuxPackagesCache = new Set(output.trim().split("\n").filter(Boolean));
-  } catch {
-    installedLinuxPackagesCache = new Set();
-  }
-
-  return installedLinuxPackagesCache;
+  if (getCurrentPlatform() !== "linux") return new Set();
+  return linuxPM.getInstalledPackages();
 }
 
 type AppInstallState = "installed" | "partial" | "not_installed";
@@ -780,34 +731,11 @@ function isStowConfigInstalled(config: string): boolean {
 }
 
 function installLinuxPackages(packages: string[]): boolean {
-  const manager = getLinuxPackageManager();
-  if (!manager) {
-    log.warning("No supported Linux package manager found (need apt, dnf, or pacman)");
+  if (!linuxPM.detect()) {
+    log.warning("No supported Linux package manager found (need apt-get, dnf, or pacman)");
     return false;
   }
-
-  const normalizedPackages = [...new Set(packages.filter(Boolean))];
-  if (normalizedPackages.length === 0) return true;
-
-  if (manager === "apt" && !aptUpdated) {
-    if (!runCommand("sudo apt-get update")) {
-      return false;
-    }
-    aptUpdated = true;
-  }
-
-  const command = manager === "apt"
-    ? `sudo apt-get install -y ${normalizedPackages.join(" ")}`
-    : manager === "dnf"
-      ? `sudo dnf install -y ${normalizedPackages.join(" ")}`
-      : `sudo pacman -S --noconfirm --needed ${normalizedPackages.join(" ")}`;
-
-  if (runCommand(command)) {
-    installedLinuxPackagesCache = null;
-    return true;
-  }
-
-  return false;
+  return linuxPM.install(packages);
 }
 
 function ensureLocalBinInPath(): void {

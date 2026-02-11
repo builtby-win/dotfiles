@@ -119,7 +119,7 @@ bb status
 ```
 dotfiles/
 ├── bootstrap.sh          # Entry installer (routes by OS)
-├── bootstrap-linux.sh    # Linux installer (apt/dnf/pacman)
+├── bootstrap-linux.sh    # Linux bootstrap shim (installs git/node, hands off to setup.ts)
 ├── bootstrap.ps1         # Main installer (Windows)
 ├── setup.ts              # Interactive setup (macOS/Linux)
 ├── setup-windows.ts      # Interactive setup (Windows)
