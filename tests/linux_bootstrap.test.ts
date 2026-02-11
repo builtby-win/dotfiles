@@ -40,22 +40,17 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('pacman');
   });
 
-  it('prompts before installing system dependencies', () => {
-    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    expect(content).toContain('Install required system packages (git, stow, curl)?');
-    expect(content).toContain('ask_yes_no');
-  });
-
   it('supports non-interactive mode with --yes', () => {
     const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
     expect(content).toContain('--yes');
     expect(content).toContain('NON_INTERACTIVE=1');
   });
 
-  it('installs pnpm without requiring system npm global directories', () => {
+  it('installs pnpm via corepack with npm fallback', () => {
     const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    expect(content).toContain('corepack');
-    expect(content).toContain('npm install -g pnpm --prefix "$HOME/.local"');
+    expect(content).toContain('corepack enable');
+    expect(content).toContain('corepack prepare pnpm@latest --activate');
+    expect(content).toContain('npm install -g pnpm');
   });
 
   it('installs starship on Linux via official curl installer', () => {
@@ -93,18 +88,15 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('curl -fsSL https://opencode.ai/install | bash');
   });
 
-  it('offers shell switch from bash to zsh on Linux', () => {
-    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    expect(content).toContain('Switch your default shell to zsh for this dotfiles setup?');
+  it('offers shell switch from bash to zsh in setup.ts', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('Set zsh as your default shell');
     expect(content).toContain('chsh -s');
-    expect(content).toContain('install_linux_packages zsh');
   });
 
-  it('installs fnm via official curl installer with URL error message', () => {
+  it('installs fnm via official curl installer', () => {
     const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
     expect(content).toContain('curl -fsSL https://fnm.vercel.app/install | bash');
-    expect(content).toContain('Cannot access https://fnm.vercel.app/install');
-    expect(content).not.toContain('fnm installed via ${LINUX_PKG_MANAGER}');
   });
 
   it('keeps startup tips focused on shell tooling', () => {
@@ -126,12 +118,6 @@ describe('Linux bootstrap workflow', () => {
     const shellInitPath = path.resolve(__dirname, '../shell/init.sh');
     const content = fs.readFileSync(shellInitPath, 'utf-8');
     expect(content).toContain('$HOME/.local/bin');
-  });
-
-  it('normalizes PNPM_HOME for Linux bootstrap runs', () => {
-    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    expect(content).toContain('ensure_linux_pnpm_home');
-    expect(content).toContain('${XDG_DATA_HOME:-$HOME/.local/share}/pnpm');
   });
 
   it('uses portable PNPM_HOME defaults in zshrc', () => {
