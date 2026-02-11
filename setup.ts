@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 import { checkbox, select, confirm } from "@inquirer/prompts";
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync } from "fs";
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync, symlinkSync } from "fs";
 import { join, dirname } from "path";
 import { homedir } from "os";
 import * as manifest from "./lib/manifest";
@@ -927,11 +927,13 @@ function installPackage(name: string, cask = false): boolean {
       return installStarshipOnLinux();
     }
 
-    const linuxPackage = getLinuxPackageName(name);
-    if (!linuxPackage) {
-      log.warning(`No Linux package mapping for ${name}`);
+    const linuxManager = getLinuxPackageManager();
+    if (!linuxManager) {
+      log.warning(`Skipping ${name}: no supported Linux package manager and no curl installer is configured`);
       return false;
     }
+
+    const linuxPackage = getLinuxPackageName(name) ?? name;
 
     const installed = getInstalledLinuxPackages();
     if (installed.has(linuxPackage) || runCommand(`command -v ${linuxPackage}`, true)) {
@@ -1060,6 +1062,52 @@ const STOW_TARGETS: Record<string, string[]> = {
   mackup: [".mackup.cfg"],
 };
 
+function setupConfigWithoutStow(config: string, targets: string[], stowPackages: string): boolean {
+  let configured = false;
+
+  for (const target of targets) {
+    const sourcePath = join(stowPackages, config, target);
+    const targetPath = join(HOME, target);
+
+    if (!existsSync(sourcePath)) {
+      log.warning(`Missing source file for ${config}: ${sourcePath}`);
+      continue;
+    }
+
+    if (existsSync(targetPath)) {
+      try {
+        const stats = lstatSync(targetPath);
+        if (stats.isSymbolicLink()) {
+          const linkPath = readlinkSync(targetPath);
+          if (linkPath.includes("builtby.win/dotfiles") || linkPath.includes(DOTFILES_DIR)) {
+            configured = true;
+            continue;
+          }
+        }
+      } catch {
+        // Continue to explicit warning below.
+      }
+
+      log.warning(`Skipping existing target during fallback: ~/${target}`);
+      continue;
+    }
+
+    const parentDir = dirname(targetPath);
+    if (!existsSync(parentDir)) {
+      mkdirSync(parentDir, { recursive: true });
+    }
+
+    try {
+      symlinkSync(sourcePath, targetPath);
+      configured = true;
+    } catch {
+      log.error(`Failed to create symlink for ~/${target}`);
+    }
+  }
+
+  return configured;
+}
+
 async function setupStowConfigs(configs: string[]): Promise<void> {
   if (configs.length === 0) return;
 
@@ -1068,10 +1116,16 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
   // Write dotfiles path so .zshrc can find it
   writeDotfilesPath();
 
-  // Ensure stow is installed
-  if (!ensureStowInstalled()) {
+  const stowAvailable = ensureStowInstalled();
+  const linuxWithoutPackageManager = getCurrentPlatform() === "linux" && !getLinuxPackageManager();
+  if (!stowAvailable && !linuxWithoutPackageManager) {
     log.error("Cannot proceed without stow");
     return;
+  }
+
+  if (!stowAvailable && linuxWithoutPackageManager) {
+    log.warning("Stow is unavailable and no Linux package manager was detected");
+    log.info("Falling back to direct symlinks for selected configs");
   }
 
   const stowPackages = join(DOTFILES_DIR, "stow-packages");
@@ -1142,17 +1196,29 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
     }
 
     if (needsStow || !targets.some(t => existsSync(join(HOME, t)))) {
-      // Run stow to create the symlinks
-      const stowCmd = `stow -d "${stowPackages}" -t "${HOME}" ${config}`;
-      if (runCommand(stowCmd, true)) {
-        log.success(`${config} configured via stow`);
+      if (stowAvailable) {
+        // Run stow to create the symlinks
+        const stowCmd = `stow -d "${stowPackages}" -t "${HOME}" ${config}`;
+        if (runCommand(stowCmd, true)) {
+          log.success(`${config} configured via stow`);
 
-        // Install TPM for tmux
+          // Install TPM for tmux
+          if (config === "tmux") {
+            setupTpm();
+          }
+        } else {
+          log.error(`Failed to stow ${config}`);
+        }
+        continue;
+      }
+
+      if (setupConfigWithoutStow(config, targets, stowPackages)) {
+        log.success(`${config} configured via symlink fallback`);
         if (config === "tmux") {
           setupTpm();
         }
       } else {
-        log.error(`Failed to stow ${config}`);
+        log.error(`Failed to configure ${config} via symlink fallback`);
       }
     }
   }

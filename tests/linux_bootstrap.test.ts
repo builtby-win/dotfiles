@@ -70,6 +70,18 @@ describe('Linux bootstrap workflow', () => {
     expect(content).not.toContain('cargo install starship --locked');
   });
 
+  it('falls back gracefully when Linux package manager is unavailable', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('Skipping ${name}: no supported Linux package manager and no curl installer is configured');
+  });
+
+  it('uses direct symlink fallback for configs when stow is unavailable', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('Falling back to direct symlinks for selected configs');
+    expect(content).toContain('setupConfigWithoutStow');
+    expect(content).toContain('configured via symlink fallback');
+  });
+
   it('keeps unsupported Linux GUI app suggestions out of setup defaults', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     expect(content).toContain('value: "vscode"');
