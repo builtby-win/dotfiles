@@ -80,6 +80,7 @@ describe("Fresh Ubuntu install", () => {
 
     expect(nodeSetup.ensureNodeAndPnpm()).toBe(true);
     expect(commandLog.some((c) => c.includes("fnm install --lts"))).toBe(true);
+    expect(commandLog.some((c) => c.includes("fnm default lts-latest"))).toBe(true);
   });
 
   it("installs fnm then uses it for node", () => {
@@ -111,6 +112,7 @@ describe("Fresh Ubuntu install", () => {
     expect(nodeSetup.installNode()).toBe(true);
     expect(commandLog.some((c) => c.includes("fnm.vercel.app/install | bash"))).toBe(true);
     expect(commandLog.some((c) => c.includes("fnm install --lts"))).toBe(true);
+    expect(commandLog.some((c) => c.includes("fnm default lts-latest"))).toBe(true);
   });
 });
 

@@ -219,14 +219,18 @@ fi
 
 # Install Node.js via fnm
 print_debug "Checking for Node.js..."
-if ! command -v node &> /dev/null; then
-  echo "  Installing Node.js..."
-  print_debug "Installing Node.js LTS..."
-  fnm install --lts || { print_error "Failed to install Node.js"; exit 1; }
+if command -v fnm &> /dev/null; then
+  echo "  Ensuring Node.js LTS is configured via fnm..."
+  print_debug "Installing and selecting Node.js LTS..."
+  fnm install --lts || { print_error "Failed to install Node.js LTS"; exit 1; }
+  fnm default lts-latest || { print_error "Failed to set default Node.js LTS"; exit 1; }
   fnm use lts-latest || { print_error "Failed to use Node.js LTS"; exit 1; }
-  print_success "Node.js installed"
-else
+  print_success "Node.js ready ($(node -v))"
+elif command -v node &> /dev/null; then
   print_success "Node.js already installed ($(node -v))"
+else
+  print_error "Node.js is not available and fnm is not installed"
+  exit 1
 fi
 
 # Install pnpm if not present

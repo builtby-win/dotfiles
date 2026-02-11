@@ -88,14 +88,15 @@ export function createNodeSetup(deps: NodeSetupDeps): NodeSetupAPI {
   }
 
   function installNode(): boolean {
-    if (sys.runCommand("command -v node", true)) {
-      return true;
-    }
-
-    log.step("Installing Node.js...");
+    const nodeAlreadyInstalled = sys.runCommand("command -v node", true);
 
     if (sys.runCommand("command -v fnm", true)) {
-      if (sys.runCommand("fnm install --lts") && sys.runCommand("fnm use lts-latest")) {
+      log.step("Installing Node.js LTS via fnm...");
+      if (
+        sys.runCommand("fnm install --lts") &&
+        sys.runCommand("fnm default lts-latest") &&
+        sys.runCommand("fnm use lts-latest")
+      ) {
         if (sys.runCommand("command -v node", true)) {
           log.success("Node.js installed via fnm");
           return true;
@@ -104,6 +105,12 @@ export function createNodeSetup(deps: NodeSetupDeps): NodeSetupAPI {
       log.error("Failed to install Node.js via fnm");
       return false;
     }
+
+    if (nodeAlreadyInstalled) {
+      return true;
+    }
+
+    log.step("Installing Node.js...");
 
     if (installLinuxPackages(["nodejs", "npm"])) {
       if (sys.runCommand("command -v node", true)) {

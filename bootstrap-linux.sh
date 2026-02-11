@@ -168,7 +168,9 @@ fi
 
 if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd --shell bash)" 2>/dev/null || true
-  command -v node >/dev/null 2>&1 || { fnm install --lts && fnm use lts-latest; }
+  fnm install --lts >/dev/null 2>&1 || { print_error "Failed to install Node.js LTS via fnm"; exit 1; }
+  fnm default lts-latest >/dev/null 2>&1 || { print_error "Failed to set fnm default Node.js version"; exit 1; }
+  fnm use lts-latest >/dev/null 2>&1 || { print_error "Failed to activate Node.js LTS via fnm"; exit 1; }
 fi
 
 if ! command -v node >/dev/null 2>&1; then

@@ -150,15 +150,42 @@ describe("createNodeSetup", () => {
   });
 
   describe("installNode()", () => {
-    it("skips if node already installed", () => {
+    it("skips if node already installed and fnm is unavailable", () => {
       const deps = mockDeps({
         sys: {
-          runCommand: (cmd) => cmd === "command -v node",
+          runCommand: (cmd) => {
+            if (cmd === "command -v node") return true;
+            if (cmd === "command -v fnm") return false;
+            return false;
+          },
           getCommandOutput: () => null,
         },
       });
       const api = createNodeSetup(deps);
       expect(api.installNode()).toBe(true);
+    });
+
+    it("uses fnm LTS and sets it as default even when node is already installed", () => {
+      const commandsRun: string[] = [];
+      const deps = mockDeps({
+        sys: {
+          runCommand: (cmd) => {
+            commandsRun.push(cmd);
+            if (cmd === "command -v fnm") return true;
+            if (cmd === "fnm install --lts") return true;
+            if (cmd === "fnm default lts-latest") return true;
+            if (cmd === "fnm use lts-latest") return true;
+            if (cmd === "command -v node") return true;
+            return false;
+          },
+          getCommandOutput: () => null,
+        },
+      });
+      const api = createNodeSetup(deps);
+      expect(api.installNode()).toBe(true);
+      expect(commandsRun).toContain("fnm install --lts");
+      expect(commandsRun).toContain("fnm default lts-latest");
+      expect(commandsRun).toContain("fnm use lts-latest");
     });
 
     it("uses fnm when available", () => {
@@ -170,6 +197,7 @@ describe("createNodeSetup", () => {
             if (cmd === "command -v node" && commandsRun.filter((c) => c === "command -v node").length === 1) return false;
             if (cmd === "command -v fnm") return true;
             if (cmd === "fnm install --lts") return true;
+            if (cmd === "fnm default lts-latest") return true;
             if (cmd === "fnm use lts-latest") return true;
             if (cmd === "command -v node") return true;
             return false;
@@ -180,6 +208,7 @@ describe("createNodeSetup", () => {
       const api = createNodeSetup(deps);
       expect(api.installNode()).toBe(true);
       expect(commandsRun).toContain("fnm install --lts");
+      expect(commandsRun).toContain("fnm default lts-latest");
       expect(commandsRun).toContain("fnm use lts-latest");
     });
 

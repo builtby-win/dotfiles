@@ -111,6 +111,13 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('curl -fsSL https://fnm.vercel.app/install | bash');
   });
 
+  it('sets fnm LTS as default before pnpm setup', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('fnm install --lts');
+    expect(content).toContain('fnm default lts-latest');
+    expect(content).toContain('fnm use lts-latest');
+  });
+
   it('keeps startup tips focused on shell tooling', () => {
     const content = fs.readFileSync(tipsPath, 'utf-8');
     expect(content).not.toContain('Hammerspoon');
