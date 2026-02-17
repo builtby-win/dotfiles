@@ -2,11 +2,8 @@
 
 ## Phase 1: Core Logic & Script Cleanup
 - [x] Task: Remove `beads` from `lib/manifest.ts` 550ad48
-- [~] Task: Remove `beads` detection and installation from `setup.ts`
-    - [ ] Write failing test in `tests/node-setup.test.ts` (or similar) to ensure `beads` is not in the feature list
-    - [ ] Remove `isBeadsFeatureActive` and references to `beads` in `setup.ts`
-    - [ ] Run tests to verify
-- [ ] Task: Clean up shell initialization
+- [x] Task: Remove `beads` detection and installation from `setup.ts` 73e41de
+- [~] Task: Clean up shell initialization
     - [ ] Remove beads sourcing logic from `shell/init.sh`
     - [ ] Delete `shell/experimental/beads.sh` if it exists
     - [ ] Delete any other standalone `beads.sh` files found in `shell/`
