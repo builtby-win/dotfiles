@@ -1,13 +1,18 @@
+# [CATEGORY] Task: Description + Shortcut
 # Keep tips short and actionable. Lines starting with # are ignored.
 
-Tmux: Leader+Space opens the sesh session picker.
-Tmux: Leader+f triggers tmux-fingers quick copy; Leader+v enters copy mode.
-Tmux: new window is Leader+t or Alt+c.
-Reload tmux config anytime with: tmux source-file ~/.tmux.conf
-Install shell modules with: bb setup shell && bb setup tmux
-Show a new tip on demand with: bb tip
-See what you installed with: bb status
-Update dotfiles with: bb update
-Create and enter a folder quickly with: mkcd <dir>
-Extract archives with: extract <file>
-Link AI agent configs into a repo with: agent-link all
+[TMUX] Session Picker: Fuzzy find and connect to sessions + Leader + Space
+[TMUX] New Window: Create a new window in the current path + Leader + t (or Alt + c)
+[TMUX] Vertical Split: Create a side-by-side pane + Leader + d (or Alt + \)
+[TMUX] Horizontal Split: Create a stacked pane + Leader + D (or Alt + -)
+[TMUX] Close Pane: Kill the current active pane + Leader + x (or Alt + w)
+[TMUX] Zoom Pane: Toggle current pane to full screen + Leader + z
+[TMUX] Copy Mode: Enter vi-mode to scroll and select text + Leader + v
+[TMUX] Command Palette: Fuzzy find all tmux commands + Leader + /
+[TMUX] Break Pane: Move current pane to its own window + Leader + !
+[TMUX] Swap Pane: Reorder panes by swapping with neighbor + Leader + > or <
+[TMUX] Resize Panes: Grow or shrink panes by 5 cells + Alt + Arrow Keys
+[TMUX] Quick Switch: Toggle back to the last active session + Leader + Tab
+[SHELL] Smart Directory: Create and enter a folder in one go + mkcd <dir>
+[SHELL] Update All: Sync dotfiles and update all packages + bb update
+[SHELL] Agent Link: Link AI configs into any repository + agent-link all
