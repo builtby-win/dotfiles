@@ -14,5 +14,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Refresh terminal tips, remap Cmd+C to yank/copy, and enhance the tmux command palette.**
+- [x] **Track: Refresh terminal tips, remap Cmd+C to yank/copy, and enhance the tmux command palette.**
   *Link: [./tracks/terminal_workflow_revamp_20260216/](./tracks/terminal_workflow_revamp_20260216/)*
