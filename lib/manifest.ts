@@ -21,7 +21,6 @@ export interface SetupManifest {
   apps: string[]; // ["ghostty", "vscode", ...]
   configs: string[]; // ["zsh", "tmux", ...]
   features: {
-    beads?: boolean;
     ai_configs?: boolean;
     [key: string]: boolean | undefined;
   };
