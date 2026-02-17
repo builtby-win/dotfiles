@@ -1,11 +1,8 @@
 # Implementation Plan: Remove Beads & Implement Tmux Pane Dimming
 
 ## Phase 1: Core Logic & Script Cleanup
-- [ ] Task: Remove `beads` from `lib/manifest.ts`
-    - [ ] Write failing test in `tests/manifest.test.ts` to ensure `beads` property is no longer expected
-    - [ ] Remove `beads?: boolean;` from `lib/manifest.ts`
-    - [ ] Run tests to verify removal
-- [ ] Task: Remove `beads` detection and installation from `setup.ts`
+- [x] Task: Remove `beads` from `lib/manifest.ts` 550ad48
+- [~] Task: Remove `beads` detection and installation from `setup.ts`
     - [ ] Write failing test in `tests/node-setup.test.ts` (or similar) to ensure `beads` is not in the feature list
     - [ ] Remove `isBeadsFeatureActive` and references to `beads` in `setup.ts`
     - [ ] Run tests to verify
