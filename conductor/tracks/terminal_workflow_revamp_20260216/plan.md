@@ -1,6 +1,6 @@
 # Implementation Plan: Terminal Workflow & Tips Revamp
 
-## Phase 1: Terminal Tips Content Refresh
+## Phase 1: Terminal Tips Content Refresh [checkpoint: ba0bc51]
 Focus on updating the content and structure of the tips system to provide high-value, actionable advice.
 
 - [x] Task: Red Phase - Write failing tests for tips format validation 2eef715
