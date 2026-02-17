@@ -13,7 +13,7 @@ Focus on updating the content and structure of the tips system to provide high-v
 
 ## Phase 2: Tmux Keybindings & Clipboard Integration [checkpoint: 1a25ae7]
 
-## Phase 3: Command Palette Enhancements & UI Polish
+## Phase 3: Command Palette Enhancements & UI Polish [checkpoint: 4c0dfc4]
 Refine the command palette content to include new shortcuts and significantly improve readability using columns and colors.
 
 - [x] Task: Red Phase - Write failing tests for command palette UI/Content 39fc962
