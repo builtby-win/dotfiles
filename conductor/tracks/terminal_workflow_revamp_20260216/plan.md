@@ -11,32 +11,18 @@ Focus on updating the content and structure of the tips system to provide high-v
     - [x] Run tests and verify success.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Terminal Tips Content Refresh' (Protocol in workflow.md)
 
-## Phase 2: Tmux Keybindings & Clipboard Integration
-Adjust `.tmux.conf` to improve ergonomics, fix the `Cmd+C` conflict, and add pane swapping.
-
-- [x] Task: Red Phase - Write failing tests for tmux configuration verification 3abf36c
-    - [x] Create a test in `tests/tmux_config.test.ts` that parses `.tmux.conf` to verify:
-        - `M-c` is NOT bound to `new-window`.
-        - `M-c` is bound to a copy-pipe command.
-        - `Leader + /` is bound to the command palette.
-        - `>` and `<` are bound to `swap-pane`.
-    - [x] Run tests and verify failure.
-- [x] Task: Green Phase - Implement keybinding changes in `stow-packages/tmux/.tmux.conf` 55b5798
-    - [x] Unbind `M-c` from `new-window`.
-    - [x] Map `M-c` to copy the selection to the system clipboard (using `pbcopy`).
-    - [x] Add `bind -r > swap-pane -D` and `bind -r < swap-pane -U`.
-    - [x] Rebind the command palette from `Leader + p` to `Leader + /`.
-    - [x] Run tests and verify success.
-- [x] Task: Conductor - User Manual Verification 'Phase 2: Tmux Keybindings & Clipboard Integration' (Protocol in workflow.md)
+## Phase 2: Tmux Keybindings & Clipboard Integration [checkpoint: 1a25ae7]
 
 ## Phase 3: Command Palette Enhancements & UI Polish
-Refine the command palette content to include new shortcuts and ensure fuzzy matching works effectively.
+Refine the command palette content to include new shortcuts and significantly improve readability using columns and colors.
 
-- [ ] Task: Red Phase - Write failing tests for command palette content
-    - [ ] Update `tests/tmux_config.test.ts` to verify the new commands (`swap-pane`, `break-pane`) are present in the palette's internal list.
-    - [ ] Run tests and verify failure.
-- [ ] Task: Green Phase - Update the command palette script in `.tmux.conf`
-    - [ ] Add `break-pane-to-window` (Leader + !), `swap-pane-right` (Leader + >), and `swap-pane-left` (Leader + <) to the palette list.
-    - [ ] Ensure all descriptions are clear and categorized for better fuzzy searching.
-    - [ ] Run tests and verify success.
+- [x] Task: Red Phase - Write failing tests for command palette UI/Content 39fc962
+    - [x] Update `tests/tmux_config.test.ts` to verify the presence of new commands and the new `|` delimiter for columns.
+    - [x] Run tests and verify failure.
+- [x] Task: Green Phase - Implement UI readability improvements and new shortcuts in `.tmux.conf` 2c06b39
+    - [x] Update the command palette script to use a clean `CATEGORY | ACTION | SHORTCUT` format.
+    - [x] Add `fzf` flags (`--delimiter '|' --with-nth '1..3'`) for a table-like display.
+    - [x] Add new shortcuts: `break-pane` (Leader + !), `swap-pane` (Leader + > / <).
+    - [x] Run tests and verify success.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Command Palette & UI Polish' (Protocol in workflow.md)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Command Palette & UI Polish' (Protocol in workflow.md)
