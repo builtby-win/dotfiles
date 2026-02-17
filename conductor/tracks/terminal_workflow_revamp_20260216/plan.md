@@ -3,13 +3,13 @@
 ## Phase 1: Terminal Tips Content Refresh
 Focus on updating the content and structure of the tips system to provide high-value, actionable advice.
 
-- [ ] Task: Red Phase - Write failing tests for tips format validation
-    - [ ] Create `tests/tips_validation.test.ts` to ensure tips follow the `[Category] Task: Description + Shortcut` format and that comments/empty lines are handled.
-    - [ ] Run tests and verify failure.
-- [ ] Task: Green Phase - Update `shell/tips.txt` with high-quality content
-    - [ ] Replace existing content with at least 10 task-oriented tips covering pane management, sessions, and advanced tmux features.
-    - [ ] Run tests and verify success.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Terminal Tips Content Refresh' (Protocol in workflow.md)
+- [x] Task: Red Phase - Write failing tests for tips format validation 2eef715
+    - [x] Create `tests/tips_validation.test.ts` to ensure tips follow the `[Category] Task: Description + Shortcut` format and that comments/empty lines are handled.
+    - [x] Run tests and verify failure.
+- [x] Task: Green Phase - Update `shell/tips.txt` with high-quality content b312ed5
+    - [x] Replace existing content with at least 10 task-oriented tips covering pane management, sessions, and advanced tmux features.
+    - [x] Run tests and verify success.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Terminal Tips Content Refresh' (Protocol in workflow.md)
 
 ## Phase 2: Tmux Keybindings & Clipboard Integration
 Adjust `.tmux.conf` to improve ergonomics, fix the `Cmd+C` conflict, and add pane swapping.
