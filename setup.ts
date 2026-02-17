@@ -43,50 +43,7 @@ function autoDetectExistingSetup(): DetectedSetup {
     }
   }
 
-  // Detect beads feature - check if beads.sh is sourced in user's shell config
-  detected.features.beads = isBeadsFeatureActive();
-
   return detected;
-}
-
-/**
- * Check if beads feature is currently active in user's shell config.
- * Conservative: returns true only if we find explicit evidence.
- */
-function isBeadsFeatureActive(): boolean {
-  const HOME = homedir();
-  
-  // Check 1: Does ~/.zshrc source beads.sh from our dotfiles?
-  const zshrcPath = join(HOME, ".zshrc");
-  if (existsSync(zshrcPath)) {
-    try {
-      const content = readFileSync(zshrcPath, "utf-8");
-      // Check if it sources our init.sh which would load beads
-      if (content.includes("beads.sh") || content.includes("beads")) {
-        // But also check if there's a manifest with beads enabled already
-        // (this handles the case where they ran setup before but manifest got deleted)
-        return true;
-      }
-    } catch {
-      // Can't read, assume no
-    }
-  }
-
-  // Check 2: Is the beads command available? (npm package installed)
-  try {
-    execSync("command -v bd", { stdio: "pipe", encoding: "utf-8" });
-    return true;
-  } catch {
-    // Not installed
-  }
-
-  // Check 3: Does ~/.global-todos exist? (beads global repo)
-  const globalTodosPath = join(HOME, ".global-todos");
-  if (existsSync(globalTodosPath)) {
-    return true;
-  }
-
-  return false;
 }
 
 /**
@@ -521,12 +478,6 @@ const STOW_CONFIGS: StowConfig[] = [
 
 // Optional features (opt-in, don't load in shell unless selected)
 const OPTIONAL_FEATURES = [
-  { 
-    name: "Beads (Global Task Manager)", 
-    value: "beads", 
-    checked: false,
-    desc: "Global task aggregation across repositories - organize tasks from multiple projects"
-  },
   {
     name: "Shell Tips (Daily)",
     value: "tips",
