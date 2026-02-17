@@ -14,20 +14,20 @@ Focus on updating the content and structure of the tips system to provide high-v
 ## Phase 2: Tmux Keybindings & Clipboard Integration
 Adjust `.tmux.conf` to improve ergonomics, fix the `Cmd+C` conflict, and add pane swapping.
 
-- [ ] Task: Red Phase - Write failing tests for tmux configuration verification
-    - [ ] Create a test in `tests/tmux_config.test.ts` that parses `.tmux.conf` to verify:
+- [x] Task: Red Phase - Write failing tests for tmux configuration verification 3abf36c
+    - [x] Create a test in `tests/tmux_config.test.ts` that parses `.tmux.conf` to verify:
         - `M-c` is NOT bound to `new-window`.
         - `M-c` is bound to a copy-pipe command.
         - `Leader + /` is bound to the command palette.
         - `>` and `<` are bound to `swap-pane`.
-    - [ ] Run tests and verify failure.
-- [ ] Task: Green Phase - Implement keybinding changes in `stow-packages/tmux/.tmux.conf`
-    - [ ] Unbind `M-c` from `new-window`.
-    - [ ] Map `M-c` to copy the selection to the system clipboard (using `pbcopy`).
-    - [ ] Add `bind -r > swap-pane -D` and `bind -r < swap-pane -U`.
-    - [ ] Rebind the command palette from `Leader + p` to `Leader + /`.
-    - [ ] Run tests and verify success.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Tmux Keybindings & Clipboard Integration' (Protocol in workflow.md)
+    - [x] Run tests and verify failure.
+- [x] Task: Green Phase - Implement keybinding changes in `stow-packages/tmux/.tmux.conf` 55b5798
+    - [x] Unbind `M-c` from `new-window`.
+    - [x] Map `M-c` to copy the selection to the system clipboard (using `pbcopy`).
+    - [x] Add `bind -r > swap-pane -D` and `bind -r < swap-pane -U`.
+    - [x] Rebind the command palette from `Leader + p` to `Leader + /`.
+    - [x] Run tests and verify success.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Tmux Keybindings & Clipboard Integration' (Protocol in workflow.md)
 
 ## Phase 3: Command Palette Enhancements & UI Polish
 Refine the command palette content to include new shortcuts and ensure fuzzy matching works effectively.
