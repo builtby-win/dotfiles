@@ -1,0 +1,8 @@
+{
+  "track_id": "terminal_workflow_revamp_20260216",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-16T12:00:00Z",
+  "updated_at": "2026-02-16T12:00:00Z",
+  "description": "Refresh terminal tips, remap Cmd+C to yank/copy, and enhance the tmux command palette."
+}

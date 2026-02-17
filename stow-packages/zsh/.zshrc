@@ -27,3 +27,6 @@ esac
 
 # Added by Antigravity
 export PATH="/Users/winstonzhao/.antigravity/antigravity/bin:$PATH"
+
+# opencode
+export PATH=/Users/winstonzhao/.opencode/bin:$PATH

@@ -3,10 +3,7 @@
 ## Phase 1: Core Logic & Script Cleanup
 - [x] Task: Remove `beads` from `lib/manifest.ts` 550ad48
 - [x] Task: Remove `beads` detection and installation from `setup.ts` 73e41de
-- [~] Task: Clean up shell initialization
-    - [ ] Remove beads sourcing logic from `shell/init.sh`
-    - [ ] Delete `shell/experimental/beads.sh` if it exists
-    - [ ] Delete any other standalone `beads.sh` files found in `shell/`
+- [x] Task: Clean up shell initialization ae4ffd0
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Core Logic & Script Cleanup' (Protocol in workflow.md)
 
 ## Phase 2: Documentation Refresh
