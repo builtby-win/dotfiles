@@ -22,7 +22,7 @@ tmux source-file ~/.tmux.conf
 
 ## Prefix
 
-- Prefix is `Ctrl+.`
+- Prefix is `Ctrl+b`
 - With Karabiner in terminals, hold `j+k` to send the prefix
 
 ## Sessions

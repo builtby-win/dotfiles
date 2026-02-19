@@ -23,7 +23,7 @@ Manual sync and restart:
 
 ## Key mappings
 
-- `j` + `k` held together in terminals sends tmux prefix (`Ctrl+.`)
+- `j` + `k` held together in terminals sends tmux prefix (`Ctrl+b`)
 - `Caps Lock` and `Fn` become `Control`
 - `Delete` (forward delete) becomes `Escape`
 - Double semicolon (`;;`) opens AltTab (Ctrl+Opt+Tab)

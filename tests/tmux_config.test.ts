@@ -31,4 +31,9 @@ describe("stow-packages/tmux/.tmux.conf verification", () => {
     expect(content).toContain("Swap Pane Left");
     expect(content).toContain("Break Pane to Window");
   });
+
+  it("should use Ctrl+b as the prefix", () => {
+    expect(content).toMatch(/set -g prefix 'C-b'/);
+    expect(content).toMatch(/bind 'C-b' send-prefix/);
+  });
 });

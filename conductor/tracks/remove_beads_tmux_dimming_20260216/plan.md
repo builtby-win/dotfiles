@@ -7,15 +7,15 @@
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Core Logic & Script Cleanup' (Protocol in workflow.md)
 
 ## Phase 2: Documentation Refresh
-- [ ] Task: Remove beads references from main project documentation
-    - [ ] Update `AGENTS.md` to remove `beads` (bd) instructions
-    - [ ] Update `README.md` to remove `beads` from core features
-- [ ] Task: Update agent-specific instructions
-    - [ ] Remove `beads` section from `agents/gemini/GEMINI.md`
-    - [ ] Remove `beads` section from `agents/claude/CLAUDE.md`
-    - [ ] Remove `beads` section from `agents/shared/base.md`
-    - [ ] Remove `beads` section from `agents/opencode/AGENTS.md`
-    - [ ] Remove `beads` from `agents/README.md`
+- [x] Task: Remove beads references from main project documentation
+    - [x] Update `AGENTS.md` to remove `beads` (bd) instructions
+    - [x] Update `README.md` to remove `beads` from core features
+- [x] Task: Update agent-specific instructions
+    - [x] Remove `beads` section from `agents/gemini/GEMINI.md`
+    - [x] Remove `beads` section from `agents/claude/CLAUDE.md`
+    - [x] Remove `beads` section from `agents/shared/base.md`
+    - [x] Remove `beads` section from `agents/opencode/AGENTS.md`
+    - [x] Remove `beads` from `agents/README.md`
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Documentation Refresh' (Protocol in workflow.md)
 
 ## Phase 3: Tmux Visual Enhancement

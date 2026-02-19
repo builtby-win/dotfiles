@@ -61,7 +61,7 @@ This is ideal if you want to add pieces over time.
 | Module | Install | Notes | Docs |
 | --- | --- | --- | --- |
 | Shell (zsh) | `bb setup shell` | zinit, starship, aliases, PATH | `docs/modules/shell.md` |
-| Tmux | `bb setup tmux` | prefix Ctrl+. and sesh integration | `docs/modules/tmux.md` |
+| Tmux | `bb setup tmux` | prefix Ctrl+b and sesh integration | `docs/modules/tmux.md` |
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS only, jk to tmux prefix | `docs/modules/karabiner.md` |
 | Ghostty | `bb setup ghostty` | terminal config | `docs/modules/ghostty.md` |
@@ -81,7 +81,7 @@ bb tip
 Example tip:
 
 ```
-Karabiner + tmux: hold j+k to send the tmux prefix (Ctrl+.). Enable with: bb setup karabiner
+Karabiner + tmux: hold j+k to send the tmux prefix (Ctrl+b). Enable with: bb setup karabiner
 ```
 
 ## Update and revert
@@ -108,7 +108,7 @@ bb status
 
 ## Key defaults (tmux + karabiner)
 
-- tmux prefix: `Ctrl+.`
+- tmux prefix: `Ctrl+b`
 - with Karabiner in terminals: hold `j+k` to send the prefix
 - tmux-fingers: `Leader+f`
 - copy mode: `Leader+v`

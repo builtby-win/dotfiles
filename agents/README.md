@@ -56,6 +56,5 @@ agents/
 Edit `shared/base.md` for rules that apply to ALL agents:
 
 - Git workflow (push, sync, etc.)
-- Issue tracking (beads)
 - Code style preferences
 - Project-specific conventions

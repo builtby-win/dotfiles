@@ -1,8 +1,8 @@
 {
   "track_id": "remove_beads_tmux_dimming_20260216",
   "type": "chore",
-  "status": "new",
+  "status": "in_progress",
   "created_at": "2026-02-16T12:00:00Z",
-  "updated_at": "2026-02-16T12:00:00Z",
+  "updated_at": "2026-02-17T12:00:00Z",
   "description": "we should remove our beads implementation we aren't using it anymore. i want to also make it so that tmux panes that are active are the full color and any tmux pane that is not in focus is like "greyed" out with some opacity very slightly."
 }

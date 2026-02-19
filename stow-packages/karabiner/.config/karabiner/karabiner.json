@@ -69,7 +69,7 @@
                         ]
                     },
                     {
-                        "description": "jk held together → Ctrl+. (tmux prefix) in terminals",
+                        "description": "jk held together → Ctrl+b (tmux prefix) in terminals",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -102,7 +102,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "period",
+                                        "key_code": "b",
                                         "modifiers": [
                                             "control"
                                         ]

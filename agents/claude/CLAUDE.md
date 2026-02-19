@@ -3,31 +3,18 @@
 <!-- This file is symlinked from builtby.win/dotfiles -->
 <!-- Edit the source at: dotfiles/agents/claude/CLAUDE.md -->
 
-## Issue Tracking
-
-This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id>         # Complete work
-bd sync               # Sync with git
-```
-
 ## Session Completion
 
 **When ending a work session**, complete ALL steps. Work is NOT complete until `git push` succeeds.
 
 1. File issues for remaining work
 2. Run quality gates (if code changed)
-3. Update issue status
-4. **PUSH TO REMOTE**:
+3. **PUSH TO REMOTE**:
    ```bash
-   git pull --rebase && bd sync && git push
+   git pull --rebase && git push
    git status  # MUST show "up to date with origin"
    ```
-5. Clean up stashes, verify all pushed
+4. Clean up stashes, verify all pushed
 
 **Critical**: NEVER stop before pushing. YOU must push, not the user.
 
