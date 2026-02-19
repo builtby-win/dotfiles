@@ -11,7 +11,7 @@ add_newline = true
 # Prompt format - clean and minimal
 format = """
 $directory\
-$git_branch\
+${custom.worktree}\
 $git_status\
 $nodejs\
 $python\
@@ -28,10 +28,29 @@ truncation_length = 3
 truncate_to_repo = true
 style = "bold blue"
 
+# Git worktree context
+[custom.worktree]
+when = "git rev-parse --is-inside-work-tree >/dev/null 2>&1"
+command = '''
+git_dir=$(git rev-parse --git-dir 2>/dev/null) || exit 0
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+case "$git_dir" in
+  */worktrees/*)
+    worktree_name=${repo_root##*/}
+    printf " %s" "$worktree_name"
+    ;;
+  *)
+    branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null) || exit 0
+    printf "%s" "$branch"
+    ;;
+esac
+'''
+format = "[$output]($style) "
+style = "bold purple"
+
 # Git branch
 [git_branch]
-symbol = " "
-style = "bold purple"
+disabled = true
 
 # Git status
 [git_status]
