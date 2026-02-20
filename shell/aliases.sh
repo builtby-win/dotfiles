@@ -40,6 +40,10 @@ alias bname='git rev-parse --abbrev-ref HEAD'
 alias ggwip="git add . && git commit -m 'wip' --no-verify"
 alias unwip="git reset --soft HEAD~1"
 
+# Back2Vibing
+alias vibe="back2vibing"
+alias vb="back2vibing"
+
 # Ship it!
 alias shipit='echo "       _~\n    _~ )_)_~\n    )_))_))_)\n    _!__!__!_\n    \______t/\n  ~~~~~~~~~~~~~" && git push origin $(git rev-parse --abbrev-ref HEAD 2> /dev/null)'
 alias SHIPIT='echo "       _~\n    _~ )_)_~\n    )_))_))_)\n    _!__!__!_\n    \______t/\n  ~~~~~~~~~~~~~" && git push --force-with-lease origin $(git rev-parse --abbrev-ref HEAD 2> /dev/null)'
@@ -64,13 +68,21 @@ if command -v bat &> /dev/null; then
   alias cat="bat"
 fi
 
-# Smart tmux - auto-names sessions after current directory
+# Smart tmux - uses sesh if installed, otherwise auto-names session
 # Usage: `tmux` in ~/code/myproject creates session named "myproject"
 tmux() {
-  if [[ $# -eq 0 ]]; then
-    local session_name="${PWD##*/}"
-    command tmux new-session -A -s "$session_name"
+  if command -v sesh &> /dev/null; then
+    if [[ $# -eq 0 ]]; then
+      sesh connect .
+    else
+      command tmux "$@"
+    fi
   else
-    command tmux "$@"
+    if [[ $# -eq 0 ]]; then
+      local session_name="${PWD##*/}"
+      command tmux new-session -A -s "$session_name"
+    else
+      command tmux "$@"
+    fi
   fi
 }

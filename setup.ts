@@ -322,6 +322,9 @@ const HOME = homedir();
 const MANIFEST_PATH = join(DOTFILES_DIR, ".backup-manifest.json");
 const DOTFILES_CONFIG_DIR = join(HOME, ".config", "dotfiles");
 const DOTFILES_PATH_FILE = join(DOTFILES_CONFIG_DIR, "path");
+const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "bootstrap.basic.conf");
+const TMUX_MERGE_MARKER_START = "# === Added from builtby.win/dotfiles (tmux) ===";
+const TMUX_MERGE_MARKER_END = "# === End builtby.win/dotfiles (tmux) ===";
 
 // Backup manifest to track all backups
 interface BackupEntry {
@@ -421,6 +424,7 @@ const APPS: App[] = [
   { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat", category: "cli" },
   { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza", category: "cli" },
   { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide", category: "cli" },
+  { name: "sesh", value: "sesh", brewName: "sesh", desc: "Smart session manager for tmux", url: "https://github.com/joshmedeski/sesh", category: "cli" },
   { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
 
   // Terminals & Editors
@@ -434,6 +438,7 @@ const APPS: App[] = [
   { name: "OpenCode", value: "opencode", brewName: "", checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: false, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
+  { name: "Back2Vibing", value: "back2vibing", brewName: "builtby-win/back2vibing/back2vibing", cask: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -469,7 +474,7 @@ interface StowConfig {
 
 const STOW_CONFIGS: StowConfig[] = [
   { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
-  { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "vim-style bindings, mouse support, sesh integration" },
+  { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "core profile + optional basic keymap, preserves existing setups" },
   { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
@@ -929,7 +934,13 @@ function writeDotfilesPath(): void {
 // Map stow package names to their target files (for conflict detection)
 const STOW_TARGETS: Record<string, string[]> = {
   zsh: [".zshrc", ".config/starship.toml"],
-  tmux: [".tmux.conf"],
+  tmux: [
+    ".config/tmux/builtby/core.conf",
+    ".config/tmux/builtby/basic.conf",
+    ".config/tmux/builtby/pro.conf",
+    ".config/tmux/builtby/bootstrap.basic.conf",
+    ".config/tmux/builtby/bootstrap.pro.conf",
+  ],
   hammerspoon: [".hammerspoon/init.lua"],
   karabiner: [".config/karabiner/karabiner.json"],
   ghostty: process.platform === "darwin"
@@ -987,6 +998,101 @@ function setupConfigWithoutStow(config: string, targets: string[], stowPackages:
   return configured;
 }
 
+function upsertTmuxMergeBlock(content: string): string {
+  const block = [
+    TMUX_MERGE_MARKER_START,
+    `if-shell '[ -f "$HOME/.config/tmux/builtby/bootstrap.pro.conf" ]' 'source-file "$HOME/.config/tmux/builtby/bootstrap.pro.conf"'`,
+    TMUX_MERGE_MARKER_END,
+  ].join("\n");
+
+  const startIdx = content.indexOf(TMUX_MERGE_MARKER_START);
+  const endIdx = content.indexOf(TMUX_MERGE_MARKER_END);
+  let next = content;
+
+  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+    next = content.slice(0, startIdx) + content.slice(endIdx + TMUX_MERGE_MARKER_END.length);
+  }
+
+  if (next && !next.endsWith("\n")) {
+    next += "\n";
+  }
+
+  return `${next}\n${block}\n`;
+}
+
+async function setupTmuxEntrypoint(): Promise<boolean> {
+  const tmuxConfPath = join(HOME, ".tmux.conf");
+
+  if (!existsSync(tmuxConfPath)) {
+    try {
+      const stats = lstatSync(tmuxConfPath);
+      if (stats.isSymbolicLink()) {
+        unlinkSync(tmuxConfPath);
+        log.info("Removed stale ~/.tmux.conf symlink");
+      }
+    } catch {
+      // Path truly does not exist.
+    }
+  }
+
+  if (!existsSync(tmuxConfPath)) {
+    if (!existsSync(TMUX_BOOTSTRAP_BASIC_SOURCE)) {
+      log.warning("tmux bootstrap.basic.conf not found - skipping ~/.tmux.conf setup");
+      return false;
+    }
+
+    const content = readFileSync(TMUX_BOOTSTRAP_BASIC_SOURCE, "utf-8");
+    writeFileSync(tmuxConfPath, content);
+    log.success("Created ~/.tmux.conf with builtby basic profile");
+    return true;
+  }
+
+  const currentContent = readFileSync(tmuxConfPath, "utf-8");
+  if (
+    currentContent.includes(TMUX_MERGE_MARKER_START) ||
+    currentContent.includes("bootstrap.basic.conf") ||
+    currentContent.includes("bootstrap.pro.conf")
+  ) {
+    log.success("~/.tmux.conf already includes builtby tmux integration");
+    return true;
+  }
+
+  log.warning("~/.tmux.conf already exists");
+  const choice = await select({
+    message: "How should we integrate tmux config?",
+    choices: [
+      { name: "Keep my existing keybinds (recommended)", value: "append-pro" as const },
+      { name: "Replace with builtby basic profile (backup mine first)", value: "replace-basic" as const },
+      { name: "Skip tmux config changes", value: "skip" as const },
+    ],
+  });
+
+  if (choice === "skip") {
+    log.info("Skipping tmux config changes");
+    return false;
+  }
+
+  const backupPath = backupFile(tmuxConfPath);
+  addToManifest({ original: tmuxConfPath, backup: backupPath, type: "file" });
+
+  if (choice === "replace-basic") {
+    if (!existsSync(TMUX_BOOTSTRAP_BASIC_SOURCE)) {
+      log.error("tmux bootstrap.basic.conf not found");
+      return false;
+    }
+
+    const content = readFileSync(TMUX_BOOTSTRAP_BASIC_SOURCE, "utf-8");
+    writeFileSync(tmuxConfPath, content);
+    log.success("Replaced ~/.tmux.conf with builtby basic profile");
+    return true;
+  }
+
+  const merged = upsertTmuxMergeBlock(currentContent);
+  writeFileSync(tmuxConfPath, merged);
+  log.success("Appended builtby tmux pro bootstrap without replacing your keybinds");
+  return true;
+}
+
 async function setupStowConfigs(configs: string[]): Promise<void> {
   if (configs.length === 0) return;
 
@@ -1014,6 +1120,14 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
     if (!targets) {
       log.warning(`Unknown stow package: ${config}`);
       continue;
+    }
+
+    if (config === "tmux") {
+      const shouldContinue = await setupTmuxEntrypoint();
+      if (!shouldContinue) {
+        log.info("Skipping tmux package setup");
+        continue;
+      }
     }
 
     // Check if the stow package exists
@@ -1378,9 +1492,9 @@ const MERGEABLE_CONFIGS: MergeableConfig[] = [
   },
   {
     name: "Tmux Config",
-    description: "Vim-style bindings, mouse support, better splits",
+    description: "Core profile plus optional basic keymap",
     userPath: join(HOME, ".tmux.conf"),
-    dotfilesPath: join(DOTFILES_DIR, "stow-packages", "tmux", ".tmux.conf"),
+    dotfilesPath: join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "bootstrap.basic.conf"),
     type: "config",
   },
   {
@@ -1796,64 +1910,92 @@ async function runSetup(): Promise<void> {
                              detectedConfigsOnPlatform.length > 0 || 
                              detectedFeaturesList.length > 0;
 
+    console.log(`${colors.cyan}${colors.bold}Welcome to builtby.win/dotfiles!${colors.reset}`);
+    console.log(`${colors.dim}This interactive setup will help you configure your development environment.${colors.reset}`);
+    console.log("");
+
+    const firstRunChoices = [];
+    
     if (hasDetectedItems) {
-      console.log(`${colors.cyan}${colors.bold}🔍 First run detected - found existing setup:${colors.reset}`);
-      console.log("");
-
-      // Show detected apps
-      if (detectedAppsOnPlatform.length > 0) {
-        console.log(`  ${colors.bold}${installItemLabel[0].toUpperCase() + installItemLabel.slice(1)} already installed:${colors.reset} ${detectedAppsOnPlatform.length}`);
-        const appNames = detectedAppsOnPlatform
-          .map(v => APPS.find(a => a.value === v)?.name)
-          .filter(Boolean)
-          .join(", ");
-        console.log(`    ${colors.dim}${appNames}${colors.reset}`);
-      }
-
-      // Show detected configs
-      if (detectedConfigsOnPlatform.length > 0) {
-        console.log(`  ${colors.bold}Configs already linked:${colors.reset} ${detectedConfigsOnPlatform.length}`);
-        const configNames = detectedConfigsOnPlatform
-          .map(v => STOW_CONFIGS.find(c => c.value === v)?.name)
-          .filter(Boolean)
-          .join(", ");
-        console.log(`    ${colors.dim}${configNames}${colors.reset}`);
-      }
-
-      // Show detected features
-      if (detectedFeaturesList.length > 0) {
-        console.log(`  ${colors.bold}Features detected:${colors.reset} ${detectedFeaturesList.length}`);
-        const featureNames = detectedFeaturesList
-          .map(v => OPTIONAL_FEATURES.find(f => f.value === v)?.name || v)
-          .join(", ");
-        console.log(`    ${colors.dim}${featureNames}${colors.reset}`);
-      }
-
-      console.log("");
-
-      const useDetected = await select({
-        message: "Should I use these as your settings?",
-        choices: [
-          { name: "Yes, use detected settings", value: "use" },
-          { name: "Let me customize", value: "customize" },
-        ],
+      firstRunChoices.push({ 
+        name: `🚀 Use Detected Setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`, 
+        value: "use_detected",
+        description: "Adopts the apps and configs already found on your system."
       });
+    }
+    
+    firstRunChoices.push({ 
+      name: "🚀 Focused Setup (Back2Vibing)", 
+      value: "focus",
+      description: "Optimized for productivity: Installs Back2Vibing, tmux, sesh, fzf, and Ghostty."
+    });
+    
+    firstRunChoices.push({ 
+      name: "⭐ Standard Setup (Recommended)", 
+      value: "standard",
+      description: "Fast track: Installs the 'bb' helper, core aliases, and essential CLI tools (tmux, fzf, etc)."
+    });
 
-      if (useDetected === "use") {
-        // Pre-populate selections with detected items
-        selectedApps = detectedAppsOnPlatform;
-        selectedStowConfigs = detectedConfigsOnPlatform;
-        selectedFeatures = detectedFeaturesList;
-        skipToRecap = true;
-        currentStep = 4; // Jump to recap step
-        console.log("");
-        log.success("Using detected settings");
-        console.log("");
-      } else {
-        console.log("");
-        log.info("Proceeding to manual selection...");
-        console.log("");
-      }
+    firstRunChoices.push({ 
+      name: "🌱 Minimal Setup (Shell only)", 
+      value: "minimal",
+      description: "Just the foundation: Installs aliases, 'bb' helper, starship, and shell config."
+    });
+    
+    firstRunChoices.push({ 
+      name: "🛠️  Custom Setup", 
+      value: "customize",
+      description: "Pick and choose exactly which apps, configs, and features you want."
+    });
+
+    // Support --focus flag
+    const isFocusFlag = process.argv.includes("--focus");
+    const setupPath = isFocusFlag ? "focus" : await select({
+      message: "How would you like to proceed?",
+      choices: firstRunChoices,
+      default: hasDetectedItems ? "use_detected" : "standard",
+    });
+
+    if (setupPath === "use_detected") {
+      selectedApps = detectedAppsOnPlatform;
+      selectedStowConfigs = detectedConfigsOnPlatform;
+      selectedFeatures = detectedFeaturesList;
+      skipToRecap = true;
+      currentStep = 4;
+      console.log("");
+      log.success("Using detected settings");
+      console.log("");
+    } else if (setupPath === "focus") {
+      selectedApps = ["back2vibing", "tmux", "sesh", "fzf", "ghostty", "starship", "zoxide"];
+      selectedStowConfigs = ["zsh", "tmux", "ghostty"];
+      selectedFeatures = ["tips"];
+      skipToRecap = true;
+      currentStep = 4;
+      console.log("");
+      log.success("Selected focused Back2Vibing defaults");
+      console.log("");
+    } else if (setupPath === "standard") {
+      selectedApps = selectableApps.filter(a => a.checked).map(a => a.value);
+      selectedStowConfigs = selectableStowConfigs.filter(c => c.checked).map(c => c.value);
+      selectedFeatures = OPTIONAL_FEATURES.filter(f => f.checked).map(f => f.value);
+      skipToRecap = true;
+      currentStep = 4;
+      console.log("");
+      log.success("Selected standard defaults");
+      console.log("");
+    } else if (setupPath === "minimal") {
+      selectedApps = ["starship", "fzf", "zoxide"]; // Core CLI dependencies
+      selectedStowConfigs = ["zsh"];
+      selectedFeatures = ["tips"];
+      skipToRecap = true;
+      currentStep = 4;
+      console.log("");
+      log.success("Selected minimal shell foundation");
+      console.log("");
+    } else {
+      console.log("");
+      log.info("Proceeding to manual selection...");
+      console.log("");
     }
   }
 
@@ -2184,9 +2326,15 @@ async function runSetup(): Promise<void> {
   console.log("");
   console.log(`${colors.green}${colors.bold}✅ Your dotfiles are set up!${colors.reset}`);
   console.log("");
+  
+  console.log(`  ${colors.bold}Next steps:${colors.reset}`);
+  console.log(`  1. ${colors.cyan}exec zsh${colors.reset} (or open a new terminal)`);
+  console.log(`  2. Try the dotfiles helper: ${colors.cyan}bb help${colors.reset}`);
+  console.log("");
+
   const bootstrapCommand = getCurrentPlatform() === "linux" ? "./bootstrap-linux.sh" : "./bootstrap.sh";
-  console.log(`  To update: ${colors.cyan}cd ${DOTFILES_DIR} && git pull && ${bootstrapCommand}${colors.reset}`);
-  console.log(`  To revert: ${colors.cyan}cd ${DOTFILES_DIR} && pnpm run setup${colors.reset} → select "Revert"`);
+  console.log(`${colors.dim}  To update manually: cd ${DOTFILES_DIR} && git pull && ${bootstrapCommand}${colors.reset}`);
+  console.log(`${colors.dim}  To revert or change: bb setup (revert option in main menu)${colors.reset}`);
 
   printAdBanner();
 }

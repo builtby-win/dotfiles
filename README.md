@@ -37,7 +37,29 @@ If `bb` is not found, run `pnpm run setup`, select Shell config, and restart you
 
 ## Choose your setup path
 
-Full setup (recommended):
+**🚀 Focused Setup (Back2Vibing):**
+Optimized for AI developers. Installs Back2Vibing, tmux, sesh, fzf, and Ghostty terminal.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --focus
+```
+
+**⭐ Standard Setup (Recommended):**
+Installs the `bb` helper, core aliases, and essential CLI tools.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
+```
+
+**🌱 Minimal Setup (Shell only):**
+Just the foundation: aliases, `bb` helper, starship, and shell config.
+
+**🛠️ Custom Setup:**
+Pick and choose exactly which apps, configs, and features you want.
+
+---
+
+Full setup (interactive):
 
 ```bash
 bb setup
@@ -67,6 +89,7 @@ This is ideal if you want to add pieces over time.
 | Ghostty | `bb setup ghostty` | terminal config | `docs/modules/ghostty.md` |
 | Mackup | `bb setup mackup` | app settings backup | `docs/modules/mackup.md` |
 | AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
+| Back2Vibing | `bb setup back2vibing` | Focus & productivity for AI devs | `back2vibing.builtby.win` |
 
 ## Onboarding tips
 

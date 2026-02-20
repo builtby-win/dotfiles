@@ -49,9 +49,13 @@ parse_args() {
       -y|--yes)
         NON_INTERACTIVE=1
         ;;
+      --focus)
+        # Passed through to setup.ts
+        ;;
       -h|--help)
         echo "Usage: bootstrap-linux.sh [options]"
         echo "  -y, --yes   Run non-interactively (auto-approve all prompts)"
+        echo "  --focus     Run focused Back2Vibing setup"
         echo "  -h, --help  Show this help message"
         exit 0
         ;;
@@ -198,9 +202,9 @@ echo ""
 print_step "Launching interactive setup..."
 TSX_BIN="./node_modules/.bin/tsx"
 if [[ -x "$TSX_BIN" ]]; then
-  "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  "$TSX_BIN" setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
 elif command -v pnpm >/dev/null 2>&1; then
-  pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  pnpm exec tsx setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
 else
   print_warning "Cannot run setup.ts"
 fi

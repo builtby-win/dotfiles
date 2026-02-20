@@ -264,8 +264,8 @@ print_debug "Running setup script..."
 # Use local tsx directly to avoid pnpm exec TTY issues in piped executions
 TSX_BIN="./node_modules/.bin/tsx"
 if [ -x "$TSX_BIN" ]; then
-  "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  "$TSX_BIN" setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
 else
-  pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty || true
+  pnpm exec tsx setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
 fi
 print_success "Setup complete!"

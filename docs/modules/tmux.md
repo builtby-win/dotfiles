@@ -1,6 +1,10 @@
 # Tmux module
 
-Tmux is preconfigured with a vim-style workflow, sesh integration, and a custom prefix.
+Tmux is split into profiles:
+
+- `basic`: beginner-friendly remaps (terminal-like splits and navigation)
+- `pro`: non-invasive (keeps tmux defaults and your existing keybinds)
+- `core`: shared options (mouse, status bar, terminal features)
 
 ## Install
 
@@ -14,6 +18,14 @@ Manual stow:
 stow -d "$DOTFILES_DIR/stow-packages" -t "$HOME" tmux
 ```
 
+Then choose a bootstrap:
+
+```bash
+cp "$HOME/.config/tmux/builtby/bootstrap.basic.conf" "$HOME/.tmux.conf"
+# or:
+cp "$HOME/.config/tmux/builtby/bootstrap.pro.conf" "$HOME/.tmux.conf"
+```
+
 Reload tmux after install:
 
 ```bash
@@ -22,7 +34,8 @@ tmux source-file ~/.tmux.conf
 
 ## Prefix
 
-- Prefix is `Ctrl+b`
+- Prefix is `Ctrl+b` in `basic`
+- `pro` keeps your existing prefix/settings
 - With Karabiner in terminals, hold `j+k` to send the prefix
 
 ## Sessions
