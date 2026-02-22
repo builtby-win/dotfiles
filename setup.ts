@@ -1459,6 +1459,9 @@ function printAdBanner(): void {
   console.log("");
   console.log(`  ${colors.yellow}→${colors.reset} back2vibing - Focus & productivity for devs`);
   console.log(`    ${colors.dim}https://back2vibing.builtby.win${colors.reset}`);
+  console.log("");
+  console.log(`  ${colors.yellow}→${colors.reset} zerostack`);
+  console.log(`    ${colors.dim}https://zerostack.builtby.win${colors.reset}`);
   console.log(`${colors.dim}${"─".repeat(50)}${colors.reset}`);
   console.log("");
 }
