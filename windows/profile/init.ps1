@@ -33,3 +33,19 @@ if (Get-Command fzf -ErrorAction SilentlyContinue) {
         }
     }
 }
+
+# 5. PSReadLine Options (Better Autocomplete)
+if (Get-Module -ListAvailable PSReadLine) {
+    # History-based prediction (like zsh-autosuggestions)
+    Set-PSReadLineOption -PredictionSource History
+    # Better Tab completion (cycle through results)
+    Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
+    # Colorize command prediction (dim gray)
+    Set-PSReadLineOption -Colors @{ InlinePrediction = "$([char]0x1b)[38;5;238m" }
+}
+
+# 6. PNPM Tab Completion
+if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+    # This just ensures completion is initialized if available
+    # pnpm setup usually handles the bulk of this on Windows
+}

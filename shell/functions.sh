@@ -99,6 +99,36 @@ _dotfiles_dir() {
   return 1
 }
 
+_sync_workmux_config() {
+  local dotfiles_dir="$1"
+  local template_path="$dotfiles_dir/templates/workmux/config.yaml"
+  local target_dir="$HOME/.config/workmux"
+  local target_path="$target_dir/config.yaml"
+
+  if [[ ! -f "$template_path" ]]; then
+    echo "Workmux template not found. Skipping local workmux config sync."
+    return 0
+  fi
+
+  mkdir -p "$target_dir"
+
+  if [[ -f "$target_path" ]]; then
+    if cmp -s "$template_path" "$target_path"; then
+      echo "Workmux config already up to date."
+      return 0
+    fi
+
+    local backup_path="$target_path.dotfiles-backup.$(date +%s)"
+    cp "$target_path" "$backup_path"
+    cp "$template_path" "$target_path"
+    echo "Updated workmux config: $target_path (backup: $backup_path)"
+    return 0
+  fi
+
+  cp "$template_path" "$target_path"
+  echo "Created workmux config: $target_path"
+}
+
 # Update dotfiles
 bbup() {
   local dotfiles_dir
@@ -116,6 +146,7 @@ bbup() {
     
     if git pull --rebase --autostash; then
       echo "Dotfiles updated successfully."
+      _sync_workmux_config "$dotfiles_dir"
       
       echo -n "Run full setup wizard? (y/N) "
       read -r response
@@ -191,6 +222,7 @@ bb() {
           echo "Shell config stowed. Reload with: exec zsh"
           ;;
         tmux)
+          _sync_workmux_config "$dotfiles_dir"
           stow -d "$dotfiles_dir/stow-packages" -t "$HOME" tmux
           if [[ -n "$TMUX" ]]; then
             tmux source-file "$HOME/.tmux.conf"

@@ -77,6 +77,25 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('configured via symlink fallback');
   });
 
+  it('migrates legacy ~/.zshrc symlinks to a local source file', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ==="');
+    expect(content).toContain('source "$DOTFILES_DIR/stow-packages/zsh/.zshrc"');
+    expect(content).toContain('unlinkSync(zshrcPath);');
+  });
+
+  it('avoids stowing ~/.zshrc while keeping other zsh files managed', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('--ignore="^\\\\.zshrc$"');
+    expect(content).toContain('config === "zsh"');
+  });
+
+  it('creates a machine-local shell overrides file during setup', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('const DOTFILES_LOCAL_SHELL_FILE = join(DOTFILES_CONFIG_DIR, "local.sh")');
+    expect(content).toContain('Created local shell overrides at ${DOTFILES_LOCAL_SHELL_FILE}');
+  });
+
   it('keeps unsupported Linux GUI app suggestions out of setup defaults', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     expect(content).toContain('value: "vscode"');

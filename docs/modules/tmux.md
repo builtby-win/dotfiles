@@ -47,6 +47,19 @@ tmux source-file ~/.tmux.conf
 | `Leader+T` | Jump to last sesh session |
 | `Alt+(` / `Alt+)` | Previous / next session |
 
+## Workmux
+
+`bb setup tmux` and `bb update` keep a local workmux config at
+`~/.config/workmux/config.yaml` in sync with dotfiles. If the file already
+exists, it is backed up and then updated. This file is machine-local and not
+symlinked.
+
+| Binding | Action |
+| --- | --- |
+| `Leader+n` | Prompt for worktree name, then `workmux add --open-if-exists` |
+| `Alt+n` | Same quick worktree flow without prefix |
+| `Leader+s` | Open `workmux dashboard` in a popup |
+
 ## Windows
 
 | Binding | Action |

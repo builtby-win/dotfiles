@@ -322,9 +322,15 @@ const HOME = homedir();
 const MANIFEST_PATH = join(DOTFILES_DIR, ".backup-manifest.json");
 const DOTFILES_CONFIG_DIR = join(HOME, ".config", "dotfiles");
 const DOTFILES_PATH_FILE = join(DOTFILES_CONFIG_DIR, "path");
+const DOTFILES_LOCAL_SHELL_FILE = join(DOTFILES_CONFIG_DIR, "local.sh");
+const WORKMUX_CONFIG_DIR = join(HOME, ".config", "workmux");
+const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml");
+const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml");
 const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "bootstrap.basic.conf");
 const TMUX_MERGE_MARKER_START = "# === Added from builtby.win/dotfiles (tmux) ===";
 const TMUX_MERGE_MARKER_END = "# === End builtby.win/dotfiles (tmux) ===";
+const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ===";
+const ZSHRC_MARKER_END = "# === End builtby.win/dotfiles (zsh) ===";
 
 // Backup manifest to track all backups
 interface BackupEntry {
@@ -419,6 +425,7 @@ interface App {
 const APPS: App[] = [
   // CLI Tools
   { name: "tmux", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf"], desc: "Terminal multiplexer - split panes, sessions", url: "https://github.com/tmux/tmux", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
+  { name: "btop", value: "btop", brewName: "btop", desc: "Modern resource monitor (better than htop)", url: "https://github.com/aristocratos/btop", category: "cli" },
   { name: "fzf", value: "fzf", brewName: "fzf", desc: "Fuzzy finder for files, history, and more", url: "https://github.com/junegunn/fzf", category: "cli" },
   { name: "ripgrep", value: "ripgrep", brewName: "ripgrep", desc: "Blazing fast grep replacement", url: "https://github.com/BurntSushi/ripgrep", category: "cli" },
   { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat", category: "cli" },
@@ -667,6 +674,25 @@ function isAppInstalled(app: App): boolean {
 function isStowConfigInstalled(config: string): boolean {
   const targets = STOW_TARGETS[config];
   if (!targets) return false;
+
+  if (config === "zsh") {
+    const zshrcPath = join(HOME, ".zshrc");
+    if (!existsSync(zshrcPath)) return false;
+
+    try {
+      const stats = lstatSync(zshrcPath);
+      if (stats.isSymbolicLink()) {
+        return false;
+      }
+
+      const zshrcContent = readFileSync(zshrcPath, "utf-8");
+      if (!zshrcContent.includes(ZSHRC_MARKER_START)) {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+  }
 
   return targets.every((target) => {
     const targetPath = join(HOME, target);
@@ -933,7 +959,7 @@ function writeDotfilesPath(): void {
 
 // Map stow package names to their target files (for conflict detection)
 const STOW_TARGETS: Record<string, string[]> = {
-  zsh: [".zshrc", ".config/starship.toml"],
+  zsh: [".config/starship.toml"],
   tmux: [
     ".config/tmux/builtby/core.conf",
     ".config/tmux/builtby/basic.conf",
@@ -951,6 +977,128 @@ const STOW_TARGETS: Record<string, string[]> = {
     : [".config/ghostty/config"],
   mackup: [".mackup.cfg"],
 };
+
+function upsertZshrcMergeBlock(content: string): string {
+  const block = [
+    ZSHRC_MARKER_START,
+    'if [[ -f "$HOME/.config/dotfiles/path" ]]; then',
+    '  DOTFILES_DIR="$(cat "$HOME/.config/dotfiles/path")"',
+    "  export DOTFILES_DIR",
+    '  [[ -f "$DOTFILES_DIR/stow-packages/zsh/.zshrc" ]] && source "$DOTFILES_DIR/stow-packages/zsh/.zshrc"',
+    "fi",
+    ZSHRC_MARKER_END,
+  ].join("\n");
+
+  const startIdx = content.indexOf(ZSHRC_MARKER_START);
+  const endIdx = content.indexOf(ZSHRC_MARKER_END);
+  let next = content;
+
+  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+    next = content.slice(0, startIdx) + content.slice(endIdx + ZSHRC_MARKER_END.length);
+  }
+
+  if (next && !next.endsWith("\n")) {
+    next += "\n";
+  }
+
+  if (!next.trim()) {
+    return `${block}\n`;
+  }
+
+  return `${next}\n${block}\n`;
+}
+
+function ensureLocalShellOverridesFile(): void {
+  if (!existsSync(DOTFILES_CONFIG_DIR)) {
+    mkdirSync(DOTFILES_CONFIG_DIR, { recursive: true });
+  }
+
+  if (existsSync(DOTFILES_LOCAL_SHELL_FILE)) {
+    return;
+  }
+
+  const content = [
+    "# Local machine-only shell overrides",
+    "# This file is not symlinked and is never committed by dotfiles.",
+    "",
+    "# Add aliases/functions for this computer only.",
+    "# alias ll='ls -lah'",
+    "# alias gs='git status'",
+    "",
+  ].join("\n");
+
+  writeFileSync(DOTFILES_LOCAL_SHELL_FILE, content);
+  log.success(`Created local shell overrides at ${DOTFILES_LOCAL_SHELL_FILE}`);
+}
+
+function ensureLocalWorkmuxConfig(): void {
+  if (!existsSync(WORKMUX_CONFIG_TEMPLATE_SOURCE)) {
+    log.warning("workmux template config not found - skipping local workmux config setup");
+    return;
+  }
+
+  if (!existsSync(WORKMUX_CONFIG_DIR)) {
+    mkdirSync(WORKMUX_CONFIG_DIR, { recursive: true });
+  }
+
+  if (!existsSync(WORKMUX_CONFIG_PATH)) {
+    copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH);
+    log.success(`Created local workmux config at ${WORKMUX_CONFIG_PATH}`);
+    return;
+  }
+
+  const currentConfig = readFileSync(WORKMUX_CONFIG_PATH, "utf-8");
+  const templateConfig = readFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, "utf-8");
+  if (currentConfig === templateConfig) {
+    return;
+  }
+
+  const backupPath = backupFile(WORKMUX_CONFIG_PATH);
+  addToManifest({ original: WORKMUX_CONFIG_PATH, backup: backupPath, type: "file" });
+  copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH);
+  log.success(`Updated local workmux config at ${WORKMUX_CONFIG_PATH}`);
+}
+
+function setupZshEntrypoint(): void {
+  const zshrcPath = join(HOME, ".zshrc");
+  let existingContent = "";
+  let hasRegularFile = false;
+
+  if (existsSync(zshrcPath)) {
+    const stats = lstatSync(zshrcPath);
+
+    if (stats.isSymbolicLink()) {
+      try {
+        const backupPath = backupFile(zshrcPath);
+        addToManifest({ original: zshrcPath, backup: backupPath, type: "file" });
+      } catch {
+        log.warning("Could not back up ~/.zshrc symlink target before migration");
+      }
+
+      unlinkSync(zshrcPath);
+      log.info("Converted ~/.zshrc symlink to local file");
+    } else {
+      existingContent = readFileSync(zshrcPath, "utf-8");
+      hasRegularFile = true;
+    }
+  }
+
+  const nextContent = upsertZshrcMergeBlock(existingContent);
+  if (!hasRegularFile || nextContent !== existingContent) {
+    if (hasRegularFile) {
+      const backupPath = backupFile(zshrcPath);
+      addToManifest({ original: zshrcPath, backup: backupPath, type: "file" });
+    }
+    writeFileSync(zshrcPath, nextContent);
+    log.success(hasRegularFile
+      ? "Updated ~/.zshrc to source dotfiles without symlinking"
+      : "Created ~/.zshrc that sources dotfiles");
+  } else {
+    log.success("~/.zshrc already configured for dotfiles source mode");
+  }
+
+  ensureLocalShellOverridesFile();
+}
 
 function setupConfigWithoutStow(config: string, targets: string[], stowPackages: string): boolean {
   let configured = false;
@@ -1122,7 +1270,12 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
       continue;
     }
 
+    if (config === "zsh") {
+      setupZshEntrypoint();
+    }
+
     if (config === "tmux") {
+      ensureLocalWorkmuxConfig();
       const shouldContinue = await setupTmuxEntrypoint();
       if (!shouldContinue) {
         log.info("Skipping tmux package setup");
@@ -1191,7 +1344,9 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
     if (needsStow || !targets.some(t => existsSync(join(HOME, t)))) {
       if (stowAvailable) {
         // Run stow to create the symlinks
-        const stowCmd = `stow -d "${stowPackages}" -t "${HOME}" ${config}`;
+        const stowOptions = config === "zsh" ? '--ignore="^\\.zshrc$"' : "";
+        const stowPackageArg = stowOptions ? `${stowOptions} ${config}` : config;
+        const stowCmd = `stow -d "${stowPackages}" -t "${HOME}" ${stowPackageArg}`;
         if (runCommand(stowCmd, true)) {
           log.success(`${config} configured via stow`);
 

@@ -34,3 +34,5 @@ export PATH=/Users/winstonzhao/.opencode/bin:$PATH
 # >>> b2v shell hook >>>
 eval "$(b2v shell-hook --shell zsh)"
 # <<< b2v shell hook <<<
+
+[[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"

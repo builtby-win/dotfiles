@@ -14,4 +14,10 @@ describe("shell/init.sh cleanup", () => {
   it("should not source experimental beads script", () => {
     expect(content).not.toContain("experimental/beads.sh");
   });
+
+  it("should source machine-local shell overrides first", () => {
+    expect(content).toContain('DOTFILES_LOCAL_SHELL="$HOME/.config/dotfiles/local.sh"');
+    expect(content).toContain('source "$DOTFILES_LOCAL_SHELL"');
+    expect(content).toContain('source "$DOTFILES_SHELL_DIR/local.sh"');
+  });
 });

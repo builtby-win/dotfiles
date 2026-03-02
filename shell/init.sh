@@ -8,7 +8,13 @@ DOTFILES_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles"
 mkdir -p "$DOTFILES_CACHE_DIR"
 
 # Local/personal config (early - for PATH/fpath setup)
-[[ -f "$DOTFILES_SHELL_DIR/local.sh" ]] && source "$DOTFILES_SHELL_DIR/local.sh"
+DOTFILES_LOCAL_SHELL="$HOME/.config/dotfiles/local.sh"
+if [[ -f "$DOTFILES_LOCAL_SHELL" ]]; then
+  source "$DOTFILES_LOCAL_SHELL"
+elif [[ -f "$DOTFILES_SHELL_DIR/local.sh" ]]; then
+  # Backward compatibility for legacy in-repo local overrides
+  source "$DOTFILES_SHELL_DIR/local.sh"
+fi
 
 # User-local binaries (used by installers like starship/pnpm fallbacks)
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -70,7 +76,15 @@ fi
 
 # zoxide (smart cd) - disable for Claude Code to avoid issues
 if [[ "$CLAUDECODE" != "1" ]] && command -v zoxide &> /dev/null; then
-  eval "$(zoxide init zsh --cmd cd)"
+  # Detect current shell
+  if [[ -n "$ZSH_VERSION" ]]; then
+    eval "$(zoxide init zsh --cmd cd)"
+  elif [[ -n "$BASH_VERSION" ]]; then
+    eval "$(zoxide init bash --cmd cd)"
+  else
+    # Fallback to general POSIX if available (or just skip)
+    eval "$(zoxide init posix --cmd cd)" 2>/dev/null || true
+  fi
 fi
 
 # Cargo/Rust

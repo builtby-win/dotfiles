@@ -23,14 +23,37 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Set-Alias cd z
 }
 
-# 2. Standard Unix utilities missing or different in PS
-function which ($name) {
-    Get-Command $name -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
-}
+# 2. Directory Navigation
+function .. { Set-Location .. }
+function ... { Set-Location ..\.. }
+function .... { Set-Location ..\..\.. }
+function ..... { Set-Location ..\..\..\.. }
+function ...... { Set-Location ..\..\..\..\.. }
 
-# 3. Git Shortcuts (mirroring aliases.sh)
+# 3. Quick shortcuts
+Set-Alias -Name d -Value z -ErrorAction SilentlyContinue
+Set-Alias -Name - -Value 'Pop-Location' -ErrorAction SilentlyContinue # Close enough to cd -
+
+# 4. Package managers (pnpm)
+function pp { pnpm @args }
+function po { pnpm run @args }
+function ppr { pnpm run @args }
+
+# 5. Git Shortcuts (mirroring aliases.sh)
+function gco { git checkout @args }
+function gst { git status @args }
+function gb { git branch @args }
+function gl { git log --oneline --graph --decorate @args }
+function ga { git add @args }
+function gc { git commit @args }
+function gp { git push @args }
+function gd { git diff @args }
 function p { git add -p @args }
-function ggwip { git commit -m "wip" @args }
-function unwip { git reset HEAD~1 @args }
-function shipit { git push @args }
-function amend { git commit --amend @args }
+function co- { git checkout - @args }
+function bname { git rev-parse --abbrev-ref HEAD }
+function ggwip { git add . ; git commit -m "wip" --no-verify @args }
+function unwip { git reset --soft HEAD~1 @args }
+function amend { git commit --amend --no-verify @args }
+function rename { git branch -m @args }
+
+# 6. Standard Unix utilities missing or different in PS

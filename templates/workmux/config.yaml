@@ -1,0 +1,9 @@
+nerdfont: true
+merge_strategy: rebase
+window_prefix: wm-
+agent: opencode
+
+panes:
+  - command: <agent>
+    focus: true
+  - split: horizontal

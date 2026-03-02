@@ -22,7 +22,11 @@ alias -g ......='../../../../..'
 alias -- -='cd -'  # Go to previous directory
 alias fuck="rm -rf"
 # Reload shell config
-alias rc="source ~/.zshrc"
+if [[ -n "$ZSH_VERSION" ]]; then
+  alias rc="source ~/.zshrc"
+elif [[ -n "$BASH_VERSION" ]]; then
+  alias rc="source ~/.bashrc"
+fi
 
 # Common shortcuts
 alias redo="sudo !!"
@@ -67,22 +71,3 @@ fi
 if command -v bat &> /dev/null; then
   alias cat="bat"
 fi
-
-# Smart tmux - uses sesh if installed, otherwise auto-names session
-# Usage: `tmux` in ~/code/myproject creates session named "myproject"
-tmux() {
-  if command -v sesh &> /dev/null; then
-    if [[ $# -eq 0 ]]; then
-      sesh connect .
-    else
-      command tmux "$@"
-    fi
-  else
-    if [[ $# -eq 0 ]]; then
-      local session_name="${PWD##*/}"
-      command tmux new-session -A -s "$session_name"
-    else
-      command tmux "$@"
-    fi
-  fi
-}

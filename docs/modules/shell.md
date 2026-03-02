@@ -32,7 +32,10 @@ stow -d "$DOTFILES_DIR/stow-packages" -t "$HOME" zsh
 
 ## Local overrides
 
-Put machine-specific changes in `shell/local.sh` (gitignored).
+Put machine-specific changes in `~/.config/dotfiles/local.sh`.
+This file is created during setup, stays local to each machine, and is never symlinked.
+
+Legacy fallback: if `~/.config/dotfiles/local.sh` is missing, `shell/local.sh` (repo-local, gitignored) is still sourced.
 
 ## Tips
 
