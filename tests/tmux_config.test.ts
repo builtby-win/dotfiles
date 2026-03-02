@@ -8,6 +8,10 @@ describe("tmux profile split", () => {
   const basicConf = readFileSync(join(tmuxDir, "basic.conf"), "utf-8");
   const proConf = readFileSync(join(tmuxDir, "pro.conf"), "utf-8");
   const bootstrapBasicConf = readFileSync(join(tmuxDir, "bootstrap.basic.conf"), "utf-8");
+  const workmuxConfigTemplate = readFileSync(
+    join(process.cwd(), "templates", "workmux", "config.yaml"),
+    "utf-8",
+  );
 
   it("keeps beginner remaps in basic profile", () => {
     expect(basicConf).toContain("bind d split-window -h -c \"#{pane_current_path}\"");
@@ -20,8 +24,24 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain("unbind s");
     expect(basicConf).toContain('bind-key n command-prompt -p "worktree name"');
     expect(basicConf).toContain('bind-key -n M-n command-prompt -p "worktree name"');
-    expect(basicConf).toContain("workmux add --open-if-exists %%");
+    expect(basicConf).toContain("workmux add --open-if-exists %%%");
     expect(basicConf).toContain('bind-key s display-popup -E -w 92% -h 85% -d "#{pane_current_path}" "workmux dashboard"');
+  });
+
+  it("uses session mode and multi-window workmux template", () => {
+    expect(workmuxConfigTemplate).toContain("mode: session");
+    expect(workmuxConfigTemplate).toContain("windows:");
+    expect(workmuxConfigTemplate).toContain("- name: agents");
+    expect(workmuxConfigTemplate).toContain("command: gemini");
+    expect(workmuxConfigTemplate).toContain("command: opencode --model openai/gpt-5.3-codex");
+    expect(workmuxConfigTemplate).toContain(
+      "command: claude --dangerously-skip-permissions",
+    );
+    expect(workmuxConfigTemplate).toContain(
+      "command: opencode --model gpt-5.3-codex-spark",
+    );
+    expect(workmuxConfigTemplate).toContain("command: lazygit");
+    expect(workmuxConfigTemplate).toContain("command: dev");
   });
 
   it("keeps pro profile non-invasive for keybinds", () => {

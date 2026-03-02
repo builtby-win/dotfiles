@@ -2,8 +2,33 @@ nerdfont: true
 merge_strategy: rebase
 window_prefix: wm-
 agent: opencode
+mode: session
 
-panes:
-  - command: <agent>
-    focus: true
-  - split: horizontal
+windows:
+  - name: work
+    panes:
+      - {}
+      - command: lazygit
+        split: horizontal
+        target: 0
+        percentage: 50
+      - command: dev
+        split: vertical
+        target: 0
+        percentage: 50
+      - command: opencode --model gpt-5.3-codex-spark
+        split: vertical
+        target: 1
+        percentage: 50
+  - name: agents
+    panes:
+      - command: gemini
+        focus: true
+      - command: opencode --model openai/gpt-5.3-codex
+        split: horizontal
+        target: 0
+        percentage: 67
+      - command: claude --dangerously-skip-permissions
+        split: horizontal
+        target: 1
+        percentage: 50
