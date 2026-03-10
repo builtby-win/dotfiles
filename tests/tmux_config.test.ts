@@ -100,6 +100,8 @@ describe("tmux setup safety", () => {
     expect(setupTs).toContain("function ensureLocalWorkmuxConfig(): void");
     expect(setupTs).toContain('mkdirSync(DOTFILES_BACKUP_DIR, { recursive: true })');
     expect(setupTs).toContain('const safeName = filePath.replace(/^\\//, "").replace(/[\\/:]/g, "__")');
+    expect(setupTs).toContain("function pruneBackupFiles(prefix: string, keep = 1): void");
+    expect(setupTs).toContain('pruneBackupFiles(`${safeName}.dotfiles-backup.`)');
     expect(setupTs).toContain('const backupPath = join(DOTFILES_BACKUP_DIR, `${safeName}.dotfiles-backup.${Date.now()}`)');
     expect(setupTs).toContain('copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH)');
     expect(setupTs).toContain('backupFile(WORKMUX_CONFIG_PATH)');
@@ -111,9 +113,11 @@ describe("tmux setup safety", () => {
   it("syncs workmux config from bb setup tmux and bb update", () => {
     expect(functionsSh).toContain('_sync_workmux_config()');
     expect(functionsSh).toContain('templates/workmux/config.yaml');
+    expect(functionsSh).toContain('_bb_prune_backups()');
     expect(functionsSh).toContain('local backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups/workmux"');
     expect(functionsSh).toContain('mkdir -p "$backup_dir"');
     expect(functionsSh).toContain('local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"');
+    expect(functionsSh).toContain('_bb_prune_backups "$backup_dir" "config.yaml.dotfiles-backup." 1');
     expect(functionsSh).toContain('_sync_workmux_config "$dotfiles_dir"');
   });
 });

@@ -178,4 +178,14 @@ exit 1
     expect(functionsSh).toContain('"$session_name" =~ ^[0-9]+$');
     expect(functionsSh).toContain('tmux kill-session -t "$session_name"');
   });
+
+  it("adds bb backups-clean command for latest-only retention", () => {
+    expect(functionsSh).toContain("bb backups-clean");
+    expect(functionsSh).toContain("backups-clean)");
+    expect(functionsSh).toContain('Usage: bb backups-clean [--yes]');
+    expect(functionsSh).toContain('Keeps only the newest dotfiles backup for each target.');
+    expect(functionsSh).toContain('_bb_prune_backup_groups()');
+    expect(functionsSh).toContain('group_key="${name%.dotfiles-backup.*}"');
+    expect(functionsSh).toContain('_bb_prune_backup_groups "$base_dir" 1 "$auto_yes"');
+  });
 });

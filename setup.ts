@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 import { checkbox, select, confirm } from "@inquirer/prompts";
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync, symlinkSync } from "fs";
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync, symlinkSync, readdirSync, rmSync } from "fs";
 import { join, dirname } from "path";
 import { homedir } from "os";
 import * as manifest from "./lib/manifest";
@@ -368,6 +368,30 @@ function addToManifest(entry: Omit<BackupEntry, "timestamp">): void {
   saveManifest(manifest);
 }
 
+function pruneBackupFiles(prefix: string, keep = 1): void {
+  if (!existsSync(DOTFILES_BACKUP_DIR)) {
+    return;
+  }
+
+  const backups = readdirSync(DOTFILES_BACKUP_DIR)
+    .filter((name) => name.startsWith(prefix))
+    .sort((a, b) => b.localeCompare(a));
+
+  if (backups.length <= keep) {
+    return;
+  }
+
+  const staleBackups = new Set(backups.slice(keep));
+  const manifest = loadManifest();
+
+  for (const backupName of staleBackups) {
+    rmSync(join(DOTFILES_BACKUP_DIR, backupName), { force: true });
+  }
+
+  manifest.entries = manifest.entries.filter((entry) => !staleBackups.has(entry.backup.split("/").pop() ?? ""));
+  saveManifest(manifest);
+}
+
 // Platform detection
 type Platform = "macos" | "windows" | "linux";
 interface PlatformSupport {
@@ -537,6 +561,7 @@ function backupFile(filePath: string): string {
   const safeName = filePath.replace(/^\//, "").replace(/[\/:]/g, "__");
   const backupPath = join(DOTFILES_BACKUP_DIR, `${safeName}.dotfiles-backup.${Date.now()}`);
   copyFileSync(filePath, backupPath);
+  pruneBackupFiles(`${safeName}.dotfiles-backup.`);
   log.info(`Backed up to ${backupPath}`);
   return backupPath;
 }

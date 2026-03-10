@@ -122,6 +122,7 @@ _sync_workmux_config() {
     mkdir -p "$backup_dir"
     local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"
     cp "$target_path" "$backup_path"
+    _bb_prune_backups "$backup_dir" "config.yaml.dotfiles-backup." 1
     cp "$template_path" "$target_path"
     echo "Updated workmux config: $target_path (backup: $backup_path)"
     return 0
@@ -129,6 +130,101 @@ _sync_workmux_config() {
 
   cp "$template_path" "$target_path"
   echo "Created workmux config: $target_path"
+}
+
+_bb_prune_backups() {
+  local backup_dir="$1"
+  local prefix="${2:-}"
+  local keep="${3:-1}"
+  local auto_yes="${4:-1}"
+
+  if [[ ! -d "$backup_dir" ]]; then
+    return 0
+  fi
+
+  local -a matches
+  local path name
+  shopt -s nullglob
+  for path in "$backup_dir"/*; do
+    name="${path##*/}"
+    if [[ -z "$prefix" || "$name" == "$prefix"* ]]; then
+      matches+=("$path")
+    fi
+  done
+  shopt -u nullglob
+
+  if [[ ${#matches[@]} -le "$keep" ]]; then
+    return 0
+  fi
+
+  IFS=$'\n' matches=($(printf '%s\n' "${matches[@]}" | sort -r))
+  unset IFS
+  local -a stale=("${matches[@]:$keep}")
+
+  if [[ ${#stale[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  if [[ "$auto_yes" != "1" ]]; then
+    echo "Would remove old backups:"
+    printf '  - %s\n' "${stale[@]}"
+    echo "Run again with --yes to delete them."
+    return 0
+  fi
+
+  rm -f -- "${stale[@]}"
+  printf 'Removed old backups:\n'
+  printf '  - %s\n' "${stale[@]}"
+}
+
+_bb_prune_backup_groups() {
+  local backup_dir="$1"
+  local keep="${2:-1}"
+  local auto_yes="${3:-0}"
+
+  if [[ ! -d "$backup_dir" ]]; then
+    return 0
+  fi
+
+  local -A groups
+  local -a group_keys
+  local path name group_key
+
+  shopt -s nullglob
+  for path in "$backup_dir"/*.dotfiles-backup.*; do
+    name="${path##*/}"
+    group_key="${name%.dotfiles-backup.*}"
+    if [[ -z "${groups[$group_key]:-}" ]]; then
+      group_keys+=("$group_key")
+      groups[$group_key]="$path"
+    else
+      groups[$group_key]+=$'\n'"$path"
+    fi
+  done
+  shopt -u nullglob
+
+  local key
+  for key in "${group_keys[@]}"; do
+    mapfile -t group_paths < <(printf '%s\n' "${groups[$key]}" | sort -r)
+    if [[ ${#group_paths[@]} -le "$keep" ]]; then
+      continue
+    fi
+
+    local -a stale=("${group_paths[@]:$keep}")
+    if [[ "$auto_yes" != "1" ]]; then
+      echo "Would remove old backups for $key:"
+      printf '  - %s\n' "${stale[@]}"
+      continue
+    fi
+
+    rm -f -- "${stale[@]}"
+    printf 'Removed old backups for %s:\n' "$key"
+    printf '  - %s\n' "${stale[@]}"
+  done
+
+  if [[ "$auto_yes" != "1" ]]; then
+    echo "Run again with --yes to delete them."
+  fi
 }
 
 _bb_tmux_clean() {
@@ -201,6 +297,37 @@ _bb_tmux_clean() {
   echo "Killed $killed tmux session(s)."
 }
 
+_bb_backups_clean() {
+  local auto_yes=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -y|--yes)
+        auto_yes=1
+        ;;
+      -h|--help)
+        echo "Usage: bb backups-clean [--yes]"
+        echo "  Keeps only the newest dotfiles backup for each target."
+        return 0
+        ;;
+      *)
+        echo "Unknown option: $1"
+        echo "Run: bb backups-clean --help"
+        return 1
+        ;;
+    esac
+    shift
+  done
+
+  local base_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups"
+  if [[ ! -d "$base_dir" ]]; then
+    echo "No dotfiles backup directory found."
+    return 0
+  fi
+
+  _bb_prune_backup_groups "$base_dir" 1 "$auto_yes"
+  _bb_prune_backups "$base_dir/workmux" "config.yaml.dotfiles-backup." 1 "$auto_yes"
+}
+
 # Update dotfiles
 bbup() {
   local dotfiles_dir
@@ -258,6 +385,7 @@ bb() {
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb update               Pull updates and optionally rerun setup"
+      echo "  bb backups-clean        Keep only the newest dotfiles backups"
       echo "  bb tmux-clean           Clean detached numeric tmux sessions"
       echo "  bb status               Show setup manifest"
       echo "  bb tip                  Show a random tip"
@@ -345,6 +473,9 @@ bb() {
       ;;
     update)
       bbup
+      ;;
+    backups-clean)
+      _bb_backups_clean "$@"
       ;;
     tmux-clean)
       _bb_tmux_clean "$@"

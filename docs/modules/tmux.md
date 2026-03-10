@@ -69,8 +69,10 @@ tmux-smart --root ~/code/client-a --new
 
 `bb setup tmux` and `bb update` keep a local workmux config at
 `~/.config/workmux/config.yaml` in sync with dotfiles. If the file already
-exists, it is backed up to `~/.local/state/dotfiles/backups/workmux/` and then
-updated. This file is machine-local and not symlinked.
+exists, it is backed up to `~/.local/state/dotfiles/backups/workmux/`, older
+copies are pruned, and then the file is updated. This file is machine-local and
+not symlinked. To clean older dotfiles backups manually, run
+`bb backups-clean --yes`.
 
 For shell-backed tools that need to start in the current project directory,
 wrap the pane command in a login shell. Example: `command: "bash -lc 'hydra'"`.
