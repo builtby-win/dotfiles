@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+
+print_help() {
+  cat <<'EOF'
+Usage: tmux-smart [--root PATH] [--new]
+       tmux-smart [tmux args...]
+
+No args:
+  Reuse the tmux session for the current canonical root. If inside a git repo,
+  the repo root is used. Otherwise the current directory is used.
+
+Options:
+  --root PATH   Use PATH instead of the current directory.
+  --new         Skip reuse and create a fresh session name for the root.
+  -h, --help    Show this help text.
+
+Any other arguments are passed directly to tmux unchanged.
+EOF
+}
+
+tmux_available() {
+  command -v tmux >/dev/null 2>&1
+}
+
+canonical_root() {
+  local input_path="$1"
+  local cwd
+  local git_root
+
+  if ! cwd="$(cd "$input_path" 2>/dev/null && pwd -P)"; then
+    echo "tmux-smart: path not found: $input_path" >&2
+    return 1
+  fi
+
+  git_root="$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null)"
+  if [[ -n "$git_root" ]]; then
+    echo "$git_root"
+    return 0
+  fi
+
+  echo "$cwd"
+}
+
+find_existing_session() {
+  local session_root="$1"
+
+  command tmux list-sessions -F '#{session_name}:::#{session_path}' 2>/dev/null |
+    awk -F ':::' -v session_root="$session_root" '$2 == session_root { print $1; exit }'
+}
+
+sanitize_session_name() {
+  local session_root="$1"
+  local session_name="${session_root##*/}"
+
+  if [[ -z "$session_name" || "$session_name" == "/" ]]; then
+    session_name="main"
+  fi
+
+  session_name="${session_name//[^[:alnum:]_-]/-}"
+  session_name="${session_name#-}"
+  session_name="${session_name%-}"
+
+  if [[ -z "$session_name" ]]; then
+    session_name="main"
+  fi
+
+  echo "$session_name"
+}
+
+unique_session_name() {
+  local base_name="$1"
+  local session_name="$base_name"
+  local attempt=2
+
+  while command tmux has-session -t "$session_name" 2>/dev/null; do
+    session_name="${base_name}-${attempt}"
+    attempt=$((attempt + 1))
+  done
+
+  echo "$session_name"
+}
+
+resolve_session_name() {
+  local session_root="$1"
+  local session_name="$2"
+  local force_new="$3"
+
+  if [[ "$force_new" == "1" ]]; then
+    unique_session_name "$session_name"
+    return 0
+  fi
+
+  # Avoid `new-session -A` attaching to an unrelated session that happens to
+  # share the same basename.
+  if command tmux has-session -t "$session_name" 2>/dev/null; then
+    unique_session_name "$session_name"
+    return 0
+  fi
+
+  echo "$session_name"
+}
+
+connect_or_create_session() {
+  local session_root="$1"
+  local force_new="$2"
+  local existing_session=""
+  local current_session=""
+  local session_name=""
+
+  if [[ "$force_new" != "1" ]]; then
+    existing_session="$(find_existing_session "$session_root")"
+  fi
+
+  if [[ -n "$existing_session" ]]; then
+    if [[ -n "$TMUX" ]]; then
+      current_session="$(command tmux display-message -p '#S' 2>/dev/null)"
+      if [[ "$current_session" == "$existing_session" ]]; then
+        exit 0
+      fi
+
+      command tmux switch-client -t "$existing_session"
+    else
+      command tmux attach-session -t "$existing_session"
+    fi
+    exit $?
+  fi
+
+  if [[ "$force_new" != "1" ]] && command -v sesh >/dev/null 2>&1; then
+    if sesh connect "$session_root"; then
+      exit 0
+    fi
+  fi
+
+  session_name="$(sanitize_session_name "$session_root")"
+  session_name="$(resolve_session_name "$session_root" "$session_name" "$force_new")"
+
+  if [[ -n "$TMUX" ]]; then
+    command tmux new-session -d -s "$session_name" -c "$session_root" 2>/dev/null || true
+    command tmux switch-client -t "$session_name"
+  else
+    command tmux new-session -A -s "$session_name" -c "$session_root"
+  fi
+}
+
+if ! tmux_available; then
+  echo "tmux-smart: tmux is not installed." >&2
+  exit 1
+fi
+
+session_root_arg=""
+force_new=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --root)
+      if [[ $# -lt 2 ]]; then
+        echo "tmux-smart: --root requires a path." >&2
+        exit 1
+      fi
+      session_root_arg="$2"
+      shift 2
+      ;;
+    --new)
+      force_new=1
+      shift
+      ;;
+    -h|--help)
+      print_help
+      exit 0
+      ;;
+    *)
+      command tmux "$@"
+      exit $?
+      ;;
+  esac
+done
+
+session_root="$(canonical_root "${session_root_arg:-$PWD}")" || exit 1
+connect_or_create_session "$session_root" "$force_new"

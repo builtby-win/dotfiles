@@ -20,4 +20,10 @@ describe("shell/init.sh cleanup", () => {
     expect(content).toContain('source "$DOTFILES_LOCAL_SHELL"');
     expect(content).toContain('source "$DOTFILES_SHELL_DIR/local.sh"');
   });
+
+  it("should prefer tmux-smart for SSH auto-attach", () => {
+    expect(content).toContain('if command -v tmux-smart &> /dev/null; then');
+    expect(content).toContain('command tmux-smart --root "$HOME"');
+    expect(content).toContain('command tmux new-session -A -s main');
+  });
 });

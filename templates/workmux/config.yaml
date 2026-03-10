@@ -3,6 +3,8 @@ merge_strategy: rebase
 window_prefix: wm-
 agent: opencode
 mode: session
+auto_name:
+  command: opencode --model gpt-5.3-codex-spark run
 
 windows:
   - name: work
@@ -21,14 +23,16 @@ windows:
         target: 1
         percentage: 50
   - name: agents
+    # Shell-backed tools that must inherit the session cwd should be wrapped
+    # in a login shell, for example: "bash -lc 'hydra'"
     panes:
-      - command: gemini
+      - command: "bash -lc 'gemini'"
         focus: true
       - command: opencode --model openai/gpt-5.3-codex
         split: horizontal
         target: 0
         percentage: 67
-      - command: claude --dangerously-skip-permissions
+      - command: "bash -lc 'claude --dangerously-skip-permissions'"
         split: horizontal
         target: 1
         percentage: 50

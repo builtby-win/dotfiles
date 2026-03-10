@@ -10,9 +10,6 @@ fi
 # Added by Antigravity
 export PATH="/Users/winstonzhao/.antigravity/antigravity/bin:$PATH"
 
-# Added by Back2Vibing - b2v CLI
-export PATH="$HOME/.local/bin:$PATH"
-
 # pnpm
 if [[ "$(uname -s)" == "Darwin" ]]; then
   export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"
@@ -36,3 +33,6 @@ eval "$(b2v shell-hook --shell zsh)"
 # <<< b2v shell hook <<<
 
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
+
+# Added by back2vibing - b2v CLI
+export PATH="$HOME/.local/bin:$PATH"

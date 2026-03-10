@@ -7,6 +7,10 @@ describe("tmux profile split", () => {
   const coreConf = readFileSync(join(tmuxDir, "core.conf"), "utf-8");
   const basicConf = readFileSync(join(tmuxDir, "basic.conf"), "utf-8");
   const proConf = readFileSync(join(tmuxDir, "pro.conf"), "utf-8");
+  const sessionBootstrapSh = readFileSync(
+    join(process.cwd(), "stow-packages", "tmux", ".config", "tmux", "session-bootstrap.sh"),
+    "utf-8",
+  );
   const bootstrapBasicConf = readFileSync(join(tmuxDir, "bootstrap.basic.conf"), "utf-8");
   const workmuxConfigTemplate = readFileSync(
     join(process.cwd(), "templates", "workmux", "config.yaml"),
@@ -32,10 +36,11 @@ describe("tmux profile split", () => {
     expect(workmuxConfigTemplate).toContain("mode: session");
     expect(workmuxConfigTemplate).toContain("windows:");
     expect(workmuxConfigTemplate).toContain("- name: agents");
-    expect(workmuxConfigTemplate).toContain("command: gemini");
+    expect(workmuxConfigTemplate).toContain("\"bash -lc 'hydra'\"");
+    expect(workmuxConfigTemplate).toContain("command: \"bash -lc 'gemini'\"");
     expect(workmuxConfigTemplate).toContain("command: opencode --model openai/gpt-5.3-codex");
     expect(workmuxConfigTemplate).toContain(
-      "command: claude --dangerously-skip-permissions",
+      "command: \"bash -lc 'claude --dangerously-skip-permissions'\"",
     );
     expect(workmuxConfigTemplate).toContain(
       "command: opencode --model gpt-5.3-codex-spark",
@@ -70,6 +75,13 @@ describe("tmux profile split", () => {
   it("updates session environment from the attached terminal", () => {
     expect(coreConf).toContain('set -ga update-environment "*"');
   });
+
+  it("bootstraps new sessions with cwd-aware windows and splits", () => {
+    expect(coreConf).toContain("session-bootstrap.sh");
+    expect(sessionBootstrapSh).toContain('tmux rename-window -t "$session_name:1" "work"');
+    expect(sessionBootstrapSh).toContain('tmux split-window -h -t "$session_name:1" -c "$session_path"');
+    expect(sessionBootstrapSh).toContain('tmux new-window -t "$session_name:" -n "tools" -c "$session_path"');
+  });
 });
 
 describe("tmux setup safety", () => {
@@ -82,9 +94,13 @@ describe("tmux setup safety", () => {
   });
 
   it("updates local workmux config from templates during setup", () => {
+    expect(setupTs).toContain('const DOTFILES_BACKUP_DIR = join(HOME, ".local", "state", "dotfiles", "backups")');
     expect(setupTs).toContain('const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml")');
     expect(setupTs).toContain('const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml")');
     expect(setupTs).toContain("function ensureLocalWorkmuxConfig(): void");
+    expect(setupTs).toContain('mkdirSync(DOTFILES_BACKUP_DIR, { recursive: true })');
+    expect(setupTs).toContain('const safeName = filePath.replace(/^\\//, "").replace(/[\\/:]/g, "__")');
+    expect(setupTs).toContain('const backupPath = join(DOTFILES_BACKUP_DIR, `${safeName}.dotfiles-backup.${Date.now()}`)');
     expect(setupTs).toContain('copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH)');
     expect(setupTs).toContain('backupFile(WORKMUX_CONFIG_PATH)');
     expect(setupTs).toContain('addToManifest({ original: WORKMUX_CONFIG_PATH, backup: backupPath, type: "file" })');
@@ -95,6 +111,9 @@ describe("tmux setup safety", () => {
   it("syncs workmux config from bb setup tmux and bb update", () => {
     expect(functionsSh).toContain('_sync_workmux_config()');
     expect(functionsSh).toContain('templates/workmux/config.yaml');
+    expect(functionsSh).toContain('local backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups/workmux"');
+    expect(functionsSh).toContain('mkdir -p "$backup_dir"');
+    expect(functionsSh).toContain('local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"');
     expect(functionsSh).toContain('_sync_workmux_config "$dotfiles_dir"');
   });
 });

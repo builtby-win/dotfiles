@@ -16,11 +16,6 @@ elif [[ -f "$DOTFILES_SHELL_DIR/local.sh" ]]; then
   source "$DOTFILES_SHELL_DIR/local.sh"
 fi
 
-# User-local binaries (used by installers like starship/pnpm fallbacks)
-if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  export PATH="$HOME/.local/bin:$PATH"
-fi
-
 # Source aliases
 [[ -f "$DOTFILES_SHELL_DIR/aliases.sh" ]] && source "$DOTFILES_SHELL_DIR/aliases.sh"
 
@@ -62,9 +57,16 @@ if [[ -f "$BREW_PATH" ]]; then
   source "$BREW_ENV_CACHE"
 fi
 
+# Add ~/.local/bin after Homebrew so brew-managed binaries win resolution.
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  export PATH="$PATH:$HOME/.local/bin"
+fi
+
 # Auto-attach tmux for SSH sessions (Termius)
 if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -z "$NO_AUTO_TMUX" ]]; then
-  if command -v tmux &> /dev/null; then
+  if command -v tmux-smart &> /dev/null; then
+    command tmux-smart --root "$HOME"
+  elif command -v tmux &> /dev/null; then
     command tmux new-session -A -s main
   fi
 fi

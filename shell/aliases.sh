@@ -71,3 +71,10 @@ fi
 if command -v bat &> /dev/null; then
   alias cat="bat"
 fi
+
+# Smart tmux launcher:
+# - no args: reuse existing session by canonical root path, else create/connect via sesh
+# - args: pass through to tmux as-is
+tmux() {
+  command tmux-smart "$@"
+}

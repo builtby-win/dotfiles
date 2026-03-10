@@ -118,7 +118,9 @@ _sync_workmux_config() {
       return 0
     fi
 
-    local backup_path="$target_path.dotfiles-backup.$(date +%s)"
+    local backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups/workmux"
+    mkdir -p "$backup_dir"
+    local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"
     cp "$target_path" "$backup_path"
     cp "$template_path" "$target_path"
     echo "Updated workmux config: $target_path (backup: $backup_path)"
@@ -127,6 +129,76 @@ _sync_workmux_config() {
 
   cp "$template_path" "$target_path"
   echo "Created workmux config: $target_path"
+}
+
+_bb_tmux_clean() {
+  if ! command -v tmux &> /dev/null; then
+    echo "tmux is not installed."
+    return 1
+  fi
+
+  local auto_yes=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -y|--yes)
+        auto_yes=1
+        ;;
+      -h|--help)
+        echo "Usage: bb tmux-clean [--yes]"
+        echo "  Removes detached tmux sessions with numeric names (legacy clutter)."
+        return 0
+        ;;
+      *)
+        echo "Unknown option: $1"
+        echo "Run: bb tmux-clean --help"
+        return 1
+        ;;
+    esac
+    shift
+  done
+
+  local -a candidates
+  local session_name session_attached session_path
+  while IFS=':::' read -r session_name session_attached session_path; do
+    [[ -z "$session_name" ]] && continue
+
+    if [[ "$session_attached" == "0" && "$session_name" =~ ^[0-9]+$ ]]; then
+      candidates+=("$session_name:::${session_path:-unknown}")
+    fi
+  done < <(tmux list-sessions -F '#{session_name}:::#{session_attached}:::#{session_path}' 2>/dev/null)
+
+  if [[ ${#candidates[@]} -eq 0 ]]; then
+    echo "No detached numeric tmux sessions to clean."
+    return 0
+  fi
+
+  echo "Detached numeric tmux sessions:"
+  local entry
+  for entry in "${candidates[@]}"; do
+    session_name="${entry%%:::*}"
+    session_path="${entry#*:::}"
+    echo "  - $session_name ($session_path)"
+  done
+
+  if [[ "$auto_yes" -ne 1 ]]; then
+    echo -n "Kill these sessions? (y/N) "
+    local response
+    read -r response
+    if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+      echo "Cancelled."
+      return 0
+    fi
+  fi
+
+  local killed=0
+  for entry in "${candidates[@]}"; do
+    session_name="${entry%%:::*}"
+    if tmux kill-session -t "$session_name" 2>/dev/null; then
+      killed=$((killed + 1))
+    fi
+  done
+
+  echo "Killed $killed tmux session(s)."
 }
 
 # Update dotfiles
@@ -186,6 +258,7 @@ bb() {
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb update               Pull updates and optionally rerun setup"
+      echo "  bb tmux-clean           Clean detached numeric tmux sessions"
       echo "  bb status               Show setup manifest"
       echo "  bb tip                  Show a random tip"
       echo "  bb help                 Show this help"
@@ -272,6 +345,9 @@ bb() {
       ;;
     update)
       bbup
+      ;;
+    tmux-clean)
+      _bb_tmux_clean "$@"
       ;;
     status)
       local manifest_path="$HOME/.config/dotfiles/setup-manifest.json"

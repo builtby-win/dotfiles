@@ -47,12 +47,33 @@ tmux source-file ~/.tmux.conf
 | `Leader+T` | Jump to last sesh session |
 | `Alt+(` / `Alt+)` | Previous / next session |
 
+Bare tmux launches now normalize to one project root: if you're inside a git repo,
+new sessions use the repo root as their main cwd, and the initial panes/windows all
+start there. If you launch tmux from outside the shell alias (for example from a
+terminal app shortcut), point it at `~/.local/bin/tmux-smart` so it can reuse an
+existing session for that root instead of creating a numbered duplicate.
+
+Useful direct calls:
+
+```bash
+tmux-smart
+tmux-smart --root ~/code/client-a
+tmux-smart --root ~/code/client-a --new
+```
+
+- `tmux-smart` reuses the current repo/root session when possible
+- `--root` targets another directory explicitly
+- `--new` forces a fresh session name for that root without giving up the same cwd
+
 ## Workmux
 
 `bb setup tmux` and `bb update` keep a local workmux config at
 `~/.config/workmux/config.yaml` in sync with dotfiles. If the file already
-exists, it is backed up and then updated. This file is machine-local and not
-symlinked.
+exists, it is backed up to `~/.local/state/dotfiles/backups/workmux/` and then
+updated. This file is machine-local and not symlinked.
+
+For shell-backed tools that need to start in the current project directory,
+wrap the pane command in a login shell. Example: `command: "bash -lc 'hydra'"`.
 
 | Binding | Action |
 | --- | --- |

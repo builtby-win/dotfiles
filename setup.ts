@@ -320,6 +320,7 @@ function appendSectionsToFile(filePath: string, sections: ParsedSection[]): void
 const DOTFILES_DIR = dirname(new URL(import.meta.url).pathname);
 const HOME = homedir();
 const MANIFEST_PATH = join(DOTFILES_DIR, ".backup-manifest.json");
+const DOTFILES_BACKUP_DIR = join(HOME, ".local", "state", "dotfiles", "backups");
 const DOTFILES_CONFIG_DIR = join(HOME, ".config", "dotfiles");
 const DOTFILES_PATH_FILE = join(DOTFILES_CONFIG_DIR, "path");
 const DOTFILES_LOCAL_SHELL_FILE = join(DOTFILES_CONFIG_DIR, "local.sh");
@@ -532,7 +533,9 @@ async function handleFileConflict(targetPath: string): Promise<"backup" | "skip"
 }
 
 function backupFile(filePath: string): string {
-  const backupPath = `${filePath}.dotfiles-backup.${Date.now()}`;
+  mkdirSync(DOTFILES_BACKUP_DIR, { recursive: true });
+  const safeName = filePath.replace(/^\//, "").replace(/[\/:]/g, "__");
+  const backupPath = join(DOTFILES_BACKUP_DIR, `${safeName}.dotfiles-backup.${Date.now()}`);
   copyFileSync(filePath, backupPath);
   log.info(`Backed up to ${backupPath}`);
   return backupPath;

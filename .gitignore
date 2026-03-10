@@ -1,6 +1,8 @@
 .worktrees/
+.agtx/
 node_modules/
 *.log
+*.dotfiles-backup.*
 .DS_Store
 .backup-manifest.json
 pnpm-lock.yaml
