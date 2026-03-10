@@ -1,0 +1,5 @@
+require("builtby.options")
+require("builtby.keymaps")
+require("builtby.autocmds")
+require("builtby.pack")
+require("builtby.lsp")

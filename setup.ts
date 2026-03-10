@@ -482,6 +482,7 @@ interface StowConfig {
 const STOW_CONFIGS: StowConfig[] = [
   { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
   { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "core profile + optional basic keymap, preserves existing setups" },
+  { name: "Neovim", value: "nvim", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
   { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
@@ -966,6 +967,33 @@ const STOW_TARGETS: Record<string, string[]> = {
     ".config/tmux/builtby/pro.conf",
     ".config/tmux/builtby/bootstrap.basic.conf",
     ".config/tmux/builtby/bootstrap.pro.conf",
+  ],
+  nvim: [
+    ".config/nvim/init.lua",
+    ".config/nvim/.luarc.json",
+    ".config/nvim/lua/builtby/init.lua",
+    ".config/nvim/lua/builtby/options.lua",
+    ".config/nvim/lua/builtby/keymaps.lua",
+    ".config/nvim/lua/builtby/autocmds.lua",
+    ".config/nvim/lua/builtby/pack.lua",
+    ".config/nvim/lua/builtby/lsp/init.lua",
+    ".config/nvim/lua/builtby/plugins/colors.lua",
+    ".config/nvim/lua/builtby/plugins/oil.lua",
+    ".config/nvim/lua/builtby/plugins/pick.lua",
+    ".config/nvim/lua/builtby/plugins/mason.lua",
+    ".config/nvim/lua/builtby/plugins/treesitter.lua",
+    ".config/nvim/lsp/lua_ls.lua",
+    ".config/nvim/lsp/ts_ls.lua",
+    ".config/nvim/lsp/bashls.lua",
+    ".config/nvim/lsp/jsonls.lua",
+    ".config/nvim/lsp/yamlls.lua",
+    ".config/nvim/lsp/taplo.lua",
+    ".config/nvim/lsp/marksman.lua",
+    ".config/nvim/after/ftplugin/lua.lua",
+    ".config/nvim/after/ftplugin/markdown.lua",
+    ".config/nvim/after/ftplugin/gitcommit.lua",
+    ".config/nvim/after/ftplugin/sh.lua",
+    ".config/nvim/after/ftplugin/typescript.lua",
   ],
   hammerspoon: [".hammerspoon/init.lua"],
   karabiner: [".config/karabiner/karabiner.json"],
@@ -2018,7 +2046,7 @@ async function runSetup(): Promise<void> {
     ? platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))
     : platformApps;
   const selectableStowConfigs = currentPlatform === "linux"
-    ? platformStowConfigs.filter((config) => config.value === "zsh" || config.value === "tmux")
+    ? platformStowConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim")
     : platformStowConfigs;
   const installItemLabel = currentPlatform === "linux" ? "commands" : "apps";
 

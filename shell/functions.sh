@@ -184,13 +184,14 @@ bb() {
       echo "  bb setup                Run full interactive setup"
       echo "  bb setup <module>       Install a single module"
       echo "  bb setup hammerspoon    Install Hammerspoon module"
+      echo "  bb setup nvim           Install Neovim module"
       echo "  bb update               Pull updates and optionally rerun setup"
       echo "  bb status               Show setup manifest"
       echo "  bb tip                  Show a random tip"
       echo "  bb help                 Show this help"
       echo ""
       echo "Modules:"
-      echo "  shell (zsh), tmux, hammerspoon, karabiner, ghostty, mackup"
+      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, mackup"
       return 0
       ;;
     setup)
@@ -229,6 +230,10 @@ bb() {
           else
             echo "Tmux config stowed. Reload with: tmux source-file ~/.tmux.conf"
           fi
+          ;;
+        nvim)
+          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" nvim
+          echo "Neovim config stowed. Launch with: nvim"
           ;;
         hammerspoon)
           if [[ "$(uname)" != "Darwin" ]]; then
