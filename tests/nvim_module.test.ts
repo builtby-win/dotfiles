@@ -13,8 +13,13 @@ describe("Neovim module wiring", () => {
     const expectedFiles = [
       "stow-packages/nvim/.config/nvim/init.lua",
       "stow-packages/nvim/.config/nvim/.luarc.json",
+      "stow-packages/nvim/.config/nvim/nvim-pack-lock.json",
       "stow-packages/nvim/.config/nvim/lua/builtby/init.lua",
       "docs/modules/nvim.md",
+      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/tree.lua",
+      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/bufferline.lua",
+      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/whichkey.lua",
+      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/gitsigns.lua",
       "stow-packages/nvim/.config/nvim/lua/builtby/plugins/mason.lua",
       "stow-packages/nvim/.config/nvim/lua/builtby/plugins/treesitter.lua",
       "stow-packages/nvim/.config/nvim/lua/builtby/lsp/init.lua",
@@ -44,8 +49,13 @@ describe("Neovim module wiring", () => {
 
     expect(setupTs).toContain('{ name: "Neovim", value: "nvim"');
     expect(setupTs).toContain('.config/nvim/init.lua');
+    expect(setupTs).toContain('.config/nvim/nvim-pack-lock.json');
     expect(setupTs).toContain('.config/nvim/lua/builtby/init.lua');
     expect(setupTs).toContain('.config/nvim/lua/builtby/options.lua');
+    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/tree.lua');
+    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/bufferline.lua');
+    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/whichkey.lua');
+    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/gitsigns.lua');
     expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/mason.lua');
     expect(setupTs).toContain('.config/nvim/lsp/lua_ls.lua');
     expect(setupTs).toContain('.config/nvim/after/ftplugin/lua.lua');
@@ -72,6 +82,12 @@ describe("Neovim module wiring", () => {
     expect(packLua).toContain("vague.nvim");
     expect(packLua).toContain("oil.nvim");
     expect(packLua).toContain("mini.pick");
+    expect(packLua).toContain("mini.extra");
+    expect(packLua).toContain("nvim-tree.lua");
+    expect(packLua).toContain("nvim-web-devicons");
+    expect(packLua).toContain("bufferline.nvim");
+    expect(packLua).toContain("which-key.nvim");
+    expect(packLua).toContain("gitsigns.nvim");
     expect(packLua).toContain("nvim-treesitter");
     expect(packLua).toContain("mason.nvim");
   });
@@ -83,22 +99,51 @@ describe("Neovim module wiring", () => {
     expect(packLua).toContain('require("builtby.plugins.colors")');
     expect(packLua).toContain('require("builtby.plugins.oil")');
     expect(packLua).toContain('require("builtby.plugins.pick")');
+    expect(packLua).toContain('require("builtby.plugins.tree")');
+    expect(packLua).toContain('require("builtby.plugins.bufferline")');
+    expect(packLua).toContain('require("builtby.plugins.whichkey")');
+    expect(packLua).toContain('require("builtby.plugins.gitsigns")');
     expect(packLua.indexOf("vim.pack.add({")).toBeLessThan(packLua.indexOf('require("builtby.plugins.colors")'));
     expect(packLua.indexOf('require("builtby.plugins.colors")')).toBeLessThan(packLua.indexOf('require("builtby.plugins.oil")'));
     expect(packLua.indexOf('require("builtby.plugins.oil")')).toBeLessThan(packLua.indexOf('require("builtby.plugins.pick")'));
   });
 
-  it("uses runtime-safe MiniPick mappings instead of Pick commands", () => {
+  it("sets beginner-friendly editor defaults", () => {
+    const optionsLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/options.lua");
+
+    expect(optionsLua).toContain('vim.o.signcolumn = "yes"');
+    expect(optionsLua).toContain('vim.o.clipboard = "unnamedplus"');
+    expect(optionsLua).toContain('vim.o.mouse = "a"');
+    expect(optionsLua).toContain("vim.o.ignorecase = true");
+    expect(optionsLua).toContain("vim.o.smartcase = true");
+    expect(optionsLua).toContain("vim.o.splitbelow = true");
+    expect(optionsLua).toContain("vim.o.splitright = true");
+    expect(optionsLua).toContain("vim.o.timeoutlen = 300");
+    expect(optionsLua).toContain("vim.o.showtabline = 2");
+  });
+
+  it("uses runtime-safe MiniPick mappings and beginner shortcuts", () => {
     const keymapsLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/keymaps.lua");
 
+    expect(keymapsLua).toContain('vim.keymap.set("i", "jj", "<Esc>"');
+    expect(keymapsLua).toContain('<leader><leader>');
+    expect(keymapsLua).toContain("MiniPick.start");
+    expect(keymapsLua).toContain('<leader>b');
     expect(keymapsLua).toContain('<leader>ff');
     expect(keymapsLua).toContain("MiniPick.builtin.files");
     expect(keymapsLua).toContain('<leader>fg');
     expect(keymapsLua).toContain("MiniPick.builtin.grep_live");
     expect(keymapsLua).toContain('<leader>fb');
     expect(keymapsLua).toContain("MiniPick.builtin.buffers");
+    expect(keymapsLua).toContain('<leader>fr');
     expect(keymapsLua).toContain('<leader>fh');
     expect(keymapsLua).toContain("MiniPick.builtin.help");
+    expect(keymapsLua).toContain('<leader>bd');
+    expect(keymapsLua).toContain('"<S-h>"');
+    expect(keymapsLua).toContain('"<S-l>"');
+    expect(keymapsLua).toContain('vim.keymap.set("x", "/"');
+    expect(keymapsLua).toContain('vim.fn.setreg("/"');
+    expect(keymapsLua).toContain('NvimTreeToggle');
     expect(keymapsLua).not.toContain("<cmd>Pick");
   });
 
@@ -114,7 +159,8 @@ describe("Neovim module wiring", () => {
     expect(packLua).toContain('require("builtby.plugins.treesitter")');
     expect(packLua).toContain("nvim-treesitter");
     expect(masonLua).toContain('require("mason").setup');
-    expect(treesitterLua).toContain('require("nvim-treesitter.configs").setup');
+    expect(treesitterLua).toContain('require("nvim-treesitter.config").setup');
+    expect(treesitterLua).not.toContain('require("nvim-treesitter.configs").setup');
     expect(lspInit).toContain("local enabled_servers = {}");
     expect(lspInit).toContain('"lua_ls"');
     expect(lspInit).toContain('"ts_ls"');
@@ -152,17 +198,26 @@ describe("Neovim module wiring", () => {
     expect(lspInit).toContain("vim.lsp.enable(enabled_servers)");
   });
 
-  it("documents install, first launch, keymaps, verification, and v1 non-goals", () => {
+  it("documents install, first launch, shortcut cheat sheet, verification, and v1 non-goals", () => {
     const nvimDocs = readRepoFile("docs/modules/nvim.md");
 
     expect(nvimDocs).toContain("bb setup nvim");
     expect(nvimDocs).toContain("Neovim 0.12+");
     expect(nvimDocs).toContain(":Mason");
     expect(nvimDocs).toContain(":checkhealth");
+    expect(nvimDocs).toContain("Leader");
+    expect(nvimDocs).toContain("Space");
+    expect(nvimDocs).toContain("jj");
+    expect(nvimDocs).toContain("clipboard");
+    expect(nvimDocs).toContain("Space Space");
+    expect(nvimDocs).toContain("<leader>b");
+    expect(nvimDocs).toContain("buffer tabs");
+    expect(nvimDocs).toContain("visual");
     expect(nvimDocs).toContain("Windows");
-    expect(nvimDocs).toContain("<leader>e");
     expect(nvimDocs).toContain("<leader>ff");
     expect(nvimDocs).toContain("<leader>fg");
+    expect(nvimDocs).toContain("<leader>fr");
+    expect(nvimDocs).toContain("<leader>bd");
     expect(nvimDocs).toContain("<leader>lf");
     expect(nvimDocs).toContain("DAP");
     expect(nvimDocs).toContain("snippets");

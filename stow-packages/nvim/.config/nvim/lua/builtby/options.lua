@@ -1,6 +1,21 @@
 vim.o.number = true
 vim.o.relativenumber = true
+vim.o.signcolumn = "yes"
 vim.o.termguicolors = true
+vim.o.clipboard = "unnamedplus"
+vim.o.mouse = "a"
+vim.o.ignorecase = true
+vim.o.smartcase = true
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
+vim.o.smartindent = true
+vim.o.splitbelow = true
+vim.o.splitright = true
+vim.o.updatetime = 200
+vim.o.timeoutlen = 300
+vim.o.showtabline = 2
+vim.o.cursorline = true
+vim.o.scrolloff = 6
+
+vim.opt.completeopt = { "menuone", "noselect", "popup" }

@@ -999,6 +999,7 @@ const STOW_TARGETS: Record<string, string[]> = {
   nvim: [
     ".config/nvim/init.lua",
     ".config/nvim/.luarc.json",
+    ".config/nvim/nvim-pack-lock.json",
     ".config/nvim/lua/builtby/init.lua",
     ".config/nvim/lua/builtby/options.lua",
     ".config/nvim/lua/builtby/keymaps.lua",
@@ -1008,6 +1009,10 @@ const STOW_TARGETS: Record<string, string[]> = {
     ".config/nvim/lua/builtby/plugins/colors.lua",
     ".config/nvim/lua/builtby/plugins/oil.lua",
     ".config/nvim/lua/builtby/plugins/pick.lua",
+    ".config/nvim/lua/builtby/plugins/tree.lua",
+    ".config/nvim/lua/builtby/plugins/bufferline.lua",
+    ".config/nvim/lua/builtby/plugins/whichkey.lua",
+    ".config/nvim/lua/builtby/plugins/gitsigns.lua",
     ".config/nvim/lua/builtby/plugins/mason.lua",
     ".config/nvim/lua/builtby/plugins/treesitter.lua",
     ".config/nvim/lsp/lua_ls.lua",
