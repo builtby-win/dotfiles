@@ -1,15 +1,6 @@
 # Shell functions
 # builtby.win/dotfiles
 
-# Quick git commit with message
-c() {
-  if [[ $# -gt 0 ]]; then
-    git commit -m "$*"
-  else
-    git commit -v
-  fi
-}
-
 # Interactive branch checkout with fzf
 co() {
   if [[ $# -gt 0 ]]; then
