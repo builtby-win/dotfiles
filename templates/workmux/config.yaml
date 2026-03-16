@@ -4,35 +4,14 @@ window_prefix: wm-
 agent: opencode
 mode: session
 auto_name:
-  command: opencode --model gpt-5.3-codex-spark run
+  command: opencode run
 
 windows:
   - name: work
     panes:
       - {}
-      - command: lazygit
+      - command: opencode
         split: horizontal
         target: 0
         percentage: 50
-      - command: dev
-        split: vertical
-        target: 0
-        percentage: 50
-      - command: opencode --model gpt-5.3-codex-spark
-        split: vertical
-        target: 1
-        percentage: 50
-  - name: agents
-    # Shell-backed tools that must inherit the session cwd should be wrapped
-    # in a login shell, for example: "bash -lc 'hydra'"
-    panes:
-      - command: "bash -lc 'gemini'"
         focus: true
-      - command: opencode --model openai/gpt-5.3-codex
-        split: horizontal
-        target: 0
-        percentage: 67
-      - command: "bash -lc 'claude --dangerously-skip-permissions'"
-        split: horizontal
-        target: 1
-        percentage: 50

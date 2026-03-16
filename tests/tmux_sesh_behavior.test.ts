@@ -49,6 +49,15 @@ case "$1" in
       printf '%s\\n' "$TMUX_LIST_SESSIONS_OUTPUT"
     fi
     ;;
+  display-message)
+    if [[ "$2" == "-p" && "$3" == "#{client_name}" ]]; then
+      if [[ -n "\${TMUX_CLIENT_NAME:-}" ]]; then
+        printf '%s\\n' "$TMUX_CLIENT_NAME"
+        exit 0
+      fi
+      exit 1
+    fi
+    ;;
   has-session)
     case "$3" in
       client-a)
@@ -59,7 +68,7 @@ case "$1" in
         ;;
     esac
     ;;
-  new-session|attach-session|switch-client|display-message)
+  new-session|attach-session|switch-client)
     ;;
   *)
     ;;
@@ -134,6 +143,29 @@ exit 1
     expect(readFileSync(logPath, "utf-8")).toContain(`new-session -A -s client-a-2 -c ${expectedRoot}`);
   });
 
+  it("attaches instead of switching clients when TMUX is stale but no client exists", () => {
+    const { fixtureDir, logPath } = createTmuxSmartFixture();
+    const targetRoot = join(fixtureDir, "roots", "client-a");
+    mkdirSync(targetRoot, { recursive: true });
+    const expectedRoot = realpathSync(targetRoot);
+
+    const result = spawnSync(tmuxSmartPath, ["--root", targetRoot], {
+      cwd: fixtureDir,
+      encoding: "utf-8",
+      env: {
+        ...process.env,
+        PATH: `${join(fixtureDir, "bin")}:${process.env.PATH ?? ""}`,
+        TMUX: "/tmp/tmux-stale,123,0",
+        TMUX_LIST_SESSIONS_OUTPUT: `client-a:::${expectedRoot}`,
+      },
+    });
+
+    expect(result.status).toBe(0);
+    expect(readFileSync(logPath, "utf-8")).toContain("display-message -p #{client_name}");
+    expect(readFileSync(logPath, "utf-8")).toContain("attach-session -t client-a");
+    expect(readFileSync(logPath, "utf-8")).not.toContain("switch-client -t client-a");
+  });
+
   it("passes explicit tmux arguments through unchanged", () => {
     const { fixtureDir, logPath } = createTmuxSmartFixture();
 
@@ -148,6 +180,24 @@ exit 1
 
     expect(result.status).toBe(0);
     expect(readFileSync(logPath, "utf-8")).toContain("list-sessions -F #{session_name}");
+  });
+
+  it("treats client-only tmux commands as direct passthroughs", () => {
+    const { fixtureDir, logPath } = createTmuxSmartFixture();
+
+    const result = spawnSync(tmuxSmartPath, ["attach"], {
+      cwd: fixtureDir,
+      encoding: "utf-8",
+      env: {
+        ...process.env,
+        PATH: `${join(fixtureDir, "bin")}:${process.env.PATH ?? ""}`,
+      },
+    });
+
+    expect(result.status).toBe(0);
+    expect(readFileSync(logPath, "utf-8")).toContain("attach");
+    expect(readFileSync(logPath, "utf-8")).not.toContain("new-session -A");
+    expect(readFileSync(logPath, "utf-8")).not.toContain("attach-session");
   });
 
   it("fails fast when --root is missing its path value", () => {

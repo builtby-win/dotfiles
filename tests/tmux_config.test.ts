@@ -32,21 +32,26 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain('bind-key s display-popup -E -w 92% -h 85% -d "#{pane_current_path}" "workmux dashboard"');
   });
 
-  it("uses session mode and multi-window workmux template", () => {
-    expect(workmuxConfigTemplate).toContain("mode: session");
-    expect(workmuxConfigTemplate).toContain("windows:");
-    expect(workmuxConfigTemplate).toContain("- name: agents");
-    expect(workmuxConfigTemplate).toContain("\"bash -lc 'hydra'\"");
-    expect(workmuxConfigTemplate).toContain("command: \"bash -lc 'gemini'\"");
-    expect(workmuxConfigTemplate).toContain("command: opencode --model openai/gpt-5.3-codex");
-    expect(workmuxConfigTemplate).toContain(
-      "command: \"bash -lc 'claude --dangerously-skip-permissions'\"",
+  it("uses a single 50/50 workmux layout with opencode on the right", () => {
+    expect(workmuxConfigTemplate.trim()).toBe(
+      `nerdfont: true
+merge_strategy: rebase
+window_prefix: wm-
+agent: opencode
+mode: session
+auto_name:
+  command: opencode --model gpt-5.3-codex-spark run
+
+windows:
+  - name: work
+    panes:
+      - {}
+      - command: opencode --model gpt-5.3-codex-spark
+        split: vertical
+        target: 0
+        percentage: 50
+        focus: true`.trim(),
     );
-    expect(workmuxConfigTemplate).toContain(
-      "command: opencode --model gpt-5.3-codex-spark",
-    );
-    expect(workmuxConfigTemplate).toContain("command: lazygit");
-    expect(workmuxConfigTemplate).toContain("command: dev");
   });
 
   it("keeps pro profile non-invasive for keybinds", () => {

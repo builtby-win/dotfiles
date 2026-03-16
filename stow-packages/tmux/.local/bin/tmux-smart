@@ -105,6 +105,7 @@ connect_or_create_session() {
   local force_new="$2"
   local existing_session=""
   local current_session=""
+  local current_client=""
   local session_name=""
 
   if [[ "$force_new" != "1" ]]; then
@@ -113,6 +114,12 @@ connect_or_create_session() {
 
   if [[ -n "$existing_session" ]]; then
     if [[ -n "$TMUX" ]]; then
+      current_client="$(command tmux display-message -p '#{client_name}' 2>/dev/null)"
+      if [[ -z "$current_client" ]]; then
+        command tmux attach-session -t "$existing_session"
+        exit $?
+      fi
+
       current_session="$(command tmux display-message -p '#S' 2>/dev/null)"
       if [[ "$current_session" == "$existing_session" ]]; then
         exit 0
