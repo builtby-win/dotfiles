@@ -449,7 +449,7 @@ interface App {
 
 const APPS: App[] = [
   // CLI Tools
-  { name: "tmux", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf"], desc: "Terminal multiplexer - split panes, sessions", url: "https://github.com/tmux/tmux", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
+  { name: "tmux", value: "tmux", brewName: "tmux", checked: true, dependencies: ["sesh", "fzf", "xclip"], desc: "Terminal multiplexer - split panes, sessions", url: "https://github.com/tmux/tmux", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
   { name: "btop", value: "btop", brewName: "btop", desc: "Modern resource monitor (better than htop)", url: "https://github.com/aristocratos/btop", category: "cli" },
   { name: "fzf", value: "fzf", brewName: "fzf", desc: "Fuzzy finder for files, history, and more", url: "https://github.com/junegunn/fzf", category: "cli" },
   { name: "ripgrep", value: "ripgrep", brewName: "ripgrep", desc: "Blazing fast grep replacement", url: "https://github.com/BurntSushi/ripgrep", category: "cli" },
@@ -858,12 +858,57 @@ function installOpenCodeCli(): boolean {
   return false;
 }
 
+function installSeshOnLinux(): boolean {
+  if (runCommand("command -v sesh", true)) {
+    log.success("sesh already installed");
+    return true;
+  }
+
+  log.info("Installing sesh...");
+  ensureLocalBinInPath();
+  const arch = getCommandOutput("uname -m");
+  if (!arch || arch !== "x86_64") {
+    log.warning("sesh automatic install currently only supports x86_64 architecture on Linux");
+    return false;
+  }
+
+  const latestTag = getCommandOutput('curl -s https://api.github.com/repos/joshmedeski/sesh/releases/latest | grep "tag_name" | cut -d\'"\' -f4');
+  if (!latestTag) {
+    log.warning("Failed to detect latest sesh version");
+    return false;
+  }
+  const version = latestTag.startsWith('v') ? latestTag.substring(1) : latestTag;
+
+  const url = `https://github.com/joshmedeski/sesh/releases/download/${latestTag}/sesh_Linux_x86_64.tar.gz`;
+  const localBin = join(HOME, ".local", "bin");
+  if (!existsSync(localBin)) {
+    mkdirSync(localBin, { recursive: true });
+  }
+
+  const installCommand = `curl -L "${url}" | tar -xz -C "${localBin}" sesh`;
+  if (!runCommand(installCommand)) {
+    log.error("Sesh binary download failed");
+    return false;
+  }
+
+  if (runCommand("command -v sesh", true)) {
+    log.success("sesh installed");
+    return true;
+  }
+
+  log.warning("sesh installation completed but binary was not found in PATH");
+  return false;
+}
+
 function installPackage(name: string, cask = false): boolean {
   const platform = getCurrentPlatform();
 
   if (platform === "linux") {
     if (name === "starship") {
       return installStarshipOnLinux();
+    }
+    if (name === "sesh") {
+      return installSeshOnLinux();
     }
 
     const linuxManager = getLinuxPackageManager();
@@ -1506,6 +1551,20 @@ function installTpmPlugins(tpmPath: string): void {
   }
 }
 
+function setupTmuxFingersOnLinux(): void {
+  const fingersPath = join(HOME, ".tmux", "plugins", "tmux-fingers");
+  if (!existsSync(fingersPath)) return;
+
+  const arch = getCommandOutput("uname -m");
+  if (arch !== "x86_64") return;
+
+  const binaryPath = join(fingersPath, "bin", "tmux-fingers");
+  if (existsSync(binaryPath)) return;
+
+  log.info("Initializing tmux-fingers for Linux...");
+  runCommand(`bash "${join(fingersPath, "install-wizard.sh")}" download-binary`, true);
+}
+
 function setupTpm(): void {
   const tpmPath = join(HOME, ".tmux", "plugins", "tpm");
   let tpmReady = false;
@@ -1530,6 +1589,9 @@ function setupTpm(): void {
 
   if (tpmReady) {
     installTpmPlugins(tpmPath);
+    if (getCurrentPlatform() === "linux") {
+      setupTmuxFingersOnLinux();
+    }
   }
 }
 
