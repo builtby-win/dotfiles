@@ -26,6 +26,13 @@ describe('Hammerspoon module wiring', () => {
     expect(initLua).toContain("hyper = { 'ctrl', 'alt', 'cmd', 'shift' }");
     expect(initLua).toContain("hs.hotkey.bind(hyper, 'space', appLauncher.show)");
     expect(initLua).toContain("hs.hotkey.bind(hyper, '4', ghostty.fourPane)");
+    expect(initLua).not.toContain('appLauncher.bindDirectShortcuts(hyper)');
+  });
+
+  it('keeps app launcher choices without direct Hyper app shortcuts', () => {
+    const appLauncherLua = readRepoFile('stow-packages/hammerspoon/.hammerspoon/modules/app_launcher.lua');
+    expect(appLauncherLua).not.toContain('function M.bindDirectShortcuts(mods)');
+    expect(appLauncherLua).not.toContain("subText = 'Hyper+'");
   });
 
   it('adds hammerspoon to setup.ts app and config catalogs', () => {

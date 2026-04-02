@@ -71,6 +71,16 @@ windows:
     expect(basicConf).toContain('--with-nth "1..3"');
   });
 
+  it("adds a rebalance binding and command palette entry", () => {
+    expect(basicConf).toContain("bind b select-layout -E");
+    expect(basicConf).toContain("[Panes] ::: Rebalance Panes ::: Leader + b ::: tmux select-layout -E");
+  });
+
+  it("reloads the modular tmux profile instead of only ~/.tmux.conf", () => {
+    expect(basicConf).toContain('bind r source-file ~/.config/tmux/builtby/core.conf \\; source-file ~/.config/tmux/builtby/basic.conf');
+    expect(basicConf).toContain('[Other] ::: Reload Config ::: Leader + r ::: tmux source-file ~/.config/tmux/builtby/core.conf && tmux source-file ~/.config/tmux/builtby/basic.conf');
+  });
+
   it("puts shared defaults in core and prefix in basic", () => {
     expect(coreConf).toContain("set -g mouse on");
     expect(basicConf).toMatch(/set -g prefix 'C-b'/);

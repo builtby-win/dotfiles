@@ -101,6 +101,7 @@ wrap the pane command in a login shell. Example: `command: "bash -lc 'hydra'"`.
 | `Alt+h/j/k/l` | Move between panes (no prefix) |
 | `Leader+d` | Split vertical |
 | `Leader+D` | Split horizontal |
+| `Leader+b` | Rebalance panes |
 | `Leader+x` | Close pane |
 | `Alt+\` | Split vertical (no prefix) |
 | `Alt+-` | Split horizontal (no prefix) |

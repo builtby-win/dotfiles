@@ -3,7 +3,7 @@
 # builtby.win/dotfiles
 
 # Timeout for commands (ms)
-command_timeout = 500
+command_timeout = 2000
 
 # Newline between prompts
 add_newline = true
@@ -47,6 +47,7 @@ esac
 '''
 format = "[$output]($style) "
 style = "bold purple"
+ignore_timeout = true
 
 # Git branch
 [git_branch]

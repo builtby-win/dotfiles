@@ -31,21 +31,13 @@ function M.show()
   for _, shortcut in ipairs(appShortcuts) do
     table.insert(choices, {
       text = shortcut.app,
-      subText = 'Hyper+' .. shortcut.key .. ' - ' .. shortcut.label,
+      subText = shortcut.label,
       app = shortcut.app,
     })
   end
 
   chooser:choices(choices)
   chooser:show()
-end
-
-function M.bindDirectShortcuts(mods)
-  for _, shortcut in ipairs(appShortcuts) do
-    hs.hotkey.bind(mods, shortcut.key, function()
-      launchApp(shortcut.app)
-    end)
-  end
 end
 
 return M

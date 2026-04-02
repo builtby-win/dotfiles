@@ -81,7 +81,9 @@
                                             "dev.warp.Warp-Stable",
                                             "net.kovidgoyal.kitty",
                                             "org.alacritty",
-                                            "io.alacritty"
+                                            "io.alacritty",
+                                            "com.github.wez.wezterm",
+                                            "com.cmuxterm.app"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
@@ -264,6 +266,42 @@
                                         "modifiers": ["left_command", "left_control", "left_option"]
                                     }
                                 ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "df chord → Hyper+f (all apps)",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "simultaneous": [
+                                        {
+                                            "key_code": "d"
+                                        },
+                                        {
+                                            "key_code": "f"
+                                        }
+                                    ],
+                                    "simultaneous_options": {
+                                        "key_down_order": "insensitive",
+                                        "key_up_order": "insensitive"
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f",
+                                        "modifiers": [
+                                            "left_command",
+                                            "left_control",
+                                            "left_option",
+                                            "left_shift"
+                                        ]
+                                    }
+                                ],
+                                "parameters": {
+                                    "basic.simultaneous_threshold_milliseconds": 150
+                                },
                                 "type": "basic"
                             }
                         ]

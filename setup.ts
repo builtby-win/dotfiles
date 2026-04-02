@@ -328,6 +328,7 @@ const WORKMUX_CONFIG_DIR = join(HOME, ".config", "workmux");
 const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml");
 const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml");
 const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "bootstrap.basic.conf");
+const TMUX_BASIC_CONF_SOURCE = join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "basic.conf");
 const TMUX_MERGE_MARKER_START = "# === Added from builtby.win/dotfiles (tmux) ===";
 const TMUX_MERGE_MARKER_END = "# === End builtby.win/dotfiles (tmux) ===";
 const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ===";
@@ -1274,6 +1275,17 @@ function upsertTmuxMergeBlock(content: string): string {
   return `${next}\n${block}\n`;
 }
 
+function generateTmuxEntrypoint(): string {
+  return [
+    "# =============================================================================",
+    "# Tmux bootstrap",
+    "# =============================================================================",
+    "",
+    `source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"`,
+    `source-file "$HOME/.config/tmux/builtby/basic.conf"`,
+  ].join("\n") + "\n";
+}
+
 async function setupTmuxEntrypoint(): Promise<boolean> {
   const tmuxConfPath = join(HOME, ".tmux.conf");
 
@@ -1295,7 +1307,7 @@ async function setupTmuxEntrypoint(): Promise<boolean> {
       return false;
     }
 
-    const content = readFileSync(TMUX_BOOTSTRAP_BASIC_SOURCE, "utf-8");
+    const content = generateTmuxEntrypoint();
     writeFileSync(tmuxConfPath, content);
     log.success("Created ~/.tmux.conf with builtby basic profile");
     return true;
@@ -1335,7 +1347,7 @@ async function setupTmuxEntrypoint(): Promise<boolean> {
       return false;
     }
 
-    const content = readFileSync(TMUX_BOOTSTRAP_BASIC_SOURCE, "utf-8");
+    const content = generateTmuxEntrypoint();
     writeFileSync(tmuxConfPath, content);
     log.success("Replaced ~/.tmux.conf with builtby basic profile");
     return true;
