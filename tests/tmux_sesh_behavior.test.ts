@@ -8,7 +8,9 @@ describe("tmux and sesh workflow", () => {
   const functionsSh = readFileSync(join(process.cwd(), "shell", "functions.sh"), "utf-8");
   const aliasesSh = readFileSync(join(process.cwd(), "shell", "aliases.sh"), "utf-8");
   const tmuxSmartPath = join(process.cwd(), "stow-packages", "tmux", ".local", "bin", "tmux-smart");
+  const seshShimPath = join(process.cwd(), "stow-packages", "tmux", ".local", "bin", "sesh");
   const tmuxSmartSh = readFileSync(tmuxSmartPath, "utf-8");
+  const seshShimSh = readFileSync(seshShimPath, "utf-8");
   const seshPickerSh = readFileSync(
     join(process.cwd(), "stow-packages", "tmux", ".config", "tmux", "sesh-picker.sh"),
     "utf-8",
@@ -217,9 +219,40 @@ exit 1
   });
 
   it("keeps the current search query when entering fuzzy mode", () => {
-    expect(seshPickerSh).toContain("sesh list --icons --hide-duplicates");
+    expect(seshPickerSh).toContain('"$sesh_bin" list --icons --hide-duplicates');
     expect(seshPickerSh).toContain("/:enable-search+change-prompt(🔍  )+unbind(j,k)+unbind(esc)");
     expect(seshPickerSh).not.toContain("clear-query");
+  });
+
+  it("prefers a real sesh binary over the stowed shim", () => {
+    const fixtureDir = mkdtempSync(join(tmpdir(), "sesh-shim-"));
+    const brewPrefix = join(fixtureDir, "brew");
+    const brewBin = join(brewPrefix, "bin");
+    const outputPath = join(fixtureDir, "args.log");
+    tempDirs.push(fixtureDir);
+    mkdirSync(brewBin, { recursive: true });
+
+    createExecutable(
+      brewBin,
+      "sesh",
+      `#!/usr/bin/env bash
+printf '%s\n' "$*" > "${outputPath}"
+`,
+    );
+
+    const result = spawnSync(seshShimPath, ["list", "--icons"], {
+      cwd: fixtureDir,
+      encoding: "utf-8",
+      env: {
+        ...process.env,
+        HOMEBREW_PREFIX: brewPrefix,
+        PATH: `${join(process.cwd(), "stow-packages", "tmux", ".local", "bin")}:${process.env.PATH ?? ""}`,
+      },
+    });
+
+    expect(result.status).toBe(0);
+    expect(readFileSync(outputPath, "utf-8")).toContain("list --icons");
+    expect(seshShimSh).toContain('which -a sesh');
   });
 
   it("adds bb tmux-clean command for stale detached sessions", () => {
