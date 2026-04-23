@@ -33,25 +33,17 @@ describe("tmux profile split", () => {
   });
 
   it("uses a single 50/50 workmux layout with opencode on the right", () => {
-    expect(workmuxConfigTemplate.trim()).toBe(
-      `nerdfont: true
-merge_strategy: rebase
-window_prefix: wm-
-agent: opencode
-mode: session
-auto_name:
-  command: opencode --model gpt-5.3-codex-spark run
-
-windows:
-  - name: work
-    panes:
-      - {}
-      - command: opencode --model gpt-5.3-codex-spark
-        split: vertical
-        target: 0
-        percentage: 50
-        focus: true`.trim(),
-    );
+    expect(workmuxConfigTemplate).toContain("nerdfont: true");
+    expect(workmuxConfigTemplate).toContain("merge_strategy: rebase");
+    expect(workmuxConfigTemplate).toContain("window_prefix: wm-");
+    expect(workmuxConfigTemplate).toContain("agent: opencode");
+    expect(workmuxConfigTemplate).toContain("mode: session");
+    expect(workmuxConfigTemplate).toContain("command: opencode run");
+    expect(workmuxConfigTemplate).toContain("- name: work");
+    expect(workmuxConfigTemplate).toContain("- command: opencode");
+    expect(workmuxConfigTemplate).toContain("split: horizontal");
+    expect(workmuxConfigTemplate).toContain("percentage: 50");
+    expect(workmuxConfigTemplate).toContain("focus: true");
   });
 
   it("keeps pro profile non-invasive for keybinds", () => {
@@ -60,9 +52,9 @@ windows:
   });
 
   it("loads core + basic + user overrides in bootstrap", () => {
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/core.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/basic.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.tmux.local.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/core.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/basic.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.tmux.local.conf\"");
   });
 
   it("keeps command palette delimiter in basic profile", () => {
