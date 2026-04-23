@@ -4,6 +4,8 @@ Ghostty is a GPU terminal with a simple config file.
 
 ## Install
 
+Legacy module install:
+
 ```bash
 bb setup ghostty
 ```

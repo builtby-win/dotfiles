@@ -8,6 +8,8 @@ Tmux is split into profiles:
 
 ## Install
 
+Legacy module install:
+
 ```bash
 bb setup tmux
 ```

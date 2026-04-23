@@ -109,6 +109,7 @@ print_brew_shellenv_instructions() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" 2>/dev/null)" && pwd 2>/dev/null || echo "")"
 REPO_URL="https://github.com/builtby-win/dotfiles.git"
 SETUP_PATH=""
+LEGACY_STOW=0
 FORWARDED_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -129,6 +130,11 @@ while [[ $# -gt 0 ]]; do
           exit 1
           ;;
       esac
+      shift
+      ;;
+    --legacy-stow)
+      LEGACY_STOW=1
+      FORWARDED_ARGS+=("$1")
       shift
       ;;
     *)
@@ -292,6 +298,17 @@ else
   print_success "GNU Stow already installed"
 fi
 
+# Install chezmoi
+print_debug "Checking for chezmoi..."
+if ! command -v chezmoi &> /dev/null; then
+  echo "  Installing chezmoi..."
+  "$BREW_BIN" install chezmoi || { print_error "Failed to install chezmoi"; exit 1; }
+  add_brew_to_session_path "$BREW_BIN"
+  print_success "chezmoi installed"
+else
+  print_success "chezmoi already installed"
+fi
+
 # Install fnm (Fast Node Manager)
 print_debug "Checking for fnm..."
 if ! command -v fnm &> /dev/null; then
@@ -349,27 +366,40 @@ else
 fi
 
 echo ""
-print_step "[3/3] Running interactive setup..."
+if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
+  print_step "[3/3] Running legacy stow setup..."
+else
+  print_step "[3/3] Applying chezmoi base dotfiles..."
+fi
 echo ""
 
-# Run the TypeScript setup
-print_debug "Running setup script..."
-SETUP_ARGS=( "$DOTFILES_DIR" "${FORWARDED_ARGS[@]}" )
-if [[ -n "$SETUP_PATH" ]]; then
-  SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
-fi
+if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
+  # Run the TypeScript setup
+  print_debug "Running legacy setup script..."
+  SETUP_ARGS=( "$DOTFILES_DIR" )
+  if [[ -n "$SETUP_PATH" ]]; then
+    SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
+  fi
 
-# Use local tsx directly to avoid pnpm exec TTY issues in piped executions
-TSX_BIN="./node_modules/.bin/tsx"
-if [ -x "$TSX_BIN" ]; then
-  if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-    print_error "setup.ts failed"
-    exit 1
+  # Use local tsx directly to avoid pnpm exec TTY issues in piped executions
+  TSX_BIN="./node_modules/.bin/tsx"
+  if [ -x "$TSX_BIN" ]; then
+    if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+      print_error "setup.ts failed"
+      exit 1
+    fi
+  else
+    if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+      print_error "setup.ts failed"
+      exit 1
+    fi
   fi
+  print_success "Legacy setup complete!"
 else
-  if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-    print_error "setup.ts failed"
+  print_debug "Applying chezmoi base state..."
+  if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
+    print_error "chezmoi apply failed"
     exit 1
   fi
+  print_success "Chezmoi base dotfiles applied!"
 fi
-print_success "Setup complete!"

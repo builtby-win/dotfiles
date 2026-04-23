@@ -2,7 +2,17 @@
 
 Zsh is the main shell setup for these dotfiles. It includes zinit, starship, aliases, and helper functions.
 
+The base shell entrypoint is now applied through the default chezmoi bootstrap lane. The old `bb setup shell` flow remains available as a legacy stow-backed path.
+
 ## Install
+
+Default/base apply:
+
+```bash
+bb apply
+```
+
+Legacy module install:
 
 ```bash
 bb setup shell
