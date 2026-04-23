@@ -18,7 +18,15 @@ This stows the config and restarts Karabiner Elements.
 Manual sync and restart:
 
 ```bash
-./scripts/sync-karabiner.sh
+./scripts/sync-karabiner.sh push
+```
+
+Pull the current machine config back into dotfiles:
+
+```bash
+bb sync karabiner pull
+# or
+./scripts/sync-karabiner.sh pull
 ```
 
 ## Key mappings

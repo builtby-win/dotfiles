@@ -375,6 +375,7 @@ bb() {
       echo "  bb setup <module>       Install a single module"
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
+      echo "  bb sync karabiner       Sync Karabiner config"
       echo "  bb update               Pull updates and optionally rerun setup"
       echo "  bb backups-clean        Keep only the newest dotfiles backups"
       echo "  bb tmux-clean           Clean detached numeric tmux sessions"
@@ -440,9 +441,9 @@ bb() {
             echo "Karabiner Elements is macOS only."
             return 1
           fi
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" karabiner
+          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" karabiner || return 1
           if [[ -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
-            "$dotfiles_dir/scripts/sync-karabiner.sh"
+            "$dotfiles_dir/scripts/sync-karabiner.sh" push
           else
             echo "Karabiner config stowed. Restart Karabiner Elements to apply."
           fi
@@ -458,6 +459,39 @@ bb() {
         *)
           echo "Unknown module: $module"
           echo "Run: bb help"
+          return 1
+          ;;
+      esac
+      ;;
+    sync)
+      if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
+        echo "Error: Dotfiles directory not found. Set DOTFILES_DIR or run setup first."
+        return 1
+      fi
+
+      if [[ $# -eq 0 ]]; then
+        echo "Usage: bb sync karabiner [push|pull]"
+        return 1
+      fi
+
+      local target="${1:-}"
+      local direction="${2:-pull}"
+
+      case "$target" in
+        karabiner)
+          if [[ "$(uname)" != "Darwin" ]]; then
+            echo "Karabiner Elements is macOS only."
+            return 1
+          fi
+          if [[ ! -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
+            echo "Karabiner sync script not found."
+            return 1
+          fi
+          "$dotfiles_dir/scripts/sync-karabiner.sh" "$direction"
+          ;;
+        *)
+          echo "Unknown sync target: $target"
+          echo "Usage: bb sync karabiner [push|pull]"
           return 1
           ;;
       esac
