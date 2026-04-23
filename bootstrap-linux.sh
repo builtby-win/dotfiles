@@ -42,6 +42,8 @@ REPO_URL="https://github.com/builtby-win/dotfiles.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd 2>/dev/null || echo "")"
 LINUX_PKG_MANAGER=""
 NON_INTERACTIVE=0
+SETUP_PATH=""
+SETUP_PATH_FROM_ARGS=0
 
 parse_args() {
   while [[ $# -gt 0 ]]; do
@@ -50,12 +52,27 @@ parse_args() {
         NON_INTERACTIVE=1
         ;;
       --focus)
-        # Passed through to setup.ts
+        SETUP_PATH="focus"
+        SETUP_PATH_FROM_ARGS=1
+        ;;
+      --setup-path)
+        shift
+        case "$1" in
+          focus|standard|minimal|customize)
+            SETUP_PATH="$1"
+            SETUP_PATH_FROM_ARGS=1
+            ;;
+          *)
+            print_error "Unknown setup path: $1"
+            exit 1
+            ;;
+        esac
         ;;
       -h|--help)
         echo "Usage: bootstrap-linux.sh [options]"
         echo "  -y, --yes   Run non-interactively (auto-approve all prompts)"
         echo "  --focus     Run focused Back2Vibing setup"
+        echo "  --setup-path <path>  Use focus, standard, minimal, or customize"
         echo "  -h, --help  Show this help message"
         exit 0
         ;;
@@ -117,6 +134,10 @@ fi
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
+
+if [[ -n "$SETUP_PATH" ]]; then
+  print_debug "Setup path override: ${SETUP_PATH}"
+fi
 
 mkdir -p "$DOTFILES_DIR" || { print_error "Failed to create ${DOTFILES_DIR}"; exit 1; }
 
@@ -195,18 +216,38 @@ fi
 print_success "pnpm ready"
 
 print_step "Installing dependencies..."
-pnpm install --silent || { print_error "pnpm install failed"; exit 1; }
+pnpm install --silent || {
+  print_error "pnpm install failed"
+  print_error "This often means disk space ran out or the bootstrap environment is incomplete"
+  print_error "Check available space with: df -h"
+  print_error "Try running manually: cd $DOTFILES_DIR && pnpm install"
+  exit 1
+}
 print_success "Dependencies installed"
 
 echo ""
 print_step "Launching interactive setup..."
 TSX_BIN="./node_modules/.bin/tsx"
+SETUP_ARGS=( "$DOTFILES_DIR" )
+if [[ -n "$SETUP_PATH" ]]; then
+  SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
+elif [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+  SETUP_ARGS+=( --setup-path standard )
+fi
 if [[ -x "$TSX_BIN" ]]; then
-  "$TSX_BIN" setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
+  if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+    print_error "setup.ts failed"
+    exit 1
+  fi
 elif command -v pnpm >/dev/null 2>&1; then
-  pnpm exec tsx setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
+  if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+    print_error "setup.ts failed"
+    exit 1
+  fi
 else
-  print_warning "Cannot run setup.ts"
+  print_error "setup.ts failed"
+  print_error "Cannot run setup.ts"
+  exit 1
 fi
 
 print_success "Linux bootstrap complete"

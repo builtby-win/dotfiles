@@ -137,6 +137,70 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('fnm use lts-latest');
   });
 
+  it('lets setup.ts own the interactive setup path chooser by default', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(macBootstrap).not.toContain('How would you like to proceed with setup?');
+    expect(linuxBootstrap).not.toContain('How would you like to proceed with setup?');
+    expect(setupContent).toContain('message: "How would you like to proceed?"');
+  });
+
+  it('only passes setup path handoff flags when bootstrap gets an explicit path', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(macBootstrap).not.toContain('SETUP_ARGS=( "$DOTFILES_DIR" --setup-path "$SETUP_PATH"');
+    expect(linuxBootstrap).not.toContain('SETUP_ARGS=( "$DOTFILES_DIR" --setup-path "$SETUP_PATH" "$@" )');
+    expect(macBootstrap).toContain('if [[ -n "$SETUP_PATH" ]]; then');
+    expect(linuxBootstrap).toContain('if [[ -n "$SETUP_PATH" ]]; then');
+    expect(setupContent).toContain('function getBootstrapSetupPath(argv: string[]): SetupPathChoice | null');
+    expect(setupContent).toContain('const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));');
+    expect(setupContent).toContain('const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : await select({');
+  });
+
+  it('documents the default install as landing in the interactive chooser', () => {
+    const content = fs.readFileSync(readmePath, 'utf-8');
+    expect(content).toContain('This installs dependencies, clones the repo, then opens the interactive setup chooser.');
+  });
+
+  it('supports explicit setup path arguments in the macOS/bootstrap wrapper too', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('--setup-path)');
+    expect(macBootstrap).toContain('Unknown setup path: $1');
+    expect(macBootstrap).toContain('FORWARDED_ARGS');
+  });
+
+  it('keeps Linux non-interactive mode free of new setup path prompts', () => {
+    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+    expect(content).toContain('elif [[ "$NON_INTERACTIVE" -eq 1 ]]; then');
+    expect(content).toContain('SETUP_ARGS+=( --setup-path standard )');
+    expect(content).not.toContain('SETUP_PATH="standard"');
+  });
+
+  it('gives pnpm install failures explicit disk-space/bootstrap guidance', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('This often means disk space ran out or the bootstrap environment is incomplete');
+    expect(linuxBootstrap).toContain('This often means disk space ran out or the bootstrap environment is incomplete');
+    expect(macBootstrap).toContain('df -h');
+    expect(linuxBootstrap).toContain('df -h');
+  });
+
+  it('does not silently swallow setup.ts launch failures', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).not.toContain('setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true');
+    expect(linuxBootstrap).not.toContain('setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true');
+    expect(macBootstrap).toContain('print_error "setup.ts failed"');
+    expect(linuxBootstrap).toContain('print_error "setup.ts failed"');
+  });
+
   it('keeps startup tips focused on shell tooling', () => {
     const content = fs.readFileSync(tipsPath, 'utf-8');
     expect(content).not.toContain('Hammerspoon');
@@ -156,6 +220,47 @@ describe('Linux bootstrap workflow', () => {
     const shellInitPath = path.resolve(__dirname, '../shell/init.sh');
     const content = fs.readFileSync(shellInitPath, 'utf-8');
     expect(content).toContain('$HOME/.local/bin');
+  });
+
+  it('detects Homebrew from fixed macOS paths before relying on PATH lookup', () => {
+    const content = fs.readFileSync(bootstrapPath, 'utf-8');
+
+    expect(content).toContain('/opt/homebrew/bin/brew');
+    expect(content).toContain('/usr/local/bin/brew');
+
+    const arm64Index = content.indexOf('/opt/homebrew/bin/brew');
+    const intelIndex = content.indexOf('/usr/local/bin/brew');
+    const commandVIndex = content.indexOf('command -v brew');
+
+    expect(arm64Index).toBeGreaterThan(-1);
+    expect(intelIndex).toBeGreaterThan(-1);
+    expect(commandVIndex).toBeGreaterThan(-1);
+    expect(arm64Index).toBeLessThan(commandVIndex);
+    expect(intelIndex).toBeLessThan(commandVIndex);
+  });
+
+  it('prints manual Homebrew shellenv commands instead of auto-evaling them', () => {
+    const content = fs.readFileSync(bootstrapPath, 'utf-8');
+
+    expect(content).not.toContain('eval "$(/opt/homebrew/bin/brew shellenv)" ||');
+    expect(content).not.toContain('eval "$(/usr/local/bin/brew shellenv)" ||');
+    expect(content).toContain('Run these commands yourself if brew is missing in new terminals:');
+    expect(content).toContain('local shellenv_cmd=""');
+    expect(content).toContain("shellenv_cmd='$(/opt/homebrew/bin/brew shellenv)'");
+    expect(content).toContain("shellenv_cmd='$(/usr/local/bin/brew shellenv)'");
+    expect(content).toContain('>> ~/.zprofile');
+    expect(content).toContain('echo "    echo \'eval \\\"$shellenv_cmd\\\"\' >> ~/.zprofile"');
+    expect(content).toContain('echo "    eval \\\"$shellenv_cmd\\\""');
+  });
+
+  it('uses the resolved Homebrew binary for macOS package installs', () => {
+    const content = fs.readFileSync(bootstrapPath, 'utf-8');
+
+    expect(content).toContain('"$BREW_BIN" install git');
+    expect(content).toContain('"$BREW_BIN" install stow');
+    expect(content).toContain('"$BREW_BIN" install fnm');
+    expect(content).not.toContain('brew install stow');
+    expect(content).not.toContain('brew install fnm');
   });
 
   it('uses portable PNPM_HOME defaults in zshrc', () => {

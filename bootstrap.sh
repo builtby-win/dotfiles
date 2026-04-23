@@ -51,9 +51,92 @@ print_debug() {
   echo -e "${CYAN}[DEBUG]${NC} $1"
 }
 
+resolve_brew_bin() {
+  if [[ -x "/opt/homebrew/bin/brew" ]]; then
+    echo "/opt/homebrew/bin/brew"
+    return 0
+  fi
+
+  if [[ -x "/usr/local/bin/brew" ]]; then
+    echo "/usr/local/bin/brew"
+    return 0
+  fi
+
+  if command -v brew &> /dev/null; then
+    command -v brew
+    return 0
+  fi
+
+  return 1
+}
+
+add_brew_to_session_path() {
+  local brew_bin="$1"
+  local brew_prefix=""
+
+  brew_prefix="$($brew_bin --prefix 2>/dev/null || true)"
+  if [[ -z "$brew_prefix" ]]; then
+    return 0
+  fi
+
+  if [[ ":$PATH:" != *":$brew_prefix/bin:"* ]]; then
+    export PATH="$brew_prefix/bin:$PATH"
+  fi
+
+  if [[ -d "$brew_prefix/sbin" && ":$PATH:" != *":$brew_prefix/sbin:"* ]]; then
+    export PATH="$brew_prefix/sbin:$PATH"
+  fi
+}
+
+print_brew_shellenv_instructions() {
+  local brew_bin="$1"
+  local shellenv_cmd=""
+
+  print_warning "Homebrew is installed, but your shell may not be configured for it yet."
+  echo "  Run these commands yourself if brew is missing in new terminals:"
+
+  if [[ "$brew_bin" == "/opt/homebrew/bin/brew" ]]; then
+    shellenv_cmd='$(/opt/homebrew/bin/brew shellenv)'
+  else
+    shellenv_cmd='$(/usr/local/bin/brew shellenv)'
+  fi
+
+  echo "    echo 'eval \"$shellenv_cmd\"' >> ~/.zprofile"
+  echo "    eval \"$shellenv_cmd\""
+}
+
 # Check if running from curl pipe or locally
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" 2>/dev/null)" && pwd 2>/dev/null || echo "")"
 REPO_URL="https://github.com/builtby-win/dotfiles.git"
+SETUP_PATH=""
+FORWARDED_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --focus)
+      SETUP_PATH="focus"
+      FORWARDED_ARGS+=("$1")
+      shift
+      ;;
+    --setup-path)
+      shift
+      case "$1" in
+        focus|standard|minimal|customize)
+          SETUP_PATH="$1"
+          ;;
+        *)
+          print_error "Unknown setup path: $1"
+          exit 1
+          ;;
+      esac
+      shift
+      ;;
+    *)
+      FORWARDED_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
 
 print_banner
 
@@ -84,9 +167,11 @@ if ! command -v git &> /dev/null; then
   print_debug "OSTYPE: $OSTYPE"
   
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    if command -v brew &> /dev/null; then
+    BREW_BIN="$(resolve_brew_bin || true)"
+    if [[ -n "$BREW_BIN" ]]; then
+      add_brew_to_session_path "$BREW_BIN"
       print_step "Installing Git via Homebrew..."
-      brew install git
+      "$BREW_BIN" install git
     else
       print_warning "Git is required. A dialog may appear to install Xcode Command Line Tools."
       print_warning "If not, run: xcode-select --install"
@@ -169,7 +254,8 @@ print_step "[1/3] Installing dependencies..."
 
 # Install Homebrew if not present
 print_debug "Checking for homebrew..."
-if ! command -v brew &> /dev/null; then
+BREW_BIN="$(resolve_brew_bin || true)"
+if [[ -z "$BREW_BIN" ]]; then
   echo "  Installing Homebrew..."
   print_debug "Downloading Homebrew installer..."
   if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1; then
@@ -179,15 +265,20 @@ if ! command -v brew &> /dev/null; then
     exit 1
   fi
 
-  # Add Homebrew to PATH for this session
-  print_debug "Setting up Homebrew PATH (uname -m: $(uname -m))"
-  if [[ "$(uname -m)" == "arm64" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)" || print_warning "Failed to set up arm64 Homebrew PATH"
-  else
-    eval "$(/usr/local/bin/brew shellenv)" || print_warning "Failed to set up x86 Homebrew PATH"
+  BREW_BIN="$(resolve_brew_bin || true)"
+  if [[ -z "$BREW_BIN" ]]; then
+    print_error "Homebrew was installed, but brew is still not available"
+    exit 1
   fi
+
+  add_brew_to_session_path "$BREW_BIN"
+  print_brew_shellenv_instructions "$BREW_BIN"
   print_success "Homebrew installed"
 else
+  add_brew_to_session_path "$BREW_BIN"
+  if ! command -v brew &> /dev/null; then
+    print_brew_shellenv_instructions "$BREW_BIN"
+  fi
   print_success "Homebrew already installed"
 fi
 
@@ -195,7 +286,7 @@ fi
 print_debug "Checking for GNU Stow..."
 if ! command -v stow &> /dev/null; then
   echo "  Installing GNU Stow..."
-  brew install stow || { print_error "Failed to install GNU Stow"; exit 1; }
+  "$BREW_BIN" install stow || { print_error "Failed to install GNU Stow"; exit 1; }
   print_success "GNU Stow installed"
 else
   print_success "GNU Stow already installed"
@@ -205,7 +296,8 @@ fi
 print_debug "Checking for fnm..."
 if ! command -v fnm &> /dev/null; then
   echo "  Installing fnm (Node version manager)..."
-  brew install fnm || { print_error "Failed to install fnm"; exit 1; }
+  "$BREW_BIN" install fnm || { print_error "Failed to install fnm"; exit 1; }
+  add_brew_to_session_path "$BREW_BIN"
 
   # Setup fnm for this session
   print_debug "Setting up fnm environment..."
@@ -250,6 +342,8 @@ if pnpm install --silent; then
   print_success "Dependencies installed"
 else
   print_error "pnpm install failed"
+  print_error "This often means disk space ran out or the bootstrap environment is incomplete"
+  print_error "Check available space with: df -h"
   print_error "Try running manually: cd $DOTFILES_DIR && pnpm install"
   exit 1
 fi
@@ -260,12 +354,22 @@ echo ""
 
 # Run the TypeScript setup
 print_debug "Running setup script..."
+SETUP_ARGS=( "$DOTFILES_DIR" "${FORWARDED_ARGS[@]}" )
+if [[ -n "$SETUP_PATH" ]]; then
+  SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
+fi
 
 # Use local tsx directly to avoid pnpm exec TTY issues in piped executions
 TSX_BIN="./node_modules/.bin/tsx"
 if [ -x "$TSX_BIN" ]; then
-  "$TSX_BIN" setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
+  if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+    print_error "setup.ts failed"
+    exit 1
+  fi
 else
-  pnpm exec tsx setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true
+  if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+    print_error "setup.ts failed"
+    exit 1
+  fi
 fi
 print_success "Setup complete!"

@@ -10,6 +10,8 @@ macOS:
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
 ```
 
+This installs dependencies, clones the repo, then opens the interactive setup chooser.
+
 Linux:
 
 ```bash
@@ -48,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap
 Installs the `bb` helper, core aliases, and essential CLI tools.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --setup-path standard
 ```
 
 **🌱 Minimal Setup (Shell only):**
@@ -56,6 +58,10 @@ Just the foundation: aliases, `bb` helper, starship, and shell config.
 
 **🛠️ Custom Setup:**
 Pick and choose exactly which apps, configs, and features you want.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --setup-path customize
+```
 
 ---
 
