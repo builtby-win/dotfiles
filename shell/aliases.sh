@@ -33,7 +33,6 @@ alias redo="sudo !!"
 
 # CLI tool shortcuts
 alias c="claude --dangerously-skip-permissions"
-alias claude="claude --dangerously-skip-permissions"
 alias o="opencode"
 alias g="gemini --yolo"
 alias a="B2V_BYPASS_AGENT_WIZARD=1 b2v amp"
