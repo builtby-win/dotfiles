@@ -268,6 +268,29 @@ else
     exit 1
   fi
   print_success "Chezmoi base dotfiles applied"
+
+  if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+    print_warning "Skipping interactive setup in non-interactive mode"
+  else
+    print_step "Launching interactive dotfiles setup..."
+    TSX_BIN="./node_modules/.bin/tsx"
+    if [[ -x "$TSX_BIN" ]]; then
+      if ! "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty; then
+        print_error "setup.ts failed"
+        exit 1
+      fi
+    elif command -v pnpm >/dev/null 2>&1; then
+      if ! pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty; then
+        print_error "setup.ts failed"
+        exit 1
+      fi
+    else
+      print_error "setup.ts failed"
+      print_error "Cannot run setup.ts"
+      exit 1
+    fi
+    print_success "Interactive setup complete"
+  fi
 fi
 
 print_success "Linux bootstrap complete"

@@ -34,6 +34,13 @@ Reload tmux after install:
 tmux source-file ~/.tmux.conf
 ```
 
+Version notes:
+
+- `fzf 0.34.x` is supported by the custom sesh picker in this repo.
+- `tmux-fingers` requires a real installed binary, not just the TPM plugin checkout.
+- On macOS, install the binary with Homebrew: `brew install tmux-fingers`.
+- If Homebrew blocks installs because Command Line Tools are outdated, run `xcode-select --install` first.
+
 ## Prefix
 
 - Prefix is `Ctrl+b` in `basic`
@@ -128,3 +135,9 @@ Then in tmux:
 
 - `Leader+I` installs plugins
 - `Leader+U` updates plugins
+
+Recommended package versions for the tmux workflow in this repo:
+
+- `fzf >= 0.34`
+- `sesh >= 2.25`
+- `tmux-fingers >= 2.6`

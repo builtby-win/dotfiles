@@ -154,6 +154,14 @@ bb status
 - copy mode: `Leader+v`
 - new window: `Leader+t` (or `Alt+c`)
 
+For the tmux workflow in this repo, keep these tools current:
+
+- `fzf >= 0.34`
+- `sesh >= 2.25`
+- `tmux-fingers >= 2.6`
+
+On macOS, `tmux-fingers` also needs working Xcode Command Line Tools before Homebrew can install it.
+
 ## Structure
 
 ```

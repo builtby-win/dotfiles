@@ -220,6 +220,11 @@ exit 1
 
   it("keeps the current search query when entering fuzzy mode", () => {
     expect(seshPickerSh).toContain('"$sesh_bin" list --icons --hide-duplicates');
+    expect(seshPickerSh).toContain('| fzf \\');
+    expect(seshPickerSh).not.toContain('fzf-tmux -p 80%,70%');
+    expect(seshPickerSh).toContain('selection="$(');
+    expect(seshPickerSh).toContain('|| exit 0');
+    expect(seshPickerSh).toContain('[[ -z "$selection" ]] && exit 0');
     expect(seshPickerSh).toContain("/:enable-search+change-prompt(🔍  )+unbind(j,k)+unbind(esc)");
     expect(seshPickerSh).not.toContain("clear-query");
   });
