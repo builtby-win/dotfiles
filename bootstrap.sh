@@ -402,4 +402,20 @@ else
     exit 1
   fi
   print_success "Chezmoi base dotfiles applied!"
+
+  echo ""
+  print_step "Launching interactive dotfiles setup..."
+  TSX_BIN="./node_modules/.bin/tsx"
+  if [ -x "$TSX_BIN" ]; then
+    if ! "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty; then
+      print_error "setup.ts failed"
+      exit 1
+    fi
+  else
+    if ! pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty; then
+      print_error "setup.ts failed"
+      exit 1
+    fi
+  fi
+  print_success "Interactive setup complete!"
 fi

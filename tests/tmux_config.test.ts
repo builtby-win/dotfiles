@@ -73,6 +73,26 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain('[Other] ::: Reload Config ::: Leader + r ::: tmux source-file ~/.config/tmux/builtby/core.conf && tmux source-file ~/.config/tmux/builtby/basic.conf');
   });
 
+  it("uses the local sesh shim and lets TPM load tmux-fingers", () => {
+    expect(basicConf).toContain("No previous sesh session yet");
+    expect(basicConf).toContain('run-shell "$HOME/.local/bin/sesh last >/dev/null 2>&1 || tmux display-message');
+    expect(basicConf).toContain("$HOME/.local/bin/sesh list --icons");
+    expect(basicConf).toContain("run '~/.tmux/plugins/tpm/tpm'");
+    expect(basicConf).toContain("set -g @plugin 'Morantron/tmux-fingers'");
+    expect(basicConf).not.toContain('tmux-fingers load-config');
+    expect(basicConf).not.toContain("bind-key f run-shell 'tmux-fingers'");
+  });
+
+  it("uses copy-command-based clipboard bindings that are safe to reload", () => {
+    expect(basicConf).toContain("set -s copy-command 'pbcopy'");
+    expect(basicConf).toContain("set -s copy-command 'xclip -in -selection clipboard'");
+    expect(basicConf).toContain('bind -n M-c copy-mode');
+    expect(basicConf).toContain('bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel');
+    expect(basicConf).toContain('bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel');
+    expect(basicConf).not.toContain("bind -n M-c copy-mode \\; send-keys -X copy-pipe-and-cancel");
+    expect(basicConf).not.toContain("MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel 'pbcopy'");
+  });
+
   it("puts shared defaults in core and prefix in basic", () => {
     expect(coreConf).toContain("set -g mouse on");
     expect(basicConf).toMatch(/set -g prefix 'C-b'/);
@@ -94,10 +114,16 @@ describe("tmux profile split", () => {
 describe("tmux setup safety", () => {
   const setupTs = readFileSync(join(process.cwd(), "setup.ts"), "utf-8");
   const functionsSh = readFileSync(join(process.cwd(), "shell", "functions.sh"), "utf-8");
+  const tmuxDocs = readFileSync(join(process.cwd(), "docs", "modules", "tmux.md"), "utf-8");
 
   it("offers keep-my-keybinds path for existing tmux users", () => {
     expect(setupTs).toContain("Keep my existing keybinds (recommended)");
     expect(setupTs).toContain("Replace with builtby basic profile (backup mine first)");
+  });
+
+  it("generates a single bootstrap-based ~/.tmux.conf entrypoint", () => {
+    expect(setupTs).toContain('source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"');
+    expect(setupTs).not.toContain('source-file "$HOME/.config/tmux/builtby/basic.conf"`,');
   });
 
   it("updates local workmux config from templates during setup", () => {
@@ -126,5 +152,12 @@ describe("tmux setup safety", () => {
     expect(functionsSh).toContain('local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"');
     expect(functionsSh).toContain('_bb_prune_backups "$backup_dir" "config.yaml.dotfiles-backup." 1');
     expect(functionsSh).toContain('_sync_workmux_config "$dotfiles_dir"');
+  });
+
+  it("documents tmux package version guidance for the custom sesh workflow", () => {
+    expect(tmuxDocs).toContain('fzf >= 0.34');
+    expect(tmuxDocs).toContain('sesh >= 2.25');
+    expect(tmuxDocs).toContain('tmux-fingers >= 2.6');
+    expect(tmuxDocs).toContain('xcode-select --install');
   });
 });

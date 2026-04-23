@@ -1334,7 +1334,6 @@ function generateTmuxEntrypoint(): string {
     "# =============================================================================",
     "",
     `source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"`,
-    `source-file "$HOME/.config/tmux/builtby/basic.conf"`,
   ].join("\n") + "\n";
 }
 
@@ -1502,11 +1501,6 @@ async function setupStowConfigs(configs: string[]): Promise<void> {
         unlinkSync(targetPath);
         needsStow = true;
       } else {
-        // Ensure parent directory exists
-        const parentDir = dirname(targetPath);
-        if (!existsSync(parentDir)) {
-          mkdirSync(parentDir, { recursive: true });
-        }
         needsStow = true;
       }
     }

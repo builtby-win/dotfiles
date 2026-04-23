@@ -167,6 +167,18 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('legacy stow/setup lane');
   });
 
+  it('hands off to interactive setup after the base chezmoi apply in interactive bootstrap runs', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('print_step "Launching interactive dotfiles setup..."');
+    expect(macBootstrap).toContain('print_success "Interactive setup complete!"');
+    expect(macBootstrap).toContain('setup.ts "$DOTFILES_DIR" < /dev/tty');
+    expect(linuxBootstrap).toContain('print_step "Launching interactive dotfiles setup..."');
+    expect(linuxBootstrap).toContain('print_success "Interactive setup complete"');
+    expect(linuxBootstrap).toContain('setup.ts "$DOTFILES_DIR" < /dev/tty');
+  });
+
   it('supports explicit setup path arguments in the macOS/bootstrap wrapper too', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
 
@@ -180,6 +192,7 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('elif [[ "$NON_INTERACTIVE" -eq 1 ]]; then');
     expect(content).toContain('SETUP_ARGS+=( --setup-path standard )');
     expect(content).not.toContain('SETUP_PATH="standard"');
+    expect(content).toContain('Skipping interactive setup in non-interactive mode');
   });
 
   it('gives pnpm install failures explicit disk-space/bootstrap guidance', () => {
