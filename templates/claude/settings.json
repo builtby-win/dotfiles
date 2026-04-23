@@ -1,11 +1,452 @@
 {
-  "hooks": {},
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"pre_tool_use\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"post_tool_use_failure\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"subagent_stop\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status waiting"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" claude --event Notification"
+          }
+        ]
+      },
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"notification\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status working"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"\" \"\" \"user_prompt_submit\""
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      }
+    ],
+    "Elicitation": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/builtby.win/private__worktrees/tulip/apps/back2vibing/src-tauri/target/.b2v-scoped/b2v-focus.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"elicitation\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"subagent_start\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" claude --event SessionStart && echo back2vibing"
+          }
+        ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" claude --event SessionStart && echo back2vibing"
+          }
+        ]
+      },
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" claude --event SessionStart && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status done"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"stop\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"task_completed\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workmux set-window-status working"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"post_tool_use\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" claude --event PermissionRequest"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"anthropic-claude-code\" \"Ghostty\" \"Glass\" \"permission_request\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/winstonzhao/.claude-control/hooks/status-hook.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-session-end.sh\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.masko-desktop/hooks/hook-sender.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "effortLevel": "high",
   "enabledPlugins": {
-    "Notion@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "hookify@claude-plugins-official": true,
-    "superpowers@superpowers-marketplace": true,
-    "superpowers-chrome@superpowers-marketplace": true,
-    "serena@claude-plugins-official": true
-  }
+    "beads@beads-marketplace": true,
+    "claude-octopus@nyldn-plugins": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "nyldn-plugins": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/nyldn/claude-octopus.git"
+      }
+    }
+  },
+  "permissions": {
+    "allow": [
+      "mcp__pencil"
+    ]
+  },
+  "skipDangerousModePermissionPrompt": true
 }

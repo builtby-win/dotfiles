@@ -1,3 +1,12 @@
 {
-  "hooks": []
+  "hooks": [
+    {
+      "event": "response.completed",
+      "command": "osascript -e 'tell application \"Warp\" to activate' -e 'tell application \"System Events\" to set frontmost of process \"Warp\" to true' -e 'do shell script \"afplay /System/Library/Sounds/Glass.aiff\"'"
+    },
+    {
+      "event": "response.complete",
+      "command": "osascript -e 'display notification \"Codex run finished\" with title \"Back2Vibing\"' -e 'tell application \"Windsurf\" to activate' -e 'tell application \"System Events\" to set frontmost of process \"Windsurf\" to true'"
+    }
+  ]
 }

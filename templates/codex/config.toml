@@ -1,23 +1,61 @@
-# Codex CLI Configuration
-# builtby.win/dotfiles
-#
-# Add your own settings below. You may want to set:
-# - model (e.g., "gpt-4", "gpt-4-turbo")
-# - notifications
-# - trusted projects
-
-model = "gpt-4"
+model = "gpt-5.4"
 model_reasoning_effort = "medium"
+notify = ["\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" openai-codex --event Notification"]
+personality = "pragmatic"
+web_search = "live"
 
 [features]
-streamable_shell = true
-web_search_request = true
+multi_agent = true
+shell_tool = true
 
-# Add MCP servers here:
-# [mcp_servers.example]
-# command = "example-command"
-# args = ["--arg"]
+[marketplaces.openai-bundled]
+last_updated = "2026-04-23T06:17:54Z"
+source = "/Users/winstonzhao/.codex/.tmp/bundled-marketplaces/openai-bundled"
+source_type = "local"
 
-# Add trusted projects here:
-# [projects."/path/to/your/project"]
-# trust_level = "trusted"
+[mcp_servers.pencil]
+args = [
+    "--app",
+    "desktop",
+]
+command = "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64"
+
+[mcp_servers.posthog]
+args = [
+    "-y",
+    "mcp-remote@latest",
+    "https://mcp.posthog.com/sse",
+]
+command = "npx"
+
+[notice]
+"hide_gpt-5.1-codex-max_migration_prompt" = true
+hide_gpt5_1_migration_prompt = true
+
+[notice.model_migrations]
+"gpt-5.1-codex-max" = "gpt-5.2-codex"
+"gpt-5.3-codex" = "gpt-5.4"
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[projects."/Users/winstonzhao"]
+trust_level = "trusted"
+
+[projects."/Users/winstonzhao/.agents"]
+trust_level = "trusted"
+
+[projects."/Users/winstonzhao/TOP-SECRET-PROJECTS/extensions"]
+trust_level = "trusted"
+
+[projects."/Users/winstonzhao/builtby.win/private"]
+trust_level = "trusted"
+
+[projects."/Users/winstonzhao/builtby.win/skills"]
+trust_level = "trusted"
+
+[projects."/Users/winstonzhao/homebase"]
+trust_level = "trusted"
+
+[projects."/Users/winstonzhao/projects/rug/areyougo.ing"]
+trust_level = "trusted"

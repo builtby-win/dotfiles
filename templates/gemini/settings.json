@@ -1,0 +1,154 @@
+{
+  "hooks": {
+    "AfterModel": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-aftermodel",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"after_model\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-sessionend",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-session-end.sh\" \"gemini-cli\""
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-notification",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-focus.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"Notification\""
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-aftertool",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"after_tool\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "BeforeModel": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-beforemodel",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"before_model\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-beforetool",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"before_tool\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-beforeagent",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-activity.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"before_agent\" && echo back2vibing"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-sessionstart",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" \"gemini-cli\" --event SessionStart"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "name": "back2vibing-afteragent",
+            "type": "command",
+            "command": "\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-focus.sh\" \"gemini-cli\" \"Ghostty\" \"Glass\" \"after_agent\""
+          }
+        ]
+      }
+    ]
+  },
+  "hooksConfig": {
+    "enabled": true
+  },
+  "experimental": {
+    "enableAgents": true
+  },
+  "general": {
+    "defaultApprovalMode": "plan",
+    "enableNotifications": true,
+    "preferredEditor": "neovim",
+    "previewFeatures": true,
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": "30d",
+      "warningAcknowledged": true
+    },
+    "vimMode": true
+  },
+  "mcpServers": {
+    "hydra": {
+      "args": [
+        "/Users/winstonzhao/projects/Hydra/lib/hydra-mcp-server.mjs"
+      ],
+      "command": "node",
+      "description": "Hydra multi-agent orchestration",
+      "timeout": 600000
+    },
+    "pencil": {
+      "args": [
+        "--app",
+        "desktop"
+      ],
+      "command": "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64",
+      "env": {}
+    }
+  },
+  "model": {
+    "name": "auto-gemini-3"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "tools": {
+    "enableHooks": true
+  },
+  "ui": {
+    "showHomeDirectoryWarning": false,
+    "showStatusInTitle": true
+  }
+}
