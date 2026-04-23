@@ -54,6 +54,23 @@ function manifestExists(): boolean {
   return existsSync(manifestPath);
 }
 
+type SetupPathChoice = "focus" | "standard" | "minimal" | "customize";
+
+function getBootstrapSetupPath(argv: string[]): SetupPathChoice | null {
+  for (let index = 0; index < argv.length; index++) {
+    if (argv[index] !== "--setup-path") continue;
+
+    const value = argv[index + 1];
+    if (value === "focus" || value === "standard" || value === "minimal" || value === "customize") {
+      return value;
+    }
+
+    return null;
+  }
+
+  return null;
+}
+
 // Colors
 const colors = {
   reset: "\x1b[0m",
@@ -437,6 +454,7 @@ interface App {
   value: string;
   brewName: string;
   cask?: boolean;
+  manualDownload?: boolean;
   configs?: string[];
   checked?: boolean;
   dependencies?: string[]; // Other brew packages to install alongside
@@ -473,6 +491,8 @@ const APPS: App[] = [
   // Productivity (macOS only)
   { name: "Back2Vibing", value: "back2vibing", brewName: "builtby-win/back2vibing/back2vibing", cask: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "TypeWhisper", value: "typewhisper", brewName: "", manualDownload: true, detectPath: "/Applications/TypeWhisper.app", desc: "Private voice dictation app for macOS", url: "https://www.typewhisper.com/en/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "Cotypist", value: "cotypist", brewName: "", manualDownload: true, detectPath: "/Applications/Cotypist.app", desc: "Voice-to-text writing assistant for macOS", url: "https://cotypist.app/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -961,6 +981,24 @@ function installPackage(name: string, cask = false): boolean {
   return false;
 }
 
+function getManualDownloadApps(apps: string[]): App[] {
+  return APPS.filter((app) => apps.includes(app.value) && app.manualDownload);
+}
+
+function printManualDownloadApps(apps: App[]): void {
+  if (apps.length === 0) return;
+
+  console.log(`  ${colors.yellow}${colors.bold}Manual download required:${colors.reset}`);
+  console.log(`  ${colors.dim}Download these manually:${colors.reset}`);
+
+  for (const app of apps) {
+    const url = app.url ?? "";
+    console.log(`    • ${app.name}: ${colors.cyan}${url}${colors.reset}`);
+  }
+
+  console.log("");
+}
+
 async function installApps(apps: string[]): Promise<void> {
   if (apps.length === 0) return;
 
@@ -984,6 +1022,12 @@ async function installApps(apps: string[]): Promise<void> {
         }
       }
     }
+  }
+
+  const manualDownloadApps = getManualDownloadApps(apps);
+  if (manualDownloadApps.length > 0) {
+    log.step("Manual app downloads");
+    printManualDownloadApps(manualDownloadApps);
   }
 
   if (apps.includes("codex")) {
@@ -2241,13 +2285,14 @@ async function runSetup(): Promise<void> {
       description: "Pick and choose exactly which apps, configs, and features you want."
     });
 
-    // Support --focus flag
+    // Support --focus flag and bootstrap handoff
+    const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));
     const isFocusFlag = process.argv.includes("--focus");
-    const setupPath = isFocusFlag ? "focus" : await select({
+    const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : await select({
       message: "How would you like to proceed?",
       choices: firstRunChoices,
       default: hasDetectedItems ? "use_detected" : "standard",
-    });
+    }));
 
     if (setupPath === "use_detected") {
       selectedApps = detectedAppsOnPlatform;
@@ -2350,23 +2395,24 @@ async function runSetup(): Promise<void> {
       for (const app of appsInCategory) {
         const state = appStates.get(app.value) ?? "not_installed";
         const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
+        const manualDownloadPart = app.manualDownload ? ` ${colors.yellow}(manual download)${colors.reset}` : "";
         if (state === "installed") {
           choices.push({
-            name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`,
+            name: `${app.name}${descPart}${manualDownloadPart} ${colors.green}(installed)${colors.reset}`,
             value: app.value,
             checked: true,
             disabled: "(already installed)",
           });
         } else if (state === "partial") {
           choices.push({
-            name: `${app.name}${descPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
+            name: `${app.name}${descPart}${manualDownloadPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
             value: app.value,
             checked: true,
             disabled: false,
           });
         } else {
           choices.push({
-            name: `${app.name}${descPart}`,
+            name: `${app.name}${descPart}${manualDownloadPart}`,
             value: app.value,
             checked: app.checked ?? false,
             disabled: false,
@@ -2515,6 +2561,12 @@ async function runSetup(): Promise<void> {
             console.log(`    ${colors.dim}${CATEGORY_LABELS[category]}:${colors.reset} ${appsInCat.map(a => a.name).join(", ")}`);
           }
         }
+      }
+
+      const manualDownloadApps = getManualDownloadApps(selectedApps);
+      if (manualDownloadApps.length > 0) {
+        console.log("");
+        printManualDownloadApps(manualDownloadApps);
       }
 
       // Configs summary

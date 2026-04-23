@@ -33,6 +33,7 @@ brew "claude"         # Claude Code CLI
 
 # Productivity
 cask "raycast"
+cask "antinote"
 cask "alt-tab"          # Windows-style alt-tab
 cask "jordanbaird-ice"  # Menu bar management
 cask "linearmouse"      # Mouse customization
