@@ -9,6 +9,8 @@ Karabiner Elements provides keyboard remaps and tmux integration.
 
 ## Install
 
+Legacy module install:
+
 ```bash
 bb setup karabiner
 ```

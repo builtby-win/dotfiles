@@ -7,8 +7,8 @@ tap "homebrew/cask-fonts"
 tap "joshmedeski/sesh"
 
 # CLI Tools
-brew "stow"           # Symlink farm manager
-brew "mackup"         # App settings backup
+brew "stow"           # Legacy symlink manager used by current setup flow
+brew "chezmoi"        # Dotfiles manager for the restore backbone
 brew "fnm"            # Fast Node Manager
 brew "fzf"            # Fuzzy finder
 brew "ripgrep"        # Fast grep

@@ -337,8 +337,14 @@ bbup() {
     if git pull --rebase --autostash; then
       echo "Dotfiles updated successfully."
       _sync_workmux_config "$dotfiles_dir"
+      echo "Reapplying base chezmoi state..."
+      if [[ -x "$dotfiles_dir/scripts/apply-chezmoi.sh" ]]; then
+        bash "$dotfiles_dir/scripts/apply-chezmoi.sh"
+      else
+        echo "Warning: chezmoi apply helper not found, skipping base apply."
+      fi
       
-      echo -n "Run full setup wizard? (y/N) "
+      echo -n "Run legacy full setup wizard? (y/N) "
       read -r response
       if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         pnpm run setup
@@ -371,11 +377,13 @@ bb() {
       echo "Usage: bb <command> [args]"
       echo ""
       echo "Commands:"
-      echo "  bb setup                Run full interactive setup"
-      echo "  bb setup <module>       Install a single module"
+      echo "  bb apply                Apply the base chezmoi state"
+      echo "  bb setup                Legacy interactive setup"
+      echo "  bb setup <module>       legacy stow module install"
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
+      echo "  bb restore <target>     Reveal macOS app backup exports"
       echo "  bb update               Pull updates and optionally rerun setup"
       echo "  bb backups-clean        Keep only the newest dotfiles backups"
       echo "  bb tmux-clean           Clean detached numeric tmux sessions"
@@ -384,8 +392,24 @@ bb() {
       echo "  bb help                 Show this help"
       echo ""
       echo "Modules:"
-      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, mackup"
+      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty"
+      echo "Restore targets:"
+      echo "  raycast, rectangle-pro, bettertouchtool, macos-apps"
       return 0
+      ;;
+    apply)
+      if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
+        echo "Error: Dotfiles directory not found. Set DOTFILES_DIR or run setup first."
+        return 1
+      fi
+
+      local apply_script="$dotfiles_dir/scripts/apply-chezmoi.sh"
+      if [[ ! -f "$apply_script" ]]; then
+        echo "chezmoi apply helper not found: $apply_script"
+        return 1
+      fi
+
+      bash "$apply_script"
       ;;
     setup)
       if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
@@ -452,10 +476,6 @@ bb() {
           stow -d "$dotfiles_dir/stow-packages" -t "$HOME" ghostty
           echo "Ghostty config stowed. Restart Ghostty to apply."
           ;;
-        mackup)
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" mackup
-          echo "Mackup config stowed. Run: mackup restore"
-          ;;
         *)
           echo "Unknown module: $module"
           echo "Run: bb help"
@@ -495,6 +515,24 @@ bb() {
           return 1
           ;;
       esac
+
+      ;;
+    restore)
+      if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
+        echo "Error: Dotfiles directory not found. Set DOTFILES_DIR or run setup first."
+        return 1
+      fi
+
+      local target="${1:-macos-apps}"
+      local restore_script="$dotfiles_dir/scripts/restore-macos-app-backups.sh"
+
+      if [[ ! -f "$restore_script" ]]; then
+        echo "Restore helper not found: $restore_script"
+        return 1
+      fi
+
+      bash "$restore_script" "$target"
+      return $?
       ;;
     update)
       bbup
@@ -507,6 +545,7 @@ bb() {
       ;;
     status)
       local manifest_path="$HOME/.config/dotfiles/setup-manifest.json"
+      local dotfiles_path_file="$HOME/.config/dotfiles/path"
       if [[ -f "$manifest_path" ]]; then
         echo "Manifest: $manifest_path"
         if command -v jq &> /dev/null; then
@@ -514,6 +553,9 @@ bb() {
         else
           cat "$manifest_path"
         fi
+      elif [[ -f "$dotfiles_path_file" ]]; then
+        echo "Base chezmoi state present via: $dotfiles_path_file"
+        echo "No legacy setup manifest found yet. Run: bb setup"
       else
         echo "No setup manifest found. Run: bb setup"
       fi

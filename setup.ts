@@ -486,7 +486,8 @@ const APPS: App[] = [
   // AI Tools
   { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
   { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
-  { name: "OpenCode", value: "opencode", brewName: "", checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: false, linux: true, windows: false }, category: "ai" },
+  { name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
+  { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
   { name: "Back2Vibing", value: "back2vibing", brewName: "builtby-win/back2vibing/back2vibing", cask: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -532,7 +533,6 @@ const STOW_CONFIGS: StowConfig[] = [
   { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
-  { name: "Mackup", value: "mackup", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Sync app settings to iCloud/Dropbox" },
 ];
 
 // Optional features (opt-in, don't load in shell unless selected)
@@ -546,14 +546,23 @@ const OPTIONAL_FEATURES = [
 ];
 
 // AI tool configs (template-based)
-const AI_CONFIGS: Record<string, { name: string; templates: string[] }> = {
+const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?: string }> = {
   claude: {
     name: "Claude Code",
-    templates: ["CLAUDE.md", "settings.json"],
+    templates: ["settings.json", "settings.local.json"],
   },
   codex: {
     name: "Codex CLI",
     templates: ["config.toml", "hooks.json"],
+  },
+  opencode: {
+    name: "OpenCode",
+    templates: ["opencode.json", "tui.json"],
+    targetDir: ".config/opencode",
+  },
+  gemini: {
+    name: "Gemini CLI",
+    templates: ["settings.json"],
   },
   cursor: {
     name: "Cursor",
@@ -1126,7 +1135,6 @@ const STOW_TARGETS: Record<string, string[]> = {
         "Library/Application Support/com.mitchellh.ghostty/config",
       ]
     : [".config/ghostty/config"],
-  mackup: [".mackup.cfg"],
 };
 
 function upsertZshrcMergeBlock(content: string): string {
@@ -1666,7 +1674,7 @@ async function setupAIConfigs(configs: string[]): Promise<void> {
       continue;
     }
 
-    const targetDir = join(HOME, `.${config}`);
+    const targetDir = join(HOME, configInfo.targetDir ?? `.${config}`);
 
     if (!existsSync(targetDir)) {
       mkdirSync(targetDir, { recursive: true });

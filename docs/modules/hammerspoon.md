@@ -9,6 +9,8 @@ Hammerspoon adds a Hyper-key launcher and Ghostty workflow shortcuts.
 
 ## Install
 
+Legacy module install:
+
 ```bash
 bb setup hammerspoon
 ```

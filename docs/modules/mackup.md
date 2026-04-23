@@ -1,21 +1,19 @@
-# Mackup module
+# Mackup module (deprecated)
 
-Mackup syncs app settings to cloud storage (iCloud, Dropbox, etc.).
+This repo no longer recommends Mackup as the macOS app-settings restore path.
 
-## Install
+Instead, keep native app exports under `assets/app-exports/` and use the restore helpers documented in:
+
+- `docs/modules/app-backups.md`
+- `docs/modules/chezmoi.md`
+
+Current restore entrypoints:
 
 ```bash
-bb setup mackup
+bb restore macos-apps
+bb restore raycast
+bb restore rectangle-pro
+bb restore bettertouchtool
 ```
 
-Manual stow:
-
-```bash
-stow -d "$DOTFILES_DIR/stow-packages" -t "$HOME" mackup
-```
-
-## Usage
-
-1. Edit `~/.mackup.cfg` to select your storage provider.
-2. Run `mackup restore` to pull settings.
-3. Run `mackup backup` to push settings.
+The old `bb setup mackup` flow has been removed from the active setup catalog.

@@ -1,0 +1,41 @@
+{
+  "plugin": [
+    "oh-my-openagent@latest"
+  ],
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openai/gpt-5.4",
+  "provider": {
+    "openai": {
+      "models": {
+        "gpt-5.3-codex": {
+          "options": {
+            "reasoningEffort": "high"
+          }
+        }
+      }
+    }
+  },
+  "mcp": {
+    "google-analytics": {
+      "type": "remote",
+      "url": "https://server.smithery.ai/google_analytics"
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
+    },
+    "pencil": {
+      "command": [
+        "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64",
+        "--app",
+        "desktop"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
+  }
+}

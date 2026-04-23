@@ -161,9 +161,10 @@ describe('Linux bootstrap workflow', () => {
     expect(setupContent).toContain('const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : await select({');
   });
 
-  it('documents the default install as landing in the interactive chooser', () => {
+  it('documents the default install as applying the base chezmoi state', () => {
     const content = fs.readFileSync(readmePath, 'utf-8');
-    expect(content).toContain('This installs dependencies, clones the repo, then opens the interactive setup chooser.');
+    expect(content).toContain('This installs dependencies, clones the repo, then applies the base chezmoi state by default.');
+    expect(content).toContain('legacy stow/setup lane');
   });
 
   it('supports explicit setup path arguments in the macOS/bootstrap wrapper too', () => {

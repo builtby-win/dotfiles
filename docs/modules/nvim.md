@@ -4,6 +4,8 @@ Requires Neovim 0.12+ because the config uses `vim.pack`. Nightly is recommended
 
 ## Install
 
+Legacy module install:
+
 ```bash
 bb setup nvim
 ```

@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(readlink:*)",
+      "Bash(mackup:*)",
+      "Bash(mackup list:*)",
+      "Bash(plutil:*)",
+      "Bash(defaults read:*)",
+      "Bash(log show:*)",
+      "Bash(xattr:*)",
+      "Bash(pluginkit:*)",
+      "Bash(sudo log show:*)",
+      "Bash(pgrep:*)",
+      "Bash(brew info:*)",
+      "Bash(system_profiler:*)",
+      "Bash(sw_vers)",
+      "Bash(sudo rm:*)",
+      "Bash(sudo find:*)",
+      "Bash(killall:*)",
+      "Bash(defaults delete:*)"
+    ]
+  }
+}
