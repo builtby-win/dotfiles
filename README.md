@@ -80,6 +80,7 @@ bb setup tmux
 bb setup nvim
 bb setup hammerspoon
 bb setup karabiner
+bb sync karabiner pull
 bb setup ghostty
 ```
 
@@ -93,7 +94,7 @@ This is ideal if you want to add pieces over time.
 | Tmux | `bb setup tmux` | prefix Ctrl+b and sesh integration | `docs/modules/tmux.md` |
 | Neovim | `bb setup nvim` | bleeding-edge vim.pack config for Neovim 0.12+ | `docs/modules/nvim.md` |
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
-| Karabiner | `bb setup karabiner` | macOS only, jk to tmux prefix | `docs/modules/karabiner.md` |
+| Karabiner | `bb setup karabiner` | macOS only, jk to tmux prefix, `bb sync karabiner pull` imports live config | `docs/modules/karabiner.md` |
 | Ghostty | `bb setup ghostty` | terminal config | `docs/modules/ghostty.md` |
 | Mackup | `bb setup mackup` | app settings backup | `docs/modules/mackup.md` |
 | AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
