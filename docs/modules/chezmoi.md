@@ -38,10 +38,11 @@ bb setup tmux
 bb setup ghostty
 ```
 
-5. Restore macOS app exports separately:
+5. Sync or restore macOS app exports separately:
 
 ```bash
+bb sync macos-apps pull
 bb restore macos-apps
 ```
 
-That command reveals the versioned exports and prints the import path for each app.
+The sync command copies fresh exports into the repo. The restore command reveals the versioned exports and prints the import path for each app.

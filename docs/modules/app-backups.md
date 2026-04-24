@@ -8,6 +8,21 @@ This repo keeps native restore artifacts for apps that should be restored throug
 - `assets/app-exports/rectangle-pro/RectangleProConfig.json`
 - `assets/app-exports/bettertouchtool/Default.bttpreset`
 
+## Sync helpers
+
+Pull the latest machine exports into the repo:
+
+```bash
+bb sync macos-apps pull
+bb sync raycast pull
+bb sync rectangle-pro pull
+bb sync bettertouchtool pull
+```
+
+For Raycast, export a backup first so a fresh `Raycast-*.rayconfig` file lands in `~/Downloads`.
+
+For Rectangle Pro and BetterTouchTool, export their config/preset from the app first, then rerun sync.
+
 ## Restore helpers
 
 Reveal all app exports and print the restore steps:

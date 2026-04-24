@@ -3,7 +3,14 @@
     "oh-my-openagent@latest"
   ],
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-5.4",
+  "model": "openai/gpt-5.5",
+  "theme": {
+    "primary": "#6E82D6",
+    "accent": "#8FA2F0",
+    "background": "#081022",
+    "surface": "#0A1338",
+    "text": "#E8EEFF"
+  },
   "provider": {
     "openai": {
       "models": {

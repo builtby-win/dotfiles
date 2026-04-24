@@ -104,7 +104,7 @@ This is ideal if you want to add pieces over time.
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS only, jk to tmux prefix, `bb sync karabiner pull` imports live config | `docs/modules/karabiner.md` |
 | Ghostty | `bb setup ghostty` | terminal config | `docs/modules/ghostty.md` |
-| App backups | `bb restore macos-apps` | Raycast, Rectangle Pro, BetterTouchTool exports | `docs/modules/app-backups.md` |
+| App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
 | AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
 | Back2Vibing | `bb setup back2vibing` | Focus & productivity for AI devs | `back2vibing.builtby.win` |
 
@@ -187,7 +187,16 @@ Native app exports live under `assets/app-exports/`:
 - `assets/app-exports/rectangle-pro/`
 - `assets/app-exports/bettertouchtool/`
 
-Restore helpers:
+Sync the latest machine exports back into the repo:
+
+```bash
+bb sync macos-apps pull
+bb sync raycast pull
+bb sync rectangle-pro pull
+bb sync bettertouchtool pull
+```
+
+Reveal/import the repo copies:
 
 ```bash
 bb restore macos-apps
@@ -195,6 +204,8 @@ bb restore raycast
 bb restore rectangle-pro
 bb restore bettertouchtool
 ```
+
+OpenCode styling is copy-managed from `templates/opencode/`. See `docs/modules/opencode.md`.
 
 ## Manual setup (if you prefer)
 

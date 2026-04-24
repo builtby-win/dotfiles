@@ -25,7 +25,7 @@ describe('Karabiner module wiring', () => {
   it('exposes bb sync karabiner helper command', () => {
     const functionsSh = readRepoFile('shell/functions.sh');
     expect(functionsSh).toContain('bb sync karabiner');
-    expect(functionsSh).toContain('Usage: bb sync karabiner [push|pull]');
+    expect(functionsSh).toContain('Usage: bb sync <target> [push|pull]');
     expect(functionsSh).toContain('"$dotfiles_dir/scripts/sync-karabiner.sh" "$direction"');
   });
 

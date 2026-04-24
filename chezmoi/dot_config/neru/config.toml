@@ -1,4 +1,8 @@
 [hotkeys]
+"Primary+Shift+Space" = "__disabled__"
+"Primary+Shift+G" = "__disabled__"
+"Primary+Shift+C" = "__disabled__"
+"Primary+Shift+S" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+K" = "scroll"
 "Cmd+Ctrl+Alt+Shift+L" = "grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+;" = "hints"

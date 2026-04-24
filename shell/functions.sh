@@ -383,6 +383,7 @@ bb() {
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
+      echo "  bb sync macos-apps      Sync Raycast/Rectangle/BTT exports"
       echo "  bb restore <target>     Reveal macOS app backup exports"
       echo "  bb update               Pull updates and optionally rerun setup"
       echo "  bb backups-clean        Keep only the newest dotfiles backups"
@@ -490,7 +491,8 @@ bb() {
       fi
 
       if [[ $# -eq 0 ]]; then
-        echo "Usage: bb sync karabiner [push|pull]"
+        echo "Usage: bb sync <target> [push|pull]"
+        echo "Targets: karabiner, raycast, rectangle-pro, bettertouchtool, macos-apps"
         return 1
       fi
 
@@ -509,9 +511,21 @@ bb() {
           fi
           "$dotfiles_dir/scripts/sync-karabiner.sh" "$direction"
           ;;
+        raycast|rectangle|rectangle-pro|bettertouchtool|btt|macos-apps)
+          if [[ "$(uname)" != "Darwin" ]]; then
+            echo "macOS app export sync is macOS only."
+            return 1
+          fi
+          if [[ ! -x "$dotfiles_dir/scripts/sync-macos-app-backups.sh" ]]; then
+            echo "macOS app sync script not found."
+            return 1
+          fi
+          "$dotfiles_dir/scripts/sync-macos-app-backups.sh" "$direction" "$target"
+          ;;
         *)
           echo "Unknown sync target: $target"
-          echo "Usage: bb sync karabiner [push|pull]"
+          echo "Usage: bb sync <target> [push|pull]"
+          echo "Targets: karabiner, raycast, rectangle-pro, bettertouchtool, macos-apps"
           return 1
           ;;
       esac

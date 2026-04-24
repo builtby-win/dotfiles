@@ -7,6 +7,7 @@ describe('macOS app backup organization', () => {
   const setupPath = path.resolve(__dirname, '../setup.ts');
   const functionsPath = path.resolve(__dirname, '../shell/functions.sh');
   const restoreScriptPath = path.resolve(__dirname, '../scripts/restore-macos-app-backups.sh');
+  const syncScriptPath = path.resolve(__dirname, '../scripts/sync-macos-app-backups.sh');
   const docsPath = path.resolve(__dirname, '../docs/modules/app-backups.md');
   const chezmoiDocPath = path.resolve(__dirname, '../docs/modules/chezmoi.md');
 
@@ -18,6 +19,7 @@ describe('macOS app backup organization', () => {
 
   it('documents app backup restore helpers in the README', () => {
     const content = fs.readFileSync(readmePath, 'utf-8');
+    expect(content).toContain('bb sync macos-apps pull');
     expect(content).toContain('bb restore macos-apps');
     expect(content).toContain('assets/app-exports/');
     expect(content).not.toContain('| Mackup | `bb setup mackup`');
@@ -32,17 +34,23 @@ describe('macOS app backup organization', () => {
   it('adds a restore helper command to shell functions', () => {
     const content = fs.readFileSync(functionsPath, 'utf-8');
     expect(content).toContain('bb restore <target>');
+    expect(content).toContain('bb sync macos-apps');
     expect(content).toContain('restore-macos-app-backups.sh');
     expect(content).toContain('raycast, rectangle-pro, bettertouchtool, macos-apps');
   });
 
-  it('adds restore script and docs for app exports', () => {
+  it('adds restore and sync scripts plus docs for app exports', () => {
     const restoreScript = fs.readFileSync(restoreScriptPath, 'utf-8');
+    const syncScript = fs.readFileSync(syncScriptPath, 'utf-8');
     const docs = fs.readFileSync(docsPath, 'utf-8');
     const chezmoiDoc = fs.readFileSync(chezmoiDocPath, 'utf-8');
 
     expect(restoreScript).toContain('Revealing macOS app backup exports');
     expect(restoreScript).toContain('Raycast-2026-04-22-23-03-14.rayconfig');
+    expect(syncScript).toContain('Usage: ./scripts/sync-macos-app-backups.sh [pull|push] [target]');
+    expect(syncScript).toContain('Copy live machine exports -> dotfiles');
+    expect(syncScript).toContain('Import in Raycast using Preferences -> Advanced -> Import Backup.');
+    expect(docs).toContain('bb sync macos-apps pull');
     expect(docs).toContain('Default.bttpreset');
     expect(chezmoiDoc).toContain('real chezmoi-first bootstrap lane');
   });
