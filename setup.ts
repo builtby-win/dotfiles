@@ -557,7 +557,7 @@ const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?
   },
   opencode: {
     name: "OpenCode",
-    templates: ["opencode.json", "tui.json"],
+    templates: ["opencode.json", "oh-my-openagent.json", "tui.json"],
     targetDir: ".config/opencode",
   },
   gemini: {
