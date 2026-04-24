@@ -1,0 +1,85 @@
+[hotkeys]
+"Cmd+Ctrl+Alt+Shift+K" = "scroll"
+"Cmd+Ctrl+Alt+Shift+L" = "grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+;" = "hints"
+"Cmd+Ctrl+Alt+Shift+'" = "recursive_grid --cursor-selection-mode follow"
+
+[theme.light]
+surface = "#EEF2FF"
+accent = "#465FBC"
+accent_alt = "#0B2377"
+on_accent_alt = "#F8FAFF"
+text = "#17327A"
+
+[theme.dark]
+surface = "#0A1338"
+accent = "#6E82D6"
+accent_alt = "#8FA2F0"
+on_accent_alt = "#081022"
+text = "#E8EEFF"
+
+[hints]
+hint_characters = "asdfghjkl"
+parallel_threshold = 20
+detect_mission_control = true
+
+[hints.hotkeys]
+"Escape" = "idle"
+"Backspace" = "action backspace"
+"Return" = ["action left_click", "idle"]
+"Shift+L" = ["action left_click", "idle"]
+"Shift+R" = ["action right_click", "idle"]
+"Shift+Return" = "action left_click"
+
+[grid]
+prewarm_enabled = true
+live_match_update = true
+hide_unmatched = true
+
+[grid.hotkeys]
+"Return" = ["action left_click", "idle"]
+"Shift+Return" = "action left_click"
+
+[recursive_grid]
+grid_cols = 2
+grid_rows = 2
+keys = "uijk"
+min_size_width = 30
+min_size_height = 30
+max_depth = 8
+
+[recursive_grid.hotkeys]
+"Return" = ["action left_click", "idle"]
+"Shift+Return" = "action left_click"
+
+[recursive_grid.ui]
+label_background = true
+sub_key_preview = true
+
+[scroll]
+scroll_step = 60
+scroll_step_half = 650
+
+[mode_indicator.scroll]
+enabled = true
+text = "Scroll"
+
+[mode_indicator.hints]
+enabled = false
+
+[mode_indicator.grid]
+enabled = true
+text = "Grid"
+
+[mode_indicator.recursive_grid]
+enabled = true
+text = "Recursive"
+
+[virtual_pointer.ui]
+size = 4
+
+[smooth_cursor]
+move_mouse_enabled = true
+steps = 12
+max_duration = 180
+duration_per_pixel = 0.12
