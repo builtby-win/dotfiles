@@ -22,6 +22,11 @@ describe('Windows Package Manifest (packages.json)', () => {
       'gerardog.gsudo',
       'Git.Git',
       'Neovim.Neovim',
+      'Microsoft.PowerShell',
+      'Microsoft.WindowsTerminal',
+      'Warp.Warp',
+      'marlocarlo.psmux',
+      'jtroo.kanata_gui',
       'Anysphere.Cursor'
     ];
     

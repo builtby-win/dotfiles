@@ -5,6 +5,7 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     function ls { eza --icons --git @args }
     function ll { eza -l --icons --git @args }
     function la { eza -a --icons --git @args }
+    function lt { eza --tree --icons --git @args }
 }
 
 if (Get-Command bat -ErrorAction SilentlyContinue) {
@@ -33,6 +34,12 @@ function ...... { Set-Location ..\..\..\..\.. }
 # 3. Quick shortcuts
 Set-Alias -Name d -Value z -ErrorAction SilentlyContinue
 Set-Alias -Name - -Value 'Pop-Location' -ErrorAction SilentlyContinue # Close enough to cd -
+function rc { . $PROFILE }
+
+# 3.1 AI CLI shortcuts
+function c { claude --dangerously-skip-permissions @args }
+function o { opencode @args }
+function g { gemini --yolo @args }
 
 # 4. Package managers (pnpm)
 function pp { pnpm @args }
@@ -50,6 +57,7 @@ function gp { git push @args }
 function gd { git diff @args }
 function p { git add -p @args }
 function co- { git checkout - @args }
+function gc- { git checkout - @args }
 function bname { git rev-parse --abbrev-ref HEAD }
 function ggwip { git add . ; git commit -m "wip" --no-verify @args }
 function unwip { git reset --soft HEAD~1 @args }

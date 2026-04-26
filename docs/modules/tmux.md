@@ -94,6 +94,28 @@ wrap the pane command in a login shell. Example: `command: "bash -lc 'hydra'"`.
 
 ## Windows
 
+On native Windows, use psmux as the tmux equivalent:
+
+```powershell
+winget install --id marlocarlo.psmux -e
+```
+
+psmux ships `psmux`, `pmux`, and `tmux` commands, so the normal tmux muscle memory should work from PowerShell 7:
+
+```powershell
+tmux
+tmux new-session -s work
+tmux attach -t work
+```
+
+For keyboard parity, Kanata maps `j+k` to `Ctrl+b`, matching the Karabiner terminal leader behavior on macOS. See `docs/modules/kanata.md`.
+
+The Windows setup installs psmux from `windows/packages.json`. Reapply with:
+
+```powershell
+bb update
+```
+
 | Binding | Action |
 | --- | --- |
 | `Leader+t` | New window |

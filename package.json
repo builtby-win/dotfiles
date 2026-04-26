@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "setup": "pnpm exec tsx setup.ts",
+    "setup:windows": "pnpm exec tsx setup-windows.ts",
     "test": "vitest run"
   },
   "packageManager": "pnpm@10.28.2",

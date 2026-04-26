@@ -16,6 +16,7 @@ const colors = {
 };
 
 const DOTFILES_DIR = dirname(fileURLToPath(import.meta.url));
+const SKIP_CORE = process.argv.includes("--skip-core");
 
 const log = {
   step: (msg: string) => console.log(`${colors.blue}==>${colors.reset} ${msg}`),
@@ -90,8 +91,8 @@ function installNpmGlobal(name: string, cmd: string) {
 async function runSetup() {
   console.log("");
   console.log(`${colors.cyan}${colors.bold}=== Windows Dotfiles Setup ===${colors.reset}`);
-  console.log("This script will configure your Windows environment for AI coding.");
-  console.log("Core setup links shell config and copies AI tool templates.");
+  console.log("This script configures a Unix-like Windows development environment.");
+  console.log("Core setup installs the package manifest, links shell/key configs, and copies AI tool templates.");
   console.log("Optional installs are selected interactively.");
   console.log("");
 
@@ -100,17 +101,21 @@ async function runSetup() {
     process.exit(1);
   }
 
-  const proceed = await confirm({
-    message: "Run the Windows core setup (windows/install.ps1)?",
-    default: true,
-  });
+  if (SKIP_CORE) {
+    log.ok("Core setup already applied. Skipping windows/install.ps1.");
+  } else {
+    const proceed = await confirm({
+      message: "Run the Windows core setup (windows/install.ps1)?",
+      default: true,
+    });
 
-  if (proceed) {
+    if (!proceed) {
+      console.log("Setup cancelled.");
+      return;
+    }
+
     const scriptPath = join(DOTFILES_DIR, "windows", "install.ps1");
     runPowerShellScript(scriptPath);
-  } else {
-    console.log("Setup cancelled.");
-    return;
   }
 
   console.log("");
@@ -136,6 +141,10 @@ async function runSetup() {
   ];
 
   const miscChoices = [
+    { name: "PowerShell 7 (recommended shell)", value: "powershell" },
+    { name: "psmux (tmux for Windows)", value: "psmux" },
+    { name: "Kanata GUI (keyboard remapping)", value: "kanata_gui" },
+    { name: "Rustup (for kanata CLI builds)", value: "rustup" },
     { name: "Python 3 (required for antigravity)", value: "python" },
   ];
 
@@ -201,6 +210,10 @@ async function runSetup() {
     }
 
     for (const item of selectedMisc) {
+      if (item === "powershell") installWingetApp("PowerShell 7", "Microsoft.PowerShell");
+      if (item === "psmux") installWingetApp("psmux", "marlocarlo.psmux");
+      if (item === "kanata_gui") installWingetApp("Kanata GUI", "jtroo.kanata_gui");
+      if (item === "rustup") installWingetApp("Rustup", "Rustlang.Rustup");
       if (item === "python") {
         installWingetAppWithFallback("Python 3", [
           "Python.Python.3",

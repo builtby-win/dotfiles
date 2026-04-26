@@ -163,7 +163,20 @@ Print-Step "Installing dependencies..."
 pnpm install --silent
 Print-Success "Dependencies installed"
 
-# 7. Run Setup
-Print-Step "Running Windows setup..."
+# 7. Apply core Windows setup
+Print-Step "Applying core Windows setup..."
+. (Join-Path $DotfilesDir "windows/install.ps1")
+Print-Success "Core Windows setup applied"
+
+# 8. Run optional setup
+Print-Step "Running optional Windows setup..."
 Write-Host ""
-pnpm exec tsx setup-windows.ts
+pnpm exec tsx setup-windows.ts --skip-core
+
+# 9. Refresh this shell and prove the helper works
+Print-Step "Refreshing PATH and checking setup..."
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+& (Join-Path $DotfilesDir "windows/bin/bb.ps1") status
+
+Write-Host ""
+Print-Success "Windows dotfiles setup complete. Open PowerShell 7 and run: bb status"

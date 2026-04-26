@@ -15,6 +15,12 @@ describe('Windows Interactive Setup (setup-windows.ts)', () => {
     expect(content).toContain('windows/install.ps1');
   });
 
+  it('should support skipping core setup after bootstrap already applied it', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('--skip-core');
+    expect(content).toContain('SKIP_CORE');
+  });
+
   it('should have interactive prompts', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     // Checking for inquirer/prompts usage

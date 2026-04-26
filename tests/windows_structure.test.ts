@@ -13,6 +13,10 @@ describe('Windows Directory Structure', () => {
     expect(fs.existsSync(path.join(baseDir, 'install.ps1'))).toBe(true);
   });
 
+  it('should have windows/update.ps1', () => {
+    expect(fs.existsSync(path.join(baseDir, 'update.ps1'))).toBe(true);
+  });
+
   it('should have windows/packages.json', () => {
     expect(fs.existsSync(path.join(baseDir, 'packages.json'))).toBe(true);
   });

@@ -27,4 +27,16 @@ describe('Windows PowerShell Profile', () => {
     expect(content).toContain('profile/aliases.ps1');
     expect(content).toContain('profile/functions.ps1');
   });
+
+  it('should provide Windows bb and Kanata helpers', () => {
+    const content = fs.readFileSync(path.join(profileDir, 'functions.ps1'), 'utf-8');
+    expect(content).toContain('function bb');
+    expect(content).toContain('function bbup');
+    expect(content).toContain('function kanata-start');
+    expect(content).toContain('function kanata-debug');
+    expect(content).toContain('function kanata-autostart');
+    expect(content).toContain('kanata-install');
+    expect(content).toContain('kanata-uninstall');
+    expect(content).toContain('kanata-status');
+  });
 });

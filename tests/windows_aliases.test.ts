@@ -35,4 +35,12 @@ describe('Windows PowerShell Aliases (aliases.ps1)', () => {
     const content = fs.readFileSync(aliasesPath, 'utf-8');
     expect(content).toMatch(/Set-Alias.*sudo.*gsudo/i);
   });
+
+  it('should include Unix-like reload and AI shortcuts', () => {
+    const content = fs.readFileSync(aliasesPath, 'utf-8');
+    expect(content).toMatch(/function rc/i);
+    expect(content).toMatch(/function c/i);
+    expect(content).toMatch(/function o/i);
+    expect(content).toMatch(/function g/i);
+  });
 });
