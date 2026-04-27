@@ -59,7 +59,15 @@ describe('Windows Bootstrap Script (install.ps1)', () => {
   it('should restore fnm and guard optional setup when pnpm is unavailable', () => {
     const content = fs.readFileSync(bootstrapPath, 'utf-8');
     expect(content).toContain('fnm env --use-on-cd');
-    expect(content).toContain('Get-Command pnpm');
+    expect(content).toContain('function Get-PnpmCommand');
+    expect(content).toContain('function Invoke-Pnpm');
     expect(content).toContain('Skipping optional setup');
+  });
+
+  it('should invoke pnpm through the resolved command path', () => {
+    const content = fs.readFileSync(bootstrapPath, 'utf-8');
+    expect(content).toContain('& $pnpm.Source @Arguments');
+    expect(content).toContain('Invoke-Pnpm install --silent');
+    expect(content).toContain('Invoke-Pnpm exec tsx setup-windows.ts --skip-core');
   });
 });

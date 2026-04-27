@@ -59,6 +59,32 @@ function Initialize-NodeSession {
     }
 }
 
+function Get-PnpmCommand {
+    $pnpm = Get-Command pnpm -ErrorAction SilentlyContinue
+    if ($pnpm) {
+        return $pnpm
+    }
+
+    Initialize-NodeSession
+    $pnpm = Get-Command pnpm -ErrorAction SilentlyContinue
+    if ($pnpm) {
+        return $pnpm
+    }
+
+    return $null
+}
+
+function Invoke-Pnpm {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
+
+    $pnpm = Get-PnpmCommand
+    if (!$pnpm) {
+        throw "pnpm is not available in this PowerShell session."
+    }
+
+    & $pnpm.Source @Arguments
+}
+
 function Refresh-PathFromRegistry {
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 }
@@ -182,7 +208,7 @@ try {
 
 # 6. Install Dependencies
 Print-Step "Installing dependencies..."
-pnpm install --silent
+Invoke-Pnpm install --silent
 Print-Success "Dependencies installed"
 
 # 7. Apply core Windows setup
@@ -196,8 +222,8 @@ Initialize-NodeSession
 # 8. Run optional setup
 Print-Step "Running optional Windows setup..."
 Write-Host ""
-if (Get-Command pnpm -ErrorAction SilentlyContinue) {
-    pnpm exec tsx setup-windows.ts --skip-core
+if (Get-PnpmCommand) {
+    Invoke-Pnpm exec tsx setup-windows.ts --skip-core
 } else {
     Print-Error "pnpm is still unavailable after Node setup. Skipping optional setup."
     Write-Host "Run later: cd `$HOME\dotfiles; pnpm run setup:windows" -ForegroundColor Yellow
