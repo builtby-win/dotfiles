@@ -1,11 +1,11 @@
 # windows/kanata-autostart.ps1 - Register or remove Kanata login autostart
 
-$ErrorActionPreference = "Stop"
-
 param(
     [ValidateSet("install", "uninstall", "status")]
     [string]$Action = "install"
 )
+
+$ErrorActionPreference = "Stop"
 
 $taskName = "BuiltBy Kanata"
 

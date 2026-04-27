@@ -20,6 +20,15 @@ describe('Windows Kanata autostart', () => {
     expect(content).toContain('Unregister-ScheduledTask');
   });
 
+  it('keeps the param block before executable statements', () => {
+    const lines = fs.readFileSync(autostartPath, 'utf-8')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'));
+
+    expect(lines[0]).toBe('param(');
+  });
+
   it('starts Kanata with the shared config', () => {
     const content = fs.readFileSync(startPath, 'utf-8');
     expect(content).toContain('.config/kanata/kanata.kbd');

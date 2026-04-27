@@ -21,6 +21,15 @@ describe('Windows bb command shim', () => {
     expect(content).toContain('"kanata-install"');
   });
 
+  it('keeps the param block before executable statements', () => {
+    const lines = fs.readFileSync(shimPath, 'utf-8')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'));
+
+    expect(lines[0]).toBe('param(');
+  });
+
   it('wraps bb.ps1 from bb.cmd', () => {
     const content = fs.readFileSync(cmdPath, 'utf-8');
     expect(content).toContain('bb.ps1');

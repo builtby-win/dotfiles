@@ -1,12 +1,12 @@
 # windows/bin/bb.ps1 - PATH-safe Windows dotfiles helper
 
-$ErrorActionPreference = "Stop"
-
 param(
     [string]$Command = "help",
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Rest
 )
+
+$ErrorActionPreference = "Stop"
 
 function Get-DotfilesDir {
     if ($env:DOTFILES_DIR -and (Test-Path $env:DOTFILES_DIR)) {
