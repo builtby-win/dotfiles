@@ -19,6 +19,9 @@ describe('Windows Configuration Linking (install.ps1)', () => {
 
   it('should contain logic to install Kanata CLI', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
+    expect(content).toContain('windows-binaries-$arch.zip');
+    expect(content).toContain('kanata_windows_tty_winIOv2_$arch.exe');
+    expect(content).toContain('windows/bin');
     expect(content).toContain('cargo install kanata');
     expect(content).toContain('.cargo/bin');
     expect(content).toContain('Install-KanataCli');

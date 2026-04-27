@@ -39,9 +39,41 @@ function Install-KanataCli {
         return
     }
 
+    $kanataBinDir = Join-Path $dotfilesDir "windows/bin"
+    if (!(Test-Path $kanataBinDir)) { New-Item -ItemType Directory $kanataBinDir -Force | Out-Null }
+    $kanataDest = Join-Path $kanataBinDir "kanata.exe"
+    $arch = if ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture -eq [System.Runtime.InteropServices.Architecture]::Arm64) { "arm64" } else { "x64" }
+    $zipUrl = "https://github.com/jtroo/kanata/releases/download/v1.11.0/windows-binaries-$arch.zip"
+    $tmpZip = Join-Path $env:TEMP "kanata-windows-$arch.zip"
+    $tmpDir = Join-Path $env:TEMP "kanata-windows-$arch"
+
+    try {
+        Write-Step "Installing Kanata CLI from GitHub release"
+        if (Test-Path $tmpZip) { Remove-Item $tmpZip -Force }
+        if (Test-Path $tmpDir) { Remove-Item $tmpDir -Recurse -Force }
+        Invoke-WebRequest -Uri $zipUrl -OutFile $tmpZip
+        Expand-Archive -Path $tmpZip -DestinationPath $tmpDir -Force
+
+        $candidate = Get-ChildItem -Path $tmpDir -Recurse -Filter "kanata_windows_tty_winIOv2_$arch.exe" | Select-Object -First 1
+        if (!$candidate) {
+            $candidate = Get-ChildItem -Path $tmpDir -Recurse -Filter "kanata_windows_tty_winIOv2*.exe" | Select-Object -First 1
+        }
+        if (!$candidate) {
+            throw "No suitable Kanata tty winIOv2 binary found in release archive."
+        }
+
+        Copy-Item -Path $candidate.FullName -Destination $kanataDest -Force
+        Refresh-Path
+        if (Get-Command kanata -ErrorAction SilentlyContinue) {
+            return
+        }
+    } catch {
+        Write-Host "WARN: Kanata release install failed: $_" -ForegroundColor Yellow
+    }
+
     Refresh-Path
     if (!(Get-Command cargo -ErrorAction SilentlyContinue)) {
-        Write-Host "WARN: cargo not found; Kanata GUI is installed, but bb kanata needs the kanata CLI." -ForegroundColor Yellow
+        Write-Host "WARN: cargo not found; Kanata CLI could not be installed." -ForegroundColor Yellow
         return
     }
 
