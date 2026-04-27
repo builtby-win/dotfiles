@@ -39,6 +39,30 @@ function Print-Error {
     Write-Host "✗ $Message" -ForegroundColor Red
 }
 
+function Initialize-NodeSession {
+    Refresh-PathFromRegistry
+
+    if (Get-Command fnm -ErrorAction SilentlyContinue) {
+        fnm env --use-on-cd | Out-String | Invoke-Expression
+    }
+
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        fnm install --lts
+        fnm use lts-latest
+    }
+
+    if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+        npm install -g pnpm
+        if (Get-Command fnm -ErrorAction SilentlyContinue) {
+            fnm env --use-on-cd | Out-String | Invoke-Expression
+        }
+    }
+}
+
+function Refresh-PathFromRegistry {
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+}
+
 Print-Banner
 
 if (-not (Test-Administrator)) {
@@ -143,15 +167,13 @@ if (-not (Get-Command fnm -ErrorAction SilentlyContinue)) {
 # 5. Setup Node & pnpm
 Print-Step "Setting up Node.js environment..."
 try {
-    # Initialize fnm for this session
-    fnm env --use-on-cd | Out-String | Invoke-Expression
-    
-    # Install LTS
+    Refresh-PathFromRegistry
+    Initialize-NodeSession
     fnm install --lts
     fnm use lts-latest
-    
-    # Install pnpm
-    npm install -g pnpm
+    if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
+        npm install -g pnpm
+    }
     Print-Success "Node.js and pnpm installed"
 } catch {
     Print-Error "Failed to setup Node/pnpm: $_"
@@ -168,14 +190,22 @@ Print-Step "Applying core Windows setup..."
 . (Join-Path $DotfilesDir "windows/install.ps1")
 Print-Success "Core Windows setup applied"
 
+# Core setup refreshes PATH from registry; restore fnm's session PATH before using pnpm again.
+Initialize-NodeSession
+
 # 8. Run optional setup
 Print-Step "Running optional Windows setup..."
 Write-Host ""
-pnpm exec tsx setup-windows.ts --skip-core
+if (Get-Command pnpm -ErrorAction SilentlyContinue) {
+    pnpm exec tsx setup-windows.ts --skip-core
+} else {
+    Print-Error "pnpm is still unavailable after Node setup. Skipping optional setup."
+    Write-Host "Run later: cd `$HOME\dotfiles; pnpm run setup:windows" -ForegroundColor Yellow
+}
 
 # 9. Refresh this shell and prove the helper works
 Print-Step "Refreshing PATH and checking setup..."
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+Refresh-PathFromRegistry
 & (Join-Path $DotfilesDir "windows/bin/bb.ps1") status
 
 Write-Host ""

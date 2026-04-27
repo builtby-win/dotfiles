@@ -50,8 +50,16 @@ describe('Windows Bootstrap Script (install.ps1)', () => {
     const content = fs.readFileSync(bootstrapPath, 'utf-8');
     expect(content).toContain('windows/install.ps1');
     expect(content).toContain('. (Join-Path $DotfilesDir "windows/install.ps1")');
+    expect(content).toContain('Initialize-NodeSession');
     expect(content).toContain('setup-windows.ts --skip-core');
     expect(content).toContain('windows/bin/bb.ps1');
     expect(content).toContain('status');
+  });
+
+  it('should restore fnm and guard optional setup when pnpm is unavailable', () => {
+    const content = fs.readFileSync(bootstrapPath, 'utf-8');
+    expect(content).toContain('fnm env --use-on-cd');
+    expect(content).toContain('Get-Command pnpm');
+    expect(content).toContain('Skipping optional setup');
   });
 });
