@@ -27,6 +27,7 @@ describe('Windows Package Manifest (packages.json)', () => {
       'Warp.Warp',
       'marlocarlo.psmux',
       'jtroo.kanata_gui',
+      'Rustlang.Rustup',
       'Anysphere.Cursor'
     ];
     

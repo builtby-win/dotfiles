@@ -17,6 +17,12 @@ describe('Windows Configuration Linking (install.ps1)', () => {
     expect(content).toContain('stow-packages/kanata');
   });
 
+  it('should contain logic to install Kanata CLI', () => {
+    const content = fs.readFileSync(scriptPath, 'utf-8');
+    expect(content).toContain('cargo install kanata');
+    expect(content).toContain('.cargo/bin');
+  });
+
   it('should contain logic to sync tmux config for psmux', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
     expect(content).toContain('stow-packages/tmux/.config/tmux');

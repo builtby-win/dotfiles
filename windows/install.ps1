@@ -147,7 +147,20 @@ Set-Content -Path (Join-Path $dotfilesConfigDir "path") -Value $dotfilesDir -NoN
 
 # 4.0.1 PATH-safe bb helper
 Add-UserPath (Join-Path $dotfilesDir "windows/bin")
+Add-UserPath (Join-Path $HOME ".cargo/bin")
 $env:DOTFILES_DIR = $dotfilesDir
+
+# 4.0.2 Kanata CLI
+if (!(Get-Command kanata -ErrorAction SilentlyContinue)) {
+    Refresh-Path
+    if (Get-Command cargo -ErrorAction SilentlyContinue) {
+        Write-Step "Installing Kanata CLI with cargo"
+        cargo install kanata
+        Refresh-Path
+    } else {
+        Write-Host "WARN: cargo not found; Kanata GUI is installed, but bb kanata needs the kanata CLI." -ForegroundColor Yellow
+    }
+}
 
 # 4.1 Starship
 $starshipConfigDir = Join-Path $HOME ".config"

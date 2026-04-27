@@ -2,12 +2,12 @@
 
 # 1. Initialize Starship Prompt
 if (Get-Command starship -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&starship init powershell)
+    & starship init powershell | Out-String | Invoke-Expression
 }
 
 # 2. Initialize Zoxide (Smarter cd)
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&zoxide init powershell)
+    & zoxide init powershell | Out-String | Invoke-Expression
 }
 
 # 3. Initialize Fnm (Fast Node Manager)

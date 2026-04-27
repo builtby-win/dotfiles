@@ -13,12 +13,14 @@ describe('Windows PowerShell Core Integrations (init.ps1)', () => {
     const content = fs.readFileSync(initPath, 'utf-8');
     expect(content).toContain('starship init powershell');
     expect(content).toContain('Invoke-Expression');
+    expect(content).toContain('Out-String');
   });
 
   it('should initialize Zoxide', () => {
     const content = fs.readFileSync(initPath, 'utf-8');
     expect(content).toContain('zoxide init powershell');
     expect(content).toContain('Invoke-Expression');
+    expect(content).toContain('Out-String');
   });
 
   it('should initialize Fnm', () => {
