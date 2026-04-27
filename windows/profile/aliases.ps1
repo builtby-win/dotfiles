@@ -9,19 +9,19 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
 }
 
 if (Get-Command bat -ErrorAction SilentlyContinue) {
-    Set-Alias cat bat
+    Set-Alias -Name cat -Value bat -Option AllScope -Force
 }
 
 if (Get-Command rg -ErrorAction SilentlyContinue) {
-    Set-Alias grep rg
+    Set-Alias -Name grep -Value rg -Force
 }
 
 if (Get-Command gsudo -ErrorAction SilentlyContinue) {
-    Set-Alias sudo gsudo
+    Set-Alias -Name sudo -Value gsudo -Force
 }
 
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Set-Alias cd z
+    Set-Alias -Name cd -Value z -Option AllScope -Force
 }
 
 # 2. Directory Navigation

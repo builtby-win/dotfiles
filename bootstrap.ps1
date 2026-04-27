@@ -18,9 +18,9 @@ function Test-Administrator {
 
 function Print-Banner {
     Write-Host ""
-    Write-Host "  ╔═══════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║         builtby.win/dotfiles              ║" -ForegroundColor Cyan
-    Write-Host "  ╚═══════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "  +-------------------------------------------+" -ForegroundColor Cyan
+    Write-Host "  |         builtby.win/dotfiles              |" -ForegroundColor Cyan
+    Write-Host "  +-------------------------------------------+" -ForegroundColor Cyan
     Write-Host ""
 }
 
@@ -31,12 +31,12 @@ function Print-Step {
 
 function Print-Success {
     param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "OK: $Message" -ForegroundColor Green
 }
 
 function Print-Error {
     param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "ERROR: $Message" -ForegroundColor Red
 }
 
 function Initialize-NodeSession {

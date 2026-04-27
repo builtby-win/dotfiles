@@ -36,12 +36,18 @@ if (Get-Command fzf -ErrorAction SilentlyContinue) {
 
 # 5. PSReadLine Options (Better Autocomplete)
 if (Get-Module -ListAvailable PSReadLine) {
-    # History-based prediction (like zsh-autosuggestions)
-    Set-PSReadLineOption -PredictionSource History
-    # Better Tab completion (cycle through results)
-    Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
-    # Colorize command prediction (dim gray)
-    Set-PSReadLineOption -Colors @{ InlinePrediction = "$([char]0x1b)[38;5;238m" }
+    try {
+        # History-based prediction (like zsh-autosuggestions)
+        if ((Get-Command Set-PSReadLineOption).Parameters.ContainsKey('PredictionSource')) {
+            Set-PSReadLineOption -PredictionSource History -ErrorAction Stop
+        }
+        # Better Tab completion (cycle through results)
+        Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete -ErrorAction Stop
+        # Colorize command prediction (dim gray)
+        Set-PSReadLineOption -Colors @{ InlinePrediction = "$([char]0x1b)[38;5;238m" } -ErrorAction Stop
+    } catch {
+        # Some hosts or older PSReadLine versions do not support prediction options.
+    }
 }
 
 # 6. PNPM Tab Completion
