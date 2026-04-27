@@ -18,6 +18,52 @@ function Refresh-Path {
     $env:Path = "$machinePath;$userPath"
 }
 
+function Initialize-NodeSession {
+    Refresh-Path
+
+    if (Get-Command fnm -ErrorAction SilentlyContinue) {
+        fnm env --use-on-cd | Out-String | Invoke-Expression
+    }
+
+    if ((Get-Command npm -ErrorAction SilentlyContinue) -and !(Get-Command pnpm -ErrorAction SilentlyContinue)) {
+        Write-Step "Installing pnpm"
+        npm install -g pnpm
+        if (Get-Command fnm -ErrorAction SilentlyContinue) {
+            fnm env --use-on-cd | Out-String | Invoke-Expression
+        }
+    }
+}
+
+function Install-KanataCli {
+    if (Get-Command kanata -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    Refresh-Path
+    if (!(Get-Command cargo -ErrorAction SilentlyContinue)) {
+        Write-Host "WARN: cargo not found; Kanata GUI is installed, but bb kanata needs the kanata CLI." -ForegroundColor Yellow
+        return
+    }
+
+    Write-Step "Installing Kanata CLI with cargo"
+    cargo install kanata
+    if ($LASTEXITCODE -eq 0) {
+        Refresh-Path
+        return
+    }
+
+    Write-Host "WARN: Kanata CLI install failed. Cleaning Cargo cache and retrying once." -ForegroundColor Yellow
+    $anyhowCache = Join-Path $HOME ".cargo/registry/src"
+    if (Test-Path $anyhowCache) {
+        Get-ChildItem -Path $anyhowCache -Recurse -Directory -Filter "anyhow-*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    cargo install kanata --force
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "WARN: Kanata CLI install still failed. Run later: cargo install kanata --force" -ForegroundColor Yellow
+    }
+    Refresh-Path
+}
+
 function Add-UserPath {
     param([string]$PathToAdd)
 
@@ -150,17 +196,11 @@ Add-UserPath (Join-Path $dotfilesDir "windows/bin")
 Add-UserPath (Join-Path $HOME ".cargo/bin")
 $env:DOTFILES_DIR = $dotfilesDir
 
-# 4.0.2 Kanata CLI
-if (!(Get-Command kanata -ErrorAction SilentlyContinue)) {
-    Refresh-Path
-    if (Get-Command cargo -ErrorAction SilentlyContinue) {
-        Write-Step "Installing Kanata CLI with cargo"
-        cargo install kanata
-        Refresh-Path
-    } else {
-        Write-Host "WARN: cargo not found; Kanata GUI is installed, but bb kanata needs the kanata CLI." -ForegroundColor Yellow
-    }
-}
+# 4.0.2 Node session tools
+Initialize-NodeSession
+
+# 4.0.3 Kanata CLI
+Install-KanataCli
 
 # 4.1 Starship
 $starshipConfigDir = Join-Path $HOME ".config"

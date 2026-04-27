@@ -99,6 +99,29 @@ function Get-DotfilesDir {
     return $null
 }
 
+function Initialize-NodeSession {
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    if (Get-Command fnm -ErrorAction SilentlyContinue) {
+        fnm env --use-on-cd | Out-String | Invoke-Expression
+    }
+}
+
+function Get-PnpmCommand {
+    $pnpm = Get-Command pnpm -ErrorAction SilentlyContinue
+    if ($pnpm) { return $pnpm }
+
+    Initialize-NodeSession
+    $pnpm = Get-Command pnpm -ErrorAction SilentlyContinue
+    if ($pnpm) { return $pnpm }
+
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        npm install -g pnpm
+        Initialize-NodeSession
+    }
+
+    return Get-Command pnpm -ErrorAction SilentlyContinue
+}
+
 function bbup {
     $dotfilesDir = Get-DotfilesDir
     if (!$dotfilesDir) {
@@ -136,9 +159,14 @@ function bb {
         "setup" {
             if (!$dotfilesDir) { Write-Host "Dotfiles directory not found." -ForegroundColor Red; return 1 }
             Push-Location $dotfilesDir
-            try { pnpm exec tsx setup-windows.ts } finally { Pop-Location }
+            try {
+                $pnpm = Get-PnpmCommand
+                if (!$pnpm) { Write-Host "pnpm not found. Run: bb update" -ForegroundColor Red; return 1 }
+                & $pnpm.Source exec tsx setup-windows.ts
+            } finally { Pop-Location }
         }
         "status" {
+            Initialize-NodeSession
             Write-Host "Dotfiles: $dotfilesDir"
             Write-Host "PowerShell: $($PSVersionTable.PSVersion)"
             foreach ($cmd in @("git", "pwsh", "pnpm", "starship", "zoxide", "fzf", "rg", "bat", "eza", "tmux", "psmux", "kanata")) {

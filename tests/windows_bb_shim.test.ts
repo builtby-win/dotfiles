@@ -21,6 +21,13 @@ describe('Windows bb command shim', () => {
     expect(content).toContain('"kanata-install"');
   });
 
+  it('initializes fnm before checking pnpm status', () => {
+    const content = fs.readFileSync(shimPath, 'utf-8');
+    expect(content).toContain('function Initialize-NodeSession');
+    expect(content).toContain('function Get-PnpmCommand');
+    expect(content).toContain('fnm env --use-on-cd');
+  });
+
   it('keeps the param block before executable statements', () => {
     const lines = fs.readFileSync(shimPath, 'utf-8')
       .split(/\r?\n/)

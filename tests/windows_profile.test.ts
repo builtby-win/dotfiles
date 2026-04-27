@@ -38,5 +38,7 @@ describe('Windows PowerShell Profile', () => {
     expect(content).toContain('kanata-install');
     expect(content).toContain('kanata-uninstall');
     expect(content).toContain('kanata-status');
+    expect(content).toContain('function Initialize-NodeSession');
+    expect(content).toContain('function Get-PnpmCommand');
   });
 });

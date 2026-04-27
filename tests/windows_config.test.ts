@@ -21,6 +21,15 @@ describe('Windows Configuration Linking (install.ps1)', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
     expect(content).toContain('cargo install kanata');
     expect(content).toContain('.cargo/bin');
+    expect(content).toContain('Install-KanataCli');
+    expect(content).toContain('Cleaning Cargo cache and retrying once');
+  });
+
+  it('should initialize fnm and pnpm during install', () => {
+    const content = fs.readFileSync(scriptPath, 'utf-8');
+    expect(content).toContain('Initialize-NodeSession');
+    expect(content).toContain('fnm env --use-on-cd');
+    expect(content).toContain('npm install -g pnpm');
   });
 
   it('should contain logic to sync tmux config for psmux', () => {
