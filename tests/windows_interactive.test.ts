@@ -26,4 +26,24 @@ describe('Windows Interactive Setup (setup-windows.ts)', () => {
     // Checking for inquirer/prompts usage
     expect(content).toContain('@inquirer/prompts');
   });
+
+  it('should preselect optional installs that are already installed', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('function markInstalled');
+    expect(content).toContain('checked: isInstalled(choice)');
+    expect(content).toContain('winget list --id');
+    expect(content).toContain('where.exe');
+  });
+
+  it('should not suggest or install Cursor interactively', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).not.toContain('Anysphere.Cursor');
+    expect(content).not.toContain('Cursor (AI code editor)');
+  });
+
+  it('should offer VS Code instead of Cursor for editors', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+    expect(content).toContain('Microsoft.VisualStudioCode');
+    expect(content).toContain('Visual Studio Code');
+  });
 });

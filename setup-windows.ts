@@ -18,6 +18,14 @@ const colors = {
 const DOTFILES_DIR = dirname(fileURLToPath(import.meta.url));
 const SKIP_CORE = process.argv.includes("--skip-core");
 
+type OptionalChoice = {
+  name: string;
+  value: string;
+  checked?: boolean;
+  wingetId?: string;
+  command?: string;
+};
+
 const log = {
   step: (msg: string) => console.log(`${colors.blue}==>${colors.reset} ${msg}`),
   ok: (msg: string) => console.log(`${colors.green}OK:${colors.reset} ${msg}`),
@@ -59,6 +67,24 @@ function ensureNpm(): boolean {
     return false;
   }
   return true;
+}
+
+function commandExists(command: string): boolean {
+  return runCommand(`where.exe ${command}`, true);
+}
+
+function wingetAppInstalled(id: string): boolean {
+  return runCommand(`winget list --id "${id}" -e --source winget`, true);
+}
+
+function isInstalled(choice: OptionalChoice): boolean {
+  if (choice.command && commandExists(choice.command)) return true;
+  if (choice.wingetId && wingetAppInstalled(choice.wingetId)) return true;
+  return false;
+}
+
+function markInstalled(choices: OptionalChoice[]): OptionalChoice[] {
+  return choices.map((choice) => ({ ...choice, checked: isInstalled(choice) }));
 }
 
 function installWingetApp(name: string, id: string) {
@@ -123,30 +149,30 @@ async function runSetup() {
   console.log("Pick what you want. You can skip everything.");
   console.log("");
 
-  const terminalChoices = [
-    { name: "Warp (beginner-friendly)", value: "warp" },
-    { name: "Windows Terminal (if missing)", value: "windows_terminal" },
-    { name: "WezTerm (power users)", value: "wezterm" },
-    { name: "Alacritty (minimal, fast)", value: "alacritty" },
-  ];
+  const terminalChoices = markInstalled([
+    { name: "Warp (beginner-friendly)", value: "warp", wingetId: "Warp.Warp" },
+    { name: "Windows Terminal (if missing)", value: "windows_terminal", wingetId: "Microsoft.WindowsTerminal", command: "wt.exe" },
+    { name: "WezTerm (power users)", value: "wezterm", wingetId: "wez.wezterm", command: "wezterm.exe" },
+    { name: "Alacritty (minimal, fast)", value: "alacritty", wingetId: "Alacritty.Alacritty", command: "alacritty.exe" },
+  ]);
 
-  const editorChoices = [
-    { name: "Cursor (AI code editor)", value: "cursor" },
-  ];
+  const editorChoices = markInstalled([
+    { name: "Visual Studio Code", value: "vscode", wingetId: "Microsoft.VisualStudioCode", command: "code.cmd" },
+  ]);
 
-  const aiChoices = [
-    { name: "Gemini CLI (npm)", value: "gemini" },
-    { name: "Claude Code (PowerShell installer)", value: "claude" },
-    { name: "OpenCode CLI (npm)", value: "opencode" },
-  ];
+  const aiChoices = markInstalled([
+    { name: "Gemini CLI (npm)", value: "gemini", command: "gemini.cmd" },
+    { name: "Claude Code (PowerShell installer)", value: "claude", command: "claude.cmd" },
+    { name: "OpenCode CLI (npm)", value: "opencode", command: "opencode.cmd" },
+  ]);
 
-  const miscChoices = [
-    { name: "PowerShell 7 (recommended shell)", value: "powershell" },
-    { name: "psmux (tmux for Windows)", value: "psmux" },
-    { name: "Kanata GUI (keyboard remapping)", value: "kanata_gui" },
-    { name: "Rustup (for kanata CLI builds)", value: "rustup" },
-    { name: "Python 3 (required for antigravity)", value: "python" },
-  ];
+  const miscChoices = markInstalled([
+    { name: "PowerShell 7 (recommended shell)", value: "powershell", wingetId: "Microsoft.PowerShell", command: "pwsh.exe" },
+    { name: "psmux (tmux for Windows)", value: "psmux", wingetId: "marlocarlo.psmux", command: "psmux.exe" },
+    { name: "Kanata GUI (keyboard remapping)", value: "kanata_gui", wingetId: "jtroo.kanata_gui" },
+    { name: "Rustup (for kanata CLI builds)", value: "rustup", wingetId: "Rustlang.Rustup", command: "rustup.exe" },
+    { name: "Python 3 (required for antigravity)", value: "python", wingetId: "Python.Python.3", command: "python.exe" },
+  ]);
 
   const selectedTerminals = await checkbox({
     message: "Select terminals to install:",
@@ -206,7 +232,7 @@ async function runSetup() {
     }
 
     for (const item of selectedEditors) {
-      if (item === "cursor") installWingetApp("Cursor", "Anysphere.Cursor");
+      if (item === "vscode") installWingetApp("Visual Studio Code", "Microsoft.VisualStudioCode");
     }
 
     for (const item of selectedMisc) {
