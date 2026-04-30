@@ -9,8 +9,8 @@ function readRepoFile(relativePath: string): string {
 }
 
 describe('Karabiner module wiring', () => {
-  it('keeps a stowable Karabiner config in the repo', () => {
-    expect(fs.existsSync(path.join(repoRoot, 'stow-packages/karabiner/.config/karabiner/karabiner.json'))).toBe(true);
+  it('keeps a chezmoi-managed Karabiner config in the repo', () => {
+    expect(fs.existsSync(path.join(repoRoot, 'chezmoi/dot_config/karabiner/karabiner.json'))).toBe(true);
   });
 
   it('supports both push and pull sync directions', () => {

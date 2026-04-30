@@ -9,32 +9,32 @@ function readRepoFile(relativePath: string): string {
 }
 
 describe("Neovim module wiring", () => {
-  it("includes stowable Neovim config files", () => {
+  it("includes chezmoi-managed Neovim config files", () => {
     const expectedFiles = [
-      "stow-packages/nvim/.config/nvim/init.lua",
-      "stow-packages/nvim/.config/nvim/.luarc.json",
-      "stow-packages/nvim/.config/nvim/nvim-pack-lock.json",
-      "stow-packages/nvim/.config/nvim/lua/builtby/init.lua",
+      "chezmoi/dot_config/nvim/init.lua",
+      "chezmoi/dot_config/nvim/.luarc.json",
+      "chezmoi/dot_config/nvim/nvim-pack-lock.json",
+      "chezmoi/dot_config/nvim/lua/builtby/init.lua",
       "docs/modules/nvim.md",
-      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/tree.lua",
-      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/bufferline.lua",
-      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/whichkey.lua",
-      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/gitsigns.lua",
-      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/mason.lua",
-      "stow-packages/nvim/.config/nvim/lua/builtby/plugins/treesitter.lua",
-      "stow-packages/nvim/.config/nvim/lua/builtby/lsp/init.lua",
-      "stow-packages/nvim/.config/nvim/lsp/lua_ls.lua",
-      "stow-packages/nvim/.config/nvim/lsp/ts_ls.lua",
-      "stow-packages/nvim/.config/nvim/lsp/bashls.lua",
-      "stow-packages/nvim/.config/nvim/lsp/jsonls.lua",
-      "stow-packages/nvim/.config/nvim/lsp/yamlls.lua",
-      "stow-packages/nvim/.config/nvim/lsp/taplo.lua",
-      "stow-packages/nvim/.config/nvim/lsp/marksman.lua",
-      "stow-packages/nvim/.config/nvim/after/ftplugin/lua.lua",
-      "stow-packages/nvim/.config/nvim/after/ftplugin/markdown.lua",
-      "stow-packages/nvim/.config/nvim/after/ftplugin/gitcommit.lua",
-      "stow-packages/nvim/.config/nvim/after/ftplugin/sh.lua",
-      "stow-packages/nvim/.config/nvim/after/ftplugin/typescript.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/plugins/tree.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/plugins/bufferline.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/plugins/whichkey.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/plugins/gitsigns.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/plugins/mason.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/plugins/treesitter.lua",
+      "chezmoi/dot_config/nvim/lua/builtby/lsp/init.lua",
+      "chezmoi/dot_config/nvim/lsp/lua_ls.lua",
+      "chezmoi/dot_config/nvim/lsp/ts_ls.lua",
+      "chezmoi/dot_config/nvim/lsp/bashls.lua",
+      "chezmoi/dot_config/nvim/lsp/jsonls.lua",
+      "chezmoi/dot_config/nvim/lsp/yamlls.lua",
+      "chezmoi/dot_config/nvim/lsp/taplo.lua",
+      "chezmoi/dot_config/nvim/lsp/marksman.lua",
+      "chezmoi/dot_config/nvim/after/ftplugin/lua.lua",
+      "chezmoi/dot_config/nvim/after/ftplugin/markdown.lua",
+      "chezmoi/dot_config/nvim/after/ftplugin/gitcommit.lua",
+      "chezmoi/dot_config/nvim/after/ftplugin/sh.lua",
+      "chezmoi/dot_config/nvim/after/ftplugin/typescript.lua",
     ];
 
     for (const file of expectedFiles) {
@@ -48,17 +48,9 @@ describe("Neovim module wiring", () => {
     const readme = readRepoFile("README.md");
 
     expect(setupTs).toContain('{ name: "Neovim", value: "nvim"');
-    expect(setupTs).toContain('.config/nvim/init.lua');
-    expect(setupTs).toContain('.config/nvim/nvim-pack-lock.json');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/init.lua');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/options.lua');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/tree.lua');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/bufferline.lua');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/whichkey.lua');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/gitsigns.lua');
-    expect(setupTs).toContain('.config/nvim/lua/builtby/plugins/mason.lua');
-    expect(setupTs).toContain('.config/nvim/lsp/lua_ls.lua');
-    expect(setupTs).toContain('.config/nvim/after/ftplugin/lua.lua');
+    expect(setupTs).toContain('nvim: [".config/nvim"]');
+    expect(setupTs).not.toContain('".config/nvim/init.lua"');
+    expect(setupTs).not.toContain('".config/nvim/lua/builtby/init.lua"');
     expect(setupTs).toContain('config.value === "nvim"');
     expect(functionsSh).toContain("bb setup nvim");
     expect(readme).toContain("| Neovim |");
@@ -66,7 +58,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("uses a modular builtby bootstrap", () => {
-    const builtbyInit = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/init.lua");
+    const builtbyInit = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/init.lua");
 
     expect(builtbyInit).toContain('require("builtby.options")');
     expect(builtbyInit).toContain('require("builtby.keymaps")');
@@ -75,7 +67,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("defines vim.pack plugin specs for the core editor stack", () => {
-    const packLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/pack.lua");
+    const packLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/pack.lua");
 
     expect(packLua).toContain("vim.pack.add({");
     expect(packLua).toContain("load = true");
@@ -93,7 +85,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("loads plugin setup after bare vim.pack specs are added", () => {
-    const packLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/pack.lua");
+    const packLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/pack.lua");
 
     expect(packLua).not.toContain("config =");
     expect(packLua).toContain('require("builtby.plugins.colors")');
@@ -109,7 +101,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("sets beginner-friendly editor defaults", () => {
-    const optionsLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/options.lua");
+    const optionsLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/options.lua");
 
     expect(optionsLua).toContain('vim.o.signcolumn = "yes"');
     expect(optionsLua).toContain('vim.o.clipboard = "unnamedplus"');
@@ -123,7 +115,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("uses runtime-safe MiniPick mappings and beginner shortcuts", () => {
-    const keymapsLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/keymaps.lua");
+    const keymapsLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/keymaps.lua");
 
     expect(keymapsLua).toContain('vim.keymap.set("i", "jj", "<Esc>"');
     expect(keymapsLua).toContain('<leader><leader>');
@@ -148,11 +140,11 @@ describe("Neovim module wiring", () => {
   });
 
   it("adds Mason, Treesitter, and native LSP entrypoints", () => {
-    const builtbyInit = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/init.lua");
-    const packLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/pack.lua");
-    const masonLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/plugins/mason.lua");
-    const treesitterLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/plugins/treesitter.lua");
-    const lspInit = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/lsp/init.lua");
+    const builtbyInit = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/init.lua");
+    const packLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/pack.lua");
+    const masonLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/plugins/mason.lua");
+    const treesitterLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/plugins/treesitter.lua");
+    const lspInit = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/lsp/init.lua");
 
     expect(builtbyInit).toContain('require("builtby.lsp")');
     expect(packLua).toContain('require("builtby.plugins.mason")');
@@ -173,7 +165,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("enables completion from LspAttach using the attached client id", () => {
-    const lspInit = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/lsp/init.lua");
+    const lspInit = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/lsp/init.lua");
 
     expect(lspInit).toContain('vim.api.nvim_create_autocmd("LspAttach"');
     expect(lspInit).toContain("args.data.client_id");
@@ -182,14 +174,14 @@ describe("Neovim module wiring", () => {
   });
 
   it("forces vim.pack to load plugins during startup", () => {
-    const packLua = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/pack.lua");
+    const packLua = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/pack.lua");
 
     expect(packLua).toContain("vim.pack.add({");
     expect(packLua).toContain("}, { load = true })");
   });
 
   it("only enables LSP servers whose binaries are available", () => {
-    const lspInit = readRepoFile("stow-packages/nvim/.config/nvim/lua/builtby/lsp/init.lua");
+    const lspInit = readRepoFile("chezmoi/dot_config/nvim/lua/builtby/lsp/init.lua");
 
     expect(lspInit).toContain("vim.fn.executable");
     expect(lspInit).toContain("enabled_servers");

@@ -11,10 +11,11 @@ describe('shell helper contract for chezmoi migration', () => {
     expect(content).toContain('chezmoi');
   });
 
-  it('marks bb setup as the legacy setup path', () => {
+  it('keeps bb setup as a chezmoi-backed compatibility path', () => {
     const content = fs.readFileSync(functionsPath, 'utf-8');
-    expect(content).toContain('Legacy interactive setup');
-    expect(content).toContain('legacy stow module install');
+    expect(content).toContain('bb setup                Apply chezmoi-managed dotfiles');
+    expect(content).toContain('Compatibility alias for chezmoi apply');
+    expect(content).not.toContain('stow -d');
   });
 
   it('teaches bb update to reapply chezmoi base state', () => {

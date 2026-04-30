@@ -8,7 +8,7 @@ describe('Linux bootstrap workflow', () => {
   const readmePath = path.resolve(__dirname, '../README.md');
   const setupPath = path.resolve(__dirname, '../setup.ts');
   const tipsPath = path.resolve(__dirname, '../shell/tips.txt');
-  const zshrcPath = path.resolve(__dirname, '../stow-packages/zsh/.zshrc');
+  const shellInitPath = path.resolve(__dirname, '../shell/init.sh');
 
   it('has a dedicated Linux bootstrap script', () => {
     expect(fs.existsSync(linuxBootstrapPath)).toBe(true);
@@ -70,24 +70,26 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('Skipping ${name}: no supported Linux package manager and no curl installer is configured');
   });
 
-  it('uses direct symlink fallback for configs when stow is unavailable', () => {
+  it('applies selected configs through chezmoi instead of direct symlink fallback', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
-    expect(content).toContain('Falling back to direct symlinks for selected configs');
-    expect(content).toContain('setupConfigWithoutStow');
-    expect(content).toContain('configured via symlink fallback');
+    expect(content).toContain('function applyChezmoi(): boolean');
+    expect(content).toContain('bash "${applyScript}"');
+    expect(content).not.toContain('setupConfigWithoutStow');
+    expect(content).not.toContain('configured via symlink fallback');
   });
 
   it('migrates legacy ~/.zshrc symlinks to a local source file', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     expect(content).toContain('const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ==="');
-    expect(content).toContain('source "$DOTFILES_DIR/stow-packages/zsh/.zshrc"');
+    expect(content).toContain('source "$DOTFILES_DIR/shell/init.sh"');
     expect(content).toContain('unlinkSync(zshrcPath);');
   });
 
-  it('avoids stowing ~/.zshrc while keeping other zsh files managed', () => {
+  it('backs up real managed targets before chezmoi apply', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
-    expect(content).toContain('--ignore="^\\\\.zshrc$"');
-    expect(content).toContain('config === "zsh"');
+    expect(content).toContain('function backupRealManagedTargets(configs: string[]): void');
+    expect(content).toContain('rmSync(targetPath, { recursive: true, force: true });');
+    expect(content).toContain('type: "chezmoi"');
   });
 
   it('creates a machine-local shell overrides file during setup', () => {
@@ -107,8 +109,8 @@ describe('Linux bootstrap workflow', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     expect(content).toContain('const linuxCommandCategories = new Set<AppCategory>(["cli", "ai"])');
     expect(content).toContain('platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))');
-    expect(content).toContain('const selectableStowConfigs = currentPlatform === "linux"');
-    expect(content).toContain('platformStowConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim")');
+    expect(content).toContain('const selectableManagedConfigs = currentPlatform === "linux"');
+    expect(content).toContain('platformManagedConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim" || config.value === "kanata")');
   });
 
   it('adds OpenCode CLI install path for Linux', () => {
@@ -164,7 +166,7 @@ describe('Linux bootstrap workflow', () => {
   it('documents the default install as applying the base chezmoi state', () => {
     const content = fs.readFileSync(readmePath, 'utf-8');
     expect(content).toContain('This installs dependencies, clones the repo, then applies the base chezmoi state by default.');
-    expect(content).toContain('legacy stow/setup lane');
+    expect(content).not.toContain('legacy stow/setup lane');
   });
 
   it('hands off to interactive setup after the base chezmoi apply in interactive bootstrap runs', () => {
@@ -173,10 +175,10 @@ describe('Linux bootstrap workflow', () => {
 
     expect(macBootstrap).toContain('print_step "Launching interactive dotfiles setup..."');
     expect(macBootstrap).toContain('print_success "Interactive setup complete!"');
-    expect(macBootstrap).toContain('setup.ts "$DOTFILES_DIR" < /dev/tty');
+    expect(macBootstrap).toContain('setup.ts "${SETUP_ARGS[@]}" < /dev/tty');
     expect(linuxBootstrap).toContain('print_step "Launching interactive dotfiles setup..."');
     expect(linuxBootstrap).toContain('print_success "Interactive setup complete"');
-    expect(linuxBootstrap).toContain('setup.ts "$DOTFILES_DIR" < /dev/tty');
+    expect(linuxBootstrap).toContain('setup.ts "${SETUP_ARGS[@]}" < /dev/tty');
   });
 
   it('supports explicit setup path arguments in the macOS/bootstrap wrapper too', () => {
@@ -189,8 +191,8 @@ describe('Linux bootstrap workflow', () => {
 
   it('keeps Linux non-interactive mode free of new setup path prompts', () => {
     const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    expect(content).toContain('elif [[ "$NON_INTERACTIVE" -eq 1 ]]; then');
-    expect(content).toContain('SETUP_ARGS+=( --setup-path standard )');
+    expect(content).toContain('if [[ "$NON_INTERACTIVE" -eq 1 ]]; then');
+    expect(content).not.toContain('SETUP_ARGS+=( --setup-path standard )');
     expect(content).not.toContain('SETUP_PATH="standard"');
     expect(content).toContain('Skipping interactive setup in non-interactive mode');
   });
@@ -271,16 +273,14 @@ describe('Linux bootstrap workflow', () => {
     const content = fs.readFileSync(bootstrapPath, 'utf-8');
 
     expect(content).toContain('"$BREW_BIN" install git');
-    expect(content).toContain('"$BREW_BIN" install stow');
+    expect(content).toContain('"$BREW_BIN" install chezmoi');
     expect(content).toContain('"$BREW_BIN" install fnm');
-    expect(content).not.toContain('brew install stow');
+    expect(content).not.toContain('brew install chezmoi');
     expect(content).not.toContain('brew install fnm');
   });
 
-  it('uses portable PNPM_HOME defaults in zshrc', () => {
-    const content = fs.readFileSync(zshrcPath, 'utf-8');
+  it('does not hardcode a machine-specific PNPM_HOME in shell init', () => {
+    const content = fs.readFileSync(shellInitPath, 'utf-8');
     expect(content).not.toContain('export PNPM_HOME="/Users/winstonzhao/Library/pnpm"');
-    expect(content).toContain('export PNPM_HOME="${PNPM_HOME:-$HOME/Library/pnpm}"');
-    expect(content).toContain('export PNPM_HOME="${PNPM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm}"');
   });
 });

@@ -1,11 +1,12 @@
 #!/usr/bin/env npx tsx
 import { checkbox, select, confirm } from "@inquirer/prompts";
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync, symlinkSync, readdirSync, rmSync } from "fs";
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, unlinkSync, renameSync, lstatSync, readlinkSync, readdirSync, rmSync } from "fs";
 import { join, dirname } from "path";
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import * as manifest from "./lib/manifest";
 import { createLinuxPackageManager, type SystemCommands } from "./lib/linux";
+import { backupExistingPath, getBuiltbyBackupDir, getSafeBackupName } from "./lib/backup-policy";
 
 // ============================================
 // Auto-Detection for Existing Users
@@ -36,9 +37,9 @@ function autoDetectExistingSetup(): DetectedSetup {
     }
   }
 
-  // Detect installed stow configs using existing isStowConfigInstalled
-  for (const config of STOW_CONFIGS) {
-    if (isStowConfigInstalled(config.value)) {
+  // Detect installed managed configs using existing isManagedConfigApplied
+  for (const config of MANAGED_CONFIGS) {
+    if (isManagedConfigApplied(config.value)) {
       detected.configs.push(config.value);
     }
   }
@@ -337,15 +338,15 @@ function appendSectionsToFile(filePath: string, sections: ParsedSection[]): void
 const DOTFILES_DIR = dirname(new URL(import.meta.url).pathname);
 const HOME = homedir();
 const MANIFEST_PATH = join(DOTFILES_DIR, ".backup-manifest.json");
-const DOTFILES_BACKUP_DIR = join(HOME, ".local", "state", "dotfiles", "backups");
+const DOTFILES_BACKUP_DIR = getBuiltbyBackupDir(HOME);
 const DOTFILES_CONFIG_DIR = join(HOME, ".config", "dotfiles");
 const DOTFILES_PATH_FILE = join(DOTFILES_CONFIG_DIR, "path");
 const DOTFILES_LOCAL_SHELL_FILE = join(DOTFILES_CONFIG_DIR, "local.sh");
 const WORKMUX_CONFIG_DIR = join(HOME, ".config", "workmux");
 const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml");
 const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml");
-const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "bootstrap.basic.conf");
-const TMUX_BASIC_CONF_SOURCE = join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "basic.conf");
+const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "bootstrap.basic.conf");
+const TMUX_BASIC_CONF_SOURCE = join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "basic.conf");
 const TMUX_MERGE_MARKER_START = "# === Added from builtby.win/dotfiles (tmux) ===";
 const TMUX_MERGE_MARKER_END = "# === End builtby.win/dotfiles (tmux) ===";
 const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ===";
@@ -355,8 +356,7 @@ const ZSHRC_MARKER_END = "# === End builtby.win/dotfiles (zsh) ===";
 interface BackupEntry {
   original: string;
   backup: string;
-  type: "file" | "stow";
-  stowPackage?: string;
+  type: "file" | "chezmoi";
   timestamp: number;
 }
 
@@ -494,6 +494,7 @@ const APPS: App[] = [
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "TypeWhisper", value: "typewhisper", brewName: "", manualDownload: true, detectPath: "/Applications/TypeWhisper.app", desc: "Private voice dictation app for macOS", url: "https://www.typewhisper.com/en/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Cotypist", value: "cotypist", brewName: "", manualDownload: true, detectPath: "/Applications/Cotypist.app", desc: "Voice-to-text writing assistant for macOS", url: "https://cotypist.app/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "Neru", value: "neru", brewName: "y3owk1n/tap/neru", cask: true, detectPath: "/Applications/Neru.app", desc: "Keyboard-driven screen navigation for macOS", url: "https://github.com/y3owk1n/neru", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -501,6 +502,7 @@ const APPS: App[] = [
   // Input (macOS only)
   { name: "Hammerspoon", value: "hammerspoon", brewName: "hammerspoon", cask: true, detectPath: "/Applications/Hammerspoon.app", desc: "Lua automation and system hotkeys for macOS", url: "https://www.hammerspoon.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
   { name: "Karabiner Elements", value: "karabiner-elements", brewName: "karabiner-elements", cask: true, detectPath: "/Applications/Karabiner-Elements.app", desc: "Powerful keyboard customization", url: "https://karabiner-elements.pqrs.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
+  { name: "Kanata", value: "kanata", brewName: "", checked: false, detectCmd: "command -v kanata", desc: "Cross-platform keyboard remapper (installed via Cargo with cmd support)", url: "https://github.com/jtroo/kanata", platforms: { macos: true, windows: false, linux: false }, category: "input" },
   { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app", platforms: { macos: true, windows: false, linux: false }, category: "input" },
 
   // Security (cross-platform)
@@ -517,8 +519,8 @@ const APPS: App[] = [
   { name: "Discord", value: "discord", brewName: "discord", cask: true, detectPath: "/Applications/Discord.app", desc: "Chat for communities", url: "https://discord.com", platforms: { macos: true, linux: false, windows: false }, category: "devtools" },
 ];
 
-// Stow-managed configs
-interface StowConfig {
+// Chezmoi-managed configs
+interface ManagedConfig {
   name: string;
   value: string;
   checked?: boolean;
@@ -526,12 +528,13 @@ interface StowConfig {
   desc?: string;
 }
 
-const STOW_CONFIGS: StowConfig[] = [
+const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
   { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "core profile + optional basic keymap, preserves existing setups" },
   { name: "Neovim", value: "nvim", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
   { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
+  { name: "Kanata", value: "kanata", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
 ];
 
@@ -573,24 +576,13 @@ const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?
 async function handleFileConflict(targetPath: string): Promise<"backup" | "skip" | "overwrite"> {
   if (!existsSync(targetPath)) return "overwrite";
 
-  log.warning(`${targetPath} already exists`);
-  const choice = await select({
-    message: "What would you like to do?",
-    choices: [
-      { name: "Backup & replace", value: "backup" as const },
-      { name: "Skip", value: "skip" as const },
-      { name: "Overwrite", value: "overwrite" as const },
-    ],
-  });
-
-  return choice;
+  log.warning(`${targetPath} already exists; backing it up before replacing`);
+  return "backup";
 }
 
 function backupFile(filePath: string): string {
-  mkdirSync(DOTFILES_BACKUP_DIR, { recursive: true });
-  const safeName = filePath.replace(/^\//, "").replace(/[\/:]/g, "__");
-  const backupPath = join(DOTFILES_BACKUP_DIR, `${safeName}.dotfiles-backup.${Date.now()}`);
-  copyFileSync(filePath, backupPath);
+  const safeName = getSafeBackupName(filePath, HOME);
+  const backupPath = backupExistingPath(filePath, HOME);
   pruneBackupFiles(`${safeName}.dotfiles-backup.`);
   log.info(`Backed up to ${backupPath}`);
   return backupPath;
@@ -730,8 +722,8 @@ function isAppInstalled(app: App): boolean {
   return getAppInstallState(app) === "installed";
 }
 
-function isStowConfigInstalled(config: string): boolean {
-  const targets = STOW_TARGETS[config];
+function isManagedConfigApplied(config: string): boolean {
+  const targets = CHEZMOI_TARGETS[config];
   if (!targets) return false;
 
   if (config === "zsh") {
@@ -762,12 +754,13 @@ function isStowConfigInstalled(config: string): boolean {
       if (stats.isSymbolicLink()) {
         // Read the symlink path itself, not the file content
         const linkPath = readlinkSync(targetPath);
-        return linkPath.includes("builtby.win/dotfiles") || linkPath.includes("stow-packages");
+        return linkPath.includes("builtby.win/dotfiles") || linkPath.includes("chezmoi");
       }
     } catch {
-      // Not our symlink
+      return false;
     }
-    return false;
+
+    return true;
   });
 }
 
@@ -990,6 +983,57 @@ function installPackage(name: string, cask = false): boolean {
   return false;
 }
 
+function ensureCargoBinInPath(): void {
+  const cargoBin = join(HOME, ".cargo", "bin");
+  const currentPath = process.env.PATH ?? "";
+  const pathEntries = currentPath.split(":").filter(Boolean);
+
+  if (!pathEntries.includes(cargoBin)) {
+    process.env.PATH = currentPath ? `${cargoBin}:${currentPath}` : cargoBin;
+  }
+}
+
+function installKanataCli(): boolean {
+  ensureCargoBinInPath();
+
+  if (runCommand("command -v kanata", true)) {
+    log.success("Kanata already installed");
+    return true;
+  }
+
+  if (!runCommand("command -v cargo", true)) {
+    log.warning("Cargo is required to install Kanata with cmd support");
+    log.warning("Install Rust first: https://rustup.rs");
+    return false;
+  }
+
+  const macosInstaller = join(DOTFILES_DIR, "scripts", "install-kanata-macos.sh");
+  const installCommand = platform() === "darwin" && existsSync(macosInstaller)
+    ? `bash ${macosInstaller}`
+    : "cargo install kanata --features cmd";
+
+  log.info("Installing Kanata via Cargo with cmd support...");
+  if (!runCommand(installCommand, true)) {
+    log.warning("Failed to install Kanata via Cargo");
+    return false;
+  }
+
+  ensureCargoBinInPath();
+  if (runCommand("command -v kanata", true)) {
+    log.success("Kanata installed");
+    return true;
+  }
+
+  const kanataPath = join(HOME, ".cargo", "bin", "kanata");
+  if (existsSync(kanataPath)) {
+    log.success(`Kanata installed at ${kanataPath}`);
+    return true;
+  }
+
+  log.warning("Kanata installation completed but binary was not found in PATH");
+  return false;
+}
+
 function getManualDownloadApps(apps: string[]): App[] {
   return APPS.filter((app) => apps.includes(app.value) && app.manualDownload);
 }
@@ -1051,30 +1095,10 @@ async function installApps(apps: string[]): Promise<void> {
   if (apps.includes("opencode")) {
     installOpenCodeCli();
   }
-}
 
-function ensureStowInstalled(): boolean {
-  if (runCommand("command -v stow", true)) {
-    return true;
+  if (apps.includes("kanata")) {
+    installKanataCli();
   }
-
-  if (getCurrentPlatform() === "linux") {
-    log.info("Installing stow via Linux package manager...");
-    if (installLinuxPackages(["stow"])) {
-      log.success("stow installed");
-      return true;
-    }
-    log.error("Failed to install stow via Linux package manager");
-    return false;
-  }
-
-  log.info("Installing stow via Homebrew...");
-  if (installPackage("stow")) {
-    log.success("stow installed");
-    return true;
-  }
-  log.error("Failed to install stow");
-  return false;
 }
 
 function writeDotfilesPath(): void {
@@ -1085,50 +1109,20 @@ function writeDotfilesPath(): void {
   log.success(`Saved dotfiles path to ${DOTFILES_PATH_FILE}`);
 }
 
-// Map stow package names to their target files (for conflict detection)
-const STOW_TARGETS: Record<string, string[]> = {
+// Map managed config names to their target files for migration/backups.
+const CHEZMOI_TARGETS: Record<string, string[]> = {
   zsh: [".config/starship.toml"],
   tmux: [
-    ".config/tmux/builtby/core.conf",
-    ".config/tmux/builtby/basic.conf",
-    ".config/tmux/builtby/pro.conf",
-    ".config/tmux/builtby/bootstrap.basic.conf",
-    ".config/tmux/builtby/bootstrap.pro.conf",
+    ".config/tmux",
+    ".local/bin/b2v",
+    ".local/bin/coolify",
+    ".local/bin/sesh",
+    ".local/bin/tmux-smart",
   ],
-  nvim: [
-    ".config/nvim/init.lua",
-    ".config/nvim/.luarc.json",
-    ".config/nvim/nvim-pack-lock.json",
-    ".config/nvim/lua/builtby/init.lua",
-    ".config/nvim/lua/builtby/options.lua",
-    ".config/nvim/lua/builtby/keymaps.lua",
-    ".config/nvim/lua/builtby/autocmds.lua",
-    ".config/nvim/lua/builtby/pack.lua",
-    ".config/nvim/lua/builtby/lsp/init.lua",
-    ".config/nvim/lua/builtby/plugins/colors.lua",
-    ".config/nvim/lua/builtby/plugins/oil.lua",
-    ".config/nvim/lua/builtby/plugins/pick.lua",
-    ".config/nvim/lua/builtby/plugins/tree.lua",
-    ".config/nvim/lua/builtby/plugins/bufferline.lua",
-    ".config/nvim/lua/builtby/plugins/whichkey.lua",
-    ".config/nvim/lua/builtby/plugins/gitsigns.lua",
-    ".config/nvim/lua/builtby/plugins/mason.lua",
-    ".config/nvim/lua/builtby/plugins/treesitter.lua",
-    ".config/nvim/lsp/lua_ls.lua",
-    ".config/nvim/lsp/ts_ls.lua",
-    ".config/nvim/lsp/bashls.lua",
-    ".config/nvim/lsp/jsonls.lua",
-    ".config/nvim/lsp/yamlls.lua",
-    ".config/nvim/lsp/taplo.lua",
-    ".config/nvim/lsp/marksman.lua",
-    ".config/nvim/after/ftplugin/lua.lua",
-    ".config/nvim/after/ftplugin/markdown.lua",
-    ".config/nvim/after/ftplugin/gitcommit.lua",
-    ".config/nvim/after/ftplugin/sh.lua",
-    ".config/nvim/after/ftplugin/typescript.lua",
-  ],
-  hammerspoon: [".hammerspoon/init.lua"],
+  nvim: [".config/nvim"],
+  hammerspoon: [".hammerspoon"],
   karabiner: [".config/karabiner/karabiner.json"],
+  kanata: [".config/kanata/kanata.kbd"],
   ghostty: process.platform === "darwin"
     ? [
         ".config/ghostty/config",
@@ -1143,7 +1137,7 @@ function upsertZshrcMergeBlock(content: string): string {
     'if [[ -f "$HOME/.config/dotfiles/path" ]]; then',
     '  DOTFILES_DIR="$(cat "$HOME/.config/dotfiles/path")"',
     "  export DOTFILES_DIR",
-    '  [[ -f "$DOTFILES_DIR/stow-packages/zsh/.zshrc" ]] && source "$DOTFILES_DIR/stow-packages/zsh/.zshrc"',
+    '  [[ -f "$DOTFILES_DIR/shell/init.sh" ]] && source "$DOTFILES_DIR/shell/init.sh"',
     "fi",
     ZSHRC_MARKER_END,
   ].join("\n");
@@ -1259,52 +1253,6 @@ function setupZshEntrypoint(): void {
   ensureLocalShellOverridesFile();
 }
 
-function setupConfigWithoutStow(config: string, targets: string[], stowPackages: string): boolean {
-  let configured = false;
-
-  for (const target of targets) {
-    const sourcePath = join(stowPackages, config, target);
-    const targetPath = join(HOME, target);
-
-    if (!existsSync(sourcePath)) {
-      log.warning(`Missing source file for ${config}: ${sourcePath}`);
-      continue;
-    }
-
-    if (existsSync(targetPath)) {
-      try {
-        const stats = lstatSync(targetPath);
-        if (stats.isSymbolicLink()) {
-          const linkPath = readlinkSync(targetPath);
-          if (linkPath.includes("builtby.win/dotfiles") || linkPath.includes(DOTFILES_DIR)) {
-            configured = true;
-            continue;
-          }
-        }
-      } catch {
-        // Continue to explicit warning below.
-      }
-
-      log.warning(`Skipping existing target during fallback: ~/${target}`);
-      continue;
-    }
-
-    const parentDir = dirname(targetPath);
-    if (!existsSync(parentDir)) {
-      mkdirSync(parentDir, { recursive: true });
-    }
-
-    try {
-      symlinkSync(sourcePath, targetPath);
-      configured = true;
-    } catch {
-      log.error(`Failed to create symlink for ~/${target}`);
-    }
-  }
-
-  return configured;
-}
-
 function upsertTmuxMergeBlock(content: string): string {
   const block = [
     TMUX_MERGE_MARKER_START,
@@ -1410,136 +1358,97 @@ async function setupTmuxEntrypoint(): Promise<boolean> {
   return true;
 }
 
-async function setupStowConfigs(configs: string[]): Promise<void> {
-  if (configs.length === 0) return;
-
-  log.step("Setting up stow configs...");
-
-  // Write dotfiles path so .zshrc can find it
-  writeDotfilesPath();
-
-  const stowAvailable = ensureStowInstalled();
-  const linuxWithoutPackageManager = getCurrentPlatform() === "linux" && !getLinuxPackageManager();
-  if (!stowAvailable && !linuxWithoutPackageManager) {
-    log.error("Cannot proceed without stow");
-    return;
-  }
-
-  if (!stowAvailable && linuxWithoutPackageManager) {
-    log.warning("Stow is unavailable and no Linux package manager was detected");
-    log.info("Falling back to direct symlinks for selected configs");
-  }
-
-  const stowPackages = join(DOTFILES_DIR, "stow-packages");
-
-  for (const config of configs) {
-    const targets = STOW_TARGETS[config];
-    if (!targets) {
-      log.warning(`Unknown stow package: ${config}`);
-      continue;
-    }
-
-    if (config === "zsh") {
-      setupZshEntrypoint();
-    }
-
-    if (config === "tmux") {
-      ensureLocalWorkmuxConfig();
-      const shouldContinue = await setupTmuxEntrypoint();
-      if (!shouldContinue) {
-        log.info("Skipping tmux package setup");
-        continue;
-      }
-    }
-
-    // Check if the stow package exists
-    const packagePath = join(stowPackages, config);
-    if (!existsSync(packagePath)) {
-      log.warning(`Stow package not found: ${config}`);
-      continue;
-    }
-
-    let needsStow = false;
-
-    for (const target of targets) {
-      const targetPath = join(HOME, target);
-
-      if (existsSync(targetPath)) {
-        const stats = lstatSync(targetPath);
-
-        // Check if it's already our symlink
-        if (stats.isSymbolicLink()) {
-          try {
-            const linkPath = readlinkSync(targetPath);
-            if (linkPath.includes("builtby.win/dotfiles") || linkPath.includes(DOTFILES_DIR)) {
-              log.success(`${config} already configured via stow`);
-              continue;
-            }
-          } catch {
-            // If we can't read it, it might be a broken symlink
-          }
-        }
-
-        // Ask user what to do with existing file
-        log.warning(`~/${target} already exists`);
-        const choice = await select({
-          message: `What should we do with your existing ${target}?`,
-          choices: [
-            { name: "Backup & replace with stow symlink (recommended)", value: "backup" as const },
-            { name: "Skip", value: "skip" as const },
-          ],
-        });
-
-        if (choice === "skip") {
-          log.info(`Skipping ${config}`);
-          continue;
-        }
-
-        // Backup existing file
-        const backupPath = backupFile(targetPath);
-        addToManifest({ original: targetPath, backup: backupPath, type: "stow", stowPackage: config });
-        unlinkSync(targetPath);
-        needsStow = true;
-      } else {
-        needsStow = true;
-      }
-    }
-
-    if (needsStow || !targets.some(t => existsSync(join(HOME, t)))) {
-      if (stowAvailable) {
-        // Run stow to create the symlinks
-        const stowOptions = config === "zsh" ? '--ignore="^\\.zshrc$"' : "";
-        const stowPackageArg = stowOptions ? `${stowOptions} ${config}` : config;
-        const stowCmd = `stow -d "${stowPackages}" -t "${HOME}" ${stowPackageArg}`;
-        if (runCommand(stowCmd, true)) {
-          log.success(`${config} configured via stow`);
-
-          // Install TPM for tmux
-          if (config === "tmux") {
-            setupTpm();
-          }
-        } else {
-          log.error(`Failed to stow ${config}`);
-        }
-        continue;
-      }
-
-      if (setupConfigWithoutStow(config, targets, stowPackages)) {
-        log.success(`${config} configured via symlink fallback`);
-        if (config === "tmux") {
-          setupTpm();
-        }
-      } else {
-        log.error(`Failed to configure ${config} via symlink fallback`);
-      }
-    }
+function isLegacyStowSymlink(targetPath: string): boolean {
+  try {
+    const stats = lstatSync(targetPath);
+    if (!stats.isSymbolicLink()) return false;
+    const linkPath = readlinkSync(targetPath);
+    return linkPath.includes(`${DOTFILES_DIR}/stow-packages`) || linkPath.includes("stow-packages");
+  } catch {
+    return false;
   }
 }
 
-async function maybeSetDefaultShellToZsh(selectedStowConfigs: string[]): Promise<void> {
+function migrateLegacyStowSymlinks(configs: string[]): void {
+  const targets = new Set<string>();
+  for (const config of configs) {
+    for (const target of CHEZMOI_TARGETS[config] ?? []) {
+      targets.add(join(HOME, target));
+    }
+  }
+
+  for (const targetPath of targets) {
+    if (!isLegacyStowSymlink(targetPath)) continue;
+    unlinkSync(targetPath);
+    log.info(`Removed legacy stow symlink: ${targetPath}`);
+  }
+}
+
+function backupRealManagedTargets(configs: string[]): void {
+  const targets = new Set<string>();
+  for (const config of configs) {
+    for (const target of CHEZMOI_TARGETS[config] ?? []) {
+      targets.add(join(HOME, target));
+    }
+  }
+
+  for (const targetPath of targets) {
+    if (!existsSync(targetPath)) continue;
+
+    const stats = lstatSync(targetPath);
+    if (stats.isSymbolicLink()) continue;
+
+    const backupPath = backupFile(targetPath);
+    addToManifest({ original: targetPath, backup: backupPath, type: "chezmoi" });
+    rmSync(targetPath, { recursive: true, force: true });
+    log.info(`Backed up existing managed path before chezmoi apply: ${targetPath}`);
+  }
+}
+
+function applyChezmoi(): boolean {
+  const applyScript = join(DOTFILES_DIR, "scripts", "apply-chezmoi.sh");
+  if (!existsSync(applyScript)) {
+    log.error(`chezmoi apply helper not found: ${applyScript}`);
+    return false;
+  }
+
+  return runCommand(`bash "${applyScript}"`);
+}
+
+async function setupManagedConfigs(configs: string[]): Promise<void> {
+  if (configs.length === 0) return;
+
+  log.step("Applying chezmoi-managed configs...");
+  writeDotfilesPath();
+
+  if (configs.includes("zsh")) {
+    setupZshEntrypoint();
+  }
+
+  if (configs.includes("tmux")) {
+    ensureLocalWorkmuxConfig();
+    const shouldContinue = await setupTmuxEntrypoint();
+    if (!shouldContinue) {
+      log.info("Skipping tmux entrypoint changes");
+    }
+  }
+
+  migrateLegacyStowSymlinks(configs);
+  backupRealManagedTargets(configs);
+
+  if (applyChezmoi()) {
+    log.success("chezmoi-managed configs applied");
+    if (configs.includes("tmux")) {
+      setupTpm();
+    }
+  } else {
+    log.error("Failed to apply chezmoi-managed configs");
+  }
+}
+async function maybeSetDefaultShellToZsh(selectedManagedConfigs: string[]): Promise<void> {
   const platform = getCurrentPlatform();
   if (platform === "windows") return;
-  if (!selectedStowConfigs.includes("zsh")) return;
+  if (!selectedManagedConfigs.includes("zsh")) return;
 
   const currentShell = (process.env.SHELL ?? "").trim();
   const currentShellName = currentShell.split("/").pop() ?? currentShell;
@@ -1755,21 +1664,16 @@ async function revertBackups(): Promise<void> {
 
   for (const entry of toRevert) {
     try {
-      // For stow entries, first unstow
-      if (entry.type === "stow" && entry.stowPackage) {
-        const unstowCmd = `stow -d "${join(DOTFILES_DIR, "stow-packages")}" -t "${HOME}" -D ${entry.stowPackage}`;
-        runCommand(unstowCmd, true);
-      }
-
       // Check if backup still exists
       if (!existsSync(entry.backup)) {
         log.error(`Backup file not found: ${entry.backup}`);
         continue;
       }
 
-      // Restore the backup
+      // Restore the backup. Use rmSync because chezmoi-managed backups can be
+      // directories such as ~/.config/tmux or ~/.config/nvim.
       if (existsSync(entry.original)) {
-        unlinkSync(entry.original);
+        rmSync(entry.original, { recursive: true, force: true });
       }
       renameSync(entry.backup, entry.original);
       log.success(`Restored ${entry.original}`);
@@ -1833,14 +1737,14 @@ const MERGEABLE_CONFIGS: MergeableConfig[] = [
     name: "Tmux Config",
     description: "Core profile plus optional basic keymap",
     userPath: join(HOME, ".tmux.conf"),
-    dotfilesPath: join(DOTFILES_DIR, "stow-packages", "tmux", ".config", "tmux", "builtby", "bootstrap.basic.conf"),
+    dotfilesPath: join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "bootstrap.basic.conf"),
     type: "config",
   },
   {
     name: "Starship Prompt",
     description: "Fast, customizable shell prompt configuration",
     userPath: join(HOME, ".config", "starship.toml"),
-    dotfilesPath: join(DOTFILES_DIR, "stow-packages", "zsh", ".config", "starship.toml"),
+    dotfilesPath: join(DOTFILES_DIR, "chezmoi", "dot_config", "starship.toml"),
     type: "config",
   },
   {
@@ -1850,8 +1754,8 @@ const MERGEABLE_CONFIGS: MergeableConfig[] = [
       ? join(HOME, "Library", "Application Support", "com.mitchellh.ghostty", "config")
       : join(HOME, ".config", "ghostty", "config"),
     dotfilesPath: process.platform === "darwin"
-      ? join(DOTFILES_DIR, "stow-packages", "ghostty", "Library", "Application Support", "com.mitchellh.ghostty", "config")
-      : join(DOTFILES_DIR, "stow-packages", "ghostty", ".config", "ghostty", "config"),
+      ? join(DOTFILES_DIR, "chezmoi", "dot_config", "ghostty", "config")
+      : join(DOTFILES_DIR, "chezmoi", "dot_config", "ghostty", "config"),
     type: "config",
   },
 ];
@@ -2193,14 +2097,14 @@ async function runSetup(): Promise<void> {
   // Filter apps and configs by current platform
   const currentPlatform = getCurrentPlatform();
   const platformApps = APPS.filter(app => isPlatformSupported(app.platforms, currentPlatform));
-  const platformStowConfigs = STOW_CONFIGS.filter(config => isPlatformSupported(config.platforms, currentPlatform));
+  const platformManagedConfigs = MANAGED_CONFIGS.filter(config => isPlatformSupported(config.platforms, currentPlatform));
   const linuxCommandCategories = new Set<AppCategory>(["cli", "ai"]);
   const selectableApps = currentPlatform === "linux"
     ? platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))
     : platformApps;
-  const selectableStowConfigs = currentPlatform === "linux"
-    ? platformStowConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim")
-    : platformStowConfigs;
+  const selectableManagedConfigs = currentPlatform === "linux"
+    ? platformManagedConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim" || config.value === "kanata")
+    : platformManagedConfigs;
   const installItemLabel = currentPlatform === "linux" ? "commands" : "apps";
 
   // Check what's already installed
@@ -2212,8 +2116,8 @@ async function runSetup(): Promise<void> {
     appStates.set(app.value, getAppInstallState(app));
   }
 
-  for (const config of selectableStowConfigs) {
-    if (isStowConfigInstalled(config.value)) {
+  for (const config of selectableManagedConfigs) {
+    if (isManagedConfigApplied(config.value)) {
       installedConfigs.add(config.value);
     }
   }
@@ -2232,7 +2136,7 @@ async function runSetup(): Promise<void> {
   // Auto-Detection for First Run (No Manifest)
   // ============================================
   let selectedApps: string[] = [];
-  let selectedStowConfigs: string[] = [];
+  let selectedManagedConfigs: string[] = [];
   let selectedFeatures: string[] = [];
   let aiConfigs: string[] = [];
   let currentStep = 1;
@@ -2242,7 +2146,7 @@ async function runSetup(): Promise<void> {
     // First run - detect what's already installed
     const detected = autoDetectExistingSetup();
     const detectedAppsOnPlatform = detected.apps.filter(a => selectableApps.some(p => p.value === a));
-    const detectedConfigsOnPlatform = detected.configs.filter(c => selectableStowConfigs.some(p => p.value === c));
+    const detectedConfigsOnPlatform = detected.configs.filter(c => selectableManagedConfigs.some(p => p.value === c));
     const detectedFeaturesList = Object.entries(detected.features).filter(([_, v]) => v).map(([k]) => k);
 
     const hasDetectedItems = detectedAppsOnPlatform.length > 0 || 
@@ -2298,7 +2202,7 @@ async function runSetup(): Promise<void> {
 
     if (setupPath === "use_detected") {
       selectedApps = detectedAppsOnPlatform;
-      selectedStowConfigs = detectedConfigsOnPlatform;
+      selectedManagedConfigs = detectedConfigsOnPlatform;
       selectedFeatures = detectedFeaturesList;
       skipToRecap = true;
       currentStep = 4;
@@ -2307,7 +2211,7 @@ async function runSetup(): Promise<void> {
       console.log("");
     } else if (setupPath === "focus") {
       selectedApps = ["back2vibing", "tmux", "sesh", "fzf", "ghostty", "starship", "zoxide"];
-      selectedStowConfigs = ["zsh", "tmux", "ghostty"];
+      selectedManagedConfigs = ["zsh", "tmux", "ghostty"];
       selectedFeatures = ["tips"];
       skipToRecap = true;
       currentStep = 4;
@@ -2316,7 +2220,7 @@ async function runSetup(): Promise<void> {
       console.log("");
     } else if (setupPath === "standard") {
       selectedApps = selectableApps.filter(a => a.checked).map(a => a.value);
-      selectedStowConfigs = selectableStowConfigs.filter(c => c.checked).map(c => c.value);
+      selectedManagedConfigs = selectableManagedConfigs.filter(c => c.checked).map(c => c.value);
       selectedFeatures = OPTIONAL_FEATURES.filter(f => f.checked).map(f => f.value);
       skipToRecap = true;
       currentStep = 4;
@@ -2325,7 +2229,7 @@ async function runSetup(): Promise<void> {
       console.log("");
     } else if (setupPath === "minimal") {
       selectedApps = ["starship", "fzf", "zoxide"]; // Core CLI dependencies
-      selectedStowConfigs = ["zsh"];
+      selectedManagedConfigs = ["zsh"];
       selectedFeatures = ["tips"];
       skipToRecap = true;
       currentStep = 4;
@@ -2452,16 +2356,16 @@ async function runSetup(): Promise<void> {
       currentStep = 2;
     }
 
-    // Step 2: Select stow-managed configs
+    // Step 2: Select chezmoi-managed configs
     if (currentStep === 2) {
-      log.step(`[Step 2 of ${TOTAL_STEPS}] Select configs to stow`);
-      const stowChoices = [
+      log.step(`[Step 2 of ${TOTAL_STEPS}] Select configs to apply`);
+      const managedChoices = [
         {
           name: `${colors.yellow}↩ Back to step 1${colors.reset}`,
           value: "__back__",
           checked: false,
         },
-        ...selectableStowConfigs.map((config) => {
+        ...selectableManagedConfigs.map((config) => {
           const installed = installedConfigs.has(config.value);
           const descPart = config.desc ? ` ${colors.dim}- ${config.desc}${colors.reset}` : "";
           return {
@@ -2475,15 +2379,15 @@ async function runSetup(): Promise<void> {
         }),
       ];
       
-      selectedStowConfigs = await checkbox({
-        message: `Select configs to install ${colors.dim}[${stowChoices.length - 1} items]${colors.reset}:`,
-        choices: stowChoices,
+      selectedManagedConfigs = await checkbox({
+        message: `Select configs to install ${colors.dim}[${managedChoices.length - 1} items]${colors.reset}:`,
+        choices: managedChoices,
         pageSize: 20,
         loop: false,
       });
 
-      if (selectedStowConfigs.includes("__back__")) {
-        selectedStowConfigs = selectedStowConfigs.filter(s => s !== "__back__");
+      if (selectedManagedConfigs.includes("__back__")) {
+        selectedManagedConfigs = selectedManagedConfigs.filter(s => s !== "__back__");
         console.log("");
         currentStep = 1;
         continue;
@@ -2549,7 +2453,7 @@ async function runSetup(): Promise<void> {
         const state = appStates.get(app);
         return state === "not_installed" || state === "partial";
       }).length;
-      const configsToInstallCount = selectedStowConfigs.filter(c => !installedConfigs.has(c)).length;
+      const configsToInstallCount = selectedManagedConfigs.filter(c => !installedConfigs.has(c)).length;
 
       // Apps summary
       console.log(`  ${colors.bold}${installItemLabel[0].toUpperCase() + installItemLabel.slice(1)}:${colors.reset} ${selectedApps.length} selected (${appsToInstallCount} to install)`);
@@ -2572,10 +2476,10 @@ async function runSetup(): Promise<void> {
       }
 
       // Configs summary
-      console.log(`  ${colors.bold}Configs:${colors.reset} ${selectedStowConfigs.length} selected (${configsToInstallCount} to install)`);
-      if (selectedStowConfigs.length > 0) {
-        const configNames = selectedStowConfigs
-          .map(v => STOW_CONFIGS.find(c => c.value === v)?.name)
+      console.log(`  ${colors.bold}Configs:${colors.reset} ${selectedManagedConfigs.length} selected (${configsToInstallCount} to install)`);
+      if (selectedManagedConfigs.length > 0) {
+        const configNames = selectedManagedConfigs
+          .map(v => MANAGED_CONFIGS.find(c => c.value === v)?.name)
           .filter(Boolean)
           .join(", ");
         console.log(`    ${colors.dim}${configNames}${colors.reset}`);
@@ -2639,7 +2543,7 @@ async function runSetup(): Promise<void> {
     const state = appStates.get(app);
     return state === "not_installed" || state === "partial";
   });
-  const configsToInstall = selectedStowConfigs.filter((config) => !installedConfigs.has(config));
+  const configsToInstall = selectedManagedConfigs.filter((config) => !installedConfigs.has(config));
 
   if (appsToInstall.length === 0 && configsToInstall.length === 0 && aiConfigs.length === 0) {
     log.success("Everything is already installed!");
@@ -2647,18 +2551,18 @@ async function runSetup(): Promise<void> {
     await installApps(appsToInstall);
     console.log("");
 
-    await setupStowConfigs(configsToInstall);
+    await setupManagedConfigs(configsToInstall);
     console.log("");
 
     await setupAIConfigs(aiConfigs);
   }
 
-  await maybeSetDefaultShellToZsh(selectedStowConfigs);
+  await maybeSetDefaultShellToZsh(selectedManagedConfigs);
 
   // Save setup manifest (tracks what user selected for features)
   const setupManifest = manifest.getEmptyManifest();
   manifest.setInstalledApps(setupManifest, selectedApps);
-  manifest.setInstalledConfigs(setupManifest, selectedStowConfigs);
+  manifest.setInstalledConfigs(setupManifest, selectedManagedConfigs);
   manifest.setFeatures(
     setupManifest,
     selectedFeatures.reduce((acc, feature) => {

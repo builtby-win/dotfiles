@@ -9,7 +9,7 @@ function readRepoFile(relativePath: string): string {
 }
 
 describe('manual download apps in setup CLI', () => {
-  it('lists TypeWhisper and Cotypist in setup.ts with manual download links', () => {
+  it('lists TypeWhisper, Cotypist, and Neru in setup.ts with install links', () => {
     const setupTs = readRepoFile('setup.ts');
 
     expect(setupTs).toContain('name: "TypeWhisper"');
@@ -18,6 +18,10 @@ describe('manual download apps in setup CLI', () => {
     expect(setupTs).toContain('name: "Cotypist"');
     expect(setupTs).toContain('value: "cotypist"');
     expect(setupTs).toContain('url: "https://cotypist.app/"');
+    expect(setupTs).toContain('name: "Neru"');
+    expect(setupTs).toContain('value: "neru"');
+    expect(setupTs).toContain('brewName: "y3owk1n/tap/neru"');
+    expect(setupTs).toContain('url: "https://github.com/y3owk1n/neru"');
   });
 
   it('shows manual download guidance for selected apps without Homebrew packages', () => {

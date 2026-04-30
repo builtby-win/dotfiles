@@ -9,11 +9,11 @@ function readRepoFile(relativePath: string): string {
 }
 
 describe('Hammerspoon module wiring', () => {
-  it('includes stowable Hammerspoon config files', () => {
+  it('includes chezmoi-managed Hammerspoon config files', () => {
     const expectedFiles = [
-      'stow-packages/hammerspoon/.hammerspoon/init.lua',
-      'stow-packages/hammerspoon/.hammerspoon/modules/app_launcher.lua',
-      'stow-packages/hammerspoon/.hammerspoon/modules/ghostty.lua',
+      'chezmoi/dot_hammerspoon/init.lua',
+      'chezmoi/dot_hammerspoon/modules/app_launcher.lua',
+      'chezmoi/dot_hammerspoon/modules/ghostty.lua',
     ];
 
     for (const file of expectedFiles) {
@@ -22,7 +22,7 @@ describe('Hammerspoon module wiring', () => {
   });
 
   it('defines hyper app launcher and Ghostty 4-pane hotkey', () => {
-    const initLua = readRepoFile('stow-packages/hammerspoon/.hammerspoon/init.lua');
+    const initLua = readRepoFile('chezmoi/dot_hammerspoon/init.lua');
     expect(initLua).toContain("hyper = { 'ctrl', 'alt', 'cmd', 'shift' }");
     expect(initLua).toContain("hs.hotkey.bind(hyper, 'space', appLauncher.show)");
     expect(initLua).toContain("hs.hotkey.bind(hyper, '4', ghostty.fourPane)");
@@ -30,7 +30,7 @@ describe('Hammerspoon module wiring', () => {
   });
 
   it('keeps app launcher choices without direct Hyper app shortcuts', () => {
-    const appLauncherLua = readRepoFile('stow-packages/hammerspoon/.hammerspoon/modules/app_launcher.lua');
+    const appLauncherLua = readRepoFile('chezmoi/dot_hammerspoon/modules/app_launcher.lua');
     expect(appLauncherLua).not.toContain('function M.bindDirectShortcuts(mods)');
     expect(appLauncherLua).not.toContain("subText = 'Hyper+'");
   });
@@ -40,12 +40,13 @@ describe('Hammerspoon module wiring', () => {
     expect(setupTs).toContain('value: "hammerspoon"');
     expect(setupTs).toContain('brewName: "hammerspoon"');
     expect(setupTs).toContain('{ name: "Hammerspoon", value: "hammerspoon"');
-    expect(setupTs).toContain('hammerspoon: [".hammerspoon/init.lua"]');
+    expect(setupTs).toContain('hammerspoon: [".hammerspoon"]');
   });
 
   it('exposes bb setup hammerspoon helper command', () => {
     const functionsSh = readRepoFile('shell/functions.sh');
     expect(functionsSh).toContain('bb setup hammerspoon');
-    expect(functionsSh).toContain('hammerspoon)');
+    expect(functionsSh).toContain('all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata)');
+    expect(functionsSh).toContain('bb setup ${module}: applying chezmoi-managed dotfiles.');
   });
 });

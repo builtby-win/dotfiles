@@ -1,0 +1,49 @@
+;; BuiltBy keyboard parity layer for Kanata.
+;; Goals:
+;; - Microsoft Sculpt modifier keys match the old Karabiner profile
+;; - Microsoft Sculpt Menu/Application key acts as Hyper (Ctrl+Alt+Shift+Meta/Win/Cmd)
+;; - Caps Lock is Escape when tapped and Control when held
+;; - Delete Forward acts as Escape
+;; - j+k chord sends Ctrl+b for tmux/psmux leader muscle memory
+;; - d+f chord sends Hyper+f
+;;
+;; Run:
+;;   kanata --cfg ~/.config/kanata/kanata.kbd
+;;
+;; Notes:
+;; - This config intentionally targets the Microsoft Sculpt receiver on macOS.
+;;   The receiver appears as hash 0xCB1EB82FC081667C in `kanata --list`.
+;; - Karabiner's `application` key is Kanata's `menu` key.
+;; - App-specific Karabiner conditions, like terminal-only or except RustDesk,
+;;   need a companion tool. Plain Kanata applies these mappings per device.
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+  macos-dev-names-include (
+    "0xCB1EB82FC081667C"
+  )
+)
+
+(defalias
+  ;; Hold Menu/Application for Hyper. Meta is Cmd on macOS.
+  hyper (multi lctl lalt lsft lmet reverse-release-order)
+  ;; Tap Caps for Escape, hold for Control.
+  cap (tap-hold 200 200 esc lctl)
+  ;; Double-tap semicolon for AltTab's Ctrl+Option+Tab shortcut.
+  semi (tap-dance 200 (; (macro C-A-tab)))
+)
+
+(defsrc
+  lalt lmet ralt menu caps del ; j k d f
+)
+
+(deflayer base
+  lmet lalt rmet @hyper @cap esc @semi j k d f
+)
+
+(defchordsv2
+  ;; Keep this fast enough to avoid accidental normal typing capture.
+  (j k) (macro C-b) 75 first-release ()
+  (d f) (macro C-A-S-M-f) 100 first-release ()
+)

@@ -9,13 +9,13 @@ Karabiner Elements provides keyboard remaps and tmux integration.
 
 ## Install
 
-Legacy module install:
+Chezmoi apply:
 
 ```bash
 bb setup karabiner
 ```
 
-This stows the config and restarts Karabiner Elements.
+This applies the chezmoi-managed config and restarts Karabiner Elements.
 
 Manual sync and restart:
 

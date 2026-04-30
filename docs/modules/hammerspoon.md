@@ -9,13 +9,13 @@ Hammerspoon adds a Hyper-key launcher and Ghostty workflow shortcuts.
 
 ## Install
 
-Legacy module install:
+Chezmoi apply:
 
 ```bash
 bb setup hammerspoon
 ```
 
-This stows `.hammerspoon` into your home directory.
+This applies `.hammerspoon` into your home directory from `chezmoi/dot_hammerspoon`.
 
 ## Included hotkeys
 

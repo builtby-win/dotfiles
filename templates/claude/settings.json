@@ -429,7 +429,6 @@
   },
   "effortLevel": "high",
   "enabledPlugins": {
-    "beads@beads-marketplace": true,
     "claude-octopus@nyldn-plugins": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,

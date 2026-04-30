@@ -9,7 +9,7 @@
 ## CLI Utilities
 - **Starship:** A fast, cross-shell prompt that provides consistent visual feedback across Zsh and PowerShell.
 - **Tmux:** Used for terminal multiplexing and session management on macOS and Linux.
-- **GNU Stow:** Manages symlinks for dotfile distribution on Unix-based systems.
+- **chezmoi:** Applies the managed dotfile source tree on Unix-based systems.
 - **Zinit:** A flexible and fast plugin manager for Zsh.
 
 ## AI Development Tools

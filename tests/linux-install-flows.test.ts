@@ -19,9 +19,9 @@ function createMockSystem(installedCommands: Set<string> = new Set()) {
     },
     getCommandOutput(cmd: string): string | null {
       commandLog.push(cmd);
-      if (cmd.includes("dpkg-query")) return "git\ncurl\nstow\n";
-      if (cmd.includes("rpm -qa")) return "git\ncurl\nstow\n";
-      if (cmd.includes("pacman -Qq")) return "git\ncurl\nstow\n";
+      if (cmd.includes("dpkg-query")) return "git\ncurl\nchezmoi\n";
+      if (cmd.includes("rpm -qa")) return "git\ncurl\nchezmoi\n";
+      if (cmd.includes("pacman -Qq")) return "git\ncurl\nchezmoi\n";
       return null;
     },
   };
@@ -48,9 +48,9 @@ describe("Fresh Ubuntu install", () => {
 
     expect(pm.detect()).toBe("apt");
 
-    pm.install(["stow"]);
+    pm.install(["chezmoi"]);
     expect(commandLog).toContain("sudo apt-get update");
-    expect(commandLog).toContain("sudo apt-get install -y stow");
+    expect(commandLog).toContain("sudo apt-get install -y chezmoi");
   });
 
   it("runs full node setup flow with fnm already installed", () => {
@@ -146,8 +146,8 @@ describe("Arch Linux", () => {
     const { sys, commandLog } = createMockSystem(new Set(["pacman"]));
     const pm = createLinuxPackageManager(sys);
     expect(pm.detect()).toBe("pacman");
-    pm.install(["git", "stow"]);
-    expect(commandLog).toContain("sudo pacman -S --noconfirm --needed git stow");
+    pm.install(["git", "chezmoi"]);
+    expect(commandLog).toContain("sudo pacman -S --noconfirm --needed git chezmoi");
   });
 });
 

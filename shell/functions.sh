@@ -344,7 +344,7 @@ bbup() {
         echo "Warning: chezmoi apply helper not found, skipping base apply."
       fi
       
-      echo -n "Run legacy full setup wizard? (y/N) "
+      echo -n "Run interactive setup wizard? (y/N) "
       read -r response
       if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         pnpm run setup
@@ -378,8 +378,8 @@ bb() {
       echo ""
       echo "Commands:"
       echo "  bb apply                Apply the base chezmoi state"
-      echo "  bb setup                Legacy interactive setup"
-      echo "  bb setup <module>       legacy stow module install"
+      echo "  bb setup                Apply chezmoi-managed dotfiles"
+      echo "  bb setup <module>       Compatibility alias for chezmoi apply"
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
@@ -393,7 +393,7 @@ bb() {
       echo "  bb help                 Show this help"
       echo ""
       echo "Modules:"
-      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty"
+      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, kanata"
       echo "Restore targets:"
       echo "  raycast, rectangle-pro, bettertouchtool, macos-apps"
       return 0
@@ -418,64 +418,26 @@ bb() {
         return 1
       fi
 
-      if [[ $# -eq 0 ]]; then
-        if ! command -v pnpm &> /dev/null; then
-          echo "pnpm not found. Run ./bootstrap.sh first."
-          return 1
-        fi
-        (builtin cd "$dotfiles_dir" && pnpm run setup)
-        return $?
-      fi
-
-      if ! command -v stow &> /dev/null; then
-        echo "stow not found. Install it first (macOS: brew install stow)."
-        return 1
-      fi
-
-      local module
-      module="$1"
-
+      local module="${1:-all}"
       case "$module" in
-        shell|zsh)
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" zsh
-          echo "Shell config stowed. Reload with: exec zsh"
-          ;;
-        tmux)
-          _sync_workmux_config "$dotfiles_dir"
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" tmux
-          if [[ -n "$TMUX" ]]; then
+        all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata)
+          if [[ "$module" == "hammerspoon" || "$module" == "karabiner" ]]; then
+            if [[ "$(uname)" != "Darwin" ]]; then
+              echo "$module is macOS only."
+              return 1
+            fi
+          fi
+          if [[ "$module" == "tmux" ]]; then
+            _sync_workmux_config "$dotfiles_dir"
+          fi
+          echo "bb setup ${module}: applying chezmoi-managed dotfiles."
+          bb apply || return $?
+          if [[ "$module" == "tmux" && -n "$TMUX" ]]; then
             tmux source-file "$HOME/.tmux.conf"
-          else
-            echo "Tmux config stowed. Reload with: tmux source-file ~/.tmux.conf"
           fi
-          ;;
-        nvim)
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" nvim
-          echo "Neovim config stowed. Launch with: nvim"
-          ;;
-        hammerspoon)
-          if [[ "$(uname)" != "Darwin" ]]; then
-            echo "Hammerspoon is macOS only."
-            return 1
-          fi
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" hammerspoon
-          echo "Hammerspoon config stowed. Reload from Hammerspoon menu or run: hs -c 'hs.reload()'"
-          ;;
-        karabiner)
-          if [[ "$(uname)" != "Darwin" ]]; then
-            echo "Karabiner Elements is macOS only."
-            return 1
-          fi
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" karabiner || return 1
-          if [[ -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
+          if [[ "$module" == "karabiner" && -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
             "$dotfiles_dir/scripts/sync-karabiner.sh" push
-          else
-            echo "Karabiner config stowed. Restart Karabiner Elements to apply."
           fi
-          ;;
-        ghostty)
-          stow -d "$dotfiles_dir/stow-packages" -t "$HOME" ghostty
-          echo "Ghostty config stowed. Restart Ghostty to apply."
           ;;
         *)
           echo "Unknown module: $module"

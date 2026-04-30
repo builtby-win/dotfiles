@@ -7,12 +7,12 @@ import { spawnSync } from "child_process";
 describe("tmux and sesh workflow", () => {
   const functionsSh = readFileSync(join(process.cwd(), "shell", "functions.sh"), "utf-8");
   const aliasesSh = readFileSync(join(process.cwd(), "shell", "aliases.sh"), "utf-8");
-  const tmuxSmartPath = join(process.cwd(), "stow-packages", "tmux", ".local", "bin", "tmux-smart");
-  const seshShimPath = join(process.cwd(), "stow-packages", "tmux", ".local", "bin", "sesh");
+  const tmuxSmartPath = join(process.cwd(), "chezmoi", "dot_local", "bin", "executable_tmux-smart");
+  const seshShimPath = join(process.cwd(), "chezmoi", "dot_local", "bin", "executable_sesh");
   const tmuxSmartSh = readFileSync(tmuxSmartPath, "utf-8");
   const seshShimSh = readFileSync(seshShimPath, "utf-8");
   const seshPickerSh = readFileSync(
-    join(process.cwd(), "stow-packages", "tmux", ".config", "tmux", "sesh-picker.sh"),
+    join(process.cwd(), "chezmoi", "dot_config", "tmux", "executable_sesh-picker.sh"),
     "utf-8",
   );
   const gitignore = readFileSync(join(process.cwd(), ".gitignore"), "utf-8");
@@ -229,7 +229,7 @@ exit 1
     expect(seshPickerSh).not.toContain("clear-query");
   });
 
-  it("prefers a real sesh binary over the stowed shim", () => {
+  it("prefers a real sesh binary over the applied shim", () => {
     const fixtureDir = mkdtempSync(join(tmpdir(), "sesh-shim-"));
     const brewPrefix = join(fixtureDir, "brew");
     const brewBin = join(brewPrefix, "bin");
@@ -251,7 +251,7 @@ printf '%s\n' "$*" > "${outputPath}"
       env: {
         ...process.env,
         HOMEBREW_PREFIX: brewPrefix,
-        PATH: `${join(process.cwd(), "stow-packages", "tmux", ".local", "bin")}:${process.env.PATH ?? ""}`,
+        PATH: `${join(process.cwd(), "chezmoi", "dot_local", "bin")}:${process.env.PATH ?? ""}`,
       },
     });
 

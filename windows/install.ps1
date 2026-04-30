@@ -237,7 +237,7 @@ Install-KanataCli
 # 4.1 Starship
 $starshipConfigDir = Join-Path $HOME ".config"
 if (!(Test-Path $starshipConfigDir)) { New-Item -ItemType Directory $starshipConfigDir }
-$starshipSource = Join-Path $dotfilesDir "stow-packages/zsh/.config/starship.toml"
+$starshipSource = Join-Path $dotfilesDir "chezmoi/dot_config/starship.toml"
 $starshipDest = Join-Path $starshipConfigDir "starship.toml"
 Write-Host "Linking starship.toml..." -ForegroundColor Yellow
 Set-DotfileLink $starshipSource $starshipDest
@@ -245,7 +245,7 @@ Set-DotfileLink $starshipSource $starshipDest
 # 4.1.1 Kanata
 $kanataConfigDir = Join-Path $starshipConfigDir "kanata"
 if (!(Test-Path $kanataConfigDir)) { New-Item -ItemType Directory $kanataConfigDir }
-$kanataSource = Join-Path $dotfilesDir "stow-packages/kanata/.config/kanata/kanata.kbd"
+$kanataSource = Join-Path $dotfilesDir "chezmoi/dot_config/kanata/kanata.kbd"
 $kanataDest = Join-Path $kanataConfigDir "kanata.kbd"
 if (Test-Path $kanataSource) {
     Write-Host "Linking kanata.kbd..." -ForegroundColor Yellow
@@ -260,7 +260,7 @@ Link-PowerShellProfile (Join-Path $documentsDir "PowerShell/Microsoft.PowerShell
 Link-PowerShellProfile (Join-Path $documentsDir "WindowsPowerShell/Microsoft.PowerShell_profile.ps1")
 
 # 4.1.3 tmux/psmux config
-$tmuxSourceDir = Join-Path $dotfilesDir "stow-packages/tmux/.config/tmux"
+$tmuxSourceDir = Join-Path $dotfilesDir "chezmoi/dot_config/tmux"
 $tmuxDestDir = Join-Path $starshipConfigDir "tmux"
 $tmuxBootstrapSource = Join-Path $tmuxSourceDir "builtby/bootstrap.basic.conf"
 $tmuxBootstrapDest = Join-Path $HOME ".tmux.conf"

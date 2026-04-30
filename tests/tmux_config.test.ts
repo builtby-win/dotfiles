@@ -3,12 +3,12 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 describe("tmux profile split", () => {
-  const tmuxDir = join(process.cwd(), "stow-packages", "tmux", ".config", "tmux", "builtby");
+  const tmuxDir = join(process.cwd(), "chezmoi", "dot_config", "tmux", "builtby");
   const coreConf = readFileSync(join(tmuxDir, "core.conf"), "utf-8");
   const basicConf = readFileSync(join(tmuxDir, "basic.conf"), "utf-8");
   const proConf = readFileSync(join(tmuxDir, "pro.conf"), "utf-8");
   const sessionBootstrapSh = readFileSync(
-    join(process.cwd(), "stow-packages", "tmux", ".config", "tmux", "session-bootstrap.sh"),
+    join(process.cwd(), "chezmoi", "dot_config", "tmux", "executable_session-bootstrap.sh"),
     "utf-8",
   );
   const bootstrapBasicConf = readFileSync(join(tmuxDir, "bootstrap.basic.conf"), "utf-8");
@@ -66,6 +66,11 @@ describe("tmux profile split", () => {
   it("adds a rebalance binding and command palette entry", () => {
     expect(basicConf).toContain("bind b select-layout -E");
     expect(basicConf).toContain("[Panes] ::: Rebalance Panes ::: Leader + b ::: tmux select-layout -E");
+  });
+
+  it("binds Leader+Space directly to the sesh picker script", () => {
+    expect(basicConf).toContain('bind-key "Space" display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
+    expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
   });
 
   it("reloads the modular tmux profile instead of only ~/.tmux.conf", () => {
@@ -126,21 +131,33 @@ describe("tmux setup safety", () => {
     expect(setupTs).not.toContain('source-file "$HOME/.config/tmux/builtby/basic.conf"`,');
   });
 
+  it("checks the tmux managed config at the directory symlink boundary", () => {
+    expect(setupTs).toContain('".config/tmux"');
+    expect(setupTs).toContain('".local/bin/tmux-smart"');
+    expect(setupTs).toContain('nvim: [".config/nvim"]');
+    expect(setupTs).not.toContain('".config/tmux/builtby/basic.conf"');
+    expect(setupTs).not.toContain('".config/tmux/builtby/pro.conf"');
+  });
+
   it("updates local workmux config from templates during setup", () => {
-    expect(setupTs).toContain('const DOTFILES_BACKUP_DIR = join(HOME, ".local", "state", "dotfiles", "backups")');
+    expect(setupTs).toContain('const DOTFILES_BACKUP_DIR = getBuiltbyBackupDir(HOME)');
     expect(setupTs).toContain('const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml")');
     expect(setupTs).toContain('const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml")');
     expect(setupTs).toContain("function ensureLocalWorkmuxConfig(): void");
-    expect(setupTs).toContain('mkdirSync(DOTFILES_BACKUP_DIR, { recursive: true })');
-    expect(setupTs).toContain('const safeName = filePath.replace(/^\\//, "").replace(/[\\/:]/g, "__")');
+    expect(setupTs).toContain('const safeName = getSafeBackupName(filePath, HOME)');
     expect(setupTs).toContain("function pruneBackupFiles(prefix: string, keep = 1): void");
     expect(setupTs).toContain('pruneBackupFiles(`${safeName}.dotfiles-backup.`)');
-    expect(setupTs).toContain('const backupPath = join(DOTFILES_BACKUP_DIR, `${safeName}.dotfiles-backup.${Date.now()}`)');
+    expect(setupTs).toContain('const backupPath = backupExistingPath(filePath, HOME)');
     expect(setupTs).toContain('copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH)');
     expect(setupTs).toContain('backupFile(WORKMUX_CONFIG_PATH)');
     expect(setupTs).toContain('addToManifest({ original: WORKMUX_CONFIG_PATH, backup: backupPath, type: "file" })');
     expect(setupTs).toContain('Updated local workmux config at ${WORKMUX_CONFIG_PATH}');
     expect(setupTs).toContain('Created local workmux config at ${WORKMUX_CONFIG_PATH}');
+  });
+
+  it("restores directory backups with recursive removal", () => {
+    expect(setupTs).toContain('rmSync(entry.original, { recursive: true, force: true })');
+    expect(setupTs).not.toContain('unlinkSync(entry.original);');
   });
 
   it("syncs workmux config from bb setup tmux and bb update", () => {

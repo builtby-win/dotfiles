@@ -21,21 +21,24 @@ describe('chezmoi-first bootstrap contract', () => {
     const macContent = fs.readFileSync(macBootstrapPath, 'utf-8');
     const linuxContent = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
-    expect(macContent).toContain('Applying chezmoi base dotfiles');
-    expect(linuxContent).toContain('Applying chezmoi base dotfiles');
+    expect(macContent).toContain('Applying chezmoi-managed dotfiles');
+    expect(linuxContent).toContain('Applying chezmoi-managed dotfiles');
   });
 
-  it('supports an explicit legacy stow mode in both bootstrap scripts', () => {
+  it('does not expose legacy bootstrap modes', () => {
     const macContent = fs.readFileSync(macBootstrapPath, 'utf-8');
     const linuxContent = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
-    expect(macContent).toContain('--legacy-stow');
-    expect(linuxContent).toContain('--legacy-stow');
+    expect(macContent).not.toContain('--legacy-chezmoi');
+    expect(linuxContent).not.toContain('--legacy-chezmoi');
+    expect(macContent).not.toContain('--legacy-stow');
+    expect(linuxContent).not.toContain('--legacy-stow');
   });
 
   it('documents chezmoi as the default bootstrap path', () => {
     const content = fs.readFileSync(readmePath, 'utf-8');
-    expect(content).toContain('default bootstrap applies the base chezmoi state');
-    expect(content).toContain('legacy stow');
+    expect(content).toContain('default bootstrap applies the chezmoi-managed source state');
+    expect(content).toContain('chezmoi-managed');
+    expect(content).not.toContain('legacy stow');
   });
 });

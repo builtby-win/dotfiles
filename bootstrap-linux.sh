@@ -44,7 +44,6 @@ LINUX_PKG_MANAGER=""
 NON_INTERACTIVE=0
 SETUP_PATH=""
 SETUP_PATH_FROM_ARGS=0
-LEGACY_STOW=0
 
 parse_args() {
   while [[ $# -gt 0 ]]; do
@@ -69,15 +68,11 @@ parse_args() {
             ;;
         esac
         ;;
-      --legacy-stow)
-        LEGACY_STOW=1
-        ;;
       -h|--help)
         echo "Usage: bootstrap-linux.sh [options]"
         echo "  -y, --yes   Run non-interactively (auto-approve all prompts)"
         echo "  --focus     Run focused Back2Vibing setup"
         echo "  --setup-path <path>  Use focus, standard, minimal, or customize"
-        echo "  --legacy-stow  Run the legacy setup.ts/stow flow explicitly"
         echo "  -h, --help  Show this help message"
         exit 0
         ;;
@@ -232,19 +227,22 @@ pnpm install --silent || {
 print_success "Dependencies installed"
 
 echo ""
-if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
-  print_step "Launching legacy stow setup..."
-else
-  print_step "Applying chezmoi base dotfiles..."
-fi
+print_step "Applying chezmoi-managed dotfiles"
 
-if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
+if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
+  print_error "chezmoi apply failed"
+  exit 1
+fi
+print_success "Chezmoi dotfiles applied"
+
+if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+  print_warning "Skipping interactive setup in non-interactive mode"
+else
+  print_step "Launching interactive dotfiles setup..."
   TSX_BIN="./node_modules/.bin/tsx"
   SETUP_ARGS=( "$DOTFILES_DIR" )
   if [[ -n "$SETUP_PATH" ]]; then
     SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
-  elif [[ "$NON_INTERACTIVE" -eq 1 ]]; then
-    SETUP_ARGS+=( --setup-path standard )
   fi
   if [[ -x "$TSX_BIN" ]]; then
     if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
@@ -261,36 +259,7 @@ if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
     print_error "Cannot run setup.ts"
     exit 1
   fi
-  print_success "Legacy setup complete"
-else
-  if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
-    print_error "chezmoi apply failed"
-    exit 1
-  fi
-  print_success "Chezmoi base dotfiles applied"
-
-  if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
-    print_warning "Skipping interactive setup in non-interactive mode"
-  else
-    print_step "Launching interactive dotfiles setup..."
-    TSX_BIN="./node_modules/.bin/tsx"
-    if [[ -x "$TSX_BIN" ]]; then
-      if ! "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty; then
-        print_error "setup.ts failed"
-        exit 1
-      fi
-    elif command -v pnpm >/dev/null 2>&1; then
-      if ! pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty; then
-        print_error "setup.ts failed"
-        exit 1
-      fi
-    else
-      print_error "setup.ts failed"
-      print_error "Cannot run setup.ts"
-      exit 1
-    fi
-    print_success "Interactive setup complete"
-  fi
+  print_success "Interactive setup complete"
 fi
 
 print_success "Linux bootstrap complete"

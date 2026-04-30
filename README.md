@@ -26,11 +26,7 @@ irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | 
 
 More details in `WINDOWS_README.md`.
 
-The default bootstrap applies the base chezmoi state. Use the legacy stow/setup lane when you want the older interactive module installer:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --legacy-stow
-```
+The default bootstrap applies the chezmoi-managed source state, then launches the interactive setup when run from an interactive terminal.
 
 ## After install
 
@@ -43,9 +39,9 @@ bb help
 `bb` is a lightweight wrapper that makes common tasks discoverable.
 If `bb` is not found, run `bash scripts/apply-chezmoi.sh` and restart your shell.
 
-## Legacy stow setup paths
+## Setup paths
 
-These paths still use the legacy stow-backed `setup.ts` flow.
+These paths select interactive setup defaults after the chezmoi apply step.
 
 **🚀 Focused Setup (Back2Vibing):**
 Optimized for AI developers. Installs Back2Vibing, tmux, sesh, fzf, and Ghostty terminal.
@@ -73,13 +69,13 @@ curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap
 
 ---
 
-Full setup (legacy interactive):
+Full setup:
 
 ```bash
 bb setup
 ```
 
-This runs the legacy interactive setup and orchestrates apps, configs, and optional features.
+This applies chezmoi-managed dotfiles and orchestrates apps, configs, and optional features.
 
 A la carte modules:
 
@@ -166,14 +162,13 @@ On macOS, `tmux-fingers` also needs working Xcode Command Line Tools before Home
 
 ```
 dotfiles/
-├── bootstrap.sh          # Entry installer (default = chezmoi base apply, legacy flags = setup.ts)
-├── bootstrap-linux.sh    # Linux bootstrap shim (default = chezmoi base apply, legacy flags = setup.ts)
+├── bootstrap.sh          # Entry installer (chezmoi apply + interactive setup)
+├── bootstrap-linux.sh    # Linux bootstrap shim (chezmoi apply + interactive setup)
 ├── bootstrap.ps1         # Main installer (Windows)
-├── chezmoi/              # Base chezmoi-managed source state
+├── chezmoi/              # Chezmoi-managed source state
 ├── setup.ts              # Interactive setup (macOS/Linux)
 ├── setup-windows.ts      # Interactive setup (Windows)
 ├── shell/                # Zsh config, aliases, functions, tips
-├── stow-packages/        # Legacy symlink-managed configs still used by setup.ts
 ├── assets/app-exports/   # Native restore artifacts for macOS apps
 ├── templates/            # Copy-managed configs for AI tools
 └── docs/                 # Module documentation
@@ -214,19 +209,19 @@ git clone https://github.com/builtby-win/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
 # macOS
-brew install stow chezmoi fnm
+brew install chezmoi fnm
 
 # Linux (choose one)
-# sudo apt-get update && sudo apt-get install -y stow curl git
-# sudo dnf install -y stow curl git
-# sudo pacman -S --noconfirm --needed stow curl git
+# sudo apt-get update && sudo apt-get install -y chezmoi curl git
+# sudo dnf install -y chezmoi curl git
+# sudo pacman -S --noconfirm --needed chezmoi curl git
 
 fnm install --lts
 npm install -g pnpm
 pnpm install
 bash scripts/apply-chezmoi.sh
 
-# legacy interactive lane
+# interactive setup
 pnpm run setup
 ```
 

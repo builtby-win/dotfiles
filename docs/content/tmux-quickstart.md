@@ -35,10 +35,10 @@ brew install tmux sesh
 ```bash
 git clone https://github.com/builtby-win/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-stow -d stow-packages -t ~ tmux
+bash scripts/apply-chezmoi.sh
 ```
 
-This uses [GNU Stow](https://www.gnu.org/software/stow/) to symlink the tmux config files into your home directory. Your existing files won't be overwritten -- Stow will warn you if there's a conflict.
+This uses chezmoi to apply the tmux config files into your home directory. Existing managed paths are handled by the dotfiles backup policy before apply.
 
 ---
 

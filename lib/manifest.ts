@@ -10,8 +10,7 @@ import { homedir } from "os";
 export interface BackupEntry {
   original: string;
   backup: string;
-  type: "file" | "stow";
-  stowPackage?: string;
+  type: "file" | "chezmoi";
   timestamp: number;
 }
 
@@ -80,14 +79,12 @@ export function addBackup(
   manifest: SetupManifest,
   original: string,
   backup: string,
-  type: "file" | "stow",
-  stowPackage?: string
+  type: "file" | "chezmoi"
 ): void {
   manifest.backups.push({
     original,
     backup,
     type,
-    stowPackage,
     timestamp: Date.now(),
   });
 }

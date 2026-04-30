@@ -109,7 +109,6 @@ print_brew_shellenv_instructions() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" 2>/dev/null)" && pwd 2>/dev/null || echo "")"
 REPO_URL="https://github.com/builtby-win/dotfiles.git"
 SETUP_PATH=""
-LEGACY_STOW=0
 FORWARDED_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -130,11 +129,6 @@ while [[ $# -gt 0 ]]; do
           exit 1
           ;;
       esac
-      shift
-      ;;
-    --legacy-stow)
-      LEGACY_STOW=1
-      FORWARDED_ARGS+=("$1")
       shift
       ;;
     *)
@@ -288,16 +282,6 @@ else
   print_success "Homebrew already installed"
 fi
 
-# Install stow
-print_debug "Checking for GNU Stow..."
-if ! command -v stow &> /dev/null; then
-  echo "  Installing GNU Stow..."
-  "$BREW_BIN" install stow || { print_error "Failed to install GNU Stow"; exit 1; }
-  print_success "GNU Stow installed"
-else
-  print_success "GNU Stow already installed"
-fi
-
 # Install chezmoi
 print_debug "Checking for chezmoi..."
 if ! command -v chezmoi &> /dev/null; then
@@ -366,56 +350,32 @@ else
 fi
 
 echo ""
-if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
-  print_step "[3/3] Running legacy stow setup..."
-else
-  print_step "[3/3] Applying chezmoi base dotfiles..."
-fi
+print_step "[3/3] Applying chezmoi-managed dotfiles..."
 echo ""
 
-if [[ "$LEGACY_STOW" -eq 1 || -n "$SETUP_PATH" ]]; then
-  # Run the TypeScript setup
-  print_debug "Running legacy setup script..."
-  SETUP_ARGS=( "$DOTFILES_DIR" )
-  if [[ -n "$SETUP_PATH" ]]; then
-    SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
-  fi
+print_debug "Applying chezmoi source state..."
+if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
+  print_error "chezmoi apply failed"
+  exit 1
+fi
+print_success "Chezmoi dotfiles applied!"
 
-  # Use local tsx directly to avoid pnpm exec TTY issues in piped executions
-  TSX_BIN="./node_modules/.bin/tsx"
-  if [ -x "$TSX_BIN" ]; then
-    if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-      print_error "setup.ts failed"
-      exit 1
-    fi
-  else
-    if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-      print_error "setup.ts failed"
-      exit 1
-    fi
-  fi
-  print_success "Legacy setup complete!"
-else
-  print_debug "Applying chezmoi base state..."
-  if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
-    print_error "chezmoi apply failed"
+echo ""
+print_step "Launching interactive dotfiles setup..."
+TSX_BIN="./node_modules/.bin/tsx"
+SETUP_ARGS=( "$DOTFILES_DIR" )
+if [[ -n "$SETUP_PATH" ]]; then
+  SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
+fi
+if [ -x "$TSX_BIN" ]; then
+  if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+    print_error "setup.ts failed"
     exit 1
   fi
-  print_success "Chezmoi base dotfiles applied!"
-
-  echo ""
-  print_step "Launching interactive dotfiles setup..."
-  TSX_BIN="./node_modules/.bin/tsx"
-  if [ -x "$TSX_BIN" ]; then
-    if ! "$TSX_BIN" setup.ts "$DOTFILES_DIR" < /dev/tty; then
-      print_error "setup.ts failed"
-      exit 1
-    fi
-  else
-    if ! pnpm exec tsx setup.ts "$DOTFILES_DIR" < /dev/tty; then
-      print_error "setup.ts failed"
-      exit 1
-    fi
+else
+  if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
+    print_error "setup.ts failed"
+    exit 1
   fi
-  print_success "Interactive setup complete!"
 fi
+print_success "Interactive setup complete!"

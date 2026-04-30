@@ -4,17 +4,16 @@ This repo now has a **real chezmoi-first bootstrap lane** for the base shell/boo
 
 The ownership split is deliberate:
 
-- `chezmoi/` manages the base applied state used by default bootstrap
-- `stow-packages/` remains the legacy module installer lane used by `bb setup` and `bb setup <module>`
+- `chezmoi/` manages the applied dotfile source state used by bootstrap and `bb setup <module>` compatibility aliases
 - `assets/app-exports/` keeps native restore artifacts for apps that should not be symlinked into place
 - `templates/` keeps copy-managed configs for tools that rewrite their own files
 
 ## Current bootstrap contract
 
 - Running `bootstrap.sh` or `bootstrap-linux.sh` with no setup-path flag applies the base chezmoi state.
-- Passing `--legacy-stow`, `--focus`, or `--setup-path ...` uses the legacy `setup.ts` flow instead.
-- `bb apply` reapplies the base chezmoi state from the checked-out repo.
-- `bb setup` and `bb setup <module>` remain the legacy interactive/stow-driven path.
+- Passing `--focus` or `--setup-path ...` selects the interactive setup defaults after chezmoi apply.
+- `bb apply` reapplies the chezmoi source state from the checked-out repo.
+- `bb setup` and `bb setup <module>` are compatibility aliases backed by chezmoi apply.
 
 ## Why not symlink app exports?
 
@@ -30,7 +29,7 @@ Raycast `.rayconfig`, Rectangle Pro JSON exports, and BetterTouchTool presets ar
 bb apply
 ```
 
-4. Optionally run the legacy module installer for modules that still live under `stow-packages/`:
+4. Optionally use compatibility setup aliases for individual chezmoi-managed modules:
 
 ```bash
 bb setup

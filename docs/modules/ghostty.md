@@ -4,16 +4,10 @@ Ghostty is a GPU terminal with a simple config file.
 
 ## Install
 
-Legacy module install:
+Chezmoi apply:
 
 ```bash
 bb setup ghostty
-```
-
-Manual stow:
-
-```bash
-stow -d "$DOTFILES_DIR/stow-packages" -t "$HOME" ghostty
 ```
 
 ## Notes

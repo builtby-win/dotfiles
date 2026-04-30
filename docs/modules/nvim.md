@@ -4,7 +4,7 @@ Requires Neovim 0.12+ because the config uses `vim.pack`. Nightly is recommended
 
 ## Install
 
-Legacy module install:
+Chezmoi apply:
 
 ```bash
 bb setup nvim
@@ -12,7 +12,7 @@ bb setup nvim
 
 ## First Launch
 
-After stowing the module, start Neovim and install the language server binaries you want:
+After applying the module, start Neovim and install the language server binaries you want:
 
 ```vim
 :Mason
