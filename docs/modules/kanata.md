@@ -4,27 +4,37 @@ Kanata is the preferred cross-platform keyboard remapper for this repo. It is th
 
 ## Goals
 
-- Microsoft Sculpt `Menu`/`Application` key becomes Hyper: `Ctrl+Alt+Shift+Meta`
-- Microsoft Sculpt `Left Option`/`Left Command` match the old Karabiner swap
-- Microsoft Sculpt `Right Option` sends `Right Command`
+- two filtered macOS Kanata profiles avoid cross-keyboard modifier conflicts
+- `Menu`/`Application` becomes Hyper: `Ctrl+Alt+Shift+Meta`
+- Microsoft Sculpt swaps `Left Option` and `Left Command`, and maps
+  `Right Option` to `Right Command`
+- Other macOS keyboards map `Right Option` to Hyper
+- Other macOS keyboards keep `Left Option` and `Left Command` in normal order
+- Built-in and other macOS keyboards use the Apple-style media row by
+  default, with `Fn` held for raw `F1`-`F12`
 - `Caps Lock` sends `Escape` when tapped and `Control` when held
 - `Delete Forward` sends `Escape`
-- `j+k` sends `Ctrl+b` for the tmux/psmux leader
+- On macOS, `j+k` is app-aware with `kanata-vk-agent`: terminal apps send
+  `Ctrl+b` for the tmux/psmux leader, while non-terminal apps arm a compact
+  Command layer for the next keypress
+- Without macOS app context, `j+k` falls back to the compact next-key Command/Super layer
 - `d+f` sends `Hyper+f`
 - Keep the same muscle memory across macOS, Linux, and Windows
 
 ## Config
 
-The starter config is managed by the default chezmoi lane and lands at:
+The starter configs are managed by the default chezmoi lane and land at:
 
 ```text
 ~/.config/kanata/kanata.kbd
+~/.config/kanata/kanata-sculpt.kbd
 ```
 
-Its source lives at:
+Their sources live at:
 
 ```text
 chezmoi/dot_config/kanata/kanata.kbd
+chezmoi/dot_config/kanata/kanata-sculpt.kbd
 ```
 
 Apply it with:
@@ -39,9 +49,10 @@ For the full guided macOS setup, use:
 bb kanata-setup
 ```
 
-The helper installs the patched Cargo build, validates `~/.config/kanata/kanata.kbd`,
-reveals the Kanata binary in Finder, opens Input Monitoring and Accessibility,
-installs the LaunchDaemon, restarts Kanata, and checks `/tmp/kanata.err.log` for
+The helper installs the patched Cargo build, installs `kanata-vk-agent`, validates
+both Kanata configs, reveals the Kanata binary in Finder, opens Input Monitoring
+and Accessibility, stops stale helper services, restarts the filtered Kanata
+daemons and matching `kanata-vk-agent` instances, and checks their logs for
 permission failures.
 
 or directly:
@@ -50,24 +61,57 @@ or directly:
 bash scripts/apply-chezmoi.sh
 ```
 
-Then run Kanata with the chezmoi-managed config:
+For a manual smoke test, run one profile at a time with its chezmoi-managed config:
 
 ```bash
 kanata --cfg ~/.config/kanata/kanata.kbd
+kanata --cfg ~/.config/kanata/kanata-sculpt.kbd --port 5830
 ```
 
-On macOS, the default config targets the Microsoft Sculpt receiver by its Kanata
-device hash:
+Kanata can filter devices with `macos-dev-names-include` /
+`macos-dev-names-exclude`, but it cannot express Karabiner-style per-device
+`device_if` mappings inside one active config. Sculpt needs a different modifier
+shape, so this repo uses two explicit filtered profiles:
 
-```lisp
-macos-dev-names-include (
-  "0xCB1EB82FC081667C"
-)
+```text
+~/.config/kanata/kanata.kbd         excludes 0xCB1EB82FC081667C, port 5829
+~/.config/kanata/kanata-sculpt.kbd  includes only 0xCB1EB82FC081667C, port 5830
 ```
 
-That prevents these modifier swaps from affecting the built-in MacBook keyboard.
-The receiver also appears as `Microsoft® 2.4GHz Transceiver v9.0` in macOS, but
-Kanata's hash match is more reliable for this setup.
+The Microsoft Sculpt receiver is `0xCB1EB82FC081667C` in `kanata --list`, with
+VendorID `1118` / ProductID `1957`. Its profile maps:
+
+```text
+Left Option  -> Left Command
+Left Command -> Left Option
+Right Option -> Right Command
+Menu/App     -> Hyper
+```
+
+The non-Sculpt profile keeps left modifiers normal and maps `Right Option` plus
+`Menu`/`Application` to Hyper. This avoids the failed `hidutil` approach: macOS
+`UserKeyMapping` can show a mapping, but Kanata still reads the raw keyboard event
+before that mapping affects its input path.
+
+The config maps plain `F1`-`F12` key events to the common macOS media row:
+
+```text
+F1  -> brightness down
+F2  -> brightness up
+F3  -> Mission Control
+F4  -> Launchpad
+F5  -> keyboard backlight down
+F6  -> keyboard backlight up
+F7  -> previous track
+F8  -> play/pause
+F9  -> next track
+F10 -> mute
+F11 -> volume down
+F12 -> volume up
+```
+
+Hold `Fn` for raw `F1`-`F12`. Tap/hold `Fn` otherwise acts as left Control when
+the Apple keyboard exposes it to macOS.
 
 ## macOS Install
 
@@ -118,7 +162,7 @@ For a first smoke test, keep it in the foreground so errors are visible:
 sudo ~/.cargo/bin/kanata --debug --cfg ~/.config/kanata/kanata.kbd
 ```
 
-For login startup, prefer a root `LaunchDaemon` over a user `LaunchAgent`. The
+For Kanata login startup, prefer a root `LaunchDaemon` over a user `LaunchAgent`. The
 official Kanata sample uses `/Library/LaunchDaemons` and points `--cfg` at an
 absolute config path such as `/etc/kanata/kanata.kbd`. If you keep the config
 managed by chezmoi at `~/.config/kanata/kanata.kbd`, either copy that file to
@@ -134,8 +178,123 @@ sudo mkdir -p /etc/kanata
 sudo cp ~/.config/kanata/kanata.kbd /etc/kanata/kanata.kbd
 ```
 
-This repo's guided helper instead writes `/Library/LaunchDaemons/com.builtbywin.kanata.plist`
-with the current user's expanded Cargo binary path and expanded chezmoi config path.
+This repo's guided helper writes two filtered daemons with the current user's
+expanded Cargo binary path and expanded chezmoi config paths:
+
+- `/Library/LaunchDaemons/com.builtbywin.kanata.plist` on TCP port `5829`
+- `/Library/LaunchDaemons/com.builtbywin.kanata-sculpt.plist` on TCP port `5830`
+
+The helper also stops the legacy `com.builtbywin.kanata-other` daemon and the
+failed `local.microsoft-sculpt-hidutil` experiment if they exist, so only the two
+named filtered profiles remain.
+
+## macOS app-aware context with kanata-vk-agent
+
+Kanata cannot natively match Karabiner's `frontmost_application_if`. On macOS,
+this repo uses [`kanata-vk-agent`](https://github.com/devsunb/kanata-vk-agent)
+as a small context bridge instead of running Karabiner Elements. Kanata remains
+the only keyboard remapper; `kanata-vk-agent` only watches the frontmost app and
+presses/releases Kanata virtual keys over the TCP server.
+
+Install manually if needed:
+
+```bash
+brew tap devsunb/tap
+brew install kanata-vk-agent
+```
+
+The guided helper installs one user LaunchAgent per Kanata TCP port:
+
+```text
+~/Library/LaunchAgents/local.kanata-vk-agent.plist
+~/Library/LaunchAgents/local.kanata-vk-agent-sculpt.plist
+```
+
+It also stops the legacy `local.kanata-vk-agent-other` LaunchAgent if it exists.
+
+Each agent connects to its matching Kanata TCP port and tracks these terminal
+bundle IDs:
+
+```text
+com.mitchellh.ghostty,com.googlecode.iterm2,com.apple.Terminal,dev.warp.Warp-Stable,net.kovidgoyal.kitty,org.alacritty,io.alacritty,com.github.wez.wezterm,com.cmuxterm.app
+```
+
+Those IDs are mirrored in both Kanata configs under `defvirtualkeys`. The `j+k`
+chord uses `switch` with `input virtual ...`:
+
+- terminal virtual key pressed: send `Ctrl+b`
+- no terminal virtual key pressed: arm the `cmd` layer for the next keypress
+
+The config keeps app-aware behavior behind semantic aliases so future chords do
+not need to duplicate raw bundle-ID logic. The current shape is:
+
+```lisp
+(defalias
+  leader (macro C-b)
+  cmd-next (one-shot 2000 (layer-while-held cmd))
+  terminal-leader-or-cmd-layer (switch
+    ((input virtual com.mitchellh.ghostty)) @leader break
+    ;; ...other terminal bundle IDs...
+    () @cmd-next break
+  )
+  jk @terminal-leader-or-cmd-layer
+)
+
+(defvirtualkeys
+  ;; ...terminal bundle IDs...
+)
+
+(defchordsv2
+  (j k) @jk 75 first-release ()
+)
+```
+
+The fallback `cmd` layer intentionally uses `one-shot` instead of a held layer.
+Press `j+k`, release it, then press the next key. That one key is interpreted
+through `cmd`, then Kanata returns to the base layer. The `2000` timeout is only a
+safety cap if no next key arrives.
+
+When adding another app-aware chord or layer, follow the same convention:
+
+1. Add the bundle ID to `TERMINAL_BUNDLE_IDS` in `scripts/setup-kanata-macos.sh`
+   if `kanata-vk-agent` should track it.
+2. Add the same ID to `defvirtualkeys` in both Kanata configs.
+3. For next-key layer fallbacks, use `(one-shot <timeout-ms> (layer-while-held <layer>))`.
+4. Put the `switch` in a named alias, for example
+   `terminal-foo-or-default-layer`.
+5. Point the chord at the semantic alias, for example `(x y) @terminal-foo-or-default-layer ...`.
+
+This keeps chord definitions readable and localizes app-context branching to the
+alias block. Kanata itself still does not know app context; `kanata-vk-agent`
+presses/releases virtual keys over the TCP server, and Kanata reacts to those
+virtual keys.
+
+The `cmd` layer currently keeps the scope intentionally small:
+
+```text
+tab -> Cmd+Tab
+`   -> Cmd+`
+a   -> Cmd+A
+c   -> Cmd+C
+v   -> Cmd+V
+x   -> Cmd+X
+z   -> Cmd+Z
+w   -> Cmd+W
+q   -> Cmd+Q
+```
+
+Discover additional bundle IDs with:
+
+```bash
+kanata-vk-agent -f
+```
+
+Logs live at:
+
+```text
+/tmp/kanata-vk-agent.out.log
+/tmp/kanata-vk-agent.err.log
+```
 
 On Windows PowerShell, use:
 
@@ -194,20 +353,29 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\dotfiles\windows\kana
 
 ## App Scope
 
-The starter `j+k -> Ctrl+b` chord is global. Kanata is cross-platform, but strict app-aware behavior is not one-to-one across Windows, macOS, and Linux without companion tooling.
+Kanata is cross-platform, but strict app-aware behavior is not one-to-one across
+Windows, macOS, and Linux without companion tooling. macOS gets app-aware
+terminal detection through `kanata-vk-agent`; other platforms currently use the
+same shared fallback as an unclassified macOS app: `j+k` arms the compact
+Command/Super layer for the next keypress.
 
 Recommended path:
 
-- Start with the global `j+k` chord because it gives immediate tmux/psmux parity.
-- If it interferes with normal typing, move the chord behind an explicit layer or add OS-specific app-aware switching later.
+- On macOS, use `bb kanata-setup` so both filtered Kanata daemons and their
+  matching `kanata-vk-agent` instances are started.
+- If `kanata-vk-agent` is not running, terminal apps are not classified and
+  `j+k` will arm the fallback Command/Super layer instead of sending `Ctrl+b`.
+- If `j+k` interferes with normal typing, move the chord behind an explicit layer
+  or tune the chord timeout.
 - Use AutoHotkey only for Windows-only gaps that Kanata cannot handle cleanly.
 
 ## Debugging
 
-If the Microsoft Sculpt `Menu` key does not trigger Hyper, run Kanata with debug output and confirm the reported key name:
+If the Microsoft Sculpt `Menu` key does not trigger Hyper, run the Sculpt profile
+with debug output and confirm the reported key name:
 
 ```bash
-kanata --debug --cfg ~/.config/kanata/kanata.kbd
+kanata --debug --cfg ~/.config/kanata/kanata-sculpt.kbd --port 5830
 ```
 
 On Windows:
