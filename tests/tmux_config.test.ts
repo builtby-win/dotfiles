@@ -108,6 +108,25 @@ describe("tmux profile split", () => {
     expect(coreConf).toContain('set -ga update-environment "*"');
   });
 
+  it("keeps the bottom status tabs and leader indicator enabled", () => {
+    expect(coreConf).toContain("set -g status on");
+    expect(coreConf).toContain("set -g status-position bottom");
+    expect(coreConf).toContain("set -g window-status-style 'fg=brightblack,bg=default'");
+    expect(coreConf).toContain("set -g window-status-current-style 'fg=blue,bg=default,bold'");
+    expect(coreConf).toContain("set -g window-status-format '#I:#W'");
+    expect(coreConf).toContain("set -g window-status-current-format '[#I:#W]'");
+    expect(coreConf).toContain("set -g window-status-separator ' '");
+    expect(coreConf).toContain("#{?client_prefix,#[fg=yellow bold] LEADER ,}");
+  });
+
+  it("uses active pane borders instead of pane-border labels for focus", () => {
+    expect(coreConf).toContain("set -g pane-border-style 'fg=brightblack'");
+    expect(coreConf).toContain("set -g pane-active-border-style 'fg=blue'");
+    expect(basicConf).toContain("set -g pane-border-status off");
+    expect(basicConf).toContain('set -g pane-border-format ""');
+    expect(basicConf).not.toContain("set -g pane-border-status bottom");
+  });
+
   it("bootstraps new sessions with cwd-aware windows and splits", () => {
     expect(coreConf).toContain("session-bootstrap.sh");
     expect(sessionBootstrapSh).toContain('tmux rename-window -t "$session_name:1" "work"');
