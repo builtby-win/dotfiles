@@ -3,22 +3,22 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.builtbywin.kanata</string>
+    <string>com.builtbywin.kanata-sculpt</string>
     <key>ProgramArguments</key>
     <array>
         <string>/Users/winstonzhao/.cargo/bin/kanata</string>
         <string>--cfg</string>
-        <string>/Users/winstonzhao/.config/kanata/kanata.kbd</string>
+        <string>/Users/winstonzhao/.config/kanata/kanata-sculpt.kbd</string>
         <string>--port</string>
-        <string>5829</string>
+        <string>5830</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/tmp/kanata.out.log</string>
+    <string>/tmp/com.builtbywin.kanata-sculpt.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/kanata.err.log</string>
+    <string>/tmp/com.builtbywin.kanata-sculpt.err.log</string>
 </dict>
 </plist>

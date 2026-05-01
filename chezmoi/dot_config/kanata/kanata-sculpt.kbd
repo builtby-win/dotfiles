@@ -1,8 +1,9 @@
-;; BuiltBy non-Sculpt keyboard parity layer for Kanata.
+;; BuiltBy Microsoft Sculpt keyboard parity layer for Kanata.
 ;; Goals:
-;; - This profile handles macOS keyboards except the Microsoft Sculpt receiver.
-;; - Menu/Application and Right Option act as Hyper (Ctrl+Alt+Shift+Meta/Win/Cmd).
-;; - Left Option and Left Command keep their normal macOS order.
+;; - This profile handles only the Microsoft Sculpt receiver.
+;; - Menu/Application acts as Hyper (Ctrl+Alt+Shift+Meta/Win/Cmd).
+;; - Left Option and Left Command are swapped to match Apple muscle memory.
+;; - Right Option sends Right Command.
 ;; - Caps Lock is Escape when tapped and Control when held
 ;; - Delete Forward acts as Escape
 ;; - j+k chord is app-aware on macOS when kanata-vk-agent is running:
@@ -12,16 +13,17 @@
 ;; - F1-F12 behave like the macOS media row by default; hold Fn for raw F keys.
 ;;
 ;; Run:
-;;   kanata --cfg ~/.config/kanata/kanata.kbd
+;;   kanata --cfg ~/.config/kanata/kanata-sculpt.kbd --port 5830
 ;;
 ;; Notes:
 ;; - Karabiner's `application` key is Kanata's `menu` key.
 ;; - App-specific behavior needs kanata-vk-agent plus Kanata's TCP server.
-;; - The Microsoft Sculpt receiver needs different modifier shape and is handled
-;;   by kanata-sculpt.kbd on a separate filtered Kanata daemon.
+;; - Plain Kanata can filter devices, but it cannot do Karabiner-style per-device
+;;   `device_if` mappings inside one active macOS config. This filtered profile is
+;;   why Sculpt can have different modifiers without changing other keyboards.
 
 (defcfg
-  macos-dev-names-exclude (
+  macos-dev-names-include (
     "0xCB1EB82FC081667C"
   )
   process-unmapped-keys yes
@@ -29,7 +31,7 @@
 )
 
 (defalias
-  ;; Hold Right Option or Menu/Application for Hyper. Meta is Cmd on macOS.
+  ;; Hold Menu/Application for Hyper. Meta is Cmd on macOS.
   hyper (multi lctl lalt lsft lmet reverse-release-order)
   ;; Tap Caps for Escape, hold for Control.
   cap (tap-hold 200 200 esc lctl)
@@ -79,7 +81,7 @@
 )
 
 (deflayer base
-  lalt lmet @hyper rmet @hyper @cap @fn esc @semi j k d f tab grv a c v x z w q brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  lmet lalt rmet rmet @hyper @cap @fn esc @semi j k d f tab grv a c v x z w q brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer cmd
