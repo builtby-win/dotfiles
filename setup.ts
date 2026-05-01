@@ -1135,7 +1135,7 @@ const CHEZMOI_TARGETS: Record<string, string[]> = {
   nvim: [".config/nvim"],
   hammerspoon: [".hammerspoon"],
   karabiner: [".config/karabiner/karabiner.json"],
-  kanata: [".config/kanata/kanata.kbd"],
+  kanata: [".config/kanata/kanata.kbd", ".config/kanata/kanata-sculpt.kbd"],
   ghostty: process.platform === "darwin"
     ? [
         ".config/ghostty/config",
