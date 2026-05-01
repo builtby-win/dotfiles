@@ -4,9 +4,9 @@
 "Primary+Shift+C" = "__disabled__"
 "Primary+Shift+S" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+K" = "scroll"
-"Cmd+Ctrl+Alt+Shift+L" = "grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+;" = "hints"
-"Cmd+Ctrl+Alt+Shift+'" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+L" = "hints"
+"Cmd+Ctrl+Alt+Shift+;" = "grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+," = "recursive_grid --cursor-selection-mode follow"
 
 [theme.light]
 surface = "#EEF2FF"
