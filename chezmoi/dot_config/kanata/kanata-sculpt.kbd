@@ -31,14 +31,40 @@
 )
 
 (defalias
-  ;; Hold Menu/Application for Hyper. Meta is Cmd on macOS.
+  ;; Tap Menu/Application for next-key Hyper; hold for held Hyper.
+  ;; Meta is Cmd on macOS.
   hyper (multi lctl lalt lsft lmet reverse-release-order)
+  os-ctl (one-shot-press-pcancel 1000 lctl)
+  os-sft (one-shot-press-pcancel 1000 lsft)
+  os-alt (one-shot-press-pcancel 1000 lalt)
+  os-cmd (one-shot-press-pcancel 1000 lmet)
+  os-rctl (one-shot-press-pcancel 1000 rctl)
+  os-rsft (one-shot-press-pcancel 1000 rsft)
+  os-ralt (one-shot-press-pcancel 1000 ralt)
+  os-rcmd (one-shot-press-pcancel 1000 rmet)
+  ;; One-shot the actual Hyper chord; one-shot layers can be consumed by tap-hold
+  ;; release events before the intended next key.
+  hyper-next (one-shot-press-pcancel 2000 C-A-S-lmet)
+  hyper-key (tap-hold 200 200 @hyper-next @hyper)
   ;; Tap Caps for Escape, hold for Control.
   cap (tap-hold 200 200 esc lctl)
   ;; Hold Fn for raw function keys; tap/hold otherwise acts as Control.
   fn (tap-hold 200 200 lctl (layer-while-held fn))
   ;; Double-tap semicolon for AltTab's Ctrl+Option+Tab shortcut.
   semi (tap-dance 200 (; (macro C-A-tab)))
+  ;; Hold j then press Space for steady Backspace repeat; Space then j stays Hammerspoon-owned.
+  j-home (tap-hold-press 200 200 j (layer-while-held jheld))
+  bksp-repeat (macro-repeat-release-cancel bspc 85)
+  nav-layer (layer-while-held nav)
+  mouse-layer (layer-while-held mouse)
+  mm-up (movemouse-accel-up 1 1000 1 5)
+  mm-down (movemouse-accel-down 1 1000 1 5)
+  mm-left (movemouse-accel-left 1 1000 1 5)
+  mm-right (movemouse-accel-right 1 1000 1 5)
+  mw-up (mwheel-up 50 120)
+  mw-down (mwheel-down 50 120)
+  mw-left (mwheel-left 50 120)
+  mw-right (mwheel-right 50 120)
   ;; Shared tmux/psmux leader action used by app-aware chords.
   leader (macro C-b)
   ;; App-aware aliases should keep their switch logic here and expose semantic
@@ -77,23 +103,66 @@
 )
 
 (defsrc
-  lalt lmet ralt rmet menu caps fn del ; j k d f tab grv a c v x z w q f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  lctl lsft lalt lmet ralt rmet rctl rsft menu caps fn del ; tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
 )
 
 (deflayer base
-  lmet lalt rmet rmet @hyper @cap @fn esc @semi j k d f tab grv a c v x z w q brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @j-home k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+)
+
+(deflayer hyperlayer
+  _ _ _ _ _ _ _ _ _ _ _ _ _ C-A-S-M-tab C-A-S-M-grv C-A-S-M-esc C-A-S-M-spc C-A-S-M-h C-A-S-M-j C-A-S-M-k C-A-S-M-l C-A-S-M-u C-A-S-M-d C-A-S-M-a C-A-S-M-e C-A-S-M-w C-A-S-M-b C-A-S-M-f C-A-S-M-c C-A-S-M-v C-A-S-M-x C-A-S-M-z C-A-S-M-q C-A-S-M-m C-A-S-M-r C-A-S-M-t C-A-S-M-y C-A-S-M-i C-A-S-M-o C-A-S-M-p C-A-S-M-s C-A-S-M-g C-A-S-M-n C-A-S-M-4 C-A-S-M-f1 C-A-S-M-f2 C-A-S-M-f3 C-A-S-M-f4 C-A-S-M-f5 C-A-S-M-f6 C-A-S-M-f7 C-A-S-M-f8 C-A-S-M-f9 C-A-S-M-f10 C-A-S-M-f11 C-A-S-M-f12
 )
 
 (deflayer cmd
-  _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv M-a M-c M-v M-x M-z M-w M-q _ _ _ _ _ _ _ _ _ _ _ _
+  _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ _ M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _
 )
 
 (deflayer fn
-  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
 )
 
+(deflayermap (nav)
+  h left
+  j down
+  k up
+  l rght
+  u pgup
+  d pgdn
+  a M-left
+  e M-rght
+  w A-rght
+  b A-left
+  esc esc
+  spc XX
+)
+
+(deflayermap (mouse)
+  h @mm-left
+  j @mm-down
+  k @mm-up
+  l @mm-right
+  u @mw-up
+  d @mw-down
+  a @mw-left
+  e @mw-right
+  spc mlft
+  ; mrgt
+  m mmid
+  esc esc
+)
+
+(deflayermap (jheld)
+  spc @bksp-repeat
+)
+
+;; fj, dk, and sl are intentionally reserved for future layers and remain unmapped in this pass.
 (defchordsv2
-  ;; Keep this fast enough to avoid accidental normal typing capture.
-  (j k) @jk 75 first-release ()
+  ;; Match Karabiner's jk simultaneous window.
+  (j k) @jk 150 first-release ()
   (d f) (macro C-A-S-M-f) 100 first-release ()
+  (j l) @nav-layer 150 first-release ()
+  (l k) @hyper-next 150 first-release ()
+  (k spc) @mouse-layer 150 first-release ()
+  (esc spc) XX 80 first-release ()
 )
