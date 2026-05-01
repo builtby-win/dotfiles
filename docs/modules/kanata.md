@@ -33,6 +33,17 @@ Apply it with:
 bb apply
 ```
 
+For the full guided macOS setup, use:
+
+```bash
+bb kanata-setup
+```
+
+The helper installs the patched Cargo build, validates `~/.config/kanata/kanata.kbd`,
+reveals the Kanata binary in Finder, opens Input Monitoring and Accessibility,
+installs the LaunchDaemon, restarts Kanata, and checks `/tmp/kanata.err.log` for
+permission failures.
+
 or directly:
 
 ```bash
@@ -75,7 +86,9 @@ On macOS, use the repo installer instead:
 bash scripts/install-kanata-macos.sh
 ```
 
-That script applies one local Kanata 1.11.0 patch before rebuilding. The Microsoft
+That script applies one local Kanata 1.11.0 patch before rebuilding, then ad-hoc
+signs the binary as `com.builtbywin.kanata` so macOS privacy permissions have a
+stable identity. The Microsoft
 Sculpt Application/Menu key reports `InputEvent { page: 7, code: 101 }`, which is
 HID keyboard usage `0x07/0x65`. Kanata 1.11.0 can emit that code for `menu`, but
 its macOS input table does not recognize the same physical key on the way in. The
@@ -85,11 +98,19 @@ rule run.
 If `cargo` is missing, install Rust first from <https://rustup.rs>.
 
 Kanata's macOS backend uses the Karabiner virtual HID driver and should run as
-root. Install the driver from Kanata's macOS setup guide, then grant the Kanata
-binary or the terminal app that runs it the required macOS privacy permissions:
+root. The official Kanata path is the standalone `Karabiner-DriverKit-VirtualHIDDevice`
+package from Kanata's macOS release notes. Installing full Karabiner Elements is
+acceptable as a fallback because it brings the driver and approval flow, but you
+do not need to use Karabiner Elements for remaps once Kanata is working.
+
+Grant the exact Kanata binary, usually `~/.cargo/bin/kanata`, the required macOS
+privacy permissions:
 
 - **System Settings → Privacy & Security → Input Monitoring**
 - **System Settings → Privacy & Security → Accessibility**
+
+If you rebuild Kanata, remove and re-add the binary in both panes. macOS privacy
+grants are tied to the executable identity, and Cargo replaces the binary in place.
 
 For a first smoke test, keep it in the foreground so errors are visible:
 
@@ -112,6 +133,9 @@ Example one-time copy after `bb apply`:
 sudo mkdir -p /etc/kanata
 sudo cp ~/.config/kanata/kanata.kbd /etc/kanata/kanata.kbd
 ```
+
+This repo's guided helper instead writes `/Library/LaunchDaemons/com.builtbywin.kanata.plist`
+with the current user's expanded Cargo binary path and expanded chezmoi config path.
 
 On Windows PowerShell, use:
 

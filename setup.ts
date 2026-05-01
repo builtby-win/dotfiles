@@ -1034,6 +1034,19 @@ function installKanataCli(): boolean {
   return false;
 }
 
+function runKanataMacOSSetupHelper(): void {
+  if (platform() !== "darwin") return;
+
+  const helper = join(DOTFILES_DIR, "scripts", "setup-kanata-macos.sh");
+  if (!existsSync(helper)) {
+    log.warning(`Kanata macOS setup helper not found: ${helper}`);
+    return;
+  }
+
+  log.step("Launching guided Kanata macOS setup...");
+  runCommand(`bash ${helper}`);
+}
+
 function getManualDownloadApps(apps: string[]): App[] {
   return APPS.filter((app) => apps.includes(app.value) && app.manualDownload);
 }
@@ -1440,6 +1453,9 @@ async function setupManagedConfigs(configs: string[]): Promise<void> {
     log.success("chezmoi-managed configs applied");
     if (configs.includes("tmux")) {
       setupTpm();
+    }
+    if (configs.includes("kanata")) {
+      runKanataMacOSSetupHelper();
     }
   } else {
     log.error("Failed to apply chezmoi-managed configs");

@@ -383,6 +383,7 @@ bb() {
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
+      echo "  bb kanata-setup         Guided macOS Kanata install + permissions"
       echo "  bb sync macos-apps      Sync Raycast/Rectangle/BTT exports"
       echo "  bb restore <target>     Reveal macOS app backup exports"
       echo "  bb update               Pull updates and optionally rerun setup"
@@ -438,6 +439,9 @@ bb() {
           if [[ "$module" == "karabiner" && -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
             "$dotfiles_dir/scripts/sync-karabiner.sh" push
           fi
+          if [[ "$module" == "kanata" && "$(uname)" == "Darwin" && -x "$dotfiles_dir/scripts/setup-kanata-macos.sh" ]]; then
+            "$dotfiles_dir/scripts/setup-kanata-macos.sh"
+          fi
           ;;
         *)
           echo "Unknown module: $module"
@@ -445,6 +449,21 @@ bb() {
           return 1
           ;;
       esac
+      ;;
+    kanata-setup)
+      if [[ "$(uname)" != "Darwin" ]]; then
+        echo "Kanata guided setup is macOS only."
+        return 1
+      fi
+      if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
+        echo "Error: Dotfiles directory not found. Set DOTFILES_DIR or run setup first."
+        return 1
+      fi
+      if [[ ! -x "$dotfiles_dir/scripts/setup-kanata-macos.sh" ]]; then
+        echo "Kanata macOS setup script not found."
+        return 1
+      fi
+      "$dotfiles_dir/scripts/setup-kanata-macos.sh"
       ;;
     sync)
       if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
