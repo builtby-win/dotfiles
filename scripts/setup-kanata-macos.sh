@@ -281,6 +281,9 @@ else
   warn "Karabiner DriverKit was not found. Install Karabiner Elements or the standalone Karabiner-DriverKit-VirtualHIDDevice package before expecting Kanata output to work."
 fi
 
+step "Heads up: macOS permission setup is annoying"
+warn "This is the frustrating part. macOS privacy grants are tied to the exact Kanata binary, and Cargo rebuilds can make old grants stale. If output does not work, remove and re-add $KANATA_BIN in both panes, then rerun bb kanata-setup."
+
 step "Approve macOS Privacy permissions"
 echo "System Settings will open now. In both Input Monitoring and Accessibility:"
 echo "  1. Remove stale kanata entries if present."

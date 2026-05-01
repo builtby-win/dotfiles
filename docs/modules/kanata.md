@@ -2,13 +2,32 @@
 
 Kanata is the preferred cross-platform keyboard remapper for this repo. It is the Windows/Linux/macOS replacement for the Karabiner-only chord and Hyper-key pieces.
 
+## Before you start
+
+Kanata is worth it, but the first macOS setup is fussy. Expect one pass through
+Rust/Cargo, Karabiner DriverKit, two System Settings privacy panes, root
+LaunchDaemons, and user LaunchAgents for app-aware shortcuts. If something does
+not work on the first try, check the logs before changing the config:
+
+```bash
+launchctl print system/com.builtbywin.kanata
+launchctl print system/com.builtbywin.kanata-sculpt
+less /tmp/kanata.err.log
+less /tmp/com.builtbywin.kanata-sculpt.err.log
+```
+
+The usual failure is macOS still denying Input Monitoring or Accessibility to
+`~/.cargo/bin/kanata`. Remove stale Kanata entries from both privacy panes,
+re-add the exact binary Finder reveals, then rerun `bb kanata-setup`.
+
 ## Goals
 
 - two filtered macOS Kanata profiles avoid cross-keyboard modifier conflicts
-- `Menu`/`Application` becomes Hyper: `Ctrl+Alt+Shift+Meta`
+- `Menu`/`Application` taps arm one-shot Hyper and holds become held Hyper:
+  `Ctrl+Alt+Shift+Meta`
 - Microsoft Sculpt swaps `Left Option` and `Left Command`, and maps
   `Right Option` to `Right Command`
-- Other macOS keyboards map `Right Option` to Hyper
+- Other macOS keyboards map `Right Option` to the same tap/hold Hyper behavior
 - Other macOS keyboards keep `Left Option` and `Left Command` in normal order
 - Built-in and other macOS keyboards use the Apple-style media row by
   default, with `Fn` held for raw `F1`-`F12`
@@ -18,7 +37,13 @@ Kanata is the preferred cross-platform keyboard remapper for this repo. It is th
   `Ctrl+b` for the tmux/psmux leader, while non-terminal apps arm a compact
   Command layer for the next keypress
 - Without macOS app context, `j+k` falls back to the compact next-key Command/Super layer
+- Tap modifiers for one-shot next-key behavior, hold them for normal modifier use
+- `j+Space`, `j+l`, `l+k`, and `k+Space` are active ergonomic chords
+- `fj`, `dk`, and `sl` stay reserved for future use, not active mappings
+- `l+k` arms Hyper for the next key, but app launching still lives in Raycast, Hammerspoon, or the apps themselves
+- `Esc+Space` cancels pending one-shot or launcher state
 - `d+f` sends `Hyper+f`
+- Existing Hammerspoon `Hyper+Space` and `Space+j` interactions are untouched
 - Keep the same muscle memory across macOS, Linux, and Windows
 
 ## Config
@@ -48,6 +73,11 @@ For the full guided macOS setup, use:
 ```bash
 bb kanata-setup
 ```
+
+The script is intentionally chatty because the setup path has sharp edges. Read
+each warning instead of clicking through: permissions are attached to the exact
+Kanata binary, and rebuilding with Cargo can require removing and re-adding that
+binary in both privacy panes.
 
 The helper installs the patched Cargo build, installs `kanata-vk-agent`, validates
 both Kanata configs, reveals the Kanata binary in Finder, opens Input Monitoring
@@ -245,7 +275,7 @@ not need to duplicate raw bundle-ID logic. The current shape is:
 )
 
 (defchordsv2
-  (j k) @jk 75 first-release ()
+  (j k) @jk 150 first-release ()
 )
 ```
 
@@ -254,12 +284,41 @@ Press `j+k`, release it, then press the next key. That one key is interpreted
 through `cmd`, then Kanata returns to the base layer. The `2000` timeout is only a
 safety cap if no next key arrives.
 
+## Ergonomic layers
+
+These chords stay intentionally small and predictable:
+
+| Chord | Action | Notes |
+| --- | --- | --- |
+| `j+Space` | `bksp-repeat` | Hold `j`, press `Space` for steady Backspace repeat |
+| `j+l` | `nav-layer` | Vim-style navigation layer |
+| `l+k` | `hyper-next` | Hyper one-shot for the next key, launcher behavior stays outside Kanata |
+| `k+Space` | `mouse-layer` | Mouse and scroll layer |
+| `Esc+Space` | cancel | Clears pending one-shot or launcher state |
+
+Reserved chords stay documented, but inactive: `fj`, `dk`, and `sl`.
+
+The `l+k` chord only arms Hyper for the next key. Actual app launching remains
+owned by Raycast, Hammerspoon, or the apps that consume the Hyper shortcut.
+
+The existing Hammerspoon `Hyper+Space` launcher path and `Space+j` navigation
+path are unchanged here. The Hyper fallback layer also keeps Hammerspoon's
+existing `Hyper+4` Ghostty layout and `Hyper+r` reload shortcuts reachable.
+Kanata implements Backspace as an ordered `j`-held layer rather than an
+order-insensitive chord so quick `Space+j` presses can still reach Hammerspoon.
+The repeat uses a release-cancellable fixed macro: it sends the first Backspace
+immediately, then repeats at a steady cadence while the combo stays held. Keep
+`bspc` as the first macro item so a normal `j+Space` press deletes once.
+
 When adding another app-aware chord or layer, follow the same convention:
 
 1. Add the bundle ID to `TERMINAL_BUNDLE_IDS` in `scripts/setup-kanata-macos.sh`
    if `kanata-vk-agent` should track it.
 2. Add the same ID to `defvirtualkeys` in both Kanata configs.
-3. For next-key layer fallbacks, use `(one-shot <timeout-ms> (layer-while-held <layer>))`.
+3. For next-key layer fallbacks from chords, use `(one-shot <timeout-ms> (layer-while-held <layer>))`.
+   For tap/hold modifier keys such as Menu/Application-as-Hyper, prefer a one-shot
+   output chord like `(one-shot-press-pcancel 2000 C-A-S-lmet)` so the tap key's
+   release cannot consume a transient layer before the intended next key.
 4. Put the `switch` in a named alias, for example
    `terminal-foo-or-default-layer`.
 5. Point the chord at the semantic alias, for example `(x y) @terminal-foo-or-default-layer ...`.
@@ -269,18 +328,13 @@ alias block. Kanata itself still does not know app context; `kanata-vk-agent`
 presses/releases virtual keys over the TCP server, and Kanata reacts to those
 virtual keys.
 
-The `cmd` layer currently keeps the scope intentionally small:
+The `cmd` layer maps every letter plus the two window-switching keys that are
+useful from a next-key Command layer:
 
 ```text
 tab -> Cmd+Tab
 `   -> Cmd+`
-a   -> Cmd+A
-c   -> Cmd+C
-v   -> Cmd+V
-x   -> Cmd+X
-z   -> Cmd+Z
-w   -> Cmd+W
-q   -> Cmd+Q
+a-z -> Cmd+A through Cmd+Z
 ```
 
 Discover additional bundle IDs with:
