@@ -64,5 +64,6 @@ else:
 PY
 
 cargo install --path "$kanata_dir" --features cmd --force
+codesign --force --sign - --identifier com.builtbywin.kanata "${CARGO_HOME:-$HOME/.cargo}/bin/kanata"
 
 echo "Installed patched Kanata at ${CARGO_HOME:-$HOME/.cargo}/bin/kanata"
