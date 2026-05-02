@@ -7,6 +7,11 @@ if [[ -z "$session_name" ]]; then
   exit 0
 fi
 
+layout_enabled="$(tmux show-options -gqv @builtby_bootstrap_layout 2>/dev/null)"
+if [[ "$layout_enabled" != "on" && "$layout_enabled" != "1" && "$layout_enabled" != "true" ]]; then
+  exit 0
+fi
+
 if [[ -z "$session_path" ]]; then
   session_path="$HOME"
 fi

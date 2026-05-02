@@ -108,6 +108,14 @@ describe("tmux profile split", () => {
     expect(coreConf).toContain('set -ga update-environment "*"');
   });
 
+  it("hardens terminal reports that can leak into panes", () => {
+    expect(coreConf).toContain("set -g allow-passthrough off");
+    expect(coreConf).toContain("set -g terminal-features 'xterm*:clipboard:cstyle:focus:title:extkeys");
+    expect(coreConf).not.toMatch(/^set\s+-ga\s+terminal-features/m);
+    expect(coreConf).not.toMatch(/^set\s+-g\s+terminal-features\s+.*ccolour/m);
+    expect(coreConf).toContain("switch-client -T root");
+  });
+
   it("keeps the bottom status tabs and leader indicator enabled", () => {
     expect(coreConf).toContain("set -g status on");
     expect(coreConf).toContain("set -g status-position bottom");
@@ -127,8 +135,10 @@ describe("tmux profile split", () => {
     expect(basicConf).not.toContain("set -g pane-border-status bottom");
   });
 
-  it("bootstraps new sessions with cwd-aware windows and splits", () => {
+  it("keeps automatic session layouts opt-in", () => {
+    expect(coreConf).toContain("set -g @builtby_bootstrap_layout off");
     expect(coreConf).toContain("session-bootstrap.sh");
+    expect(sessionBootstrapSh).toContain("tmux show-options -gqv @builtby_bootstrap_layout");
     expect(sessionBootstrapSh).toContain('tmux rename-window -t "$session_name:1" "work"');
     expect(sessionBootstrapSh).toContain('tmux split-window -h -t "$session_name:1" -c "$session_path"');
     expect(sessionBootstrapSh).toContain('tmux new-window -t "$session_name:" -n "tools" -c "$session_path"');
