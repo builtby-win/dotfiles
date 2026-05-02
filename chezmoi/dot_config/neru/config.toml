@@ -1,3 +1,7 @@
+[general]
+passthrough_unbounded_keys = true
+should_exit_after_passthrough = false
+
 [hotkeys]
 "Primary+Shift+Space" = "__disabled__"
 "Primary+Shift+G" = "__disabled__"
@@ -5,8 +9,8 @@
 "Primary+Shift+S" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+K" = "scroll"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
-"Cmd+Ctrl+Alt+Shift+;" = "grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+," = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+'" = "grid --cursor-selection-mode follow"
 
 [theme.light]
 surface = "#EEF2FF"
@@ -35,12 +39,20 @@ detect_mission_control = true
 "Shift+R" = ["action right_click", "idle"]
 "Shift+Return" = "action left_click"
 
+[hints.additional_ax_support]
+enable = true
+additional_electron_bundles = []
+additional_chromium_bundles = []
+additional_firefox_bundles = []
+
 [grid]
 prewarm_enabled = true
 live_match_update = true
 hide_unmatched = true
 
 [grid.hotkeys]
+"," = "action reset"
+"'" = "action reset"
 "Return" = ["action left_click", "idle"]
 "Shift+Return" = "action left_click"
 
@@ -64,12 +76,68 @@ sub_key_preview = true
 scroll_step = 60
 scroll_step_half = 650
 
+[scroll.hotkeys]
+"Escape" = "idle"
+"k" = ["action scroll_up", "idle"]
+"j" = ["action scroll_down", "idle"]
+"h" = ["action scroll_left", "idle"]
+"l" = ["action scroll_right", "idle"]
+"gg" = ["action go_top", "idle"]
+"Shift+G" = ["action go_bottom", "idle"]
+"u" = ["action page_up", "idle"]
+"PageUp" = ["action page_up", "idle"]
+"d" = ["action page_down", "idle"]
+"PageDown" = ["action page_down", "idle"]
+"Shift+L" = ["action left_click", "idle"]
+"Shift+R" = ["action right_click", "idle"]
+"Shift+M" = ["action middle_click", "idle"]
+"Shift+I" = ["action mouse_down", "idle"]
+"Shift+U" = ["action mouse_up", "idle"]
+"Up" = ["action move_mouse_relative --dx=0 --dy=-10", "idle"]
+"Down" = ["action move_mouse_relative --dx=0 --dy=10", "idle"]
+"Left" = ["action move_mouse_relative --dx=-10 --dy=0", "idle"]
+"Right" = ["action move_mouse_relative --dx=10 --dy=0", "idle"]
+"a" = "idle"
+"b" = "idle"
+"c" = "idle"
+"e" = "idle"
+"f" = "idle"
+"i" = "idle"
+"m" = "idle"
+"n" = "idle"
+"o" = "idle"
+"p" = "idle"
+"q" = "idle"
+"r" = "idle"
+"s" = "idle"
+"t" = "idle"
+"v" = "idle"
+"w" = "idle"
+"x" = "idle"
+"y" = "idle"
+"z" = "idle"
+"0" = "idle"
+"1" = "idle"
+"2" = "idle"
+"3" = "idle"
+"4" = "idle"
+"5" = "idle"
+"6" = "idle"
+"7" = "idle"
+"8" = "idle"
+"9" = "idle"
+"Return" = "idle"
+"Tab" = "idle"
+"Space" = "idle"
+"Backspace" = "idle"
+
 [mode_indicator.scroll]
 enabled = true
 text = "Scroll"
 
 [mode_indicator.hints]
-enabled = false
+enabled = true
+text = "Hints"
 
 [mode_indicator.grid]
 enabled = true
