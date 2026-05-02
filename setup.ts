@@ -1298,6 +1298,34 @@ function generateTmuxEntrypoint(): string {
   ].join("\n") + "\n";
 }
 
+function normalizeTmuxEntrypoint(content: string): string {
+  const lines = content.split(/\r?\n/);
+  const normalized: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const trimmed = line.trim();
+    const nextLine = lines[index + 1]?.trim() ?? "";
+
+    if (trimmed === "# Back2Vibing Integration" && nextLine.includes("back2vibing-tmux.conf")) {
+      continue;
+    }
+
+    if (
+      trimmed === 'source-file "$HOME/.config/tmux/builtby/basic.conf"' ||
+      trimmed === 'source-file -q "$HOME/.config/tmux/builtby/basic.conf"' ||
+      (trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf"))
+    ) {
+      continue;
+    }
+
+    normalized.push(line);
+  }
+
+  const next = normalized.join("\n").replace(/\n{3,}$/u, "\n\n").replace(/[ \t]+\n/gu, "\n");
+  return next.endsWith("\n") ? next : `${next}\n`;
+}
+
 async function setupTmuxEntrypoint(): Promise<boolean> {
   const tmuxConfPath = join(HOME, ".tmux.conf");
 
@@ -1331,6 +1359,13 @@ async function setupTmuxEntrypoint(): Promise<boolean> {
     currentContent.includes("bootstrap.basic.conf") ||
     currentContent.includes("bootstrap.pro.conf")
   ) {
+    const normalizedContent = normalizeTmuxEntrypoint(currentContent);
+    if (normalizedContent !== currentContent) {
+      writeFileSync(tmuxConfPath, normalizedContent);
+      log.success("Normalized ~/.tmux.conf to source the builtby tmux profile once");
+      return true;
+    }
+
     log.success("~/.tmux.conf already includes builtby tmux integration");
     return true;
   }

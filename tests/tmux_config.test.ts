@@ -150,6 +150,14 @@ describe("tmux setup safety", () => {
     expect(setupTs).not.toContain('source-file "$HOME/.config/tmux/builtby/basic.conf"`,');
   });
 
+  it("normalizes duplicate managed tmux source lines", () => {
+    expect(setupTs).toContain("function normalizeTmuxEntrypoint(content: string): string");
+    expect(setupTs).toContain('trimmed === \'source-file "$HOME/.config/tmux/builtby/basic.conf"\'');
+    expect(setupTs).toContain('trimmed === \'source-file -q "$HOME/.config/tmux/builtby/basic.conf"\'');
+    expect(setupTs).toContain('trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf")');
+    expect(setupTs).toContain("Normalized ~/.tmux.conf to source the builtby tmux profile once");
+  });
+
   it("checks the tmux managed config at the directory symlink boundary", () => {
     expect(setupTs).toContain('".config/tmux"');
     expect(setupTs).toContain('".local/bin/tmux-smart"');
