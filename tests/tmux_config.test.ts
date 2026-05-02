@@ -73,9 +73,10 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
   });
 
-  it("reloads the modular tmux profile instead of only ~/.tmux.conf", () => {
-    expect(basicConf).toContain('bind r source-file ~/.config/tmux/builtby/core.conf \\; source-file ~/.config/tmux/builtby/basic.conf');
-    expect(basicConf).toContain('[Other] ::: Reload Config ::: Leader + r ::: tmux source-file ~/.config/tmux/builtby/core.conf && tmux source-file ~/.config/tmux/builtby/basic.conf');
+  it("reloads through the single tmux bootstrap entrypoint", () => {
+    expect(basicConf).toContain('bind r source-file ~/.tmux.conf \\; display-message "Config reloaded!"');
+    expect(basicConf).toContain('[Other] ::: Reload Config ::: Leader + r ::: tmux source-file ~/.tmux.conf && tmux display-message "Config reloaded!"');
+    expect(basicConf).not.toContain('source-file ~/.config/tmux/builtby/core.conf \\; source-file ~/.config/tmux/builtby/basic.conf');
   });
 
   it("uses the local sesh shim and lets TPM load tmux-fingers", () => {
@@ -105,15 +106,23 @@ describe("tmux profile split", () => {
   });
 
   it("updates session environment from the attached terminal", () => {
-    expect(coreConf).toContain('set -ga update-environment "*"');
+    expect(coreConf).toContain('set -g update-environment "*"');
   });
 
   it("hardens terminal reports that can leak into panes", () => {
     expect(coreConf).toContain("set -g allow-passthrough off");
     expect(coreConf).toContain("set -g terminal-features 'xterm*:clipboard:cstyle:focus:title:extkeys");
+    expect(coreConf).toContain('set -g terminal-overrides "*256col*:Tc,xterm-256color:Usync"');
     expect(coreConf).not.toMatch(/^set\s+-ga\s+terminal-features/m);
+    expect(coreConf).not.toMatch(/^set\s+-ga\s+terminal-overrides/m);
     expect(coreConf).not.toMatch(/^set\s+-g\s+terminal-features\s+.*ccolour/m);
     expect(coreConf).toContain("switch-client -T root");
+  });
+
+  it("does not source mutable app-generated tmux snippets", () => {
+    expect(coreConf).not.toContain("back2vibing-tmux.conf");
+    expect(coreConf).toContain("set-option -gu pane-focus-in");
+    expect(coreConf).toContain("set-hook -gu after-select-pane");
   });
 
   it("keeps the bottom status tabs and leader indicator enabled", () => {
@@ -162,8 +171,12 @@ describe("tmux setup safety", () => {
 
   it("normalizes duplicate managed tmux source lines", () => {
     expect(setupTs).toContain("function normalizeTmuxEntrypoint(content: string): string");
+    expect(setupTs).toContain("function isManagedTmuxDirectSource(trimmed: string): boolean");
+    expect(setupTs).toContain('trimmed === \'source-file "$HOME/.config/tmux/builtby/core.conf"\'');
+    expect(setupTs).toContain('trimmed === \'source-file -q "$HOME/.config/tmux/builtby/core.conf"\'');
     expect(setupTs).toContain('trimmed === \'source-file "$HOME/.config/tmux/builtby/basic.conf"\'');
     expect(setupTs).toContain('trimmed === \'source-file -q "$HOME/.config/tmux/builtby/basic.conf"\'');
+    expect(setupTs).toContain("removedManagedDirectSource && !hasBuiltbyTmuxBootstrap");
     expect(setupTs).toContain('trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf")');
     expect(setupTs).toContain("Normalized ~/.tmux.conf to source the builtby tmux profile once");
   });
@@ -206,6 +219,7 @@ describe("tmux setup safety", () => {
     expect(functionsSh).toContain('local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"');
     expect(functionsSh).toContain('_bb_prune_backups "$backup_dir" "config.yaml.dotfiles-backup." 1');
     expect(functionsSh).toContain('_sync_workmux_config "$dotfiles_dir"');
+    expect(functionsSh).toContain('command tmux source-file "$HOME/.tmux.conf"');
   });
 
   it("documents tmux package version guidance for the custom sesh workflow", () => {

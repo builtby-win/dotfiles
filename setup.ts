@@ -1298,9 +1298,23 @@ function generateTmuxEntrypoint(): string {
   ].join("\n") + "\n";
 }
 
+function isManagedTmuxDirectSource(trimmed: string): boolean {
+  return (
+    trimmed === 'source-file "$HOME/.config/tmux/builtby/core.conf"' ||
+    trimmed === 'source-file -q "$HOME/.config/tmux/builtby/core.conf"' ||
+    trimmed === 'source-file "$HOME/.config/tmux/builtby/basic.conf"' ||
+    trimmed === 'source-file -q "$HOME/.config/tmux/builtby/basic.conf"'
+  );
+}
+
+function hasBuiltbyTmuxBootstrap(content: string): boolean {
+  return content.includes("bootstrap.basic.conf") || content.includes("bootstrap.pro.conf");
+}
+
 function normalizeTmuxEntrypoint(content: string): string {
   const lines = content.split(/\r?\n/);
   const normalized: string[] = [];
+  let removedManagedDirectSource = false;
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
@@ -1311,15 +1325,20 @@ function normalizeTmuxEntrypoint(content: string): string {
       continue;
     }
 
-    if (
-      trimmed === 'source-file "$HOME/.config/tmux/builtby/basic.conf"' ||
-      trimmed === 'source-file -q "$HOME/.config/tmux/builtby/basic.conf"' ||
-      (trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf"))
-    ) {
+    if (isManagedTmuxDirectSource(trimmed)) {
+      removedManagedDirectSource = true;
+      continue;
+    }
+
+    if (trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf")) {
       continue;
     }
 
     normalized.push(line);
+  }
+
+  if (removedManagedDirectSource && !hasBuiltbyTmuxBootstrap(normalized.join("\n"))) {
+    normalized.push('source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"');
   }
 
   const next = normalized.join("\n").replace(/\n{3,}$/u, "\n\n").replace(/[ \t]+\n/gu, "\n");
@@ -1356,8 +1375,9 @@ async function setupTmuxEntrypoint(): Promise<boolean> {
   const currentContent = readFileSync(tmuxConfPath, "utf-8");
   if (
     currentContent.includes(TMUX_MERGE_MARKER_START) ||
-    currentContent.includes("bootstrap.basic.conf") ||
-    currentContent.includes("bootstrap.pro.conf")
+    hasBuiltbyTmuxBootstrap(currentContent) ||
+    currentContent.includes("$HOME/.config/tmux/builtby/core.conf") ||
+    currentContent.includes("$HOME/.config/tmux/builtby/basic.conf")
   ) {
     const normalizedContent = normalizeTmuxEntrypoint(currentContent);
     if (normalizedContent !== currentContent) {

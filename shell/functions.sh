@@ -434,7 +434,7 @@ bb() {
           echo "bb setup ${module}: applying chezmoi-managed dotfiles."
           bb apply || return $?
           if [[ "$module" == "tmux" && -n "$TMUX" ]]; then
-            tmux source-file "$HOME/.tmux.conf"
+            command tmux source-file "$HOME/.tmux.conf"
           fi
           if [[ "$module" == "karabiner" && -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
             "$dotfiles_dir/scripts/sync-karabiner.sh" push
