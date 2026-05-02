@@ -157,3 +157,29 @@ Recommended package versions for the tmux workflow in this repo:
 - `fzf >= 0.34`
 - `sesh >= 2.25`
 - `tmux-fingers >= 2.6`
+
+## Troubleshooting literal terminal replies
+
+If tmux panes show text like `]10;rgb:...`, `]11;rgb:...`, or `[?997;1n`, a
+terminal color/theme reply leaked into the pane as normal input. `]10` and `]11`
+are foreground/background color replies. `[?997;1n` is tmux theme-report traffic.
+
+The shared tmux profile keeps passthrough disabled to avoid forwarding wrapped
+terminal queries from inner programs to the outer terminal by default. This is the
+safe default for typing-heavy shells. If the leak is coming from a prompt or app
+that sends plain terminal queries itself, fix that tool to either read the reply
+synchronously from `/dev/tty` or skip the probe inside tmux.
+
+Apply the safe default to the current server:
+
+```bash
+tmux source-file ~/.tmux.conf
+tmux set -g allow-passthrough off
+```
+
+If you intentionally need passthrough-only features such as inline graphics,
+enable it per machine in `~/.tmux.local.conf` instead of changing the repo default:
+
+```tmux
+set -g allow-passthrough on
+```
