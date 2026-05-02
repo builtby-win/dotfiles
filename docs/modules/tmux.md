@@ -51,10 +51,17 @@ Version notes:
 | `Alt+(` / `Alt+)` | Previous / next session |
 
 Bare tmux launches now normalize to one project root: if you're inside a git repo,
-new sessions use the repo root as their main cwd, and the initial panes/windows all
-start there. If you launch tmux from outside the shell alias (for example from a
-terminal app shortcut), point it at `~/.local/bin/tmux-smart` so it can reuse an
-existing session for that root instead of creating a numbered duplicate.
+new sessions use the repo root as their main cwd. If you launch tmux from outside
+the shell alias (for example from a terminal app shortcut), point it at
+`~/.local/bin/tmux-smart` so it can reuse an existing session for that root instead
+of creating a numbered duplicate.
+
+The old two-pane + tools-window bootstrap layout is now opt-in. Enable it in
+`~/.tmux.local.conf` only if you want new sessions to be expanded automatically:
+
+```tmux
+set -g @builtby_bootstrap_layout on
+```
 
 Useful direct calls:
 
@@ -175,7 +182,12 @@ Apply the safe default to the current server:
 ```bash
 tmux source-file ~/.tmux.conf
 tmux set -g allow-passthrough off
+tmux switch-client -T root
 ```
+
+The managed profile also removes tmux's `ccolour` terminal feature for xterm-like
+terminals. That keeps tmux from advertising color/theme reporting support by
+default, which reduces the chance of color replies arriving in a shell prompt.
 
 If you intentionally need passthrough-only features such as inline graphics,
 enable it per machine in `~/.tmux.local.conf` instead of changing the repo default:
