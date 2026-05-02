@@ -28,6 +28,11 @@ Reload tmux after install:
 tmux source-file ~/.tmux.conf
 ```
 
+Reload through `~/.tmux.conf`, not the individual profile files. The bootstrap
+entrypoint loads core, the selected profile, and `~/.tmux.local.conf` exactly once
+in the right order. This keeps reloads fast and prevents append-style tmux options
+from growing duplicate entries.
+
 Version notes:
 
 - `fzf 0.34.x` is supported by the custom sesh picker in this repo.
@@ -188,6 +193,8 @@ tmux switch-client -T root
 The managed profile also removes tmux's `ccolour` terminal feature for xterm-like
 terminals. That keeps tmux from advertising color/theme reporting support by
 default, which reduces the chance of color replies arriving in a shell prompt.
+It also clears stale app-installed focus hooks from the baseline config, instead
+of sourcing mutable generated tmux snippets on every reload.
 
 If you intentionally need passthrough-only features such as inline graphics,
 enable it per machine in `~/.tmux.local.conf` instead of changing the repo default:
