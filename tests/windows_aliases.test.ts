@@ -39,8 +39,14 @@ describe('Windows PowerShell Aliases (aliases.ps1)', () => {
   it('should include Unix-like reload and AI shortcuts', () => {
     const content = fs.readFileSync(aliasesPath, 'utf-8');
     expect(content).toMatch(/function rc/i);
+    expect(content).toMatch(/function claude/i);
     expect(content).toMatch(/function c/i);
     expect(content).toMatch(/function o/i);
+    expect(content).toMatch(/function gemini/i);
     expect(content).toMatch(/function g/i);
+    expect(content).toMatch(/function codex/i);
+    expect(content).toContain('--dangerously-skip-permissions');
+    expect(content).toContain('--yolo');
+    expect(content).toContain('--dangerously-bypass-approvals-and-sandbox');
   });
 });

@@ -104,9 +104,14 @@ Kanata can filter devices with `macos-dev-names-include` /
 shape, so this repo uses two explicit filtered profiles:
 
 ```text
-~/.config/kanata/kanata.kbd         excludes 0xCB1EB82FC081667C, port 5829
+~/.config/kanata/kanata.kbd         excludes 0xCB1EB82FC081667C and Kanata's Karabiner virtual output, port 5829
 ~/.config/kanata/kanata-sculpt.kbd  includes only 0xCB1EB82FC081667C, port 5830
 ```
+
+The non-Sculpt profile must also exclude `Karabiner DriverKit VirtualHIDKeyboard`.
+Kanata emits remapped keys through that virtual keyboard on macOS. If the
+non-Sculpt daemon reads the same virtual output device as input, a key can feed
+back through Kanata and look like a random repeated character.
 
 The Microsoft Sculpt receiver is `0xCB1EB82FC081667C` in `kanata --list`, with
 VendorID `1118` / ProductID `1957`. Its profile maps:
@@ -214,9 +219,34 @@ expanded Cargo binary path and expanded chezmoi config paths:
 - `/Library/LaunchDaemons/com.builtbywin.kanata.plist` on TCP port `5829`
 - `/Library/LaunchDaemons/com.builtbywin.kanata-sculpt.plist` on TCP port `5830`
 
-The helper also stops the legacy `com.builtbywin.kanata-other` daemon and the
-failed `local.microsoft-sculpt-hidutil` experiment if they exist, so only the two
-named filtered profiles remain.
+The helper also stops, disables, and removes stale plist files for the legacy
+`com.builtbywin.kanata-other` daemon and the failed
+`local.microsoft-sculpt-hidutil` experiment if they exist, so only the two named
+filtered profiles remain after reboot.
+
+The helper follows the upstream launchd shape for no-surprises startup: copy the
+plist into `/Library/LaunchDaemons`, set `root:wheel` ownership and `0644`
+permissions, `launchctl enable`, `launchctl bootstrap`, then
+`launchctl kickstart -k` so the daemon starts immediately instead of waiting for
+the next boot.
+
+After restarting your Mac and logging in, verify the root daemons:
+
+```bash
+launchctl print system/com.builtbywin.kanata
+launchctl print system/com.builtbywin.kanata-sculpt
+```
+
+If you manually restart one Kanata daemon, restart both or reset both live layers.
+Otherwise one keyboard can be back on `base` while the other stays in a modal layer
+such as `neruscroll`:
+
+```bash
+sudo launchctl kickstart -k system/com.builtbywin.kanata
+sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt
+kanata-layer base
+kanata-layer status
+```
 
 ## macOS app-aware context with kanata-vk-agent
 
@@ -240,7 +270,19 @@ The guided helper installs one user LaunchAgent per Kanata TCP port:
 ~/Library/LaunchAgents/local.kanata-vk-agent-sculpt.plist
 ```
 
-It also stops the legacy `local.kanata-vk-agent-other` LaunchAgent if it exists.
+It also stops, disables, and removes the legacy
+`local.kanata-vk-agent-other` LaunchAgent plist if it exists.
+
+After restarting your Mac and logging in, verify the per-user agents:
+
+```bash
+launchctl print gui/$(id -u)/local.kanata-vk-agent
+launchctl print gui/$(id -u)/local.kanata-vk-agent-sculpt
+```
+
+The root Kanata daemons start at boot. The `kanata-vk-agent` LaunchAgents start
+after you log in because they need your user GUI session to detect the frontmost
+app.
 
 Each agent connects to its matching Kanata TCP port and tracks these terminal
 bundle IDs:
@@ -275,7 +317,7 @@ not need to duplicate raw bundle-ID logic. The current shape is:
 )
 
 (defchordsv2
-  (j k) @jk 150 first-release ()
+  (j k) @jk 75 first-release (neruscroll)
 )
 ```
 
@@ -295,6 +337,16 @@ These chords stay intentionally small and predictable:
 | `l+k` | `hyper-next` | Hyper one-shot for the next key, launcher behavior stays outside Kanata |
 | `k+Space` | `mouse-layer` | Mouse and scroll layer |
 | `Esc+Space` | cancel | Clears pending one-shot or launcher state |
+
+The base `j` key uses `tap-hold-tap-keys` with the right-hand letter keys as
+early-tap triggers. Fast rolls such as `ij`, `ji`, `jk`, and `jl` favor the
+plain `j` tap instead of accidentally entering the held `j` layer. Intentional
+holds still activate after the hold timeout, so `j` then `Space` keeps the
+Backspace-repeat path without making normal typing eat `j`.
+
+Typing-sensitive simultaneous chords use a tight 75ms window. This keeps words
+and rolls like `look `, `walk `, `jk`, `jl`, `lk`, and `df` as plain text unless
+the chord keys are pressed nearly together on purpose.
 
 Reserved chords stay documented, but inactive: `fj`, `dk`, and `sl`.
 

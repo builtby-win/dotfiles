@@ -7,7 +7,7 @@ should_exit_after_passthrough = false
 "Primary+Shift+G" = "__disabled__"
 "Primary+Shift+C" = "__disabled__"
 "Primary+Shift+S" = "__disabled__"
-"Cmd+Ctrl+Alt+Shift+K" = "scroll"
+"Cmd+Ctrl+Alt+Shift+K" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
 "Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+'" = "grid --cursor-selection-mode follow"
@@ -29,7 +29,7 @@ text = "#E8EEFF"
 [hints]
 hint_characters = "asdfghjkl"
 parallel_threshold = 20
-detect_mission_control = true
+detect_mission_control = false
 
 [hints.hotkeys]
 "Escape" = "idle"
@@ -73,63 +73,63 @@ label_background = true
 sub_key_preview = true
 
 [scroll]
-scroll_step = 60
-scroll_step_half = 650
+scroll_step = 40
+scroll_step_half = 500
 
 [scroll.hotkeys]
-"Escape" = "idle"
-"k" = ["action scroll_up", "idle"]
-"j" = ["action scroll_down", "idle"]
-"h" = ["action scroll_left", "idle"]
-"l" = ["action scroll_right", "idle"]
-"gg" = ["action go_top", "idle"]
-"Shift+G" = ["action go_bottom", "idle"]
-"u" = ["action page_up", "idle"]
-"PageUp" = ["action page_up", "idle"]
-"d" = ["action page_down", "idle"]
-"PageDown" = ["action page_down", "idle"]
-"Shift+L" = ["action left_click", "idle"]
-"Shift+R" = ["action right_click", "idle"]
-"Shift+M" = ["action middle_click", "idle"]
-"Shift+I" = ["action mouse_down", "idle"]
-"Shift+U" = ["action mouse_up", "idle"]
-"Up" = ["action move_mouse_relative --dx=0 --dy=-10", "idle"]
-"Down" = ["action move_mouse_relative --dx=0 --dy=10", "idle"]
-"Left" = ["action move_mouse_relative --dx=-10 --dy=0", "idle"]
-"Right" = ["action move_mouse_relative --dx=10 --dy=0", "idle"]
-"a" = "idle"
-"b" = "idle"
-"c" = "idle"
-"e" = "idle"
-"f" = "idle"
-"i" = "idle"
-"m" = "idle"
-"n" = "idle"
-"o" = "idle"
-"p" = "idle"
-"q" = "idle"
-"r" = "idle"
-"s" = "idle"
-"t" = "idle"
-"v" = "idle"
-"w" = "idle"
-"x" = "idle"
-"y" = "idle"
-"z" = "idle"
-"0" = "idle"
-"1" = "idle"
-"2" = "idle"
-"3" = "idle"
-"4" = "idle"
-"5" = "idle"
-"6" = "idle"
-"7" = "idle"
-"8" = "idle"
-"9" = "idle"
-"Return" = "idle"
-"Tab" = "idle"
-"Space" = "idle"
-"Backspace" = "idle"
+"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"k" = "action scroll_up"
+"j" = "action scroll_down"
+"h" = "action scroll_left"
+"l" = "action scroll_right"
+"gg" = "action go_top"
+"Shift+G" = "action go_bottom"
+"u" = "action page_up"
+"PageUp" = "action page_up"
+"d" = "action page_down"
+"PageDown" = "action page_down"
+"Shift+L" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+R" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+I" = ["action mouse_down", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+U" = ["action mouse_up", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Up" = ["action move_mouse_relative --dx=0 --dy=-10", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Down" = ["action move_mouse_relative --dx=0 --dy=10", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Left" = ["action move_mouse_relative --dx=-10 --dy=0", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Right" = ["action move_mouse_relative --dx=10 --dy=0", "exec ~/.local/bin/kanata-layer base", "idle"]
+"a" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"b" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"c" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"e" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"f" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"i" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"m" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"n" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"o" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"p" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"q" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"r" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"s" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"t" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"v" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"w" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"x" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"y" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"z" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"0" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"1" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"2" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"3" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"4" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"5" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"6" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"7" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"8" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"9" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Return" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Tab" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Space" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Backspace" = ["exec ~/.local/bin/kanata-layer base", "idle"]
 
 [mode_indicator.scroll]
 enabled = true

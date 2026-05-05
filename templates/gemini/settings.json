@@ -134,6 +134,13 @@
       ],
       "command": "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64",
       "env": {}
+    },
+    "cua-driver": {
+      "args": [
+        "mcp"
+      ],
+      "command": "/Users/winstonzhao/.local/bin/cua-driver",
+      "env": {}
     }
   },
   "model": {

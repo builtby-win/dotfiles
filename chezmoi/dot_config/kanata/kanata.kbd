@@ -19,10 +19,15 @@
 ;; - App-specific behavior needs kanata-vk-agent plus Kanata's TCP server.
 ;; - The Microsoft Sculpt receiver needs different modifier shape and is handled
 ;;   by kanata-sculpt.kbd on a separate filtered Kanata daemon.
+;; - Exclude Kanata's own Karabiner virtual output device. If this profile reads
+;;   that virtual keyboard, remapped output can feed back into Kanata as fresh
+;;   input and show up as repeated letters.
 
 (defcfg
   macos-dev-names-exclude (
     "0xCB1EB82FC081667C"
+    "Karabiner DriverKit VirtualHIDKeyboard 1.8.0"
+    "0x2E7E3EBD4C615B55"
   )
   process-unmapped-keys yes
   concurrent-tap-hold yes
@@ -50,8 +55,15 @@
   fn (tap-hold 200 200 lctl (layer-while-held fn))
   ;; Double-tap semicolon for AltTab's Ctrl+Option+Tab shortcut.
   semi (tap-dance 200 (; (macro C-A-tab)))
-  ;; Hold j then press Space for steady Backspace repeat; Space then j stays Hammerspoon-owned.
-  j-home (tap-hold-press 200 200 j (layer-while-held jheld))
+  ;; Hold j then press Space for steady Backspace repeat; right-hand rolls still emit j.
+  j-home (tap-hold-tap-keys 200 200 j (layer-while-held jheld) (y u i o p h j k l ; n m , . /))
+  ;; In GUI editors with Vim mode, keep j raw so holding it repeats normally.
+  editor-j (switch
+    ((input virtual dev.zed.Zed)) j break
+    ((input virtual com.microsoft.VSCode)) j break
+    ((input virtual com.todesktop.230313mzl4w4u92)) j break
+    () @j-home break
+  )
   bksp-repeat (macro-repeat-release-cancel bspc 85)
   nav-layer (layer-while-held nav)
   mouse-layer (layer-while-held mouse)
@@ -98,6 +110,9 @@
   io.alacritty nop0
   com.github.wez.wezterm nop0
   com.cmuxterm.app nop0
+  dev.zed.Zed nop0
+  com.microsoft.VSCode nop0
+  com.todesktop.230313mzl4w4u92 nop0
 )
 
 (defsrc
@@ -105,7 +120,7 @@
 )
 
 (deflayer base
-  @os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @j-home k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer hyperlayer
@@ -154,13 +169,20 @@
   spc @bksp-repeat
 )
 
+;; Neru scroll mode needs raw, repeatable motion keys. Keep j out of its
+;; tap-hold behavior while Neru owns modal scrolling.
+(deflayer neruscroll
+  @os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+)
+
 ;; fj, dk, and sl are intentionally reserved for future layers and remain unmapped in this pass.
 (defchordsv2
-  ;; Match Karabiner's jk simultaneous window.
-  (j k) @jk 150 first-release ()
-  (d f) (macro C-A-S-M-f) 100 first-release ()
-  (j l) @nav-layer 150 first-release ()
-  (l k) @hyper-next 150 first-release ()
-  (k spc) @mouse-layer 150 first-release ()
+  ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
+  ;; sequences stay plain text unless the keys are truly simultaneous.
+  (j k) @jk 75 first-release (neruscroll)
+  (d f) (macro C-A-S-M-f) 75 first-release ()
+  (j l) @nav-layer 75 first-release (neruscroll)
+  (l k) @hyper-next 75 first-release ()
+  (k spc) @mouse-layer 75 first-release (neruscroll)
   (esc spc) XX 80 first-release ()
 )

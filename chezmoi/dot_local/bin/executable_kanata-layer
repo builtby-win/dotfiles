@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Switch all local Kanata daemons to a layer over their TCP sockets."""
+
+from __future__ import annotations
+
+import json
+import socket
+import sys
+
+
+PORTS = (5829, 5830)
+TIMEOUT_SECONDS = 1.0
+
+
+def send_payload(port: int, payload: dict[str, object]) -> tuple[bool, str]:
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=TIMEOUT_SECONDS) as conn:
+            conn.settimeout(TIMEOUT_SECONDS)
+            try:
+                conn.recv(4096)
+            except TimeoutError:
+                pass
+
+            conn.sendall((json.dumps(payload, separators=(",", ":")) + "\n").encode("utf-8"))
+            try:
+                response = conn.recv(4096).decode("utf-8", errors="replace").strip()
+            except TimeoutError:
+                response = ""
+    except OSError as exc:
+        return False, f"port {port}: {exc}"
+
+    return True, response
+
+
+def current_layer(port: int) -> tuple[bool, str]:
+    ok, response = send_payload(port, {"RequestCurrentLayerName": {}})
+    if not ok:
+        return False, response
+    if '"name"' in response:
+        return True, f"port {port}: {response}"
+    return False, f"port {port}: unexpected response {response!r}"
+
+
+def change_layer(port: int, layer: str) -> tuple[bool, str]:
+    ok, response = send_payload(port, {"ChangeLayer": {"new": layer}})
+    if not ok:
+        return False, response
+
+    if f'"new":"{layer}"' in response:
+        return True, f"port {port}: {response}"
+
+    ok, verify_message = current_layer(port)
+    if ok and f'"name":"{layer}"' in verify_message:
+        return True, verify_message
+
+    return False, f"port {port}: unexpected response {response!r}"
+
+
+def main() -> int:
+    if len(sys.argv) != 2 or sys.argv[1] in {"-h", "--help"}:
+        print("usage: kanata-layer <layer|status>", file=sys.stderr)
+        return 2
+
+    layer = sys.argv[1]
+    action = current_layer if layer == "status" else lambda port: change_layer(port, layer)
+    results = [action(port) for port in PORTS]
+    failures = [message for ok, message in results if not ok]
+    successes = [message for ok, message in results if ok]
+
+    if successes:
+        print("\n".join(successes))
+
+    if failures:
+        print("\n".join(failures), file=sys.stderr)
+
+    return 0 if all(ok for ok, _ in results) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -172,9 +172,10 @@ Recommended package versions for the tmux workflow in this repo:
 
 ## Troubleshooting literal terminal replies
 
-If tmux panes show text like `]10;rgb:...`, `]11;rgb:...`, or `[?997;1n`, a
-terminal color/theme reply leaked into the pane as normal input. `]10` and `]11`
-are foreground/background color replies. `[?997;1n` is tmux theme-report traffic.
+If tmux panes show text like `]10;rgb:...`, `]11;rgb:...`, `[?997;1n`, or
+phantom `I` characters after a focus change, a terminal reply leaked into the pane
+as normal input. `]10` and `]11` are foreground/background color replies,
+`[?997;1n` is tmux theme-report traffic, and focus-in reports end with `I`.
 
 The shared tmux profile keeps passthrough disabled to avoid forwarding wrapped
 terminal queries from inner programs to the outer terminal by default. This is the
@@ -187,14 +188,16 @@ Apply the safe default to the current server:
 ```bash
 tmux source-file ~/.tmux.conf
 tmux set -g allow-passthrough off
+tmux set -g focus-events off
 tmux switch-client -T root
 ```
 
 The managed profile also removes tmux's `ccolour` terminal feature for xterm-like
 terminals. That keeps tmux from advertising color/theme reporting support by
 default, which reduces the chance of color replies arriving in a shell prompt.
-It also clears stale app-installed focus hooks from the baseline config, instead
-of sourcing mutable generated tmux snippets on every reload.
+It also does not advertise tmux focus reporting by default, and it clears stale
+app-installed focus hooks from the baseline config instead of sourcing mutable
+generated tmux snippets on every reload.
 
 If you intentionally need passthrough-only features such as inline graphics,
 enable it per machine in `~/.tmux.local.conf` instead of changing the repo default:

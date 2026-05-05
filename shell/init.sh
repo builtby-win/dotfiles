@@ -73,7 +73,8 @@ fi
 
 # fnm (Fast Node Manager)
 if command -v fnm &> /dev/null; then
-  eval "$(FNM_LOG_LEVEL=error fnm env --use-on-cd)"
+  export FNM_LOG_LEVEL=error
+  eval "$(fnm env --use-on-cd)"
 fi
 
 # zoxide (smart cd) - disable for Claude Code to avoid issues

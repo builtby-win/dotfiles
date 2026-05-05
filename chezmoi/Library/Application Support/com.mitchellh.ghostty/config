@@ -3,7 +3,7 @@ font-family = "JetBrainsMono Nerd Font"
 font-size = 14
 
 # Theme
-theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+theme = Catppuccin Frappe
 background-opacity = 0.95
 background-blur-radius = 20
 

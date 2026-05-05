@@ -111,12 +111,19 @@ describe("tmux profile split", () => {
 
   it("hardens terminal reports that can leak into panes", () => {
     expect(coreConf).toContain("set -g allow-passthrough off");
-    expect(coreConf).toContain("set -g terminal-features 'xterm*:clipboard:cstyle:focus:title:extkeys");
+    expect(coreConf).toContain("set -g terminal-features 'xterm*:clipboard:cstyle:title:extkeys");
+    expect(coreConf).not.toMatch(/^set\s+-g\s+terminal-features\s+.*:focus(?::|')/m);
     expect(coreConf).toContain('set -g terminal-overrides "*256col*:Tc,xterm-256color:Usync"');
     expect(coreConf).not.toMatch(/^set\s+-ga\s+terminal-features/m);
     expect(coreConf).not.toMatch(/^set\s+-ga\s+terminal-overrides/m);
     expect(coreConf).not.toMatch(/^set\s+-g\s+terminal-features\s+.*ccolour/m);
     expect(coreConf).toContain("switch-client -T root");
+  });
+
+  it("keeps terminal focus reports disabled by default", () => {
+    expect(coreConf).toContain("set -g focus-events off");
+    expect(coreConf).not.toContain("set -g focus-events on");
+    expect(coreConf).toContain("Terminal focus-in reports end with `I`");
   });
 
   it("does not source mutable app-generated tmux snippets", () => {

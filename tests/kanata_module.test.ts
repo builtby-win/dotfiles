@@ -11,6 +11,7 @@ describe('Kanata module', () => {
   const macosInstallerPath = path.resolve(__dirname, '../scripts/install-kanata-macos.sh');
   const macosSetupPath = path.resolve(__dirname, '../scripts/setup-kanata-macos.sh');
   const shellFunctionsPath = path.resolve(__dirname, '../shell/functions.sh');
+  const kanataLayerPath = path.resolve(__dirname, '../chezmoi/dot_local/bin/executable_kanata-layer');
 
   function getActiveChords(content: string): string[] {
     const lines = content.split(/\r?\n/);
@@ -52,8 +53,8 @@ describe('Kanata module', () => {
     const content = fs.readFileSync(configPath, 'utf-8');
     const sculpt = fs.readFileSync(sculptConfigPath, 'utf-8');
     const defsrc = 'lctl lsft lalt lmet ralt rmet rctl rsft menu caps fn del ; tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
-    const nonSculptBase = '@os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @j-home k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
-    const sculptBase = '@os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @j-home k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
+    const nonSculptBase = '@os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
+    const sculptBase = '@os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
     const hyperlayer = '_ _ _ _ _ _ _ _ _ _ _ _ _ C-A-S-M-tab C-A-S-M-grv C-A-S-M-esc C-A-S-M-spc C-A-S-M-h C-A-S-M-j C-A-S-M-k C-A-S-M-l C-A-S-M-u C-A-S-M-d C-A-S-M-a C-A-S-M-e C-A-S-M-w C-A-S-M-b C-A-S-M-f C-A-S-M-c C-A-S-M-v C-A-S-M-x C-A-S-M-z C-A-S-M-q C-A-S-M-m C-A-S-M-r C-A-S-M-t C-A-S-M-y C-A-S-M-i C-A-S-M-o C-A-S-M-p C-A-S-M-s C-A-S-M-g C-A-S-M-n C-A-S-M-4 C-A-S-M-f1 C-A-S-M-f2 C-A-S-M-f3 C-A-S-M-f4 C-A-S-M-f5 C-A-S-M-f6 C-A-S-M-f7 C-A-S-M-f8 C-A-S-M-f9 C-A-S-M-f10 C-A-S-M-f11 C-A-S-M-f12';
     const cmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ _ M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
     const fnRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
@@ -61,8 +62,11 @@ describe('Kanata module', () => {
     expect(content).toContain('(defsrc');
     expect(content).toContain('macos-dev-names-exclude');
     expect(content).toContain('0xCB1EB82FC081667C');
+    expect(content).toContain('Karabiner DriverKit VirtualHIDKeyboard 1.8.0');
+    expect(content).toContain('0x2E7E3EBD4C615B55');
     expect(sculpt).toContain('macos-dev-names-include');
     expect(sculpt).toContain('0xCB1EB82FC081667C');
+    expect(sculpt).not.toContain('Karabiner DriverKit VirtualHIDKeyboard 1.8.0');
     expect(content).toContain(defsrc);
     expect(sculpt).toContain(defsrc);
     expect(content).toContain('hyper (multi lctl lalt lsft lmet reverse-release-order)');
@@ -81,7 +85,8 @@ describe('Kanata module', () => {
     expect(content).toContain('cap (tap-hold 200 200 esc lctl)');
     expect(content).toContain('fn (tap-hold 200 200 lctl (layer-while-held fn))');
     expect(content).toContain('semi (tap-dance 200 (; (macro C-A-tab)))');
-    expect(content).toContain('j-home (tap-hold-press 200 200 j (layer-while-held jheld))');
+    expect(content).toContain('j-home (tap-hold-tap-keys 200 200 j (layer-while-held jheld) (y u i o p h j k l ; n m , . /))');
+    expect(sculpt).toContain('j-home (tap-hold-tap-keys 200 200 j (layer-while-held jheld) (y u i o p h j k l ; n m , . /))');
     expect(content).toContain('bksp-repeat (macro-repeat-release-cancel bspc 85)');
     expect(sculpt).toContain('bksp-repeat (macro-repeat-release-cancel bspc 85)');
     expect(content).toContain('nav-layer (layer-while-held nav)');
@@ -109,6 +114,8 @@ describe('Kanata module', () => {
     expect(sculpt).toContain('deflayermap (nav)');
     expect(sculpt).toContain('deflayermap (mouse)');
     expect(sculpt).toContain('deflayermap (jheld)');
+    expect(content).toContain('(deflayer neruscroll');
+    expect(sculpt).toContain('(deflayer neruscroll');
     expect(sculpt).toContain('spc @bksp-repeat');
     expect(content).toContain(nonSculptBase);
     expect(sculpt).toContain(sculptBase);
@@ -127,23 +134,23 @@ describe('Kanata module', () => {
     expect(sculpt).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
     expect(content).toContain('() @cmd-next break');
     const requiredActiveChords = [
-      '(j k) @jk 150 first-release ()',
-      '(d f) (macro C-A-S-M-f) 100 first-release ()',
-      '(j l) @nav-layer 150 first-release ()',
-      '(l k) @hyper-next 150 first-release ()',
-      '(k spc) @mouse-layer 150 first-release ()',
+      '(j k) @jk 75 first-release (neruscroll)',
+      '(d f) (macro C-A-S-M-f) 75 first-release ()',
+      '(j l) @nav-layer 75 first-release (neruscroll)',
+      '(l k) @hyper-next 75 first-release ()',
+      '(k spc) @mouse-layer 75 first-release (neruscroll)',
       '(esc spc) XX 80 first-release ()',
     ];
-    expect(content).toContain('(j k) @jk 150 first-release ()');
-    expect(sculpt).toContain('(j k) @jk 150 first-release ()');
+    expect(content).toContain('(j k) @jk 75 first-release (neruscroll)');
+    expect(sculpt).toContain('(j k) @jk 75 first-release (neruscroll)');
     expect(content).toContain('(d f) (macro C-A-S-M-f)');
-    expect(content).toContain('(j l) @nav-layer 150 first-release ()');
-    expect(content).toContain('(l k) @hyper-next 150 first-release ()');
-    expect(content).toContain('(k spc) @mouse-layer 150 first-release ()');
+    expect(content).toContain('(j l) @nav-layer 75 first-release (neruscroll)');
+    expect(content).toContain('(l k) @hyper-next 75 first-release ()');
+    expect(content).toContain('(k spc) @mouse-layer 75 first-release (neruscroll)');
     expect(content).toContain('(esc spc) XX 80 first-release ()');
-    expect(sculpt).toContain('(j l) @nav-layer 150 first-release ()');
-    expect(sculpt).toContain('(l k) @hyper-next 150 first-release ()');
-    expect(sculpt).toContain('(k spc) @mouse-layer 150 first-release ()');
+    expect(sculpt).toContain('(j l) @nav-layer 75 first-release (neruscroll)');
+    expect(sculpt).toContain('(l k) @hyper-next 75 first-release ()');
+    expect(sculpt).toContain('(k spc) @mouse-layer 75 first-release (neruscroll)');
     expect(sculpt).toContain('(esc spc) XX 80 first-release ()');
 
     for (const chords of [getActiveChords(content), getActiveChords(sculpt)]) {
@@ -179,7 +186,14 @@ describe('Kanata module', () => {
 
     expect(helper).toContain('Privacy_ListenEvent');
     expect(helper).toContain('Privacy_Accessibility');
+    expect(helper).toContain('macOS may ask for your password');
     expect(helper).toContain('/Library/LaunchDaemons/${label}.plist');
+    expect(helper).toContain('chown root:wheel');
+    expect(helper).toContain('chmod 644');
+    expect(helper).toContain('launchctl enable system/$label');
+    expect(helper).toContain("launchctl bootstrap system '$plist_path'");
+    expect(helper).toContain('launchctl kickstart -k system/$label');
+    expect(helper).toContain('launchctl kickstart -k "gui/$(id -u)/$label"');
     expect(helper).toContain('KANATA_TCP_PORT="5829"');
     expect(helper).toContain('KANATA_SCULPT_TCP_PORT="5830"');
     expect(helper).toContain('com.builtbywin.kanata-sculpt');
@@ -187,12 +201,20 @@ describe('Kanata module', () => {
     expect(helper).toContain('local.kanata-vk-agent-other');
     expect(helper).toContain('local.kanata-vk-agent-sculpt');
     expect(helper).toContain('Stop legacy Kanata helpers');
+    expect(helper).toContain('remove_legacy_launchdaemon');
+    expect(helper).toContain('remove_legacy_vk_agent_launchagent');
+    expect(helper).toContain("rm -f '$plist_path'");
+    expect(helper).toContain('rm -f "$plist_path"');
     expect(helper).toContain('brew install kanata-vk-agent');
     expect(helper).toContain('$HOME/Library/LaunchAgents');
     expect(helper).toContain('local.kanata-vk-agent');
     expect(helper).toContain('local.microsoft-sculpt-hidutil');
     expect(helper).toContain('Karabiner-DriverKit-VirtualHIDDevice');
     expect(helper).toContain('IOHIDDeviceOpen.*not permitted');
+    expect(helper).toContain('Next restart/login check:');
+    expect(helper).toContain('launchctl print system/$PLIST_LABEL');
+    expect(helper).toContain('launchctl print gui/$(id -u)/$VK_AGENT_LABEL');
+    expect(helper).toContain('bb kanata-setup');
     expect(shellFunctions).toContain('bb kanata-setup');
     expect(setupTs).toContain('setup-kanata-macos.sh');
   });
@@ -211,6 +233,16 @@ describe('Kanata module', () => {
     expect(content).toContain('terminal virtual key pressed: send `Ctrl+b`');
     expect(content).toContain('AutoHotkey only for Windows-only gaps');
     expect(content).toContain('bb kanata-setup');
+  });
+
+  it('provides a layer status helper for both Kanata daemons', () => {
+    const helper = fs.readFileSync(kanataLayerPath, 'utf-8');
+
+    expect(helper).toContain('PORTS = (5829, 5830)');
+    expect(helper).toContain('def current_layer(port: int)');
+    expect(helper).toContain('usage: kanata-layer <layer|status>');
+    expect(helper).toContain('action = current_layer if layer == "status"');
+    expect(helper).toContain('return 0 if all(ok for ok, _ in results) else 1');
   });
 
   it('offers Kanata in local setup as an app and managed config', () => {

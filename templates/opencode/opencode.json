@@ -43,6 +43,14 @@
       ],
       "enabled": true,
       "type": "local"
+    },
+    "cua-driver": {
+      "command": [
+        "/Users/winstonzhao/.local/bin/cua-driver",
+        "mcp"
+      ],
+      "enabled": true,
+      "type": "local"
     }
   }
 }

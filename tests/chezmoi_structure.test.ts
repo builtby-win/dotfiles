@@ -28,6 +28,16 @@ describe('chezmoi source tree', () => {
     expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/dot_config/tmux/executable_sesh-picker.sh'))).toBe(true);
   });
 
+  it('keeps Ghostty Catppuccin flavor consistent across platform paths', () => {
+    const xdgGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/config'), 'utf-8');
+    const macGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/config'), 'utf-8');
+
+    expect(xdgGhosttyConfig).toContain('theme = Catppuccin Frappe');
+    expect(macGhosttyConfig).toContain('theme = Catppuccin Frappe');
+    expect(macGhosttyConfig).not.toContain('Catppuccin Mocha');
+    expect(macGhosttyConfig).not.toContain('Catppuccin Latte');
+  });
+
   it('keeps the chezmoi zsh entrypoint free of hardcoded user paths', () => {
     const content = fs.readFileSync(zshEntryPath, 'utf-8');
     expect(content).toContain('shell/init.sh');

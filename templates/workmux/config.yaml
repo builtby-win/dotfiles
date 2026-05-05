@@ -1,16 +1,15 @@
 nerdfont: true
 merge_strategy: rebase
 window_prefix: wm-
-agent: opencode
 mode: session
 auto_name:
-  command: opencode run
+  command: command opencode run
 
 windows:
   - name: work
     panes:
       - {}
-      - command: opencode
+      - command: command opencode
         split: horizontal
         target: 0
         percentage: 50
