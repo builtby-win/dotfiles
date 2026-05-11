@@ -1144,6 +1144,64 @@ const CHEZMOI_TARGETS: Record<string, string[]> = {
     : [".config/ghostty/config"],
 };
 
+function formatHomePath(path: string): string {
+  return path.startsWith(HOME) ? path.replace(HOME, "~") : path;
+}
+
+function selectedManagedTargetPaths(configs: string[]): string[] {
+  const paths = new Set<string>();
+
+  if (configs.length > 0) {
+    paths.add(DOTFILES_PATH_FILE);
+  }
+
+  if (configs.includes("zsh")) {
+    paths.add(join(HOME, ".zshrc"));
+    paths.add(DOTFILES_LOCAL_SHELL_FILE);
+  }
+
+  if (configs.includes("tmux")) {
+    paths.add(join(HOME, ".tmux.conf"));
+    paths.add(WORKMUX_CONFIG_PATH);
+    paths.add(join(HOME, ".tmux", "plugins", "tpm"));
+  }
+
+  for (const config of configs) {
+    for (const target of CHEZMOI_TARGETS[config] ?? []) {
+      paths.add(join(HOME, target));
+    }
+  }
+
+  return [...paths].sort();
+}
+
+function selectedAIConfigPaths(configs: string[]): string[] {
+  const paths = new Set<string>();
+
+  for (const config of configs) {
+    const configInfo = AI_CONFIGS[config];
+    if (!configInfo) continue;
+
+    const targetDir = join(HOME, configInfo.targetDir ?? `.${config}`);
+    for (const template of configInfo.templates) {
+      paths.add(join(targetDir, template));
+    }
+  }
+
+  return [...paths].sort();
+}
+
+function printPathList(paths: string[], emptyMessage: string): void {
+  if (paths.length === 0) {
+    console.log(`    ${colors.dim}${emptyMessage}${colors.reset}`);
+    return;
+  }
+
+  for (const path of paths) {
+    console.log(`    ${colors.dim}${formatHomePath(path)}${colors.reset}`);
+  }
+}
+
 function upsertZshrcMergeBlock(content: string): string {
   const block = [
     ZSHRC_MARKER_START,
@@ -2225,48 +2283,48 @@ async function runSetup(): Promise<void> {
                              detectedFeaturesList.length > 0;
 
     console.log(`${colors.cyan}${colors.bold}Welcome to builtby.win/dotfiles!${colors.reset}`);
-    console.log(`${colors.dim}This interactive setup will help you configure your development environment.${colors.reset}`);
+    console.log(`${colors.dim}Pick a starting point. You will review the exact changes before optional tools are installed.${colors.reset}`);
     console.log("");
 
     const firstRunChoices = [];
     
     if (hasDetectedItems) {
       firstRunChoices.push({ 
-        name: `🚀 Use Detected Setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`, 
+        name: `↻ Use Detected Setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`,
         value: "use_detected",
-        description: "Adopts the apps and configs already found on your system."
+        description: "Keeps the tools and configs already found on this machine."
       });
     }
     
     firstRunChoices.push({ 
-      name: "🚀 Focused Setup (Back2Vibing)", 
+      name: "🚀 Focused Setup - full AI/dev workflow",
       value: "focus",
-      description: "Optimized for productivity: Installs Back2Vibing, tmux, sesh, fzf, and Ghostty."
+      description: "Installs Back2Vibing, tmux, sesh, fzf, Ghostty, and shell polish."
     });
     
     firstRunChoices.push({ 
-      name: "⭐ Standard Setup (Recommended)", 
+      name: "⭐ Standard Setup - recommended default",
       value: "standard",
-      description: "Fast track: Installs the 'bb' helper, core aliases, and essential CLI tools (tmux, fzf, etc)."
+      description: "Adds the bb helper, aliases, tmux, fzf, editor defaults, and core CLI tools."
     });
 
     firstRunChoices.push({ 
-      name: "🌱 Minimal Setup (Shell only)", 
+      name: "🌱 Minimal Setup - shell foundation only",
       value: "minimal",
-      description: "Just the foundation: Installs aliases, 'bb' helper, starship, and shell config."
+      description: "Sets up zsh, aliases, starship, fzf, and zoxide without app installs."
     });
     
     firstRunChoices.push({ 
-      name: "🛠️  Custom Setup", 
+      name: "🛠️  Custom Setup - choose each item",
       value: "customize",
-      description: "Pick and choose exactly which apps, configs, and features you want."
+      description: "Walk through every app, config, and optional feature before installing."
     });
 
     // Support --focus flag and bootstrap handoff
     const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));
     const isFocusFlag = process.argv.includes("--focus");
     const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : await select({
-      message: "How would you like to proceed?",
+      message: "Choose your setup path:",
       choices: firstRunChoices,
       default: hasDetectedItems ? "use_detected" : "standard",
     }));
@@ -2573,9 +2631,29 @@ async function runSetup(): Promise<void> {
       }
 
       console.log("");
+      console.log(`  ${colors.bold}Will modify or create:${colors.reset}`);
+      printPathList(
+        [
+          ...selectedManagedTargetPaths(selectedManagedConfigs),
+          ...selectedAIConfigPaths(aiConfigs),
+          manifest.getManifestPath(),
+        ],
+        "No file changes selected"
+      );
+
+      console.log(`  ${colors.bold}Backups:${colors.reset}`);
+      console.log(`    ${colors.dim}The setup dashboard backs up managed files before optional replacements.${colors.reset}`);
+      console.log(`    ${colors.dim}Restore later from: bb setup → Revert to backups${colors.reset}`);
+
+      if (appsToInstallCount === 0 && configsToInstallCount === 0 && aiConfigs.length === 0) {
+        console.log(`  ${colors.bold}Already installed:${colors.reset}`);
+        console.log(`    ${colors.dim}Selected apps/configs already appear to be present; setup will refresh the manifest and shell checks.${colors.reset}`);
+      }
+
+      console.log("");
 
       const proceed = await confirm({
-        message: "Proceed with these selections?",
+        message: "Apply these installs and file changes?",
         default: true,
       });
 
@@ -2652,13 +2730,12 @@ async function runSetup(): Promise<void> {
   console.log(`  ${colors.bold}Next steps:${colors.reset}`);
   console.log(`  1. ${colors.cyan}exec zsh${colors.reset} (or open a new terminal)`);
   console.log(`  2. Try the dotfiles helper: ${colors.cyan}bb help${colors.reset}`);
+  console.log(`  3. Change or restore setup later: ${colors.cyan}bb setup${colors.reset}`);
   console.log("");
 
   const bootstrapCommand = getCurrentPlatform() === "linux" ? "./bootstrap-linux.sh" : "./bootstrap.sh";
   console.log(`${colors.dim}  To update manually: cd ${DOTFILES_DIR} && git pull && ${bootstrapCommand}${colors.reset}`);
-  console.log(`${colors.dim}  To revert or change: bb setup (revert option in main menu)${colors.reset}`);
-
-  printAdBanner();
+  console.log(`${colors.dim}  Setup manifest: ${manifest.getManifestPath()}${colors.reset}`);
 }
 
 async function main(): Promise<void> {

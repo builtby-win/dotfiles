@@ -38,6 +38,35 @@ print_debug() {
   echo -e "${CYAN}[debug]${NC} $1"
 }
 
+confirm_install_plan() {
+  if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
+    return 0
+  fi
+
+  echo ""
+  echo -e "${BOLD}Before anything changes, here is the plan:${NC}"
+  echo "  1. Use this folder for the dotfiles repo: $DOTFILES_DIR"
+  echo "  2. Install or reuse the required tools: Git, curl, unzip, chezmoi, fnm, Node.js, and pnpm"
+  echo "  3. Apply the base chezmoi-managed shell/config files"
+  echo "  4. Open an interactive setup dashboard where you review optional commands and configs"
+  echo ""
+  echo -e "${BOLD}Safety:${NC} the setup dashboard backs up managed files before optional replacements."
+  echo "You can later change selections or restore backups from: bb setup"
+  echo ""
+  read -r -p "Continue with this install? [Y/n] " confirm < /dev/tty || {
+    print_error "Cannot read from terminal. Make sure you're running this script interactively."
+    exit 1
+  }
+  case "$confirm" in
+    ""|y|Y|yes|YES)
+      ;;
+    *)
+      print_error "Aborted before making changes."
+      exit 1
+      ;;
+  esac
+}
+
 REPO_URL="https://github.com/builtby-win/dotfiles.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd 2>/dev/null || echo "")"
 LINUX_PKG_MANAGER=""
@@ -139,6 +168,8 @@ if [[ -n "$SETUP_PATH" ]]; then
   print_debug "Setup path override: ${SETUP_PATH}"
 fi
 
+confirm_install_plan
+
 mkdir -p "$DOTFILES_DIR" || { print_error "Failed to create ${DOTFILES_DIR}"; exit 1; }
 
 ensure_command git git
@@ -182,7 +213,7 @@ fi
 
 cd "$DOTFILES_DIR"
 
-print_step "Setting up Node.js environment..."
+print_step "[1/4] Preparing required installer tools..."
 
 if ! command -v fnm >/dev/null 2>&1; then
   command -v unzip >/dev/null 2>&1 || install_packages unzip
@@ -216,21 +247,23 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 print_success "pnpm ready"
 
-print_step "Installing dependencies..."
+print_step "[2/4] Installing project dependencies..."
 pnpm install --silent || {
   print_error "pnpm install failed"
   print_error "This often means disk space ran out or the bootstrap environment is incomplete"
   print_error "Check available space with: df -h"
   print_error "Try running manually: cd $DOTFILES_DIR && pnpm install"
+  print_error "Then resume with: cd $DOTFILES_DIR && ./bootstrap-linux.sh"
   exit 1
 }
 print_success "Dependencies installed"
 
 echo ""
-print_step "Applying chezmoi-managed dotfiles"
+print_step "[3/4] Applying base dotfiles"
 
 if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
   print_error "chezmoi apply failed"
+  print_error "Fix the message above, then resume with: cd $DOTFILES_DIR && ./bootstrap-linux.sh"
   exit 1
 fi
 print_success "Chezmoi dotfiles applied"
@@ -238,7 +271,7 @@ print_success "Chezmoi dotfiles applied"
 if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
   print_warning "Skipping interactive setup in non-interactive mode"
 else
-  print_step "Launching interactive dotfiles setup..."
+  print_step "[4/4] Opening interactive setup dashboard..."
   TSX_BIN="./node_modules/.bin/tsx"
   SETUP_ARGS=( "$DOTFILES_DIR" )
   if [[ -n "$SETUP_PATH" ]]; then

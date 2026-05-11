@@ -4,13 +4,25 @@ Fast, modular dotfiles with interactive setup, curated macOS app backups, and a 
 
 ## Quick install
 
+The macOS and Linux install commands are meant to be run in a terminal. They explain the plan before changing files, then ask you to confirm.
+
+What happens during install:
+
+1. The dotfiles repo is cloned or updated, usually at `~/dotfiles`.
+2. Required installer tools are installed or reused: Git, Homebrew or your Linux package manager, chezmoi, Node.js, and pnpm.
+3. The base shell/config files are applied with chezmoi.
+4. An interactive setup dashboard opens so you can choose apps, configs, and optional features.
+5. Before optional dashboard changes are applied, the dashboard shows what will be installed, which files may change, and how to restore backups.
+
+The setup dashboard backs up managed files before optional replacements. After install, run `bb setup` to change selections or restore backups.
+
 macOS:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
 ```
 
-This installs dependencies, clones the repo, then applies the base chezmoi state by default.
+This installs dependencies, clones the repo, applies the base chezmoi state, then opens the interactive setup dashboard.
 
 Linux:
 
@@ -26,6 +38,8 @@ irm https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.ps1 | 
 
 More details in `WINDOWS_README.md`.
 
+Windows uses a separate PowerShell flow. Follow `WINDOWS_README.md` for the exact prompts and recovery steps.
+
 The default bootstrap applies the chezmoi-managed source state, then launches the interactive setup when run from an interactive terminal.
 
 ## After install
@@ -39,29 +53,31 @@ bb help
 `bb` is a lightweight wrapper that makes common tasks discoverable.
 If `bb` is not found, run `bash scripts/apply-chezmoi.sh` and restart your shell.
 
+If something looks wrong, run `bb setup` and choose the revert option. The installer records backups and the setup manifest under `~/.config/dotfiles/`.
+
 ## Setup paths
 
-These paths select interactive setup defaults after the chezmoi apply step.
+These paths select interactive setup defaults after the base chezmoi apply step. You still get a review screen before optional installs or file changes happen.
 
 **🚀 Focused Setup (Back2Vibing):**
-Optimized for AI developers. Installs Back2Vibing, tmux, sesh, fzf, and Ghostty terminal.
+Full AI/dev workflow. Installs Back2Vibing, tmux, sesh, fzf, Ghostty terminal, and shell polish.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --focus
 ```
 
 **⭐ Standard Setup (Recommended):**
-Installs the `bb` helper, core aliases, and essential CLI tools.
+Recommended default. Installs the `bb` helper, core aliases, tmux, fzf, editor defaults, and essential CLI tools.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --setup-path standard
 ```
 
 **🌱 Minimal Setup (Shell only):**
-Just the foundation: aliases, `bb` helper, starship, and shell config.
+Shell foundation only: zsh config, aliases, `bb` helper, starship, fzf, and zoxide. Use this if you want the lowest-change install.
 
 **🛠️ Custom Setup:**
-Pick and choose exactly which apps, configs, and features you want.
+Walk through each app, config, and optional feature manually.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --setup-path customize

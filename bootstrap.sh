@@ -51,6 +51,31 @@ print_debug() {
   echo -e "${CYAN}[DEBUG]${NC} $1"
 }
 
+confirm_install_plan() {
+  echo ""
+  echo -e "${BOLD}Before anything changes, here is the plan:${NC}"
+  echo "  1. Use this folder for the dotfiles repo: $DOTFILES_DIR"
+  echo "  2. Install or reuse the required tools: Homebrew, Git, chezmoi, fnm, Node.js, and pnpm"
+  echo "  3. Apply the base chezmoi-managed shell/config files"
+  echo "  4. Open an interactive setup dashboard where you review optional apps and configs"
+  echo ""
+  echo -e "${BOLD}Safety:${NC} the setup dashboard backs up managed files before optional replacements."
+  echo "You can later change selections or restore backups from: bb setup"
+  echo ""
+  read -r -p "Continue with this install? [Y/n] " confirm < /dev/tty || {
+    print_error "Cannot read from terminal. Make sure you're running this script interactively."
+    exit 1
+  }
+  case "$confirm" in
+    ""|y|Y|yes|YES)
+      ;;
+    *)
+      print_error "Aborted before making changes."
+      exit 1
+      ;;
+  esac
+}
+
 resolve_brew_bin() {
   if [[ -x "/opt/homebrew/bin/brew" ]]; then
     echo "/opt/homebrew/bin/brew"
@@ -149,6 +174,8 @@ read -r -p "> " DOTFILES_DIR < /dev/tty || {
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
 print_debug "Install directory: $DOTFILES_DIR"
+
+confirm_install_plan
 
 # Create directory if it doesn't exist
 if ! mkdir -p "$DOTFILES_DIR" 2>/dev/null; then
@@ -250,7 +277,7 @@ print_debug "Changing to directory: $DOTFILES_DIR"
 cd "$DOTFILES_DIR" || { print_error "Failed to cd into $DOTFILES_DIR"; exit 1; }
 
 echo ""
-print_step "[1/3] Installing dependencies..."
+print_step "[1/4] Preparing required installer tools..."
 
 # Install Homebrew if not present
 print_debug "Checking for homebrew..."
@@ -337,7 +364,7 @@ else
 fi
 
 echo ""
-print_step "[2/3] Installing dependencies..."
+print_step "[2/4] Installing project dependencies..."
 print_debug "Running: pnpm install"
 if pnpm install --silent; then
   print_success "Dependencies installed"
@@ -346,22 +373,24 @@ else
   print_error "This often means disk space ran out or the bootstrap environment is incomplete"
   print_error "Check available space with: df -h"
   print_error "Try running manually: cd $DOTFILES_DIR && pnpm install"
+  print_error "Then resume with: cd $DOTFILES_DIR && ./bootstrap.sh"
   exit 1
 fi
 
 echo ""
-print_step "[3/3] Applying chezmoi-managed dotfiles..."
+print_step "[3/4] Applying base dotfiles..."
 echo ""
 
 print_debug "Applying chezmoi source state..."
 if ! bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh"; then
   print_error "chezmoi apply failed"
+  print_error "Fix the message above, then resume with: cd $DOTFILES_DIR && ./bootstrap.sh"
   exit 1
 fi
 print_success "Chezmoi dotfiles applied!"
 
 echo ""
-print_step "Launching interactive dotfiles setup..."
+print_step "[4/4] Opening interactive setup dashboard..."
 TSX_BIN="./node_modules/.bin/tsx"
 SETUP_ARGS=( "$DOTFILES_DIR" )
 if [[ -n "$SETUP_PATH" ]]; then

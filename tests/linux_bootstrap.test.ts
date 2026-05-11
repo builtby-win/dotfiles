@@ -146,7 +146,7 @@ describe('Linux bootstrap workflow', () => {
 
     expect(macBootstrap).not.toContain('How would you like to proceed with setup?');
     expect(linuxBootstrap).not.toContain('How would you like to proceed with setup?');
-    expect(setupContent).toContain('message: "How would you like to proceed?"');
+    expect(setupContent).toContain('message: "Choose your setup path:"');
   });
 
   it('only passes setup path handoff flags when bootstrap gets an explicit path', () => {
@@ -165,18 +165,54 @@ describe('Linux bootstrap workflow', () => {
 
   it('documents the default install as applying the base chezmoi state', () => {
     const content = fs.readFileSync(readmePath, 'utf-8');
-    expect(content).toContain('This installs dependencies, clones the repo, then applies the base chezmoi state by default.');
+    expect(content).toContain('This installs dependencies, clones the repo, applies the base chezmoi state, then opens the interactive setup dashboard.');
     expect(content).not.toContain('legacy stow/setup lane');
+  });
+
+  it('explains the install plan and recovery path for first-time users', () => {
+    const readme = fs.readFileSync(readmePath, 'utf-8');
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(readme).toContain('What happens during install:');
+    expect(readme).toContain('The setup dashboard backs up managed files before optional replacements.');
+    expect(macBootstrap).toContain('Before anything changes, here is the plan:');
+    expect(linuxBootstrap).toContain('Before anything changes, here is the plan:');
+    expect(macBootstrap).toContain('Continue with this install? [Y/n]');
+  });
+
+  it('uses clear four-phase bootstrap progress labels', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('[1/4] Preparing required installer tools');
+    expect(macBootstrap).toContain('[2/4] Installing project dependencies');
+    expect(macBootstrap).toContain('[3/4] Applying base dotfiles');
+    expect(macBootstrap).toContain('[4/4] Opening interactive setup dashboard');
+    expect(linuxBootstrap).toContain('[1/4] Preparing required installer tools');
+    expect(linuxBootstrap).toContain('[4/4] Opening interactive setup dashboard');
+  });
+
+  it('shows safety and recovery context in the setup review and success screens', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('Pick a starting point. You will review the exact changes before optional tools are installed.');
+    expect(content).toContain('Will modify or create:');
+    expect(content).toContain('DOTFILES_PATH_FILE');
+    expect(content).toContain('WORKMUX_CONFIG_PATH');
+    expect(content).toContain('Restore later from: bb setup');
+    expect(content).toContain('Apply these installs and file changes?');
+    expect(content).toContain('Change or restore setup later:');
   });
 
   it('hands off to interactive setup after the base chezmoi apply in interactive bootstrap runs', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
-    expect(macBootstrap).toContain('print_step "Launching interactive dotfiles setup..."');
+    expect(macBootstrap).toContain('print_step "[4/4] Opening interactive setup dashboard..."');
     expect(macBootstrap).toContain('print_success "Interactive setup complete!"');
     expect(macBootstrap).toContain('setup.ts "${SETUP_ARGS[@]}" < /dev/tty');
-    expect(linuxBootstrap).toContain('print_step "Launching interactive dotfiles setup..."');
+    expect(linuxBootstrap).toContain('print_step "[4/4] Opening interactive setup dashboard..."');
     expect(linuxBootstrap).toContain('print_success "Interactive setup complete"');
     expect(linuxBootstrap).toContain('setup.ts "${SETUP_ARGS[@]}" < /dev/tty');
   });

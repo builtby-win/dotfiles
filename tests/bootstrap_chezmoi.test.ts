@@ -21,8 +21,8 @@ describe('chezmoi-first bootstrap contract', () => {
     const macContent = fs.readFileSync(macBootstrapPath, 'utf-8');
     const linuxContent = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
-    expect(macContent).toContain('Applying chezmoi-managed dotfiles');
-    expect(linuxContent).toContain('Applying chezmoi-managed dotfiles');
+    expect(macContent).toContain('Applying base dotfiles');
+    expect(linuxContent).toContain('Applying base dotfiles');
   });
 
   it('does not expose legacy bootstrap modes', () => {
