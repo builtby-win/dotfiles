@@ -26,7 +26,8 @@ SCULPT_HIDUTIL_LABEL="local.microsoft-sculpt-hidutil"
 # keys when the matching bundle ID is frontmost.
 TERMINAL_BUNDLE_IDS="com.mitchellh.ghostty,com.googlecode.iterm2,com.apple.Terminal,dev.warp.Warp-Stable,net.kovidgoyal.kitty,org.alacritty,io.alacritty,com.github.wez.wezterm,com.cmuxterm.app"
 EDITOR_BUNDLE_IDS="dev.zed.Zed,com.microsoft.VSCode,com.todesktop.230313mzl4w4u92"
-VK_AGENT_BUNDLE_IDS="${TERMINAL_BUNDLE_IDS},${EDITOR_BUNDLE_IDS}"
+BROWSER_BUNDLE_IDS="com.vivaldi.Vivaldi"
+VK_AGENT_BUNDLE_IDS="${TERMINAL_BUNDLE_IDS},${EDITOR_BUNDLE_IDS},${BROWSER_BUNDLE_IDS}"
 ADMIN_PROMPT_EXPLAINED=0
 
 step() {

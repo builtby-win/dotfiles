@@ -1,59 +1,86 @@
 #!/usr/bin/env python3
-"""Switch all local Kanata daemons to a layer over their TCP sockets."""
+"""Switch all local Kanata daemons to a layer over their TCP sockets.
+
+Performance notes:
+- Both daemons are contacted in parallel via threads. Sequential connects added
+  unnecessary latency on the hot path used by Neru's idle hooks.
+- We never do a probe `recv()` after connect. Kanata's TCP server only emits
+  events when a layer change happens; on a fresh connection there is nothing
+  to drain, so the old probe just burned the full socket timeout (~1s/port).
+- Timeout is short on purpose. If kanata is healthy the round-trip is well
+  under 50ms; anything beyond ~250ms means the daemon is wedged or absent and
+  we should fail loudly rather than block the caller (Neru, hot keys, etc).
+"""
 
 from __future__ import annotations
 
 import json
 import socket
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 
 PORTS = (5829, 5830)
-TIMEOUT_SECONDS = 1.0
+TIMEOUT_SECONDS = 0.25
 
 
-def send_payload(port: int, payload: dict[str, object]) -> tuple[bool, str]:
+def send_payload(port: int, payload: dict[str, object], match: str) -> tuple[bool, str]:
+    """Send `payload` to the kanata daemon on `port` and return the first
+    newline-delimited message containing `match`.
+
+    Kanata's TCP server is event-driven: it emits a `LayerChange` event to all
+    connected clients at connect time and on every layer switch. That means
+    the first frame we read after connect is often noise (the connect-time
+    broadcast). We loop until we find a frame that matches the caller's
+    expected substring or the per-call timeout fires.
+    """
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=TIMEOUT_SECONDS) as conn:
             conn.settimeout(TIMEOUT_SECONDS)
-            try:
-                conn.recv(4096)
-            except TimeoutError:
-                pass
-
             conn.sendall((json.dumps(payload, separators=(",", ":")) + "\n").encode("utf-8"))
-            try:
-                response = conn.recv(4096).decode("utf-8", errors="replace").strip()
-            except TimeoutError:
-                response = ""
+
+            buffer = b""
+            last_frame = ""
+            while True:
+                try:
+                    chunk = conn.recv(4096)
+                except TimeoutError:
+                    break
+                if not chunk:
+                    break
+                buffer += chunk
+                while b"\n" in buffer:
+                    line, buffer = buffer.split(b"\n", 1)
+                    frame = line.decode("utf-8", errors="replace").strip()
+                    if not frame:
+                        continue
+                    last_frame = frame
+                    if match in frame:
+                        return True, frame
     except OSError as exc:
         return False, f"port {port}: {exc}"
 
-    return True, response
+    return False, f"port {port}: no matching response (last: {last_frame!r})"
 
 
 def current_layer(port: int) -> tuple[bool, str]:
-    ok, response = send_payload(port, {"RequestCurrentLayerName": {}})
+    ok, response = send_payload(port, {"RequestCurrentLayerName": {}}, "CurrentLayerName")
     if not ok:
         return False, response
-    if '"name"' in response:
-        return True, f"port {port}: {response}"
-    return False, f"port {port}: unexpected response {response!r}"
+    return True, f"port {port}: {response}"
 
 
 def change_layer(port: int, layer: str) -> tuple[bool, str]:
-    ok, response = send_payload(port, {"ChangeLayer": {"new": layer}})
+    # Kanata acks a ChangeLayer with a `LayerChange` event whose `new` field
+    # is the requested layer. That broadcast IS the confirmation; no second
+    # round-trip needed (the old verify step doubled latency on Neru's hot
+    # exit-hook path).
+    ok, response = send_payload(
+        port, {"ChangeLayer": {"new": layer}}, f'"new":"{layer}"'
+    )
     if not ok:
         return False, response
-
-    if f'"new":"{layer}"' in response:
-        return True, f"port {port}: {response}"
-
-    ok, verify_message = current_layer(port)
-    if ok and f'"name":"{layer}"' in verify_message:
-        return True, verify_message
-
-    return False, f"port {port}: unexpected response {response!r}"
+    return True, f"port {port}: {response}"
 
 
 def main() -> int:
@@ -63,7 +90,12 @@ def main() -> int:
 
     layer = sys.argv[1]
     action = current_layer if layer == "status" else lambda port: change_layer(port, layer)
-    results = [action(port) for port in PORTS]
+
+    # Fan out to both daemons concurrently; otherwise the slower port adds its
+    # full latency on top of the faster one.
+    with ThreadPoolExecutor(max_workers=len(PORTS)) as pool:
+        results = list(pool.map(action, PORTS))
+
     failures = [message for ok, message in results if not ok]
     successes = [message for ok, message in results if ok]
 

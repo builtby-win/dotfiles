@@ -21,6 +21,9 @@
 ;; - Plain Kanata can filter devices, but it cannot do Karabiner-style per-device
 ;;   `device_if` mappings inside one active macOS config. This filtered profile is
 ;;   why Sculpt can have different modifiers without changing other keyboards.
+;; - Behavior shared with kanata.kbd lives in kanata-shared.kbd, included at the
+;;   bottom of this file. Keep `deflayer base` first so it remains the starting
+;;   layer.
 
 (defcfg
   macos-dev-names-include (
@@ -28,142 +31,29 @@
   )
   process-unmapped-keys yes
   concurrent-tap-hold yes
+  chords-v2-min-idle 100
 )
 
+;; One-shot modifier aliases. Kept per-profile because Sculpt deliberately
+;; remaps `os-rsft` to lsft (the receiver reports right-shift differently from
+;; other keyboards).
 (defalias
-  ;; Tap Menu/Application for next-key Hyper; hold for held Hyper.
-  ;; Meta is Cmd on macOS.
-  hyper (multi lctl lalt lsft lmet reverse-release-order)
   os-ctl (one-shot-press-pcancel 1000 lctl)
   os-sft (one-shot-press-pcancel 1000 lsft)
   os-alt (one-shot-press-pcancel 1000 lalt)
   os-cmd (one-shot-press-pcancel 1000 lmet)
   os-rctl (one-shot-press-pcancel 1000 rctl)
-  os-rsft (one-shot-press-pcancel 1000 rsft)
+  os-rsft (one-shot-press-pcancel 1000 lsft)
   os-ralt (one-shot-press-pcancel 1000 ralt)
   os-rcmd (one-shot-press-pcancel 1000 rmet)
-  ;; One-shot the actual Hyper chord; one-shot layers can be consumed by tap-hold
-  ;; release events before the intended next key.
-  hyper-next (one-shot-press-pcancel 2000 C-A-S-lmet)
-  hyper-key (tap-hold 200 200 @hyper-next @hyper)
-  ;; Tap Caps for Escape, hold for Control.
-  cap (tap-hold 200 200 esc lctl)
-  ;; Hold Fn for raw function keys; tap/hold otherwise acts as Control.
-  fn (tap-hold 200 200 lctl (layer-while-held fn))
-  ;; Double-tap semicolon for AltTab's Ctrl+Option+Tab shortcut.
-  semi (tap-dance 200 (; (macro C-A-tab)))
-  ;; Hold j then press Space for steady Backspace repeat; right-hand rolls still emit j.
-  j-home (tap-hold-tap-keys 200 200 j (layer-while-held jheld) (y u i o p h j k l ; n m , . /))
-  ;; In GUI editors with Vim mode, keep j raw so holding it repeats normally.
-  editor-j (switch
-    ((input virtual dev.zed.Zed)) j break
-    ((input virtual com.microsoft.VSCode)) j break
-    ((input virtual com.todesktop.230313mzl4w4u92)) j break
-    () @j-home break
-  )
-  bksp-repeat (macro-repeat-release-cancel bspc 85)
-  nav-layer (layer-while-held nav)
-  mouse-layer (layer-while-held mouse)
-  mm-up (movemouse-accel-up 1 1000 1 5)
-  mm-down (movemouse-accel-down 1 1000 1 5)
-  mm-left (movemouse-accel-left 1 1000 1 5)
-  mm-right (movemouse-accel-right 1 1000 1 5)
-  mw-up (mwheel-up 50 120)
-  mw-down (mwheel-down 50 120)
-  mw-left (mwheel-left 50 120)
-  mw-right (mwheel-right 50 120)
-  ;; Shared tmux/psmux leader action used by app-aware chords.
-  leader (macro C-b)
-  ;; App-aware aliases should keep their switch logic here and expose semantic
-  ;; names to chord definitions. Keep terminal bundle IDs mirrored with
-  ;; defvirtualkeys below and scripts/setup-kanata-macos.sh.
-  ;; Outside terminals, j+k arms the Cmd layer for the next keypress only.
-  ;; The timeout is just a safety cap if no next key arrives.
-  cmd-next (one-shot 2000 (layer-while-held cmd))
-  terminal-leader-or-cmd-layer (switch
-    ((input virtual com.mitchellh.ghostty)) @leader break
-    ((input virtual com.googlecode.iterm2)) @leader break
-    ((input virtual com.apple.Terminal)) @leader break
-    ((input virtual dev.warp.Warp-Stable)) @leader break
-    ((input virtual net.kovidgoyal.kitty)) @leader break
-    ((input virtual org.alacritty)) @leader break
-    ((input virtual io.alacritty)) @leader break
-    ((input virtual com.github.wez.wezterm)) @leader break
-    ((input virtual com.cmuxterm.app)) @leader break
-    () @cmd-next break
-  )
-  ;; j+k is terminal-aware when kanata-vk-agent has pressed one of the terminal
-  ;; app virtual keys. Outside terminals, it arms Cmd for the next keypress.
-  jk @terminal-leader-or-cmd-layer
-)
-
-(defvirtualkeys
-  com.mitchellh.ghostty nop0
-  com.googlecode.iterm2 nop0
-  com.apple.Terminal nop0
-  dev.warp.Warp-Stable nop0
-  net.kovidgoyal.kitty nop0
-  org.alacritty nop0
-  io.alacritty nop0
-  com.github.wez.wezterm nop0
-  com.cmuxterm.app nop0
-  dev.zed.Zed nop0
-  com.microsoft.VSCode nop0
-  com.todesktop.230313mzl4w4u92 nop0
-)
-
-(defsrc
-  lctl lsft lalt lmet ralt rmet rctl rsft menu caps fn del ; tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
 )
 
 (deflayer base
-  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
-)
-
-(deflayer hyperlayer
-  _ _ _ _ _ _ _ _ _ _ _ _ _ C-A-S-M-tab C-A-S-M-grv C-A-S-M-esc C-A-S-M-spc C-A-S-M-h C-A-S-M-j C-A-S-M-k C-A-S-M-l C-A-S-M-u C-A-S-M-d C-A-S-M-a C-A-S-M-e C-A-S-M-w C-A-S-M-b C-A-S-M-f C-A-S-M-c C-A-S-M-v C-A-S-M-x C-A-S-M-z C-A-S-M-q C-A-S-M-m C-A-S-M-r C-A-S-M-t C-A-S-M-y C-A-S-M-i C-A-S-M-o C-A-S-M-p C-A-S-M-s C-A-S-M-g C-A-S-M-n C-A-S-M-4 C-A-S-M-f1 C-A-S-M-f2 C-A-S-M-f3 C-A-S-M-f4 C-A-S-M-f5 C-A-S-M-f6 C-A-S-M-f7 C-A-S-M-f8 C-A-S-M-f9 C-A-S-M-f10 C-A-S-M-f11 C-A-S-M-f12
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o @viap s g @vian 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer cmd
-  _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ _ M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _
-)
-
-(deflayer fn
-  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
-)
-
-(deflayermap (nav)
-  h left
-  j down
-  k up
-  l rght
-  u pgup
-  d pgdn
-  a M-left
-  e M-rght
-  w A-rght
-  b A-left
-  esc esc
-  spc XX
-)
-
-(deflayermap (mouse)
-  h @mm-left
-  j @mm-down
-  k @mm-up
-  l @mm-right
-  u @mw-up
-  d @mw-down
-  a @mw-left
-  e @mw-right
-  spc mlft
-  ; mrgt
-  m mmid
-  esc esc
-)
-
-(deflayermap (jheld)
-  spc @bksp-repeat
+  _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _
 )
 
 ;; Neru scroll mode needs raw, repeatable motion keys. Keep j out of its
@@ -172,14 +62,20 @@
   @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
+(deflayer nerumode
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn (multi esc (layer-switch base)) @semi tab grv (multi esc (layer-switch base)) (multi spc (layer-switch base)) h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+)
+
 ;; fj, dk, and sl are intentionally reserved for future layers and remain unmapped in this pass.
 (defchordsv2
   ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
   ;; sequences stay plain text unless the keys are truly simultaneous.
-  (j k) @jk 75 first-release (neruscroll)
-  (d f) (macro C-A-S-M-f) 75 first-release ()
-  (j l) @nav-layer 75 first-release (neruscroll)
-  (l k) @hyper-next 75 first-release ()
-  (k spc) @mouse-layer 75 first-release (neruscroll)
-  (esc spc) XX 80 first-release ()
+  (f j) @neru 100 first-release (nerumode)
+  (j l) @nudge 100 first-release (nerumode)
+  (d k) @scroll 100 first-release (nerumode)
+  (d f) @hints 100 first-release (nerumode)
+  (j k) @jk 100 first-release (neruscroll nerumode)
+  (esc spc) XX 80 first-release (nerumode)
 )
+
+(include kanata-shared.kbd)
