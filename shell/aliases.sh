@@ -21,6 +21,9 @@ alias -g ......='../../../../..'
 # Quick shortcuts
 alias -- -='cd -'  # Go to previous directory
 alias fuck="rm -rf"
+# Copy current working directory to clipboard
+alias cwd="pwd | tr -d '\n' | pbcopy"
+
 # Reload shell config
 if [[ -n "$ZSH_VERSION" ]]; then
   alias rc="source ~/.zshrc"
@@ -30,6 +33,9 @@ fi
 
 # Common shortcuts
 alias redo="sudo !!"
+
+# Zed - default to opening current directory
+zed() { command zed "${@:-.}"; }
 
 # CLI tool shortcuts
 claude() {
@@ -73,9 +79,44 @@ alias unwip="git reset --soft HEAD~1"
 alias vibe="back2vibing"
 alias vb="back2vibing"
 
+# Kanata
+alias kr="sudo launchctl kickstart -k system/com.builtbywin.kanata && sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt"
+alias ks="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts"
+alias ksr="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts reload"
+
 # Ship it!
 alias shipit='echo "       _~\n    _~ )_)_~\n    )_))_))_)\n    _!__!__!_\n    \______t/\n  ~~~~~~~~~~~~~" && git push origin $(git rev-parse --abbrev-ref HEAD 2> /dev/null)'
 alias SHIPIT='echo "       _~\n    _~ )_)_~\n    )_))_))_)\n    _!__!__!_\n    \______t/\n  ~~~~~~~~~~~~~" && git push --force-with-lease origin $(git rev-parse --abbrev-ref HEAD 2> /dev/null)'
+
+# Git shorthand (g* prefix convention)
+alias gs='git status'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gl='git log --oneline --graph'
+alias gll='git log --oneline --graph --all'
+alias gco='git checkout'
+alias gcob='git checkout -b'
+alias gp='git push'
+alias gpf='git push --force-with-lease'
+alias gpl='git pull'
+alias ga='git add'
+alias gaa='git add -A'
+alias gci='git commit'
+alias gcia='git commit --amend --no-verify'
+alias grb='git rebase'
+alias grbc='git rebase --continue'
+alias grba='git rebase --abort'
+alias grbi='git rebase -i'
+alias gcp='git cherry-pick'
+alias grs='git reset'
+alias grh='git reset --hard'
+alias gst='git stash'
+alias gsta='git stash apply'
+alias gstp='git stash pop'
+alias gmg='git merge'
+alias gbl='git blame'
+alias grv='git revert'
+alias gplom='git pull origin main'
 
 # Directory jumping (zoxide)
 alias d="z"

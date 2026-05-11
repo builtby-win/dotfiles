@@ -8,7 +8,11 @@ should_exit_after_passthrough = false
 "Primary+Shift+C" = "__disabled__"
 "Primary+Shift+S" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+K" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
+"Cmd+Ctrl+Alt+Shift+F" = "hints"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
+"Cmd+Ctrl+Alt+Shift+Space" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+'" = "grid --cursor-selection-mode follow"
 
@@ -32,11 +36,14 @@ parallel_threshold = 20
 detect_mission_control = false
 
 [hints.hotkeys]
-"Escape" = "idle"
+# Every path that ends in `idle` also resets the Kanata layer so the
+# fj/dk/jl/df chord doesn't leave us stuck in `nerumode`. Neru has no
+# global on-idle hook, so we have to do this per binding.
+"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
 "Backspace" = "action backspace"
-"Return" = ["action left_click", "idle"]
-"Shift+L" = ["action left_click", "idle"]
-"Shift+R" = ["action right_click", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+L" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+R" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = "action left_click"
 
 [hints.additional_ax_support]
@@ -53,20 +60,36 @@ hide_unmatched = true
 [grid.hotkeys]
 "," = "action reset"
 "'" = "action reset"
-"Return" = ["action left_click", "idle"]
+"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = "action left_click"
 
 [recursive_grid]
-grid_cols = 2
-grid_rows = 2
-keys = "uijk"
+grid_cols = 4
+grid_rows = 3
+keys = "eruidfjkcvm,"
 min_size_width = 30
 min_size_height = 30
 max_depth = 8
 
 [recursive_grid.hotkeys]
-"Return" = ["action left_click", "idle"]
-"Shift+Return" = "action left_click"
+# Every path that ends in `idle` also resets the Kanata layer so the
+# fj/dk/jl/df chord doesn't leave us stuck in `nerumode`. Neru has no
+# global on-idle hook, so we have to do this per binding.
+"Space" = "action left_click"
+"Shift+Space" = "action right_click"
+"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
+"n" = "action backspace"
+"`" = "toggle-cursor-follow-selection"
+"Up" = "action move_mouse_relative --dx=0 --dy=-5"
+"Down" = "action move_mouse_relative --dx=0 --dy=5"
+"Left" = "action move_mouse_relative --dx=-5 --dy=0"
+"Right" = "action move_mouse_relative --dx=5 --dy=0"
+"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Backspace" = "action reset"
+"'" = "action reset"
 
 [recursive_grid.ui]
 label_background = true
@@ -93,10 +116,10 @@ scroll_step_half = 500
 "Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+I" = ["action mouse_down", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+U" = ["action mouse_up", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Up" = ["action move_mouse_relative --dx=0 --dy=-10", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Down" = ["action move_mouse_relative --dx=0 --dy=10", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Left" = ["action move_mouse_relative --dx=-10 --dy=0", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Right" = ["action move_mouse_relative --dx=10 --dy=0", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Up" = "action move_mouse_relative --dx=0 --dy=-10"
+"Down" = "action move_mouse_relative --dx=0 --dy=10"
+"Left" = "action move_mouse_relative --dx=-10 --dy=0"
+"Right" = "action move_mouse_relative --dx=10 --dy=0"
 "a" = ["exec ~/.local/bin/kanata-layer base", "idle"]
 "b" = ["exec ~/.local/bin/kanata-layer base", "idle"]
 "c" = ["exec ~/.local/bin/kanata-layer base", "idle"]
