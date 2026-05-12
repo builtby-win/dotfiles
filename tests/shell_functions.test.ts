@@ -11,10 +11,10 @@ describe('shell helper contract for chezmoi migration', () => {
     expect(content).toContain('chezmoi');
   });
 
-  it('keeps bb setup as a chezmoi-backed compatibility path', () => {
+  it('keeps bb setup aligned with guided setup vocabulary', () => {
     const content = fs.readFileSync(functionsPath, 'utf-8');
-    expect(content).toContain('bb setup                Apply chezmoi-managed dotfiles');
-    expect(content).toContain('Compatibility alias for chezmoi apply');
+    expect(content).toContain('bb setup                Open guided setup to change apps, configs, or restore backups');
+    expect(content).toContain('Apply one selected module intentionally');
     expect(content).not.toContain('stow -d');
   });
 

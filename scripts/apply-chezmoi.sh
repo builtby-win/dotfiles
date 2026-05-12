@@ -41,4 +41,15 @@ remove_legacy_stow_symlink "$HOME/.local/bin/coolify"
 remove_legacy_stow_symlink "$HOME/.local/bin/sesh"
 remove_legacy_stow_symlink "$HOME/.local/bin/tmux-smart"
 
-DOTFILES_DIR="$DOTFILES_DIR" chezmoi init --apply --source="$CHEZMOI_SOURCE_DIR"
+apply_targets=("$@")
+
+if [[ "${#apply_targets[@]}" -eq 0 ]]; then
+  apply_targets=(
+    "$HOME/.zshrc"
+    "$HOME/.config/dotfiles/path"
+    "$HOME/.config/starship.toml"
+  )
+fi
+
+DOTFILES_DIR="$DOTFILES_DIR" chezmoi init --source="$CHEZMOI_SOURCE_DIR"
+DOTFILES_DIR="$DOTFILES_DIR" chezmoi --source="$CHEZMOI_SOURCE_DIR" apply "${apply_targets[@]}"

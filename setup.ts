@@ -1175,6 +1175,24 @@ function selectedManagedTargetPaths(configs: string[]): string[] {
   return [...paths].sort();
 }
 
+function selectedChezmoiApplyTargets(configs: string[]): string[] {
+  const paths = new Set<string>();
+
+  if (configs.includes("zsh")) {
+    paths.add(join(HOME, ".zshrc"));
+    paths.add(join(HOME, ".config/dotfiles/path"));
+    paths.add(join(HOME, ".config/starship.toml"));
+  }
+
+  for (const config of configs) {
+    for (const target of CHEZMOI_TARGETS[config] ?? []) {
+      paths.add(join(HOME, target));
+    }
+  }
+
+  return [...paths].sort();
+}
+
 function selectedAIConfigPaths(configs: string[]): string[] {
   const paths = new Set<string>();
 
@@ -1531,14 +1549,21 @@ function backupRealManagedTargets(configs: string[]): void {
   }
 }
 
-function applyChezmoi(): boolean {
+function applyChezmoi(configs: string[]): boolean {
   const applyScript = join(DOTFILES_DIR, "scripts", "apply-chezmoi.sh");
   if (!existsSync(applyScript)) {
     log.error(`chezmoi apply helper not found: ${applyScript}`);
     return false;
   }
 
-  return runCommand(`bash "${applyScript}"`);
+  const targets = selectedChezmoiApplyTargets(configs);
+  if (targets.length === 0) {
+    log.info("No selected chezmoi targets to apply");
+    return true;
+  }
+
+  const quotedTargets = targets.map((target) => `"${target.replace(/"/g, '\\"')}"`).join(" ");
+  return runCommand(`bash "${applyScript}" ${quotedTargets}`);
 }
 
 async function setupManagedConfigs(configs: string[]): Promise<void> {
@@ -1562,8 +1587,8 @@ async function setupManagedConfigs(configs: string[]): Promise<void> {
   migrateLegacyStowSymlinks(configs);
   backupRealManagedTargets(configs);
 
-  if (applyChezmoi()) {
-    log.success("chezmoi-managed configs applied");
+  if (applyChezmoi(configs)) {
+    log.success("Selected chezmoi-managed configs applied");
     if (configs.includes("tmux")) {
       setupTpm();
     }
@@ -2290,32 +2315,32 @@ async function runSetup(): Promise<void> {
     
     if (hasDetectedItems) {
       firstRunChoices.push({ 
-        name: `↻ Use Detected Setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`,
+        name: `Keep what is already on this machine (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs) - Detected setup`,
         value: "use_detected",
         description: "Keeps the tools and configs already found on this machine."
       });
     }
     
     firstRunChoices.push({ 
-      name: "🚀 Focused Setup - full AI/dev workflow",
+      name: "Install the full AI/dev workflow - Focused setup",
       value: "focus",
       description: "Installs Back2Vibing, tmux, sesh, fzf, Ghostty, and shell polish."
     });
     
     firstRunChoices.push({ 
-      name: "⭐ Standard Setup - recommended default",
+      name: "Install the recommended shell and dev tools - Standard setup",
       value: "standard",
       description: "Adds the bb helper, aliases, tmux, fzf, editor defaults, and core CLI tools."
     });
 
     firstRunChoices.push({ 
-      name: "🌱 Minimal Setup - shell foundation only",
+      name: "Set up only shell basics - Minimal setup",
       value: "minimal",
       description: "Sets up zsh, aliases, starship, fzf, and zoxide without app installs."
     });
     
     firstRunChoices.push({ 
-      name: "🛠️  Custom Setup - choose each item",
+      name: "Choose every app and config yourself - Custom setup",
       value: "customize",
       description: "Walk through every app, config, and optional feature before installing."
     });
@@ -2405,13 +2430,7 @@ async function runSetup(): Promise<void> {
 
   // Helper: Build categorized choices for apps
   const buildCategorizedAppChoices = () => {
-    const choices: Array<{ name: string; value: string; checked: boolean; disabled?: string | false }> = [
-      {
-        name: `${colors.yellow}↩ Back to menu${colors.reset}`,
-        value: "__back__",
-        checked: false,
-      },
-    ];
+    const choices: Array<{ name: string; value: string; checked: boolean; disabled?: string | false }> = [];
 
     // Group apps by category
     for (const category of CATEGORY_ORDER) {
@@ -2469,32 +2488,35 @@ async function runSetup(): Promise<void> {
       const appsChoices = buildCategorizedAppChoices();
       
       selectedApps = await checkbox({
-        message: `Select ${installItemLabel} (space to toggle, enter to confirm) ${colors.dim}[${selectableApps.length} items]${colors.reset}:`,
+        message: `Select ${installItemLabel} (space to toggle, enter when done — you can go back after) ${colors.dim}[${selectableApps.length} items]${colors.reset}:`,
         choices: appsChoices,
         pageSize: 25,
         loop: false,
       });
 
-      // Filter out separators and back
+      // Filter out separators
       selectedApps = selectedApps.filter(a => !a.startsWith("__"));
-      if (appsChoices.find(c => c.value === "__back__" && selectedApps.includes("__back__"))) {
+
+      console.log("");
+      const step1Nav = await select({
+        message: "Next step?",
+        choices: [
+          { name: "Continue to step 2 (configs)", value: "next" as const },
+          { name: "Back to main menu", value: "menu" as const },
+        ],
+      });
+
+      if (step1Nav === "menu") {
         return mainMenu();
       }
 
-      console.log("");
       currentStep = 2;
     }
 
     // Step 2: Select chezmoi-managed configs
     if (currentStep === 2) {
       log.step(`[Step 2 of ${TOTAL_STEPS}] Select configs to apply`);
-      const managedChoices = [
-        {
-          name: `${colors.yellow}↩ Back to step 1${colors.reset}`,
-          value: "__back__",
-          checked: false,
-        },
-        ...selectableManagedConfigs.map((config) => {
+      const managedChoices = selectableManagedConfigs.map((config) => {
           const installed = installedConfigs.has(config.value);
           const descPart = config.desc ? ` ${colors.dim}- ${config.desc}${colors.reset}` : "";
           return {
@@ -2505,59 +2527,63 @@ async function runSetup(): Promise<void> {
             checked: installed ? true : (config.checked ?? false),
             disabled: installed ? "(already installed)" : false,
           };
-        }),
-      ];
+        });
       
       selectedManagedConfigs = await checkbox({
-        message: `Select configs to install ${colors.dim}[${managedChoices.length - 1} items]${colors.reset}:`,
+        message: `Select configs to install (space to toggle, enter when done — you can go back after) ${colors.dim}[${managedChoices.length} items]${colors.reset}:`,
         choices: managedChoices,
         pageSize: 20,
         loop: false,
       });
 
-      if (selectedManagedConfigs.includes("__back__")) {
-        selectedManagedConfigs = selectedManagedConfigs.filter(s => s !== "__back__");
-        console.log("");
+      console.log("");
+      const step2Nav = await select({
+        message: "Next step?",
+        choices: [
+          { name: "Continue to step 3 (optional features)", value: "next" as const },
+          { name: "Back to step 1 (apps)", value: "back" as const },
+        ],
+      });
+
+      if (step2Nav === "back") {
         currentStep = 1;
         continue;
       }
 
-      console.log("");
       currentStep = 3;
     }
 
     // Step 3: Select optional features
     if (currentStep === 3) {
       log.step(`[Step 3 of ${TOTAL_STEPS}] Select optional features`);
-      const featureChoices = [
-        {
-          name: `${colors.yellow}↩ Back to step 2${colors.reset}`,
-          value: "__back__",
-          checked: false,
-        },
-        ...OPTIONAL_FEATURES.map((feature) => ({
+      const featureChoices = OPTIONAL_FEATURES.map((feature) => ({
           name: feature.desc ? `${feature.name} ${colors.dim}- ${feature.desc}${colors.reset}` : feature.name,
           value: feature.value,
           checked: feature.checked ?? false,
           disabled: false,
-        })),
-      ];
+        }));
 
       selectedFeatures = await checkbox({
-        message: `Select optional features ${colors.dim}[${featureChoices.length - 1} items]${colors.reset}:`,
+        message: `Select optional features (space to toggle, enter when done — you can go back after) ${colors.dim}[${featureChoices.length} items]${colors.reset}:`,
         choices: featureChoices,
         pageSize: 20,
         loop: false,
       });
 
-      if (selectedFeatures.includes("__back__")) {
-        selectedFeatures = selectedFeatures.filter(f => f !== "__back__");
-        console.log("");
+      console.log("");
+      const step3Nav = await select({
+        message: "Next step?",
+        choices: [
+          { name: "Continue to step 4 (review selections)", value: "next" as const },
+          { name: "Back to step 2 (configs)", value: "back" as const },
+        ],
+      });
+
+      if (step3Nav === "back") {
         currentStep = 2;
         continue;
       }
 
-      console.log("");
       currentStep = 4;
     }
 
@@ -2640,6 +2666,14 @@ async function runSetup(): Promise<void> {
         ],
         "No file changes selected"
       );
+
+      const skippedConfigs = selectableManagedConfigs
+        .filter((config) => !selectedManagedConfigs.includes(config.value))
+        .map((config) => config.name);
+      if (skippedConfigs.length > 0) {
+        console.log(`  ${colors.bold}Will not touch:${colors.reset}`);
+        console.log(`    ${colors.dim}${skippedConfigs.join(", ")}${colors.reset}`);
+      }
 
       console.log(`  ${colors.bold}Backups:${colors.reset}`);
       console.log(`    ${colors.dim}The setup dashboard backs up managed files before optional replacements.${colors.reset}`);

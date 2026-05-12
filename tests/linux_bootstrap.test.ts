@@ -106,10 +106,41 @@ describe('Linux bootstrap workflow', () => {
 
   it('applies selected configs through chezmoi instead of direct symlink fallback', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
-    expect(content).toContain('function applyChezmoi(): boolean');
-    expect(content).toContain('bash "${applyScript}"');
+    expect(content).toContain('function applyChezmoi(configs: string[]): boolean');
+    expect(content).toContain('bash "${applyScript}" ${quotedTargets}');
     expect(content).not.toContain('setupConfigWithoutStow');
     expect(content).not.toContain('configured via symlink fallback');
+  });
+
+  it('keeps setup navigation Enter-friendly while preserving back actions', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('message: "Next step?"');
+    expect(content).toContain('{ name: "Continue to step 2 (configs)", value: "next" as const },');
+    expect(content).toContain('{ name: "Back to main menu", value: "menu" as const },');
+    expect(content).toContain('{ name: "Continue to step 3 (optional features)", value: "next" as const },');
+    expect(content).toContain('{ name: "Back to step 1 (apps)", value: "back" as const },');
+    expect(content).toContain('{ name: "Continue to step 4 (review selections)", value: "next" as const },');
+    expect(content).toContain('{ name: "Back to step 2 (configs)", value: "back" as const },');
+  });
+
+  it('makes selected configs drive the chezmoi targets that are applied', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('function selectedChezmoiApplyTargets(configs: string[]): string[]');
+    expect(content).toContain('applyChezmoi(configs)');
+    expect(content).toContain('No selected chezmoi targets to apply');
+    expect(content).toContain('Will not touch:');
+  });
+
+  it('uses action-first setup path labels', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('Install the full AI/dev workflow - Focused setup');
+    expect(content).toContain('Install the recommended shell and dev tools - Standard setup');
+    expect(content).toContain('Set up only shell basics - Minimal setup');
+    expect(content).toContain('Choose every app and config yourself - Custom setup');
+    expect(content).toContain('Keep what is already on this machine');
   });
 
   it('migrates legacy ~/.zshrc symlinks to a local source file', () => {

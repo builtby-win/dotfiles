@@ -55,4 +55,14 @@ describe('chezmoi source tree', () => {
     expect(content).toContain('rm "$target"');
     expect(content).not.toContain('rm -r "$target"');
   });
+
+  it('applies only base targets by default instead of every optional module', () => {
+    const content = fs.readFileSync(applyScriptPath, 'utf-8');
+
+    expect(content).toContain('apply_targets=("$@")');
+    expect(content).toContain('"$HOME/.zshrc"');
+    expect(content).toContain('"$HOME/.config/dotfiles/path"');
+    expect(content).toContain('chezmoi --source="$CHEZMOI_SOURCE_DIR" apply "${apply_targets[@]}"');
+    expect(content).not.toContain('chezmoi init --apply');
+  });
 });
