@@ -46,23 +46,45 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('NON_INTERACTIVE=1');
   });
 
-  it('installs pnpm via corepack with npm fallback', () => {
-    const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    expect(content).toContain('corepack enable');
-    expect(content).toContain('corepack prepare pnpm@10.28.2 --activate');
-    expect(content).toContain('npm install -g pnpm');
+  it('installs pnpm into stable user-local paths via corepack with npm fallback', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    for (const content of [macBootstrap, linuxBootstrap]) {
+      expect(content).toContain('export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"');
+      expect(content).toContain('mkdir -p "$HOME/.local/bin" "$PNPM_HOME"');
+      expect(content).toContain('export PATH="$HOME/.local/bin:$PNPM_HOME:$PATH"');
+      expect(content).toContain('corepack enable --install-directory "$HOME/.local/bin"');
+      expect(content).toContain('corepack prepare pnpm@10.28.2 --activate');
+      expect(content).toContain('npm install --global --prefix "$HOME/.local" pnpm@10.28.2');
+    }
   });
 
-  it('uses npm install as a fresh-machine fallback when pnpm is unavailable', () => {
+  it('requires pnpm for dependency install while keeping npm exec only for setup launch recovery', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
     expect(macBootstrap).toContain('install_project_dependencies() {');
-    expect(macBootstrap).toContain('npm install && return 0');
-    expect(macBootstrap).toContain('pnpm is not available; setup will use npm fallback');
     expect(linuxBootstrap).toContain('install_project_dependencies() {');
-    expect(linuxBootstrap).toContain('npm install && return 0');
-    expect(linuxBootstrap).toContain('pnpm is not available; setup will use npm fallback');
+    expect(macBootstrap).not.toContain('npm install && return 0');
+    expect(linuxBootstrap).not.toContain('npm install && return 0');
+    expect(macBootstrap).toContain('pnpm is not available; dependency install requires pnpm');
+    expect(linuxBootstrap).toContain('pnpm is not available; dependency install requires pnpm');
+    expect(macBootstrap).toContain('npm exec --yes tsx -- "$setup_script" "${setup_args[@]}"');
+    expect(linuxBootstrap).toContain('npm exec --yes tsx -- "$setup_script" "${setup_args[@]}"');
+  });
+
+  it('offers an interactive login-shell refresh after bootstrap completes', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    for (const content of [macBootstrap, linuxBootstrap]) {
+      expect(content).toContain('prompt_shell_refresh() {');
+      expect(content).toContain('Run exec \\\"\\$SHELL\\\" -l now? [y/N]');
+      expect(content).toContain('exec "$SHELL" -l');
+      expect(content).toContain('Open a new terminal or run exec \\\"\\$SHELL\\\" -l');
+    }
+    expect(linuxBootstrap).toContain('if [[ "$NON_INTERACTIVE" -eq 1 ]]; then');
   });
 
   it('installs starship on Linux via official curl installer', () => {

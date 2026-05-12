@@ -136,13 +136,21 @@ print_setup_resume_instructions() {
   echo "    cd $DOTFILES_DIR && npm exec --yes tsx -- setup.ts $DOTFILES_DIR"
 }
 
+setup_node_tool_paths() {
+  export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+  mkdir -p "$HOME/.local/bin" "$PNPM_HOME"
+  export PATH="$HOME/.local/bin:$PNPM_HOME:$PATH"
+}
+
 ensure_pnpm_available() {
+  setup_node_tool_paths
+
   if command -v pnpm &> /dev/null; then
     return 0
   fi
 
   if command -v corepack &> /dev/null; then
-    corepack enable 2>/dev/null || true
+    corepack enable --install-directory "$HOME/.local/bin" 2>/dev/null || true
     corepack prepare pnpm@10.28.2 --activate 2>/dev/null || true
   fi
 
@@ -151,7 +159,7 @@ ensure_pnpm_available() {
   fi
 
   if command -v npm &> /dev/null; then
-    npm install -g pnpm || true
+    npm install --global --prefix "$HOME/.local" pnpm@10.28.2 || true
   fi
 
   command -v pnpm &> /dev/null
@@ -162,12 +170,26 @@ install_project_dependencies() {
     pnpm install --silent && return 0
   fi
 
-  if command -v npm &> /dev/null; then
-    print_warning "pnpm is not available in this shell; falling back to npm install"
-    npm install && return 0
+  return 1
+}
+
+prompt_shell_refresh() {
+  if [[ ! -r /dev/tty || -z "${SHELL:-}" || ! -x "$SHELL" ]]; then
+    print_warning "Open a new terminal or run exec \"\$SHELL\" -l to refresh your PATH."
+    return 0
   fi
 
-  return 1
+  echo ""
+  echo -e "${BOLD}Refresh your shell now?${NC} This loads the updated dotfiles and PATH."
+  read -r -p "Run exec \"\$SHELL\" -l now? [y/N] " refresh_shell < /dev/tty || return 0
+  case "$refresh_shell" in
+    y|Y|yes|YES)
+      exec "$SHELL" -l
+      ;;
+    *)
+      print_warning "Open a new terminal or run exec \"\$SHELL\" -l when you are ready."
+      ;;
+  esac
 }
 
 run_interactive_setup() {
@@ -425,12 +447,12 @@ else
 fi
 
 # Install pnpm if possible. npm remains a fallback for fresh machines where
-# the global npm bin directory is not on PATH yet.
+# corepack cannot write a shim into the local user bin.
 print_debug "Checking for pnpm..."
 if ensure_pnpm_available; then
   print_success "pnpm ready"
 else
-  print_warning "pnpm is not available; setup will use npm fallback"
+  print_warning "pnpm is not available; dependency install requires pnpm"
 fi
 
 echo ""
@@ -463,3 +485,5 @@ echo ""
 print_step "[4/4] Opening interactive setup dashboard..."
 run_interactive_setup || exit 1
 print_success "Interactive setup complete!"
+
+prompt_shell_refresh
