@@ -49,8 +49,20 @@ describe('Linux bootstrap workflow', () => {
   it('installs pnpm via corepack with npm fallback', () => {
     const content = fs.readFileSync(linuxBootstrapPath, 'utf-8');
     expect(content).toContain('corepack enable');
-    expect(content).toContain('corepack prepare pnpm@latest --activate');
+    expect(content).toContain('corepack prepare pnpm@10.28.2 --activate');
     expect(content).toContain('npm install -g pnpm');
+  });
+
+  it('uses npm install as a fresh-machine fallback when pnpm is unavailable', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('install_project_dependencies() {');
+    expect(macBootstrap).toContain('npm install && return 0');
+    expect(macBootstrap).toContain('pnpm is not available; setup will use npm fallback');
+    expect(linuxBootstrap).toContain('install_project_dependencies() {');
+    expect(linuxBootstrap).toContain('npm install && return 0');
+    expect(linuxBootstrap).toContain('pnpm is not available; setup will use npm fallback');
   });
 
   it('installs starship on Linux via official curl installer', () => {
@@ -225,9 +237,11 @@ describe('Linux bootstrap workflow', () => {
     expect(macBootstrap).toContain('local setup_script="$DOTFILES_DIR/setup.ts"');
     expect(macBootstrap).toContain('"$tsx_bin" "$setup_script" "${setup_args[@]}" < /dev/tty');
     expect(macBootstrap).toContain('pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty');
+    expect(macBootstrap).toContain('npm exec --yes tsx -- "$setup_script" "${setup_args[@]}"');
     expect(linuxBootstrap).toContain('local tsx_bin="$DOTFILES_DIR/node_modules/.bin/tsx"');
     expect(linuxBootstrap).toContain('local setup_script="$DOTFILES_DIR/setup.ts"');
     expect(linuxBootstrap).toContain('pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty');
+    expect(linuxBootstrap).toContain('npm exec --yes tsx -- "$setup_script" "${setup_args[@]}"');
   });
 
   it('prints the exact setup resume command if automatic launch fails', () => {
@@ -235,9 +249,9 @@ describe('Linux bootstrap workflow', () => {
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
     expect(macBootstrap).toContain('Interactive setup did not launch automatically.');
-    expect(macBootstrap).toContain('cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR');
+    expect(macBootstrap).toContain('cd $DOTFILES_DIR && npm exec --yes tsx -- setup.ts $DOTFILES_DIR');
     expect(linuxBootstrap).toContain('Interactive setup did not launch automatically.');
-    expect(linuxBootstrap).toContain('cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR');
+    expect(linuxBootstrap).toContain('cd $DOTFILES_DIR && npm exec --yes tsx -- setup.ts $DOTFILES_DIR');
   });
 
   it('supports explicit setup path arguments in the macOS/bootstrap wrapper too', () => {

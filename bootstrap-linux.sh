@@ -41,7 +41,41 @@ print_debug() {
 print_setup_resume_instructions() {
   print_error "Interactive setup did not launch automatically."
   echo "  Resume it with:"
-  echo "    cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR"
+  echo "    cd $DOTFILES_DIR && npm exec --yes tsx -- setup.ts $DOTFILES_DIR"
+}
+
+ensure_pnpm_available() {
+  if command -v pnpm >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if command -v corepack >/dev/null 2>&1; then
+    corepack enable 2>/dev/null || true
+    corepack prepare pnpm@10.28.2 --activate 2>/dev/null || true
+  fi
+
+  if command -v pnpm >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if command -v npm >/dev/null 2>&1; then
+    npm install -g pnpm 2>/dev/null || true
+  fi
+
+  command -v pnpm >/dev/null 2>&1
+}
+
+install_project_dependencies() {
+  if ensure_pnpm_available; then
+    pnpm install --silent && return 0
+  fi
+
+  if command -v npm >/dev/null 2>&1; then
+    print_warning "pnpm is not available in this shell; falling back to npm install"
+    npm install && return 0
+  fi
+
+  return 1
 }
 
 run_interactive_setup() {
@@ -65,6 +99,10 @@ run_interactive_setup() {
 
   if command -v pnpm >/dev/null 2>&1; then
     pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
+  fi
+
+  if command -v npm >/dev/null 2>&1; then
+    (cd "$DOTFILES_DIR" && npm exec --yes tsx -- "$setup_script" "${setup_args[@]}") < /dev/tty && return 0
   fi
 
   print_setup_resume_instructions
@@ -270,22 +308,18 @@ fi
 command -v node >/dev/null 2>&1 || { print_error "Failed to install Node.js"; exit 1; }
 print_success "Node.js ready ($(node -v))"
 
-if ! command -v pnpm >/dev/null 2>&1; then
-  if command -v corepack >/dev/null 2>&1; then
-    corepack enable 2>/dev/null || true
-    corepack prepare pnpm@latest --activate 2>/dev/null || true
-  fi
-  command -v pnpm >/dev/null 2>&1 || npm install -g pnpm 2>/dev/null || true
-  command -v pnpm >/dev/null 2>&1 || { print_error "Failed to install pnpm"; exit 1; }
+if ensure_pnpm_available; then
+  print_success "pnpm ready"
+else
+  print_warning "pnpm is not available; setup will use npm fallback"
 fi
-print_success "pnpm ready"
 
 print_step "[2/4] Installing project dependencies..."
-pnpm install --silent || {
-  print_error "pnpm install failed"
+install_project_dependencies || {
+  print_error "Dependency install failed"
   print_error "This often means disk space ran out or the bootstrap environment is incomplete"
   print_error "Check available space with: df -h"
-  print_error "Try running manually: cd $DOTFILES_DIR && pnpm install"
+  print_error "Try running manually: cd $DOTFILES_DIR && npm install"
   print_error "Then resume with: cd $DOTFILES_DIR && ./bootstrap-linux.sh"
   exit 1
 }
