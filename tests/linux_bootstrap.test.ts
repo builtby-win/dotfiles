@@ -211,10 +211,33 @@ describe('Linux bootstrap workflow', () => {
 
     expect(macBootstrap).toContain('print_step "[4/4] Opening interactive setup dashboard..."');
     expect(macBootstrap).toContain('print_success "Interactive setup complete!"');
-    expect(macBootstrap).toContain('setup.ts "${SETUP_ARGS[@]}" < /dev/tty');
+    expect(macBootstrap).toContain('run_interactive_setup || exit 1');
     expect(linuxBootstrap).toContain('print_step "[4/4] Opening interactive setup dashboard..."');
     expect(linuxBootstrap).toContain('print_success "Interactive setup complete"');
-    expect(linuxBootstrap).toContain('setup.ts "${SETUP_ARGS[@]}" < /dev/tty');
+    expect(linuxBootstrap).toContain('run_interactive_setup || exit 1');
+  });
+
+  it('launches setup with absolute paths so curl installs do not require manual cd', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('local tsx_bin="$DOTFILES_DIR/node_modules/.bin/tsx"');
+    expect(macBootstrap).toContain('local setup_script="$DOTFILES_DIR/setup.ts"');
+    expect(macBootstrap).toContain('"$tsx_bin" "$setup_script" "${setup_args[@]}" < /dev/tty');
+    expect(macBootstrap).toContain('pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty');
+    expect(linuxBootstrap).toContain('local tsx_bin="$DOTFILES_DIR/node_modules/.bin/tsx"');
+    expect(linuxBootstrap).toContain('local setup_script="$DOTFILES_DIR/setup.ts"');
+    expect(linuxBootstrap).toContain('pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty');
+  });
+
+  it('prints the exact setup resume command if automatic launch fails', () => {
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macBootstrap).toContain('Interactive setup did not launch automatically.');
+    expect(macBootstrap).toContain('cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR');
+    expect(linuxBootstrap).toContain('Interactive setup did not launch automatically.');
+    expect(linuxBootstrap).toContain('cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR');
   });
 
   it('supports explicit setup path arguments in the macOS/bootstrap wrapper too', () => {
@@ -249,8 +272,8 @@ describe('Linux bootstrap workflow', () => {
 
     expect(macBootstrap).not.toContain('setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true');
     expect(linuxBootstrap).not.toContain('setup.ts "$DOTFILES_DIR" "$@" < /dev/tty || true');
-    expect(macBootstrap).toContain('print_error "setup.ts failed"');
-    expect(linuxBootstrap).toContain('print_error "setup.ts failed"');
+    expect(macBootstrap).toContain('run_interactive_setup || exit 1');
+    expect(linuxBootstrap).toContain('run_interactive_setup || exit 1');
   });
 
   it('keeps startup tips focused on shell tooling', () => {

@@ -130,6 +130,37 @@ print_brew_shellenv_instructions() {
   echo "    eval \"$shellenv_cmd\""
 }
 
+print_setup_resume_instructions() {
+  print_error "Interactive setup did not launch automatically."
+  echo "  Resume it with:"
+  echo "    cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR"
+}
+
+run_interactive_setup() {
+  local tsx_bin="$DOTFILES_DIR/node_modules/.bin/tsx"
+  local setup_script="$DOTFILES_DIR/setup.ts"
+  local setup_args=( "$DOTFILES_DIR" )
+
+  if [[ -n "$SETUP_PATH" ]]; then
+    setup_args+=( --setup-path "$SETUP_PATH" )
+  fi
+
+  if [[ ! -r /dev/tty ]]; then
+    print_error "Cannot open /dev/tty for interactive setup."
+    print_setup_resume_instructions
+    return 1
+  fi
+
+  if [[ -x "$tsx_bin" ]]; then
+    "$tsx_bin" "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
+  fi
+
+  pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
+
+  print_setup_resume_instructions
+  return 1
+}
+
 # Check if running from curl pipe or locally
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" 2>/dev/null)" && pwd 2>/dev/null || echo "")"
 REPO_URL="https://github.com/builtby-win/dotfiles.git"
@@ -391,20 +422,5 @@ print_success "Chezmoi dotfiles applied!"
 
 echo ""
 print_step "[4/4] Opening interactive setup dashboard..."
-TSX_BIN="./node_modules/.bin/tsx"
-SETUP_ARGS=( "$DOTFILES_DIR" )
-if [[ -n "$SETUP_PATH" ]]; then
-  SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
-fi
-if [ -x "$TSX_BIN" ]; then
-  if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-    print_error "setup.ts failed"
-    exit 1
-  fi
-else
-  if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-    print_error "setup.ts failed"
-    exit 1
-  fi
-fi
+run_interactive_setup || exit 1
 print_success "Interactive setup complete!"

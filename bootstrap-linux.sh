@@ -38,6 +38,39 @@ print_debug() {
   echo -e "${CYAN}[debug]${NC} $1"
 }
 
+print_setup_resume_instructions() {
+  print_error "Interactive setup did not launch automatically."
+  echo "  Resume it with:"
+  echo "    cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR"
+}
+
+run_interactive_setup() {
+  local tsx_bin="$DOTFILES_DIR/node_modules/.bin/tsx"
+  local setup_script="$DOTFILES_DIR/setup.ts"
+  local setup_args=( "$DOTFILES_DIR" )
+
+  if [[ -n "$SETUP_PATH" ]]; then
+    setup_args+=( --setup-path "$SETUP_PATH" )
+  fi
+
+  if [[ ! -r /dev/tty ]]; then
+    print_error "Cannot open /dev/tty for interactive setup."
+    print_setup_resume_instructions
+    return 1
+  fi
+
+  if [[ -x "$tsx_bin" ]]; then
+    "$tsx_bin" "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
+  fi
+
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
+  fi
+
+  print_setup_resume_instructions
+  return 1
+}
+
 confirm_install_plan() {
   if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
     return 0
@@ -272,26 +305,7 @@ if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
   print_warning "Skipping interactive setup in non-interactive mode"
 else
   print_step "[4/4] Opening interactive setup dashboard..."
-  TSX_BIN="./node_modules/.bin/tsx"
-  SETUP_ARGS=( "$DOTFILES_DIR" )
-  if [[ -n "$SETUP_PATH" ]]; then
-    SETUP_ARGS+=( --setup-path "$SETUP_PATH" )
-  fi
-  if [[ -x "$TSX_BIN" ]]; then
-    if ! "$TSX_BIN" setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-      print_error "setup.ts failed"
-      exit 1
-    fi
-  elif command -v pnpm >/dev/null 2>&1; then
-    if ! pnpm exec tsx setup.ts "${SETUP_ARGS[@]}" < /dev/tty; then
-      print_error "setup.ts failed"
-      exit 1
-    fi
-  else
-    print_error "setup.ts failed"
-    print_error "Cannot run setup.ts"
-    exit 1
-  fi
+  run_interactive_setup || exit 1
   print_success "Interactive setup complete"
 fi
 
