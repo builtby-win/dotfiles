@@ -41,6 +41,11 @@ remove_legacy_stow_symlink "$HOME/.local/bin/coolify"
 remove_legacy_stow_symlink "$HOME/.local/bin/sesh"
 remove_legacy_stow_symlink "$HOME/.local/bin/tmux-smart"
 
+# Ensure the ~/.config/dotfiles directory exists before chezmoi
+# applies the path template — chezmoi otherwise fails with a stat
+# error when the parent directory is missing on a fresh machine.
+mkdir -p "$HOME/.config/dotfiles"
+
 apply_targets=("$@")
 
 if [[ "${#apply_targets[@]}" -eq 0 ]]; then

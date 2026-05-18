@@ -328,7 +328,16 @@ if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
   print_warning "Skipping interactive setup in non-interactive mode"
 else
   print_step "[4/4] Opening interactive setup dashboard..."
+
+  # Try login shell first (ideal when $SHELL matches the real login
+  # shell), then fall back to direct pnpm exec, tsx, or npm exec.
   if "$SHELL" -l -c "cd '$DOTFILES_DIR' && exec pnpm exec tsx setup.ts '$DOTFILES_DIR'${SETUP_PATH:+ --setup-path '$SETUP_PATH'}" < /dev/tty 2>&1; then
+    print_success "Interactive setup complete"
+  elif cd "$DOTFILES_DIR" && pnpm exec tsx setup.ts "$DOTFILES_DIR" ${SETUP_PATH:+ --setup-path "$SETUP_PATH"} < /dev/tty 2>&1; then
+    print_success "Interactive setup complete"
+  elif "$DOTFILES_DIR/node_modules/.bin/tsx" "$DOTFILES_DIR/setup.ts" "$DOTFILES_DIR" ${SETUP_PATH:+ --setup-path "$SETUP_PATH"} < /dev/tty 2>&1; then
+    print_success "Interactive setup complete"
+  elif (cd "$DOTFILES_DIR" && npm exec --yes tsx -- setup.ts "$DOTFILES_DIR" ${SETUP_PATH:+ --setup-path "$SETUP_PATH"}) < /dev/tty 2>&1; then
     print_success "Interactive setup complete"
   else
     print_error "Interactive setup did not launch automatically."

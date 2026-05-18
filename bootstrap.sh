@@ -472,11 +472,20 @@ print_success "Chezmoi dotfiles applied!"
 echo ""
 print_step "[4/4] Opening interactive setup dashboard..."
 
-# The chezmoi-managed shell config was just applied in step 3 —
-# that config has eval "$(fnm env)" and eval "$(brew shellenv)".
-# Spawn a login shell so those are sourced correctly (rather than
-# fighting against curl | bash pipe stdin / missing PATH entries).
+# Try several strategies to launch the interactive setup.
+# A login shell is ideal — it sources brew shellenv, fnm, and other
+# env from the chezmoi-managed config we just applied in step 3.
+# But in a curl | bash context $SHELL is /bin/bash, not the user's
+# login shell, so the login shell path may fail.  Fall back to
+# direct pnpm exec, explicit tsx, then npm exec.
+
 if "$SHELL" -l -c "cd '$DOTFILES_DIR' && exec pnpm exec tsx setup.ts '$DOTFILES_DIR'${SETUP_PATH:+ --setup-path '$SETUP_PATH'}" < /dev/tty 2>&1; then
+  print_success "Interactive setup complete!"
+elif cd "$DOTFILES_DIR" && pnpm exec tsx setup.ts "$DOTFILES_DIR" ${SETUP_PATH:+ --setup-path "$SETUP_PATH"} < /dev/tty 2>&1; then
+  print_success "Interactive setup complete!"
+elif "$DOTFILES_DIR/node_modules/.bin/tsx" "$DOTFILES_DIR/setup.ts" "$DOTFILES_DIR" ${SETUP_PATH:+ --setup-path "$SETUP_PATH"} < /dev/tty 2>&1; then
+  print_success "Interactive setup complete!"
+elif (cd "$DOTFILES_DIR" && npm exec --yes tsx -- setup.ts "$DOTFILES_DIR" ${SETUP_PATH:+ --setup-path "$SETUP_PATH"}) < /dev/tty 2>&1; then
   print_success "Interactive setup complete!"
 else
   print_error "Interactive setup did not launch automatically."
