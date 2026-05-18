@@ -78,8 +78,8 @@
   ;; j+k is terminal-aware when kanata-vk-agent has pressed one of the terminal
   ;; app virtual keys. Outside terminals, it arms Cmd for the next keypress.
   jk @terminal-leader-or-cmd-layer
-  ;; Vivaldi: Ctrl+n → Down, Ctrl+p → Up. Release lctl so the output is a
-  ;; plain arrow key, not Ctrl+arrow.
+  ;; Vivaldi: Ctrl+n → Down, Ctrl+p → Up. These aliases are only used from the
+  ;; Vivaldi-specific Control layer, so plain n/p stay raw on the base layer.
   vian (switch
     ((input virtual com.vivaldi.Vivaldi)) (macro rctl down) break
     () n break

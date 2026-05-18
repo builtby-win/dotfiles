@@ -38,22 +38,32 @@
 ;; remaps `os-rsft` to lsft (the receiver reports right-shift differently from
 ;; other keyboards).
 (defalias
-  os-ctl (one-shot-press-pcancel 1000 lctl)
+  os-ctl (switch
+    ((input virtual com.vivaldi.Vivaldi)) (one-shot 1000 (layer-while-held vivaldi-ctl)) break
+    () (one-shot-press-pcancel 1000 lctl) break
+  )
   os-sft (one-shot-press-pcancel 1000 lsft)
   os-alt (one-shot-press-pcancel 1000 lalt)
   os-cmd (one-shot-press-pcancel 1000 lmet)
-  os-rctl (one-shot-press-pcancel 1000 rctl)
+  os-rctl (switch
+    ((input virtual com.vivaldi.Vivaldi)) (one-shot 1000 (layer-while-held vivaldi-ctl)) break
+    () (one-shot-press-pcancel 1000 rctl) break
+  )
   os-rsft (one-shot-press-pcancel 1000 lsft)
   os-ralt (one-shot-press-pcancel 1000 ralt)
   os-rcmd (one-shot-press-pcancel 1000 rmet)
 )
 
 (deflayer base
-  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o @viap s g @vian 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer cmd
   _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _
+)
+
+(deflayer vivaldi-ctl
+  _ _ _ _ _ _ _ _ _ _ _ _ _ C-tab C-grv _ C-spc C-h C-j C-k C-l C-u C-d C-a C-e C-w C-b C-f C-c C-v C-x C-z C-q C-m C-r C-t C-y C-i C-o @viap C-s C-g @vian _ _ _ _ _ _ _ _ _ _ _ _ _
 )
 
 ;; Neru scroll mode needs raw, repeatable motion keys. Keep j out of its
