@@ -201,7 +201,10 @@ prompt_shell_refresh() {
   read -r -p "Run exec \"\$SHELL\" -l now? [y/N] " refresh_shell < /dev/tty || return 0
   case "$refresh_shell" in
     y|Y|yes|YES)
-      exec "$SHELL" -l
+      # Redirect stdin from /dev/tty so the login shell is interactive.
+      # Without this, curl | bash leaves stdin as a closed pipe and the
+      # shell immediately exits (never reads .zshrc / init.sh).
+      exec "$SHELL" -l < /dev/tty
       ;;
     *)
       print_warning "Open a new terminal or run exec \"\$SHELL\" -l when you are ready."
