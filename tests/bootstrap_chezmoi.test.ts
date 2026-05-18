@@ -25,6 +25,19 @@ describe('chezmoi-first bootstrap contract', () => {
     expect(linuxContent).toContain('Applying base dotfiles');
   });
 
+  it('checks Xcode Command Line Tools before macOS install work starts', () => {
+    const content = fs.readFileSync(macBootstrapPath, 'utf-8');
+    const callIndex = content.indexOf('\nensure_xcode_command_line_tools\n');
+
+    expect(content).toContain('ensure_xcode_command_line_tools()');
+    expect(content).toContain('xcode-select -p');
+    expect(callIndex).toBeGreaterThan(-1);
+    expect(callIndex).toBeLessThan(content.indexOf('# Ask for install location'));
+    expect(callIndex).toBeLessThan(content.indexOf('# Create directory if it doesn\'t exist'));
+    expect(callIndex).toBeLessThan(content.indexOf('# Ensure Git is installed'));
+    expect(callIndex).toBeLessThan(content.indexOf('# Install Homebrew if not present'));
+  });
+
   it('does not expose legacy bootstrap modes', () => {
     const macContent = fs.readFileSync(macBootstrapPath, 'utf-8');
     const linuxContent = fs.readFileSync(linuxBootstrapPath, 'utf-8');

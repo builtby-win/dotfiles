@@ -55,7 +55,7 @@ confirm_install_plan() {
   echo ""
   echo -e "${BOLD}Before anything changes, here is the plan:${NC}"
   echo "  1. Use this folder for the dotfiles repo: $DOTFILES_DIR"
-  echo "  2. Install or reuse the required tools: Homebrew, Git, chezmoi, fnm, Node.js, and pnpm"
+  echo "  2. Verify Xcode Command Line Tools, then install or reuse Homebrew, Git, chezmoi, fnm, Node.js, and pnpm"
   echo "  3. Apply the base chezmoi-managed shell/config files"
   echo "  4. Open an interactive setup dashboard where you review optional apps and configs"
   echo ""
@@ -74,6 +74,29 @@ confirm_install_plan() {
       exit 1
       ;;
   esac
+}
+
+ensure_xcode_command_line_tools() {
+  if xcode-select -p >/dev/null 2>&1; then
+    print_success "Xcode Command Line Tools already installed"
+    return 0
+  fi
+
+  print_error "Xcode Command Line Tools are required before running this installer."
+  print_warning "Run: xcode-select --install"
+  print_warning "After the install finishes, rerun this bootstrap script."
+
+  if [[ -r /dev/tty ]]; then
+    echo ""
+    read -r -p "Open the Xcode Command Line Tools installer now? [Y/n] " install_xcode_tools < /dev/tty || install_xcode_tools="n"
+    case "$install_xcode_tools" in
+      ""|y|Y|yes|YES)
+        xcode-select --install >/dev/null 2>&1 || true
+        ;;
+    esac
+  fi
+
+  exit 1
 }
 
 resolve_brew_bin() {
@@ -257,6 +280,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 print_banner
+
+ensure_xcode_command_line_tools
 
 # Ask for install location
 echo -e "Where should we install the dotfiles? ${CYAN}(press enter for ~/dotfiles)${NC}"

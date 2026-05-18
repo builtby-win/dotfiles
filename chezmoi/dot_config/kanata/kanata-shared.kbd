@@ -155,3 +155,17 @@
 (deflayermap (jheld)
   spc @bksp-repeat
 )
+
+;; Neru nudge layer: entered via `n` from recursive_grid (NERU config.toml).
+;; Maps h/j/k/l → arrow keys so NERU's existing 5px nudge bindings work.
+;; Press `n` again to return to the normal recursive-grid Kanata layer without
+;; leaving NERU. Escape and Space both switch back to base (defense-in-depth for
+;; Kanata layer unwinding; NERU also runs `kanata-layer base` on its side).
+(defalias
+  esc-base (multi esc (layer-switch base))
+  spc-base (multi spc (layer-switch base))
+  nudge-off (layer-switch nerumode)
+)
+(deflayer nerunudge
+  _ _ _ _ _ _ _ _ _ _ _ @esc-base _ _ _ @esc-base @spc-base left down up rght _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ @nudge-off _ _ _ _ _ _ _ _ _ _ _ _
+)

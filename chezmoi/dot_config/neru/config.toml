@@ -76,12 +76,17 @@ max_depth = 8
 # Every path that ends in `idle` also resets the Kanata layer so the
 # fj/dk/jl/df chord doesn't leave us stuck in `nerumode`. Neru has no
 # global on-idle hook, so we have to do this per binding.
+# `n` enters the Kanata nerunudge layer where h/j/k/l → arrow keys,
+# letting the existing 5px nudge bindings below work as micro nudges.
+# Press `n` again in nerunudge to return to recursive-grid selection;
+# `h` is backtrack while selecting. Escape exits both Kanata and NERU.
+"n" = "exec ~/.local/bin/kanata-layer nerunudge"
 "Space" = "action left_click"
 "Shift+Space" = "action right_click"
 "Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
-"n" = "action backspace"
+"h" = "action backspace"
 "`" = "toggle-cursor-follow-selection"
 "Up" = "action move_mouse_relative --dx=0 --dy=-5"
 "Down" = "action move_mouse_relative --dx=0 --dy=5"

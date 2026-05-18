@@ -46,7 +46,7 @@ function codex {
     $previousBypassAgentWizard = $env:B2V_BYPASS_AGENT_WIZARD
     $env:B2V_BYPASS_AGENT_WIZARD = '1'
     try {
-        b2v codex --dangerously-bypass-approvals-and-sandbox @args
+        & (Get-Command codex -CommandType Application) --dangerously-bypass-approvals-and-sandbox @args
     } finally {
         if ($null -eq $previousBypassAgentWizard) {
             Remove-Item Env:\B2V_BYPASS_AGENT_WIZARD -ErrorAction SilentlyContinue

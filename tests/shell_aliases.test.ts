@@ -15,6 +15,6 @@ describe("shell aliases", () => {
     expect(aliasesSh).toContain("g() {");
     expect(aliasesSh).toContain('gemini "$@"');
     expect(aliasesSh).toContain("codex() {");
-    expect(aliasesSh).toContain('B2V_BYPASS_AGENT_WIZARD=1 b2v codex --dangerously-bypass-approvals-and-sandbox "$@"');
+    expect(aliasesSh).toContain('B2V_BYPASS_AGENT_WIZARD=1 command codex --dangerously-bypass-approvals-and-sandbox "$@"');
   });
 });
