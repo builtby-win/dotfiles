@@ -153,12 +153,6 @@ print_brew_shellenv_instructions() {
   echo "    eval \"$shellenv_cmd\""
 }
 
-print_setup_resume_instructions() {
-  print_error "Interactive setup did not launch automatically."
-  echo "  Resume it with:"
-  echo "    cd $DOTFILES_DIR && npm exec --yes tsx -- setup.ts $DOTFILES_DIR"
-}
-
 setup_node_tool_paths() {
   export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
   mkdir -p "$HOME/.local/bin" "$PNPM_HOME"
@@ -213,37 +207,6 @@ prompt_shell_refresh() {
       print_warning "Open a new terminal or run exec \"\$SHELL\" -l when you are ready."
       ;;
   esac
-}
-
-run_interactive_setup() {
-  local tsx_bin="$DOTFILES_DIR/node_modules/.bin/tsx"
-  local setup_script="$DOTFILES_DIR/setup.ts"
-  local setup_args=( "$DOTFILES_DIR" )
-
-  if [[ -n "$SETUP_PATH" ]]; then
-    setup_args+=( --setup-path "$SETUP_PATH" )
-  fi
-
-  if [[ ! -r /dev/tty ]]; then
-    print_error "Cannot open /dev/tty for interactive setup."
-    print_setup_resume_instructions
-    return 1
-  fi
-
-  if [[ -x "$tsx_bin" ]]; then
-    "$tsx_bin" "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
-  fi
-
-  if command -v pnpm &> /dev/null; then
-    pnpm --dir "$DOTFILES_DIR" exec tsx "$setup_script" "${setup_args[@]}" < /dev/tty && return 0
-  fi
-
-  if command -v npm &> /dev/null; then
-    (cd "$DOTFILES_DIR" && npm exec --yes tsx -- "$setup_script" "${setup_args[@]}") < /dev/tty && return 0
-  fi
-
-  print_setup_resume_instructions
-  return 1
 }
 
 # Check if running from curl pipe or locally
@@ -508,7 +471,17 @@ print_success "Chezmoi dotfiles applied!"
 
 echo ""
 print_step "[4/4] Opening interactive setup dashboard..."
-run_interactive_setup || exit 1
-print_success "Interactive setup complete!"
+
+# The chezmoi-managed shell config was just applied in step 3 —
+# that config has eval "$(fnm env)" and eval "$(brew shellenv)".
+# Spawn a login shell so those are sourced correctly (rather than
+# fighting against curl | bash pipe stdin / missing PATH entries).
+if "$SHELL" -l -c "cd '$DOTFILES_DIR' && exec pnpm exec tsx setup.ts '$DOTFILES_DIR'${SETUP_PATH:+ --setup-path '$SETUP_PATH'}" < /dev/tty 2>&1; then
+  print_success "Interactive setup complete!"
+else
+  print_error "Interactive setup did not launch automatically."
+  print_error "Run: cd $DOTFILES_DIR && pnpm exec tsx setup.ts $DOTFILES_DIR"
+  exit 1
+fi
 
 prompt_shell_refresh
