@@ -1096,9 +1096,27 @@ async function installApps(apps: string[]): Promise<void> {
     printManualDownloadApps(manualDownloadApps);
   }
 
+  if (apps.includes("claude")) {
+    log.info("Installing Claude Code CLI...");
+    if (runCommand("npm install -g @anthropic-ai/claude-code", false)) {
+      log.success("Claude Code CLI installed");
+    } else {
+      log.warning("Failed to install Claude Code CLI");
+    }
+  }
+
+  if (apps.includes("gemini")) {
+    log.info("Installing Gemini CLI...");
+    if (runCommand("npm install -g @google/gemini-cli", false)) {
+      log.success("Gemini CLI installed");
+    } else {
+      log.warning("Failed to install Gemini CLI");
+    }
+  }
+
   if (apps.includes("codex")) {
     log.info("Installing Codex CLI...");
-    if (runCommand("npm install -g @openai/codex", true)) {
+    if (runCommand("npm install -g @openai/codex", false)) {
       log.success("Codex CLI installed");
     } else {
       log.warning("Failed to install Codex CLI");
@@ -2407,97 +2425,88 @@ async function runSetup(): Promise<void> {
 
     if (showInfo) {
       console.log("");
-      if (currentPlatform === "linux") {
-        console.log(`${colors.cyan}${colors.bold}=== Shell Commands ===${colors.reset}`);
-      } else {
-        console.log(`${colors.cyan}${colors.bold}=== CLI Tools ===${colors.reset}`);
-      }
-      for (const app of selectableApps.filter(a => !a.cask)) {
-        const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
-        console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
-      }
-      if (currentPlatform !== "linux") {
-        console.log("");
-        console.log(`${colors.cyan}${colors.bold}=== Apps ===${colors.reset}`);
-        for (const app of selectableApps.filter(a => a.cask)) {
+      for (const category of CATEGORY_ORDER) {
+        const appsInCategory = selectableApps.filter(app => app.category === category);
+        if (appsInCategory.length === 0) continue;
+        console.log(`${colors.cyan}${colors.bold}=== ${CATEGORY_LABELS[category]} ===${colors.reset}`);
+        for (const app of appsInCategory) {
           const urlPart = app.url ? ` ${colors.dim}${app.url}${colors.reset}` : "";
           console.log(`  ${colors.bold}${app.name}${colors.reset} - ${app.desc || ""}${urlPart}`);
         }
+        console.log("");
       }
-      console.log("");
     }
   }
-
-  // Helper: Build categorized choices for apps
-  const buildCategorizedAppChoices = () => {
-    const choices: Array<{ name: string; value: string; checked: boolean; disabled?: string | false }> = [];
-
-    // Group apps by category
-    for (const category of CATEGORY_ORDER) {
-      const appsInCategory = selectableApps.filter(app => app.category === category);
-      if (appsInCategory.length === 0) continue;
-
-      // Add category separator
-      choices.push({
-        name: `${colors.cyan}─── ${CATEGORY_LABELS[category]} ───${colors.reset}`,
-        value: `__separator_${category}__`,
-        checked: false,
-        disabled: " ",
-      });
-
-      // Add apps in this category
-      for (const app of appsInCategory) {
-        const state = appStates.get(app.value) ?? "not_installed";
-        const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
-        const manualDownloadPart = app.manualDownload ? ` ${colors.yellow}(manual download)${colors.reset}` : "";
-        if (state === "installed") {
-          choices.push({
-            name: `${app.name}${descPart}${manualDownloadPart} ${colors.green}(installed)${colors.reset}`,
-            value: app.value,
-            checked: true,
-            disabled: "(already installed)",
-          });
-        } else if (state === "partial") {
-          choices.push({
-            name: `${app.name}${descPart}${manualDownloadPart} ${colors.green}(installed)${colors.reset} ${colors.yellow}(missing extras)${colors.reset}`,
-            value: app.value,
-            checked: true,
-            disabled: false,
-          });
-        } else {
-          choices.push({
-            name: `${app.name}${descPart}${manualDownloadPart}`,
-            value: app.value,
-            checked: app.checked ?? false,
-            disabled: false,
-          });
-        }
-      }
-    }
-
-    return choices;
-  };
 
   const TOTAL_STEPS = 5;
 
   // Step navigation loop
   while (currentStep >= 1) {
-    // Step 1: Select apps to install
+    // Step 1: Select app groups (categories)
     if (currentStep === 1) {
       log.step(`[Step 1 of ${TOTAL_STEPS}] Select ${installItemLabel} to install`);
-      const appsChoices = buildCategorizedAppChoices();
-      
-      selectedApps = await checkbox({
-        message: `Select ${installItemLabel} (space to toggle, enter when done — you can go back after) ${colors.dim}[${selectableApps.length} items]${colors.reset}:`,
-        choices: appsChoices,
-        pageSize: 25,
+
+      const categoryChoices: Array<{ name: string; value: string; checked: boolean; disabled?: string | false }> = [];
+
+      for (const category of CATEGORY_ORDER) {
+        const appsInCategory = selectableApps.filter(app => app.category === category);
+        if (appsInCategory.length === 0) continue;
+
+        const totalCount = appsInCategory.length;
+        const installedCount = appsInCategory.filter(a => appStates.get(a.value) === "installed").length;
+        const partialCount = appsInCategory.filter(a => appStates.get(a.value) === "partial").length;
+        const allInstalled = installedCount === totalCount;
+        const label = CATEGORY_LABELS[category];
+
+        if (allInstalled && partialCount === 0) {
+          categoryChoices.push({
+            name: `${label} ${colors.green}(all ${totalCount} installed)${colors.reset}`,
+            value: `__cat_${category}__`,
+            checked: true,
+            disabled: " ",
+          });
+        } else {
+          const parts: string[] = [];
+          if (installedCount > 0) parts.push(`${installedCount} installed`);
+          if (partialCount > 0) parts.push(`${partialCount} partial`);
+          const toInstall = totalCount - installedCount - partialCount;
+          if (toInstall > 0) parts.push(`${toInstall} to install`);
+          const status = parts.length > 0 ? ` ${colors.dim}(${parts.join(", ")})${colors.reset}` : "";
+          const isPowerUser = category === "input";
+          categoryChoices.push({
+            name: isPowerUser ? `${label} ${colors.yellow}(power user)${colors.reset}${status}` : `${label}${status}`,
+            value: `__cat_${category}__`,
+            checked: !isPowerUser,
+            disabled: false,
+          });
+        }
+      }
+
+      const selectedCats = await checkbox({
+        message: `Select groups to install (space to toggle, enter when done)${colors.reset}:`,
+        choices: categoryChoices,
+        pageSize: 15,
         loop: false,
       });
 
-      // Filter out separators
-      selectedApps = selectedApps.filter(a => !a.startsWith("__"));
+      selectedApps = [];
+      for (const app of selectableApps) {
+        const catTag = `__cat_${app.category}__`;
+        if (selectedCats.includes(catTag)) {
+          selectedApps.push(app.value);
+        } else if (appStates.get(app.value) === "installed" || appStates.get(app.value) === "partial") {
+          // Keep already-installed apps selected even if category wasn't chosen
+          selectedApps.push(app.value);
+        }
+      }
 
       console.log("");
+      const toInstall = selectedApps.filter(a => appStates.get(a) !== "installed").length;
+      log.success(`Selected ${selectedApps.length} ${installItemLabel} (${toInstall} to install)`);
+      if (toInstall === 0) {
+        log.info("All selected tools are already installed — proceed or go back to add more.");
+      }
+
       const step1Nav = await select({
         message: "Next step?",
         choices: [
@@ -2510,6 +2519,7 @@ async function runSetup(): Promise<void> {
         return mainMenu();
       }
 
+      console.log("");
       currentStep = 2;
     }
 

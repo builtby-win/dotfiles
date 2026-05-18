@@ -28,7 +28,6 @@ cask "visual-studio-code"
 cask "cursor"
 
 # AI Tools
-brew "claude"         # Claude Code CLI
 
 # Productivity
 cask "raycast"
