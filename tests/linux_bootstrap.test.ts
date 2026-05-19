@@ -129,7 +129,7 @@ describe('Linux bootstrap workflow', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
     expect(content).toContain('function selectedChezmoiApplyTargets(configs: string[]): string[]');
-    expect(content).toContain('applyChezmoi(configs)');
+    expect(content).toContain('applyChezmoi(chezmoiConfigs)');
     expect(content).toContain('No selected chezmoi targets to apply');
     expect(content).toContain('Will not touch:');
   });

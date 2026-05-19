@@ -38,6 +38,21 @@ describe('chezmoi source tree', () => {
     expect(macGhosttyConfig).not.toContain('Catppuccin Latte');
   });
 
+  it('does not override Ghostty super+a so native select-all still works', () => {
+    const xdgGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/config'), 'utf-8');
+    const macGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/config'), 'utf-8');
+
+    expect(xdgGhosttyConfig).not.toContain('keybind = super+a=text:\\x01');
+    expect(macGhosttyConfig).not.toContain('keybind = super+a=text:\\x01');
+  });
+
+  it('exposes a path-filtered bb setup ghostty apply path', () => {
+    const functions = fs.readFileSync(path.resolve(__dirname, '../shell/functions.sh'), 'utf-8');
+
+    expect(functions).toContain('bb setup ghostty: applying Ghostty config.');
+    expect(functions).toContain('com.mitchellh.ghostty/config');
+  });
+
   it('keeps the chezmoi zsh entrypoint free of hardcoded user paths', () => {
     const content = fs.readFileSync(zshEntryPath, 'utf-8');
     expect(content).toContain('shell/init.sh');

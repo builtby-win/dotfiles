@@ -8,6 +8,8 @@ This repo keeps native restore artifacts for apps that should be restored throug
 - `assets/app-exports/rectangle-pro/RectangleProConfig.json`
 - `assets/app-exports/bettertouchtool/Default.bttpreset`
 
+iTerm2 is handled as defaults instead of a full app export. Run `bb setup iterm2` or select `iTerm2 defaults` in `bb setup` to merge the BuiltBy key mappings into the existing iTerm preferences.
+
 ## Sync helpers
 
 Pull the latest machine exports into the repo:

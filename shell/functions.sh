@@ -381,6 +381,7 @@ bb() {
       echo "  bb setup                Open guided setup to change apps, configs, or restore backups"
       echo "  bb setup <module>       Apply one selected module intentionally"
       echo "  bb setup hammerspoon    Install Hammerspoon module"
+      echo "  bb setup iterm2         Apply iTerm2 key defaults"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
       echo "  bb kanata-setup         Guided macOS Kanata install + permissions"
@@ -394,7 +395,7 @@ bb() {
       echo "  bb help                 Show this help"
       echo ""
       echo "Modules:"
-      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, kanata"
+      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, kanata, iterm2"
       echo "Restore targets:"
       echo "  raycast, rectangle-pro, bettertouchtool, macos-apps"
       return 0
@@ -421,12 +422,35 @@ bb() {
 
       local module="${1:-all}"
       case "$module" in
-        all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata)
-          if [[ "$module" == "hammerspoon" || "$module" == "karabiner" ]]; then
+        all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata|iterm2)
+          if [[ "$module" == "hammerspoon" || "$module" == "karabiner" || "$module" == "iterm2" ]]; then
             if [[ "$(uname)" != "Darwin" ]]; then
               echo "$module is macOS only."
               return 1
             fi
+          fi
+          if [[ "$module" == "iterm2" ]]; then
+            local iterm_script="$dotfiles_dir/scripts/setup-iterm-defaults.sh"
+            if [[ ! -f "$iterm_script" ]]; then
+              echo "iTerm2 defaults script not found: $iterm_script"
+              return 1
+            fi
+            bash "$iterm_script"
+            return $?
+          fi
+          if [[ "$module" == "ghostty" ]]; then
+            local apply_script="$dotfiles_dir/scripts/apply-chezmoi.sh"
+            if [[ ! -f "$apply_script" ]]; then
+              echo "chezmoi apply helper not found: $apply_script"
+              return 1
+            fi
+            echo "bb setup ghostty: applying Ghostty config."
+            if [[ "$(uname)" == "Darwin" ]]; then
+              bash "$apply_script" "$HOME/.config/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+            else
+              bash "$apply_script" "$HOME/.config/ghostty/config"
+            fi
+            return $?
           fi
           if [[ "$module" == "tmux" ]]; then
             _sync_workmux_config "$dotfiles_dir"

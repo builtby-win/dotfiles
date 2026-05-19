@@ -479,7 +479,8 @@ const APPS: App[] = [
   { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
 
   // Terminals & Editors
-  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, configs: ["ghostty"], checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "iTerm2", value: "iterm2", brewName: "iterm2", cask: true, configs: ["iterm2"], checked: false, detectPath: "/Applications/iTerm.app", desc: "Terminal emulator with BuiltBy key defaults", url: "https://iterm2.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Cursor", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
 
@@ -536,6 +537,7 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Kanata", value: "kanata", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
+  { name: "iTerm2 defaults", value: "iterm2", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
 ];
 
 // Optional features (opt-in, don't load in shell unless selected)
@@ -723,6 +725,12 @@ function isAppInstalled(app: App): boolean {
 }
 
 function isManagedConfigApplied(config: string): boolean {
+  if (config === "iterm2") {
+    if (getCurrentPlatform() !== "macos") return false;
+    const globalKeyMap = getCommandOutput('defaults read com.googlecode.iterm2 GlobalKeyMap 2>/dev/null') ?? "";
+    return globalKeyMap.includes('0x7f-0x100000-0x33') && globalKeyMap.includes('0x7f-0x80000-0x33');
+  }
+
   const targets = CHEZMOI_TARGETS[config];
   if (!targets) return false;
 
@@ -832,54 +840,6 @@ function installStarshipOnLinux(): boolean {
   return false;
 }
 
-function installOpenCodeCli(): boolean {
-  if (runCommand("command -v opencode", true)) {
-    log.success("OpenCode already installed");
-    return true;
-  }
-
-  log.info("Installing OpenCode...");
-  ensureLocalBinInPath();
-
-  const installerUrl = "https://opencode.ai/install";
-  if (!runCommand(`curl -fsSL "${installerUrl}" -o /dev/null`, true)) {
-    log.error(`Cannot access ${installerUrl}`);
-    log.error("Third-party URL access is required to install OpenCode");
-    return false;
-  }
-
-  const installCommand = "curl -fsSL https://opencode.ai/install | bash";
-  if (!runCommand(installCommand)) {
-    log.warning("OpenCode installer failed");
-    return false;
-  }
-
-  ensureLocalBinInPath();
-  if (runCommand("command -v opencode", true)) {
-    log.success("OpenCode installed");
-    return true;
-  }
-
-  const localCandidates = [
-    join(HOME, ".local", "bin", "opencode"),
-    join(HOME, ".cargo", "bin", "opencode"),
-    join(HOME, ".nix-profile", "bin", "opencode"),
-  ];
-
-  for (const candidate of localCandidates) {
-    if (!existsSync(candidate)) continue;
-    const candidateDir = dirname(candidate);
-    const currentPath = process.env.PATH ?? "";
-    if (!currentPath.split(":").includes(candidateDir)) {
-      process.env.PATH = currentPath ? `${candidateDir}:${currentPath}` : candidateDir;
-    }
-    log.success("OpenCode installed");
-    return true;
-  }
-
-  log.warning("OpenCode installation completed but binary was not found in PATH");
-  return false;
-}
 
 function installSeshOnLinux(): boolean {
   if (runCommand("command -v sesh", true)) {
@@ -1124,7 +1084,12 @@ async function installApps(apps: string[]): Promise<void> {
   }
 
   if (apps.includes("opencode")) {
-    installOpenCodeCli();
+    log.info("Installing OpenCode CLI...");
+    if (runCommand("npm install -g opencode-ai", false)) {
+      log.success("OpenCode CLI installed");
+    } else {
+      log.warning("Failed to install OpenCode CLI");
+    }
   }
 
   if (apps.includes("kanata")) {
@@ -1182,6 +1147,10 @@ function selectedManagedTargetPaths(configs: string[]): string[] {
     paths.add(join(HOME, ".tmux.conf"));
     paths.add(WORKMUX_CONFIG_PATH);
     paths.add(join(HOME, ".tmux", "plugins", "tpm"));
+  }
+
+  if (configs.includes("iterm2")) {
+    paths.add(join(HOME, "Library/Preferences/com.googlecode.iterm2.plist"));
   }
 
   for (const config of configs) {
@@ -1587,8 +1556,10 @@ function applyChezmoi(configs: string[]): boolean {
 async function setupManagedConfigs(configs: string[]): Promise<void> {
   if (configs.length === 0) return;
 
-  log.step("Applying chezmoi-managed configs...");
+  log.step("Applying selected configs...");
   writeDotfilesPath();
+
+  const chezmoiConfigs = configs.filter((config) => config !== "iterm2");
 
   if (configs.includes("zsh")) {
     setupZshEntrypoint();
@@ -1602,10 +1573,10 @@ async function setupManagedConfigs(configs: string[]): Promise<void> {
     }
   }
 
-  migrateLegacyStowSymlinks(configs);
-  backupRealManagedTargets(configs);
+  migrateLegacyStowSymlinks(chezmoiConfigs);
+  backupRealManagedTargets(chezmoiConfigs);
 
-  if (applyChezmoi(configs)) {
+  if (applyChezmoi(chezmoiConfigs)) {
     log.success("Selected chezmoi-managed configs applied");
     if (configs.includes("tmux")) {
       setupTpm();
@@ -1615,6 +1586,26 @@ async function setupManagedConfigs(configs: string[]): Promise<void> {
     }
   } else {
     log.error("Failed to apply chezmoi-managed configs");
+  }
+
+  if (configs.includes("iterm2")) {
+    applyITermDefaults();
+  }
+}
+
+function applyITermDefaults(): void {
+  if (getCurrentPlatform() !== "macos") return;
+
+  const scriptPath = join(DOTFILES_DIR, "scripts", "setup-iterm-defaults.sh");
+  if (!existsSync(scriptPath)) {
+    log.warning(`iTerm2 defaults helper not found: ${scriptPath}`);
+    return;
+  }
+
+  if (runCommand(`bash "${scriptPath}"`)) {
+    log.success("iTerm2 defaults applied");
+  } else {
+    log.warning("Failed to apply iTerm2 defaults");
   }
 }
 async function maybeSetDefaultShellToZsh(selectedManagedConfigs: string[]): Promise<void> {
@@ -2599,13 +2590,19 @@ async function runSetup(): Promise<void> {
 
     // Step 4: Recap and confirm
     if (currentStep === 4) {
-      // Auto-select AI configs based on app selection
-      const autoSelectedAIConfigs = selectedApps
+      const autoSelectedAppConfigs = selectedApps
         .filter((app) => {
           const appDef = APPS.find((a) => a.value === app);
           return appDef?.configs && appDef.configs.length > 0;
         })
         .flatMap((app) => APPS.find((a) => a.value === app)?.configs ?? []);
+
+      const managedConfigValues = new Set(MANAGED_CONFIGS.map((config) => config.value));
+      const autoSelectedManagedConfigs = autoSelectedAppConfigs.filter((config) => managedConfigValues.has(config));
+      selectedManagedConfigs = [...new Set([...selectedManagedConfigs, ...autoSelectedManagedConfigs])];
+
+      // Auto-select AI configs based on app selection
+      const autoSelectedAIConfigs = autoSelectedAppConfigs.filter((config) => AI_CONFIGS[config]);
 
       aiConfigs = [...new Set(autoSelectedAIConfigs)];
 

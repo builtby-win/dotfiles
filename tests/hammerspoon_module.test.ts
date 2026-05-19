@@ -46,7 +46,7 @@ describe('Hammerspoon module wiring', () => {
   it('exposes bb setup hammerspoon helper command', () => {
     const functionsSh = readRepoFile('shell/functions.sh');
     expect(functionsSh).toContain('bb setup hammerspoon');
-    expect(functionsSh).toContain('all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata)');
+    expect(functionsSh).toContain('all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata|iterm2)');
     expect(functionsSh).toContain('bb setup ${module}: applying chezmoi-managed dotfiles.');
   });
 });

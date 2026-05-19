@@ -6,6 +6,7 @@ describe('Kanata module', () => {
   const configPath = path.resolve(__dirname, '../chezmoi/dot_config/kanata/kanata.kbd');
   const chezmoiConfigPath = path.resolve(__dirname, '../chezmoi/dot_config/kanata/kanata.kbd');
   const sculptConfigPath = path.resolve(__dirname, '../chezmoi/dot_config/kanata/kanata-sculpt.kbd');
+  const sharedConfigPath = path.resolve(__dirname, '../chezmoi/dot_config/kanata/kanata-shared.kbd');
   const docsPath = path.resolve(__dirname, '../docs/modules/kanata.md');
   const setupPath = path.resolve(__dirname, '../setup.ts');
   const macosInstallerPath = path.resolve(__dirname, '../scripts/install-kanata-macos.sh');
@@ -50,13 +51,15 @@ describe('Kanata module', () => {
   });
 
   it('provides filtered macOS Kanata profiles', () => {
-    const content = fs.readFileSync(configPath, 'utf-8');
-    const sculpt = fs.readFileSync(sculptConfigPath, 'utf-8');
+    const shared = fs.readFileSync(sharedConfigPath, 'utf-8');
+    const content = `${fs.readFileSync(configPath, 'utf-8')}\n${shared}`;
+    const sculpt = `${fs.readFileSync(sculptConfigPath, 'utf-8')}\n${shared}`;
     const defsrc = 'lctl lsft lalt lmet ralt rmet rctl rsft menu caps fn del ; tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
     const nonSculptBase = '@os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
     const sculptBase = '@os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
     const hyperlayer = '_ _ _ _ _ _ _ _ _ _ _ _ _ C-A-S-M-tab C-A-S-M-grv C-A-S-M-esc C-A-S-M-spc C-A-S-M-h C-A-S-M-j C-A-S-M-k C-A-S-M-l C-A-S-M-u C-A-S-M-d C-A-S-M-a C-A-S-M-e C-A-S-M-w C-A-S-M-b C-A-S-M-f C-A-S-M-c C-A-S-M-v C-A-S-M-x C-A-S-M-z C-A-S-M-q C-A-S-M-m C-A-S-M-r C-A-S-M-t C-A-S-M-y C-A-S-M-i C-A-S-M-o C-A-S-M-p C-A-S-M-s C-A-S-M-g C-A-S-M-n C-A-S-M-4 C-A-S-M-f1 C-A-S-M-f2 C-A-S-M-f3 C-A-S-M-f4 C-A-S-M-f5 C-A-S-M-f6 C-A-S-M-f7 C-A-S-M-f8 C-A-S-M-f9 C-A-S-M-f10 C-A-S-M-f11 C-A-S-M-f12';
     const cmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ _ M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
+    const sculptCmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
     const fnRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
 
     expect(content).toContain('(defsrc');
@@ -120,7 +123,7 @@ describe('Kanata module', () => {
     expect(content).toContain(nonSculptBase);
     expect(sculpt).toContain(sculptBase);
     expect(content).toContain(cmdRow);
-    expect(sculpt).toContain(cmdRow);
+    expect(sculpt).toContain(sculptCmdRow);
     for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
       expect(content).toContain(`M-${letter}`);
       expect(sculpt).toContain(`M-${letter}`);
@@ -130,43 +133,51 @@ describe('Kanata module', () => {
     expect(content).toContain('com.mitchellh.ghostty nop0');
     expect(sculpt).toContain('com.mitchellh.ghostty nop0');
     expect(content).toContain('((input virtual com.github.wez.wezterm)) @leader break');
+    expect(content).toContain('((input virtual com.github.wez.wezterm)) C-n break');
+    expect(content).toContain('((input virtual com.github.wez.wezterm)) C-p break');
+    expect(content).toContain('() down break');
+    expect(content).toContain('() up break');
     expect(content).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
     expect(sculpt).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
     expect(content).toContain('() @cmd-next break');
+    expect(content).not.toContain("(defoverrides");
+    expect(sculpt).not.toContain("(defoverrides");
+    for (const chord of [
+      "(lctl n) @ctrl-n-or-down 75 first-release ()",
+      "(rctl n) @ctrl-n-or-down 75 first-release ()",
+      "(lctl p) @ctrl-p-or-up 75 first-release ()",
+      "(rctl p) @ctrl-p-or-up 75 first-release ()",
+    ]) {
+      expect(content).toContain(chord);
+      expect(sculpt).toContain(chord);
+    }
     const requiredActiveChords = [
-      '(j k) @jk 75 first-release (neruscroll)',
-      '(d f) (macro C-A-S-M-f) 75 first-release ()',
-      '(j l) @nav-layer 75 first-release (neruscroll)',
-      '(l k) @hyper-next 75 first-release ()',
-      '(k spc) @mouse-layer 75 first-release (neruscroll)',
-      '(esc spc) XX 80 first-release ()',
+      '(lctl n) @ctrl-n-or-down 75 first-release ()',
+      '(rctl n) @ctrl-n-or-down 75 first-release ()',
+      '(lctl p) @ctrl-p-or-up 75 first-release ()',
+      '(rctl p) @ctrl-p-or-up 75 first-release ()',
+      '(f j) @neru 100 first-release (nerumode)',
+      '(j l) @nudge 100 first-release (nerumode)',
+      '(d k) @scroll 100 first-release (nerumode)',
+      '(d f) @hints 100 first-release (nerumode)',
+      '(j k) @jk 100 first-release (neruscroll nerumode)',
     ];
-    expect(content).toContain('(j k) @jk 75 first-release (neruscroll)');
-    expect(sculpt).toContain('(j k) @jk 75 first-release (neruscroll)');
-    expect(content).toContain('(d f) (macro C-A-S-M-f)');
-    expect(content).toContain('(j l) @nav-layer 75 first-release (neruscroll)');
-    expect(content).toContain('(l k) @hyper-next 75 first-release ()');
-    expect(content).toContain('(k spc) @mouse-layer 75 first-release (neruscroll)');
-    expect(content).toContain('(esc spc) XX 80 first-release ()');
-    expect(sculpt).toContain('(j l) @nav-layer 75 first-release (neruscroll)');
-    expect(sculpt).toContain('(l k) @hyper-next 75 first-release ()');
-    expect(sculpt).toContain('(k spc) @mouse-layer 75 first-release (neruscroll)');
-    expect(sculpt).toContain('(esc spc) XX 80 first-release ()');
 
     for (const chords of [getActiveChords(content), getActiveChords(sculpt)]) {
       for (const entry of requiredActiveChords) {
         expect(chords).toContain(entry);
       }
 
-      expect(chords.some((entry) => entry.startsWith('(f j) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(j f) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(d k) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(k d) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(s l) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(l s) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(j spc) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(spc j) '))).toBe(false);
     }
+
+    expect(getActiveChords(content)).toContain('(esc spc) XX 100 first-release (nerumode)');
+    expect(getActiveChords(sculpt)).toContain('(esc spc) XX 80 first-release (nerumode)');
   });
 
   it('documents the patched macOS Application key installer', () => {

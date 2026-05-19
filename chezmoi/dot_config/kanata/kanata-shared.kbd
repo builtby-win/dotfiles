@@ -78,15 +78,29 @@
   ;; j+k is terminal-aware when kanata-vk-agent has pressed one of the terminal
   ;; app virtual keys. Outside terminals, it arms Cmd for the next keypress.
   jk @terminal-leader-or-cmd-layer
-  ;; Vivaldi: Ctrl+n → Down, Ctrl+p → Up. These aliases are only used from the
-  ;; Vivaldi-specific Control layer, so plain n/p stay raw on the base layer.
-  vian (switch
-    ((input virtual com.vivaldi.Vivaldi)) (macro rctl down) break
-    () n break
+  ctrl-n-or-down (switch
+    ((input virtual com.mitchellh.ghostty)) C-n break
+    ((input virtual com.googlecode.iterm2)) C-n break
+    ((input virtual com.apple.Terminal)) C-n break
+    ((input virtual dev.warp.Warp-Stable)) C-n break
+    ((input virtual net.kovidgoyal.kitty)) C-n break
+    ((input virtual org.alacritty)) C-n break
+    ((input virtual io.alacritty)) C-n break
+    ((input virtual com.github.wez.wezterm)) C-n break
+    ((input virtual com.cmuxterm.app)) C-n break
+    () down break
   )
-  viap (switch
-    ((input virtual com.vivaldi.Vivaldi)) (macro rctl up) break
-    () p break
+  ctrl-p-or-up (switch
+    ((input virtual com.mitchellh.ghostty)) C-p break
+    ((input virtual com.googlecode.iterm2)) C-p break
+    ((input virtual com.apple.Terminal)) C-p break
+    ((input virtual dev.warp.Warp-Stable)) C-p break
+    ((input virtual net.kovidgoyal.kitty)) C-p break
+    ((input virtual org.alacritty)) C-p break
+    ((input virtual io.alacritty)) C-p break
+    ((input virtual com.github.wez.wezterm)) C-p break
+    ((input virtual com.cmuxterm.app)) C-p break
+    () up break
   )
   neru (multi (macro C-A-S-M-spc) (layer-switch nerumode))
   nudge (multi (macro C-A-S-M-;) (layer-switch nerumode))
