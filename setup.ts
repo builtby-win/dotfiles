@@ -472,6 +472,7 @@ const APPS: App[] = [
   { name: "btop", value: "btop", brewName: "btop", desc: "Modern resource monitor (better than htop)", url: "https://github.com/aristocratos/btop", category: "cli" },
   { name: "fzf", value: "fzf", brewName: "fzf", desc: "Fuzzy finder for files, history, and more", url: "https://github.com/junegunn/fzf", category: "cli" },
   { name: "ripgrep", value: "ripgrep", brewName: "ripgrep", desc: "Blazing fast grep replacement", url: "https://github.com/BurntSushi/ripgrep", category: "cli" },
+  { name: "gh", value: "gh", brewName: "gh", checked: true, desc: "GitHub CLI - PRs, issues, auth from terminal", url: "https://cli.github.com", category: "cli" },
   { name: "bat", value: "bat", brewName: "bat", desc: "cat with syntax highlighting", url: "https://github.com/sharkdp/bat", category: "cli" },
   { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza", category: "cli" },
   { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide", category: "cli" },
@@ -1656,6 +1657,38 @@ async function maybeSetDefaultShellToZsh(selectedManagedConfigs: string[]): Prom
   }
 }
 
+async function maybeLoginGhCli(selectedApps: string[]): Promise<void> {
+  if (!selectedApps.includes("gh")) return;
+
+  const ghInstalled = runCommand("command -v gh", true);
+  if (!ghInstalled) return;
+
+  // Check if already authenticated
+  const authStatus = getCommandOutput("gh auth status 2>&1");
+  if (authStatus && authStatus.includes("Logged in to github.com")) {
+    log.success("GitHub CLI already authenticated");
+    return;
+  }
+
+  log.warning("GitHub CLI is installed but not authenticated");
+  const shouldLogin = await confirm({
+    message: "Login to GitHub now via gh auth login? (opens browser)",
+    default: true,
+  });
+
+  if (!shouldLogin) {
+    log.info("Skipping GitHub auth. Run 'gh auth login' later to set it up.");
+    return;
+  }
+
+  console.log("");
+  log.step("Launching GitHub CLI login...");
+  log.info("Follow the prompts in your terminal to authenticate.");
+  console.log("");
+
+  runCommand("gh auth login");
+}
+
 function installTpmPlugins(tpmPath: string): void {
   const tmuxConfPath = join(HOME, ".tmux.conf");
   const installScript = join(tpmPath, "bin", "install_plugins");
@@ -2768,6 +2801,9 @@ async function runSetup(): Promise<void> {
   }
 
   await maybeSetDefaultShellToZsh(selectedManagedConfigs);
+  console.log("");
+
+  await maybeLoginGhCli(selectedApps);
 
   // Save setup manifest (tracks what user selected for features)
   const setupManifest = manifest.getEmptyManifest();
