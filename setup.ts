@@ -535,7 +535,7 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Neovim", value: "nvim", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
   { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
-  { name: "Kanata", value: "kanata", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer" },
+  { name: "Kanata (advanced)", value: "kanata", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer — advanced alternative to Karabiner Elements" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
   { name: "iTerm2 defaults", value: "iterm2", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
 ];

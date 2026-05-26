@@ -384,7 +384,7 @@ bb() {
       echo "  bb setup iterm2         Apply iTerm2 key defaults"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
-      echo "  bb kanata-setup         Guided macOS Kanata install + permissions"
+      echo "  bb kanata-setup         [Advanced] Guided macOS Kanata install + permissions"
       echo "  bb sync macos-apps      Sync Raycast/Rectangle/BTT exports"
       echo "  bb restore <target>     Reveal macOS app backup exports"
       echo "  bb update               Pull updates and optionally rerun setup"

@@ -1,6 +1,6 @@
 # Kanata module
 
-Kanata is the preferred cross-platform keyboard remapper for this repo. It is the Windows/Linux/macOS replacement for the Karabiner-only chord and Hyper-key pieces.
+> **Advanced users only.** Start with **Karabiner Elements** (`bb setup karabiner`) for your keyboard remapping needs. Kanata is a powerful cross-platform alternative that replaces the Karabiner-only chord and Hyper-key pieces on macOS, Linux, and Windows — but it requires Cargo installation, DriverKit permissions, root LaunchDaemons, and a complicated setup process.
 
 ## Before you start
 

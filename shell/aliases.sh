@@ -79,10 +79,12 @@ alias unwip="git reset --soft HEAD~1"
 alias vibe="back2vibing"
 alias vb="back2vibing"
 
-# Kanata
-alias kr="sudo launchctl kickstart -k system/com.builtbywin.kanata && sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt"
-alias ks="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts"
-alias ksr="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts reload"
+# Kanata (advanced — only loaded if installed)
+if command -v kanata &> /dev/null; then
+  alias kr="sudo launchctl kickstart -k system/com.builtbywin.kanata && sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt"
+  alias ks="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts"
+  alias ksr="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts reload"
+fi
 
 # Ship it!
 alias shipit='echo "       _~\n    _~ )_)_~\n    )_))_))_)\n    _!__!__!_\n    \______t/\n  ~~~~~~~~~~~~~" && git push origin $(git rev-parse --abbrev-ref HEAD 2> /dev/null)'
