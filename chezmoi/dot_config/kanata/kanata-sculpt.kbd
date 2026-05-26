@@ -69,11 +69,8 @@
 
 ;; fj, dk, and sl are intentionally reserved for future layers and remain unmapped in this pass.
 (defchordsv2
-  ;; Source-key chords keep Ctrl+N/P from catching Hyper+N/P or other combos.
-  (lctl n) @ctrl-n-or-down 75 first-release ()
-  (rctl n) @ctrl-n-or-down 75 first-release ()
-  (lctl p) @ctrl-p-or-up 75 first-release ()
-  (rctl p) @ctrl-p-or-up 75 first-release ()
+  ;; (lctl p), (lctl n), (rctl p), (rctl n) intentionally omitted.
+  ;; They conflicted with Hyper + p/n — see kanata.kbd for rationale.
   ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
   ;; sequences stay plain text unless the keys are truly simultaneous.
   (f j) @neru 100 first-release (nerumode)

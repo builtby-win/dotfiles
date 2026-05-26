@@ -71,11 +71,14 @@
 
 ;; sl is intentionally reserved for future layers and remain unmapped in this pass.
 (defchordsv2
-  ;; Source-key chords keep Ctrl+N/P from catching Hyper+N/P or other combos.
-  (lctl n) @ctrl-n-or-down 75 first-release ()
-  (rctl n) @ctrl-n-or-down 75 first-release ()
-  (lctl p) @ctrl-p-or-up 75 first-release ()
-  (rctl p) @ctrl-p-or-up 75 first-release ()
+  ;; Disabled: (lctl p), (lctl n), (rctl p), (rctl n) source-key chords
+  ;; conflicted with Hyper (lctl+lalt+lsft+lmet) + p/n — the narrow 2-key match
+  ;; would fire before the wider 4-key guard could win.  With chords removed,
+  ;; lctl/rctl pass through as raw modifiers (process-unmapped-keys yes) and p/n
+  ;; output their base-layer keys; the OS sees C-p / C-n / C-A-S-M-p / C-A-S-M-n
+  ;; naturally.  The app-aware terminal-vs-up differentiation is lost with this
+  ;; revert — re-add if needed via a different mechanism (e.g. tap-hold on n/p
+  ;; with a switch).
   ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
   ;; sequences stay plain text unless the keys are truly simultaneous.
   (f j) @neru 100 first-release (nerumode)

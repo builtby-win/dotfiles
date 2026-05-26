@@ -36,9 +36,12 @@
   fn (tap-hold 200 200 lctl (layer-while-held fn))
   ;; Double-tap semicolon for AltTab's Ctrl+Option+Tab shortcut.
   semi (tap-dance 200 (; (macro C-A-tab)))
-  ;; Hold j then press Space for steady Backspace repeat; right-hand rolls still emit j.
-  j-home (tap-hold-tap-keys 200 200 j (layer-while-held jheld) (y u i o p h j k l ; n m , . /))
-  ;; In GUI editors with Vim mode, keep j raw so holding it repeats normally.
+  ;; Hold j via tap-hold: 200ms of j hold at OS level, then hold action
+  ;; keeps j pressed via multi + activates jheld layer so j+space =
+  ;; backspace repeat. Chords (j+k, j+l, f+j) fire within 100ms,
+  ;; before the 200ms tap-hold transition.
+  j-home (tap-hold 200 200 j (multi j (layer-while-held jheld)))
+  ;; In GUI editors with Vim mode, j is plain for cleanest repeat.
   editor-j (switch
     ((input virtual dev.zed.Zed)) j break
     ((input virtual com.microsoft.VSCode)) j break
@@ -170,7 +173,7 @@
   spc @bksp-repeat
 )
 
-;; Neru nudge layer: entered via `n` from recursive_grid (NERU config.toml).
+;; Neru nudge: entered via `n` from recursive_grid (NERU config.toml).
 ;; Maps h/j/k/l → arrow keys so NERU's existing 5px nudge bindings work.
 ;; Press `n` again to return to the normal recursive-grid Kanata layer without
 ;; leaving NERU. Escape and Space both switch back to base (defense-in-depth for

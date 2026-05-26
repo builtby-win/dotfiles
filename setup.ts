@@ -483,6 +483,7 @@ const APPS: App[] = [
   { name: "iTerm2", value: "iterm2", brewName: "iterm2", cask: true, configs: ["iterm2"], checked: false, detectPath: "/Applications/iTerm.app", desc: "Terminal emulator with BuiltBy key defaults", url: "https://iterm2.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Cursor", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "Zed", value: "zed", brewName: "zed", cask: true, checked: true, detectPath: "/Applications/Zed.app", desc: "High-performance code editor by the Atom creators", url: "https://zed.dev", platforms: { macos: true, linux: true, windows: false }, category: "terminals" },
 
   // AI Tools
   { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
@@ -532,8 +533,8 @@ interface ManagedConfig {
 const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
   { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "core profile + optional basic keymap, preserves existing setups" },
-  { name: "Neovim", value: "nvim", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
-  { name: "Hammerspoon", value: "hammerspoon", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
+  { name: "Neovim", value: "nvim", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
+  { name: "Hammerspoon", value: "hammerspoon", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Kanata (advanced)", value: "kanata", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer — advanced alternative to Karabiner Elements" },
   { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
