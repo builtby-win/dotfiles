@@ -2335,6 +2335,12 @@ async function runSetup(): Promise<void> {
       value: "focus",
       description: "Installs Back2Vibing, tmux, sesh, fzf, Ghostty, and shell polish."
     });
+
+    firstRunChoices.push({ 
+      name: "Install OpenCode with AI agent configs - AI Agent setup",
+      value: "ai_agent",
+      description: "Installs OpenCode CLI plus oh-my-openagent.json agent configs (sisyphus, hephaestus, oracle, and more)."
+    });
     
     firstRunChoices.push({ 
       name: "Install the recommended shell and dev tools - Standard setup",
@@ -2354,10 +2360,11 @@ async function runSetup(): Promise<void> {
       description: "Walk through every app, config, and optional feature before installing."
     });
 
-    // Support --focus flag and bootstrap handoff
+    // Support --focus and --ai-agent flags and bootstrap handoff
     const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));
     const isFocusFlag = process.argv.includes("--focus");
-    const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : await select({
+    const isAiAgentFlag = process.argv.includes("--ai-agent");
+    const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : isAiAgentFlag ? "ai_agent" : await select({
       message: "Choose your setup path:",
       choices: firstRunChoices,
       default: hasDetectedItems ? "use_detected" : "standard",
@@ -2398,6 +2405,18 @@ async function runSetup(): Promise<void> {
       currentStep = 4;
       console.log("");
       log.success("Selected minimal shell foundation");
+      console.log("");
+    } else if (setupPath === "ai_agent") {
+      selectedApps = selectableApps.filter(a => a.checked).map(a => a.value);
+      if (!selectedApps.includes("opencode")) selectedApps.push("opencode");
+      selectedManagedConfigs = selectableManagedConfigs.filter(c => c.checked).map(c => c.value);
+      selectedFeatures = OPTIONAL_FEATURES.filter(f => f.checked).map(f => f.value);
+      aiConfigs = ["opencode"];
+      skipToRecap = true;
+      currentStep = 4;
+      console.log("");
+      log.success("Selected OpenCode with AI agent configs");
+      console.log(`  ${colors.dim}Includes: opencode CLI install, oh-my-openagent.json agent configs, TUI theme${colors.reset}`);
       console.log("");
     } else {
       console.log("");

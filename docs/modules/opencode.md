@@ -14,10 +14,14 @@ The repo keeps OpenCode on a cool blue palette so it visually matches the newer 
 
 ## Apply
 
-Run the interactive setup and select OpenCode, or re-run setup if it is already enabled:
+Run the interactive setup and select OpenCode, or use the AI Agent preset:
 
 ```bash
+# Interactive — select "AI Agent setup" from the menu
 bb setup
+
+# Or use the --ai-agent flag for non-interactive AI agent setup
+bb setup --ai-agent
 ```
 
 ## Sync workflow
