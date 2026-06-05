@@ -105,9 +105,9 @@
     ((input virtual com.cmuxterm.app)) C-p break
     () up break
   )
-  neru (multi (macro C-A-S-M-spc) (layer-switch nerumode))
+  neru (multi (macro C-A-S-M-k) (layer-switch nerumode))
   nudge (multi (macro C-A-S-M-;) (layer-switch nerumode))
-  scroll (multi (macro C-A-S-M-k) (layer-switch nerumode))
+  scroll (multi (macro C-A-S-M-s) (layer-switch nerumode))
   hints (multi (macro C-A-S-M-i) (layer-switch nerumode))
 )
 
