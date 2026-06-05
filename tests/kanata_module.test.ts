@@ -132,14 +132,16 @@ describe('Kanata module', () => {
     expect(sculpt).toContain(fnRow);
     expect(content).toContain('com.mitchellh.ghostty nop0');
     expect(sculpt).toContain('com.mitchellh.ghostty nop0');
+    expect(content).toContain('((input virtual com.github.wez.wezterm)) @leader break');
     expect(content).toContain('((input virtual com.github.wez.wezterm)) C-n break');
     expect(content).toContain('((input virtual com.github.wez.wezterm)) C-p break');
     expect(content).toContain('() down break');
     expect(content).toContain('() up break');
-    expect(content).toContain('j+k is intentionally not mapped');
-    expect(sculpt).toContain('j+k is intentionally not mapped');
-    expect(content).not.toContain('terminal-leader-or-cmd-layer');
-    expect(sculpt).not.toContain('terminal-leader-or-cmd-layer');
+    expect(content).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
+    expect(sculpt).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
+    expect(content).toContain('jk @terminal-leader-or-cmd-layer');
+    expect(sculpt).toContain('jk @terminal-leader-or-cmd-layer');
+    expect(content).toContain('() @cmd-next break');
     expect(content).not.toContain("(defoverrides");
     expect(sculpt).not.toContain("(defoverrides");
     const requiredActiveChords = [
@@ -147,6 +149,7 @@ describe('Kanata module', () => {
       '(j l) @nudge 100 first-release (nerumode)',
       '(d k) @scroll 100 first-release (nerumode)',
       '(d f) @hints 100 first-release (nerumode)',
+      '(j k) @jk 100 first-release (neruscroll nerumode)',
     ];
 
     for (const chords of [getActiveChords(content), getActiveChords(sculpt)]) {
@@ -158,7 +161,6 @@ describe('Kanata module', () => {
       expect(chords.some((entry) => entry.startsWith('(k d) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(s l) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(l s) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(j k) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(j spc) '))).toBe(false);
       expect(chords.some((entry) => entry.startsWith('(spc j) '))).toBe(false);
     }
