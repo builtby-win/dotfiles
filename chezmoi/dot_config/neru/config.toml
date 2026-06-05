@@ -10,10 +10,10 @@ should_exit_after_passthrough = false
 "Cmd+Ctrl+Alt+Shift+K" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+F" = "hints"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
-"Cmd+Ctrl+Alt+Shift+Space" = "recursive_grid --cursor-selection-mode hold"
-"Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode hold"
-"Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode hold"
-"Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode hold"
+"Cmd+Ctrl+Alt+Shift+Space" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+'" = "grid --cursor-selection-mode follow"
 
 [theme.light]
@@ -180,10 +180,10 @@ enabled = true
 text = "Recursive"
 
 [virtual_pointer]
-enabled = true
+enabled = false
 
 [virtual_pointer.ui]
-size = 8
+size = 3
 color = "#FFFF00CC"
 
 [smooth_cursor]
