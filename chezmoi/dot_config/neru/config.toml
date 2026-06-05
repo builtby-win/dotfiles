@@ -103,9 +103,12 @@ max_depth = 10
 enabled = false
 
 [recursive_grid.ui]
-label_background = true
-sub_key_preview = true
+label_background = false
+sub_key_preview = false
 sub_key_preview_autohide_multiplier = 1.0
+text_color = "#66000000"
+line_color = "#22000000"
+highlight_color = "#11FFFFFF"
 
 [scroll]
 scroll_step = 40
