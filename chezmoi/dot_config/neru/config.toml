@@ -66,10 +66,12 @@ hide_unmatched = true
 
 [recursive_grid]
 grid_cols = 5
-grid_rows = 5
-# Row-major 5x5 layout optimized for QWERTY muscle memory:
-# top screen rows use top-row keys, center rows use home-row keys, bottom uses bottom-row keys.
-keys = "qwertyuiopasdfghjkl;zxcvb"
+grid_rows = 3
+# Compact 5x3 home-area layout for faster muscle memory:
+#   r t y u i
+#   f g h j k
+#   v b n m ,
+keys = "rtyuifghjkvbnm,"
 min_size_width = 1
 min_size_height = 1
 max_depth = 10
@@ -86,8 +88,9 @@ max_depth = 10
 "Space" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Space" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"m" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "." = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "`" = "toggle-cursor-follow-selection"
 "Up" = "action move_mouse_relative --dx=0 --dy=-5"
@@ -96,7 +99,6 @@ max_depth = 10
 "Right" = "action move_mouse_relative --dx=5 --dy=0"
 "Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
 "Backspace" = "action backspace"
-"," = "action reset"
 "'" = "action reset"
 
 [recursive_grid.animation]
@@ -106,8 +108,8 @@ enabled = false
 label_background = false
 sub_key_preview = false
 sub_key_preview_autohide_multiplier = 1.0
-text_color = "#66000000"
-line_color = "#22000000"
+text_color = "#99000000"
+line_color = "#33000000"
 highlight_color = "#11FFFFFF"
 
 [scroll]
