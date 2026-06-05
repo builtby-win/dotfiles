@@ -10,10 +10,10 @@ should_exit_after_passthrough = false
 "Cmd+Ctrl+Alt+Shift+K" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+F" = "hints"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
-"Cmd+Ctrl+Alt+Shift+Space" = "recursive_grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+Space" = "recursive_grid --cursor-selection-mode hold"
+"Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode hold"
+"Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode hold"
+"Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode hold"
 "Cmd+Ctrl+Alt+Shift+'" = "grid --cursor-selection-mode follow"
 
 [theme.light]
@@ -65,12 +65,12 @@ hide_unmatched = true
 "Shift+Return" = "action left_click"
 
 [recursive_grid]
-grid_cols = 4
-grid_rows = 3
-keys = "eruidfjkcvm,"
-min_size_width = 30
-min_size_height = 30
-max_depth = 8
+grid_cols = 5
+grid_rows = 5
+keys = "qwertasdfgcvbnmyuiophjkl;"
+min_size_width = 1
+min_size_height = 1
+max_depth = 10
 
 [recursive_grid.hotkeys]
 # Every path that ends in `idle` also resets the Kanata layer so the
@@ -81,8 +81,8 @@ max_depth = 8
 # Press `n` again in nerunudge to return to recursive-grid selection;
 # `h` is backtrack while selecting. Escape exits both Kanata and NERU.
 "n" = "exec ~/.local/bin/kanata-layer nerunudge"
-"Space" = "action left_click"
-"Shift+Space" = "action right_click"
+"Space" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+Space" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
@@ -96,9 +96,13 @@ max_depth = 8
 "Backspace" = "action reset"
 "'" = "action reset"
 
+[recursive_grid.animation]
+enabled = false
+
 [recursive_grid.ui]
 label_background = true
 sub_key_preview = true
+sub_key_preview_autohide_multiplier = 1.0
 
 [scroll]
 scroll_step = 40
@@ -175,8 +179,12 @@ text = "Grid"
 enabled = true
 text = "Recursive"
 
+[virtual_pointer]
+enabled = true
+
 [virtual_pointer.ui]
-size = 4
+size = 8
+color = "#FFFF00CC"
 
 [smooth_cursor]
 move_mouse_enabled = true
