@@ -59,28 +59,8 @@
   mw-down (mwheel-down 50 120)
   mw-left (mwheel-left 50 120)
   mw-right (mwheel-right 50 120)
-  ;; Shared tmux/psmux leader action used by app-aware chords.
-  leader (macro C-b)
-  ;; App-aware aliases keep their switch logic here and expose semantic names
-  ;; to chord definitions in each profile.
-  ;; Outside terminals, j+k arms the Cmd layer for the next keypress only.
-  ;; The timeout is just a safety cap if no next key arrives.
-  cmd-next (one-shot 2000 (layer-while-held cmd))
-  terminal-leader-or-cmd-layer (switch
-    ((input virtual com.mitchellh.ghostty)) @leader break
-    ((input virtual com.googlecode.iterm2)) @leader break
-    ((input virtual com.apple.Terminal)) @leader break
-    ((input virtual dev.warp.Warp-Stable)) @leader break
-    ((input virtual net.kovidgoyal.kitty)) @leader break
-    ((input virtual org.alacritty)) @leader break
-    ((input virtual io.alacritty)) @leader break
-    ((input virtual com.github.wez.wezterm)) @leader break
-    ((input virtual com.cmuxterm.app)) @leader break
-    () @cmd-next break
-  )
-  ;; j+k is terminal-aware when kanata-vk-agent has pressed one of the terminal
-  ;; app virtual keys. Outside terminals, it arms Cmd for the next keypress.
-  jk @terminal-leader-or-cmd-layer
+  ;; j+k is intentionally not mapped. It should type normally everywhere,
+  ;; including terminals (no Ctrl+b) and GUI apps (no next-key Cmd layer).
   ctrl-n-or-down (switch
     ((input virtual com.mitchellh.ghostty)) C-n break
     ((input virtual com.googlecode.iterm2)) C-n break

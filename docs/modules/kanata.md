@@ -33,13 +33,12 @@ re-add the exact binary Finder reveals, then rerun `bb kanata-setup`.
   default, with `Fn` held for raw `F1`-`F12`
 - `Caps Lock` sends `Escape` when tapped and `Control` when held
 - `Delete Forward` sends `Escape`
-- On macOS, `j+k` is app-aware with `kanata-vk-agent`: terminal apps send
-  `Ctrl+b` for the tmux/psmux leader, while non-terminal apps arm a compact
-  Command layer for the next keypress
-- Without macOS app context, `j+k` falls back to the compact next-key Command/Super layer
+- `j+k` is intentionally unbound: it types normally everywhere, including
+  terminals (no `Ctrl+b`) and GUI apps (no next-key Command layer)
 - Tap modifiers for one-shot next-key behavior, hold them for normal modifier use
 - `j+Space`, `j+l`, `l+k`, and `k+Space` are active ergonomic chords
-- `fj`, `dk`, and `sl` stay reserved for future use, not active mappings
+- `fj`, `j+l`, `d+k`, and `d+f` are active NERU chords; `sl` and `j+k`
+  stay reserved/inactive
 - `l+k` arms Hyper for the next key, but app launching still lives in Raycast, Hammerspoon, or the apps themselves
 - `Esc+Space` cancels pending one-shot or launcher state
 - `d+f` sends `Hyper+f`
@@ -297,34 +296,10 @@ chord uses `switch` with `input virtual ...`:
 - terminal virtual key pressed: send `Ctrl+b`
 - no terminal virtual key pressed: arm the `cmd` layer for the next keypress
 
-The config keeps app-aware behavior behind semantic aliases so future chords do
-not need to duplicate raw bundle-ID logic. The current shape is:
-
-```lisp
-(defalias
-  leader (macro C-b)
-  cmd-next (one-shot 2000 (layer-while-held cmd))
-  terminal-leader-or-cmd-layer (switch
-    ((input virtual com.mitchellh.ghostty)) @leader break
-    ;; ...other terminal bundle IDs...
-    () @cmd-next break
-  )
-  jk @terminal-leader-or-cmd-layer
-)
-
-(defvirtualkeys
-  ;; ...terminal bundle IDs...
-)
-
-(defchordsv2
-  (j k) @jk 75 first-release (neruscroll)
-)
-```
-
-The fallback `cmd` layer intentionally uses `one-shot` instead of a held layer.
-Press `j+k`, release it, then press the next key. That one key is interpreted
-through `cmd`, then Kanata returns to the base layer. The `2000` timeout is only a
-safety cap if no next key arrives.
+`j+k` used to be an app-aware terminal leader / next-key Command chord. It is
+now intentionally unbound so `jk` types normally everywhere. Terminals should not
+receive `Ctrl+b`, and GUI apps should not enter the compact Command layer from
+`j+k`.
 
 ## Ergonomic layers
 
@@ -333,7 +308,10 @@ These chords stay intentionally small and predictable:
 | Chord | Action | Notes |
 | --- | --- | --- |
 | `j+Space` | `bksp-repeat` | Hold `j`, press `Space` for steady Backspace repeat |
-| `j+l` | `nav-layer` | Vim-style navigation layer |
+| `j+k` | inactive | Types normally everywhere; no terminal leader or Cmd layer |
+| `j+l` | NERU nudge | Enters recursive-grid nudge mode |
+| `d+k` | NERU scroll | Enters scroll mode; chord keys are consumed by design |
+| `d+f` | NERU hints | Opens hints mode |
 | `l+k` | `hyper-next` | Hyper one-shot for the next key, launcher behavior stays outside Kanata |
 | `k+Space` | `mouse-layer` | Mouse and scroll layer |
 | `Esc+Space` | cancel | Clears pending one-shot or launcher state |
@@ -344,11 +322,11 @@ plain `j` tap instead of accidentally entering the held `j` layer. Intentional
 holds still activate after the hold timeout, so `j` then `Space` keeps the
 Backspace-repeat path without making normal typing eat `j`.
 
-Typing-sensitive simultaneous chords use a tight 75ms window. This keeps words
-and rolls like `look `, `walk `, `jk`, `jl`, `lk`, and `df` as plain text unless
-the chord keys are pressed nearly together on purpose.
+Typing-sensitive simultaneous chords use a tight 100ms window. This keeps words
+and rolls like `look `, `walk `, `jl`, `lk`, and `df` as plain text unless the
+chord keys are pressed nearly together on purpose. `jk` is not a chord at all.
 
-Reserved chords stay documented, but inactive: `fj`, `dk`, and `sl`.
+Reserved chords stay documented, but inactive: `sl`, `j+k`.
 
 The `l+k` chord only arms Hyper for the next key. Actual app launching remains
 owned by Raycast, Hammerspoon, or the apps that consume the Hyper shortcut.

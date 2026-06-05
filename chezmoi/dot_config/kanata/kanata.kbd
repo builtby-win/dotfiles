@@ -81,11 +81,11 @@
   ;; with a switch).
   ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
   ;; sequences stay plain text unless the keys are truly simultaneous.
+  ;; j+k is intentionally unbound: it should type normally everywhere.
   (f j) @neru 100 first-release (nerumode)
   (j l) @nudge 100 first-release (nerumode)
   (d k) @scroll 100 first-release (nerumode)
   (d f) @hints 100 first-release (nerumode)
-  (j k) @jk 100 first-release (neruscroll nerumode)
   (esc spc) XX 100 first-release (nerumode)
 )
 
