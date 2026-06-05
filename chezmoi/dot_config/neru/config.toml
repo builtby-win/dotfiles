@@ -86,6 +86,7 @@ max_depth = 10
 "Space" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Space" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"m" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "." = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "`" = "toggle-cursor-follow-selection"
