@@ -101,6 +101,16 @@ PLIST
 }
 
 kanata_vk_agent_bin() {
+  # Prefer the polling wrapper from this dotfiles repo. The upstream
+  # kanata-vk-agent has been observed to panic when NSWorkspace briefly reports
+  # no frontmost app or sends an activation notification without an app payload.
+  # The wrapper combines NSWorkspace notifications with polling and nil-safe
+  # handling, which makes app context changes much more reliable.
+  if [[ -x "$HOME/.local/bin/kanata-vk-agent-poll" ]]; then
+    echo "$HOME/.local/bin/kanata-vk-agent-poll"
+    return 0
+  fi
+
   if command -v kanata-vk-agent >/dev/null 2>&1; then
     command -v kanata-vk-agent
     return 0

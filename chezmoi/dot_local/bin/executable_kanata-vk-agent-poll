@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOURCE="${HOME}/.local/lib/kanata-vk-agent-poll.swift"
+CACHE_DIR="${HOME}/.cache/kanata-vk-agent-poll"
+BINARY="${CACHE_DIR}/kanata-vk-agent-poll"
+
+if [[ ! -f "$SOURCE" ]]; then
+  echo "kanata-vk-agent-poll: missing source: $SOURCE" >&2
+  exit 1
+fi
+
+mkdir -p "$CACHE_DIR"
+if [[ ! -x "$BINARY" || "$SOURCE" -nt "$BINARY" ]]; then
+  /usr/bin/swiftc "$SOURCE" -o "$BINARY.tmp"
+  mv "$BINARY.tmp" "$BINARY"
+fi
+
+exec "$BINARY" "$@"
