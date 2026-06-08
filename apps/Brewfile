@@ -23,7 +23,7 @@ brew "tmux"           # Terminal multiplexer
 brew "sesh"           # Smart tmux session manager
 
 # Terminals & Editors
-cask "ghostty"
+cask "iterm2"
 cask "visual-studio-code"
 cask "cursor"
 

@@ -34,6 +34,7 @@ bb apply
 ```bash
 bb setup
 bb setup tmux
+bb setup iterm2
 bb setup ghostty
 ```
 

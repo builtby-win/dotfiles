@@ -55,43 +55,23 @@ If `bb` is not found, run `bash scripts/apply-chezmoi.sh` and restart your shell
 
 If something looks wrong, run `bb setup` and choose the revert option. The installer records backups and the setup manifest under `~/.config/dotfiles/`.
 
-## Setup paths
+## Setup
 
-These paths select interactive setup defaults after the base chezmoi apply step. You still get a review screen before optional installs or file changes happen.
-
-**🚀 Focused Setup (Back2Vibing):**
-Full AI/dev workflow. Installs Back2Vibing, tmux, sesh, fzf, Ghostty terminal, and shell polish.
+The default install uses the recommended full AI/dev workflow. It starts with iTerm2 as the first terminal plus Claude Code and GitHub CLI, then gives you one checklist where you can add optional alternatives like Ghostty or uncheck anything you do not want. You still get a review screen before optional installs or file changes happen.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --focus
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
 ```
 
-**⭐ Standard Setup (Recommended):**
-Recommended default. Installs the `bb` helper, core aliases, tmux, fzf, editor defaults, and essential CLI tools.
+This applies chezmoi-managed dotfiles and orchestrates apps, configs, and optional features.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --setup-path standard
-```
-
-**🌱 Minimal Setup (Shell only):**
-Shell foundation only: zsh config, aliases, `bb` helper, starship, fzf, and zoxide. Use this if you want the lowest-change install.
-
-**🛠️ Custom Setup:**
-Walk through each app, config, and optional feature manually.
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --setup-path customize
-```
-
----
-
-Full setup:
+Change selections later:
 
 ```bash
 bb setup
 ```
 
-This applies chezmoi-managed dotfiles and orchestrates apps, configs, and optional features.
+Advanced: pass `--setup-path standard`, `minimal`, `customize`, or `ai_agent` only when you intentionally want a non-default setup.
 
 A la carte modules:
 
@@ -102,6 +82,7 @@ bb setup hammerspoon
 bb setup karabiner
 bb sync karabiner pull
 bb kanata-setup
+bb setup iterm2
 bb setup ghostty
 ```
 
@@ -117,7 +98,8 @@ This is ideal if you want to add pieces over time.
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS only, jk to tmux prefix, `bb sync karabiner pull` imports live config | `docs/modules/karabiner.md` |
 || Kanata (advanced) | `bb kanata-setup` | Cross-platform remaps (advanced alt. to Karabiner). Needs Cargo, DriverKit, root daemons | `docs/modules/kanata.md` |
-| Ghostty | `bb setup ghostty` | terminal config | `docs/modules/ghostty.md` |
+| iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
+| Ghostty | `bb setup ghostty` | optional terminal config | `docs/modules/ghostty.md` |
 | App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
 | AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
 | Back2Vibing | `bb setup back2vibing` | Focus & productivity for AI devs | `back2vibing.builtby.win` |

@@ -28,9 +28,10 @@ describe('iTerm2 defaults', () => {
     const setup = fs.readFileSync(setupPath, 'utf-8');
     const functions = fs.readFileSync(functionsPath, 'utf-8');
 
-    expect(setup).toContain('{ name: "iTerm2", value: "iterm2"');
-    expect(setup).toContain('{ name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, configs: ["ghostty"]');
-    expect(setup).toContain('{ name: "iTerm2 defaults", value: "iterm2"');
+    expect(setup).toContain('{ name: "iTerm2", value: "iterm2", brewName: "iterm2", cask: true, configs: ["iterm2"], checked: true');
+    expect(setup).toContain('{ name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, configs: ["ghostty"], checked: false');
+    expect(setup).toContain('{ name: "iTerm2 defaults", value: "iterm2", checked: true');
+    expect(setup).toContain('selectedManagedConfigs = ["zsh", "tmux", "iterm2"];');
     expect(setup).toContain('autoSelectedManagedConfigs');
     expect(setup).toContain('applyITermDefaults');
     expect(functions).toContain('bb setup iterm2');

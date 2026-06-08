@@ -56,13 +56,14 @@ g() {
 }
 
 alias a="B2V_BYPASS_AGENT_WIZARD=1 b2v amp"
-alias kiro="B2V_BYPASS_AGENT_WIZARD=1 b2v kiro-cli"
-alias spark="B2V_BYPASS_AGENT_WIZARD=1 command codex -m gpt-5.3-codex-spark"
+function kiro() {
+  command kiro-cli "$@"
+}
+alias spark="command codex -m gpt-5.3-codex-spark"
 codex() {
   B2V_BYPASS_AGENT_WIZARD=1 command codex --dangerously-bypass-approvals-and-sandbox "$@"
 }
 
-# Git shortcuts
 alias co-="git checkout -"
 alias gc-="git checkout -"
 alias p="git add -p"

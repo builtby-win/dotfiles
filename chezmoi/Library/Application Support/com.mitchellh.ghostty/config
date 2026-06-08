@@ -21,6 +21,8 @@ cursor-style-blink = false
 shell-integration = zsh
 
 # Keybindings
+# Forward Shift+Enter as CSI-u so pi/tmux can distinguish it from plain Enter.
+keybind = shift+enter=text:\x1b[13;2u
 keybind = cmd+t=new_tab
 keybind = cmd+w=close_surface
 keybind = cmd+shift+]=next_tab

@@ -16,7 +16,7 @@ Tmux keeps your terminal sessions alive even if your terminal window closes or y
 
 - macOS or Linux
 - Homebrew (macOS) or equivalent package manager
-- A terminal emulator (Ghostty recommended, iTerm2/Alacritty also work)
+- A terminal emulator (iTerm2 recommended, Ghostty/Alacritty also work)
 
 ---
 

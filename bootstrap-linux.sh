@@ -150,7 +150,7 @@ parse_args() {
       --setup-path)
         shift
         case "$1" in
-          focus|standard|minimal|customize)
+          focus|standard|minimal|customize|ai_agent)
             SETUP_PATH="$1"
             SETUP_PATH_FROM_ARGS=1
             ;;
@@ -164,7 +164,7 @@ parse_args() {
         echo "Usage: bootstrap-linux.sh [options]"
         echo "  -y, --yes   Run non-interactively (auto-approve all prompts)"
         echo "  --focus     Run focused Back2Vibing setup"
-        echo "  --setup-path <path>  Use focus, standard, minimal, or customize"
+        echo "  --setup-path <path>  Use focus, standard, minimal, customize, or ai_agent"
         echo "  -h, --help  Show this help message"
         exit 0
         ;;

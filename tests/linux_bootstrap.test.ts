@@ -137,11 +137,12 @@ describe('Linux bootstrap workflow', () => {
   it('uses action-first setup path labels', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
-    expect(content).toContain('Install the full AI/dev workflow - Focused setup');
-    expect(content).toContain('Install the recommended shell and dev tools - Standard setup');
-    expect(content).toContain('Set up only shell basics - Minimal setup');
-    expect(content).toContain('Choose every app and config yourself - Custom setup');
-    expect(content).toContain('Keep what is already on this machine');
+    expect(content).toContain('Recommended full AI/dev workflow');
+    expect(content).toContain('Keep detected setup');
+    expect(content).toContain('Customize manually');
+    expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal.');
+    expect(content).not.toContain('Install the recommended shell and dev tools - Standard setup');
+    expect(content).not.toContain('Set up only shell basics - Minimal setup');
   });
 
   it('migrates legacy ~/.zshrc symlinks to a local source file', () => {
@@ -205,14 +206,15 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('fnm use lts-latest');
   });
 
-  it('lets setup.ts own the interactive setup path chooser by default', () => {
+  it('lets setup.ts own the simplified interactive setup by default', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
     const setupContent = fs.readFileSync(setupPath, 'utf-8');
 
     expect(macBootstrap).not.toContain('How would you like to proceed with setup?');
     expect(linuxBootstrap).not.toContain('How would you like to proceed with setup?');
-    expect(setupContent).toContain('message: "Choose your setup path:"');
+    expect(setupContent).not.toContain('message: "Choose your setup path:"');
+    expect(setupContent).toContain('message: "Use the recommended setup or keep what is already here?"');
   });
 
   it('only passes setup path handoff flags when bootstrap gets an explicit path', () => {
@@ -227,7 +229,7 @@ describe('Linux bootstrap workflow', () => {
     expect(linuxBootstrap).toContain('SETUP_PATH:+ --setup-path');
     expect(setupContent).toContain('function getBootstrapSetupPath(argv: string[]): SetupPathChoice | null');
     expect(setupContent).toContain('const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));');
-    expect(setupContent).toContain('const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : await select({');
+    expect(setupContent).toContain('let setupPath: SetupPathChoice | "use_detected" = bootstrapSetupPath ?? (isFocusFlag ? "focus" : "focus");');
   });
 
   it('documents the default install as applying the base chezmoi state', () => {
@@ -263,7 +265,7 @@ describe('Linux bootstrap workflow', () => {
   it('shows safety and recovery context in the setup review and success screens', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
-    expect(content).toContain('Pick a starting point. You will review the exact changes before optional tools are installed.');
+    expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal. Uncheck anything you do not want, then review before install.');
     expect(content).toContain('Will modify or create:');
     expect(content).toContain('DOTFILES_PATH_FILE');
     expect(content).toContain('WORKMUX_CONFIG_PATH');

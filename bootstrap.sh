@@ -228,11 +228,12 @@ while [[ $# -gt 0 ]]; do
     --setup-path)
       shift
       case "$1" in
-        focus|standard|minimal|customize)
+        focus|standard|minimal|customize|ai_agent)
           SETUP_PATH="$1"
           ;;
         *)
           print_error "Unknown setup path: $1"
+          print_error "Use one of: focus, standard, minimal, customize, ai_agent"
           exit 1
           ;;
       esac

@@ -421,6 +421,11 @@ bb() {
       fi
 
       local module="${1:-all}"
+      if [[ "$module" == "all" || "$module" == --* ]]; then
+        (cd "$dotfiles_dir" && pnpm exec tsx setup.ts "$dotfiles_dir" "$@")
+        return $?
+      fi
+
       case "$module" in
         all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata|iterm2)
           if [[ "$module" == "hammerspoon" || "$module" == "karabiner" || "$module" == "iterm2" ]]; then

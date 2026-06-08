@@ -55,14 +55,14 @@ function manifestExists(): boolean {
   return existsSync(manifestPath);
 }
 
-type SetupPathChoice = "focus" | "standard" | "minimal" | "customize";
+type SetupPathChoice = "focus" | "standard" | "minimal" | "customize" | "ai_agent";
 
 function getBootstrapSetupPath(argv: string[]): SetupPathChoice | null {
   for (let index = 0; index < argv.length; index++) {
     if (argv[index] !== "--setup-path") continue;
 
     const value = argv[index + 1];
-    if (value === "focus" || value === "standard" || value === "minimal" || value === "customize") {
+    if (value === "focus" || value === "standard" || value === "minimal" || value === "customize" || value === "ai_agent") {
       return value;
     }
 
@@ -480,14 +480,14 @@ const APPS: App[] = [
   { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
 
   // Terminals & Editors
-  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, configs: ["ghostty"], checked: true, detectPath: "/Applications/Ghostty.app", desc: "GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
-  { name: "iTerm2", value: "iterm2", brewName: "iterm2", cask: true, configs: ["iterm2"], checked: false, detectPath: "/Applications/iTerm.app", desc: "Terminal emulator with BuiltBy key defaults", url: "https://iterm2.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "iTerm2", value: "iterm2", brewName: "iterm2", cask: true, configs: ["iterm2"], checked: true, detectPath: "/Applications/iTerm.app", desc: "Recommended first terminal with BuiltBy key defaults", url: "https://iterm2.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
+  { name: "Ghostty", value: "ghostty", brewName: "ghostty", cask: true, configs: ["ghostty"], checked: false, detectPath: "/Applications/Ghostty.app", desc: "Optional GPU-accelerated terminal by Mitchell Hashimoto", url: "https://ghostty.org", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Visual Studio Code", value: "vscode", brewName: "visual-studio-code", cask: true, checked: true, detectPath: "/Applications/Visual Studio Code.app", desc: "Popular code editor by Microsoft", url: "https://code.visualstudio.com", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Cursor", value: "cursor", brewName: "cursor", cask: true, configs: ["cursor"], checked: false, detectPath: "/Applications/Cursor.app", desc: "AI-first code editor (VS Code fork)", url: "https://cursor.sh", platforms: { macos: true, linux: false, windows: false }, category: "terminals" },
   { name: "Zed", value: "zed", brewName: "zed", cask: true, checked: true, detectPath: "/Applications/Zed.app", desc: "High-performance code editor by the Atom creators", url: "https://zed.dev", platforms: { macos: true, linux: true, windows: false }, category: "terminals" },
 
   // AI Tools
-  { name: "Claude Code", value: "claude", brewName: "claude", configs: ["claude"], checked: false, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
+  { name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
   { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
   { name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
   { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
@@ -538,8 +538,8 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Hammerspoon", value: "hammerspoon", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
   { name: "Kanata (advanced)", value: "kanata", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer — advanced alternative to Karabiner Elements" },
-  { name: "Ghostty", value: "ghostty", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for GPU terminal" },
-  { name: "iTerm2 defaults", value: "iterm2", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
+  { name: "iTerm2 defaults", value: "iterm2", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
+  { name: "Ghostty", value: "ghostty", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for optional GPU terminal" },
 ];
 
 // Optional features (opt-in, don't load in shell unless selected)
@@ -720,6 +720,38 @@ function getAppInstallState(app: App): AppInstallState {
   }
 
   return "installed";
+}
+
+function formatAppChoiceName(app: App, state: AppInstallState): string {
+  const descPart = app.desc ? ` ${colors.dim}- ${app.desc}${colors.reset}` : "";
+  if (state === "installed") {
+    return `${app.name}${descPart} ${colors.green}(installed)${colors.reset}`;
+  }
+  if (state === "partial") {
+    return `${app.name}${descPart} ${colors.yellow}(missing extras)${colors.reset}`;
+  }
+  return `${app.name}${descPart}`;
+}
+
+async function selectFocusedWorkflowApps(
+  selectableApps: App[],
+  appStates: Map<string, AppInstallState>,
+  installItemLabel: string,
+): Promise<string[]> {
+  console.log(`  ${colors.dim}Focused setup starts with the recommended AI/dev workflow selected. iTerm2 is the first terminal; Ghostty stays optional.${colors.reset}`);
+  console.log("");
+
+  return checkbox({
+    message: `Select ${installItemLabel} for the full AI/dev workflow:`,
+    choices: selectableApps.map((app) => ({
+      name: formatAppChoiceName(app, appStates.get(app.value) ?? "not_installed"),
+      value: app.value,
+      checked: app.value !== "ghostty",
+      disabled: false,
+    })),
+    pageSize: 20,
+    loop: false,
+  });
 }
 
 function isAppInstalled(app: App): boolean {
@@ -1087,7 +1119,10 @@ async function installApps(apps: string[]): Promise<void> {
 
   if (apps.includes("opencode")) {
     log.info("Installing OpenCode CLI...");
-    if (runCommand("npm install -g opencode-ai", false)) {
+    const installCommand = getCurrentPlatform() === "linux"
+      ? "curl -fsSL https://opencode.ai/install | bash"
+      : "npm install -g opencode-ai";
+    if (runCommand(installCommand, false)) {
       log.success("OpenCode CLI installed");
     } else {
       log.warning("Failed to install OpenCode CLI");
@@ -2351,58 +2386,37 @@ async function runSetup(): Promise<void> {
                              detectedFeaturesList.length > 0;
 
     console.log(`${colors.cyan}${colors.bold}Welcome to builtby.win/dotfiles!${colors.reset}`);
-    console.log(`${colors.dim}Pick a starting point. You will review the exact changes before optional tools are installed.${colors.reset}`);
+    console.log(`${colors.dim}Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal. Uncheck anything you do not want, then review before install.${colors.reset}`);
     console.log("");
 
-    const firstRunChoices = [];
-    
-    if (hasDetectedItems) {
-      firstRunChoices.push({ 
-        name: `Keep what is already on this machine (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs) - Detected setup`,
-        value: "use_detected",
-        description: "Keeps the tools and configs already found on this machine."
-      });
-    }
-    
-    firstRunChoices.push({ 
-      name: "Install the full AI/dev workflow - Focused setup",
-      value: "focus",
-      description: "Installs Back2Vibing, tmux, sesh, fzf, Ghostty, and shell polish."
-    });
-
-    firstRunChoices.push({ 
-      name: "Install OpenCode with AI agent configs - AI Agent setup",
-      value: "ai_agent",
-      description: "Installs OpenCode CLI plus oh-my-openagent.json agent configs (sisyphus, hephaestus, oracle, and more)."
-    });
-    
-    firstRunChoices.push({ 
-      name: "Install the recommended shell and dev tools - Standard setup",
-      value: "standard",
-      description: "Adds the bb helper, aliases, tmux, fzf, editor defaults, and core CLI tools."
-    });
-
-    firstRunChoices.push({ 
-      name: "Set up only shell basics - Minimal setup",
-      value: "minimal",
-      description: "Sets up zsh, aliases, starship, fzf, and zoxide without app installs."
-    });
-    
-    firstRunChoices.push({ 
-      name: "Choose every app and config yourself - Custom setup",
-      value: "customize",
-      description: "Walk through every app, config, and optional feature before installing."
-    });
-
-    // Support --focus and --ai-agent flags and bootstrap handoff
+    // Support --focus flag and bootstrap handoff
     const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));
     const isFocusFlag = process.argv.includes("--focus");
-    const isAiAgentFlag = process.argv.includes("--ai-agent");
-    const setupPath = bootstrapSetupPath ?? (isFocusFlag ? "focus" : isAiAgentFlag ? "ai_agent" : await select({
-      message: "Choose your setup path:",
-      choices: firstRunChoices,
-      default: hasDetectedItems ? "use_detected" : "standard",
-    }));
+    let setupPath: SetupPathChoice | "use_detected" = bootstrapSetupPath ?? (isFocusFlag ? "focus" : "focus");
+
+    if (!bootstrapSetupPath && !isFocusFlag && hasDetectedItems) {
+      setupPath = await select({
+        message: "Use the recommended setup or keep what is already here?",
+        choices: [
+          {
+            name: "Recommended full AI/dev workflow",
+            value: "focus",
+            description: "iTerm2 is selected as the default terminal; optional alternatives can be checked."
+          },
+          {
+            name: `Keep detected setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`,
+            value: "use_detected",
+            description: "Keeps only the tools and configs already found on this machine.",
+          },
+          {
+            name: "Customize manually",
+            value: "customize",
+            description: "Walk through each group yourself.",
+          },
+        ],
+        default: "focus",
+      });
+    }
 
     if (setupPath === "use_detected") {
       selectedApps = detectedAppsOnPlatform;
@@ -2414,13 +2428,13 @@ async function runSetup(): Promise<void> {
       log.success("Using detected settings");
       console.log("");
     } else if (setupPath === "focus") {
-      selectedApps = ["back2vibing", "tmux", "sesh", "fzf", "ghostty", "starship", "zoxide"];
-      selectedManagedConfigs = ["zsh", "tmux", "ghostty"];
+      selectedApps = await selectFocusedWorkflowApps(selectableApps, appStates, installItemLabel);
+      selectedManagedConfigs = ["zsh", "tmux", "iterm2"];
       selectedFeatures = ["tips"];
       skipToRecap = true;
       currentStep = 4;
       console.log("");
-      log.success("Selected focused Back2Vibing defaults");
+      log.success("Selected focused full AI/dev workflow defaults");
       console.log("");
     } else if (setupPath === "standard") {
       selectedApps = selectableApps.filter(a => a.checked).map(a => a.value);

@@ -71,6 +71,26 @@ if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -z "$NO_AUTO_TMUX" ]]; then
   fi
 fi
 
+# Automatically start/attach to tmux if we are in an interactive iTerm2 session and not already in tmux
+if [ -n "$ITERM_PROFILE" ] && [ -z "$TMUX" ] && [[ $- == *i* ]]; then
+    # Get the base name of the current working directory
+    session_name=$(basename "$PWD")
+
+    # If inside a conductor workspace, prefix the session name
+    if [[ "$PWD" == *"/conductor/"* ]]; then
+        session_name="conductor-$session_name"
+    fi
+
+    # Check for session, then exec to replace the shell process
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        exec tmux attach-session -t "$session_name"
+    elif tmux has-session -t main 2>/dev/null; then
+        exec tmux attach-session -t main
+    else
+        exec tmux new-session -s main
+    fi
+fi
+
 # fnm (Fast Node Manager)
 if command -v fnm &> /dev/null; then
   export FNM_LOG_LEVEL=error

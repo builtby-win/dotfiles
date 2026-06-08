@@ -20,8 +20,8 @@ Run the interactive setup and select OpenCode, or use the AI Agent preset:
 # Interactive — select "AI Agent setup" from the menu
 bb setup
 
-# Or use the --ai-agent flag for non-interactive AI agent setup
-bb setup --ai-agent
+# Or pass the AI Agent setup path explicitly
+bb setup --setup-path ai_agent
 ```
 
 ## Sync workflow

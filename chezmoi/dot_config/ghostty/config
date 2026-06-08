@@ -69,7 +69,8 @@ shell-integration = detect
 quick-terminal-position = top
 quick-terminal-screen = main
 
-keybind = shift+enter=text:\x1b\r
+# Forward Shift+Enter as CSI-u so pi/tmux can distinguish it from plain Enter.
+keybind = shift+enter=text:\x1b[13;2u
 
 # Performance optimizations
 # Smooth out rendering for high-throughput tools (Claude Code/Gemini)
