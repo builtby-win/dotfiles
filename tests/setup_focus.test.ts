@@ -8,21 +8,25 @@ const linuxBootstrapPath = path.resolve(__dirname, '../bootstrap-linux.sh');
 const functionsPath = path.resolve(__dirname, '../shell/functions.sh');
 
 describe('focused setup defaults', () => {
-  it('defaults Claude Code into AI/dev setup without using Homebrew', () => {
+  it('defaults Claude Code and OpenCode into AI/dev setup while keeping Codex optional', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
     expect(content).toContain('{ name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true');
+    expect(content).toContain('{ name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: true');
+    expect(content).toContain('{ name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false');
     expect(content).toContain('platforms: { macos: true, linux: true, windows: false }, category: "ai"');
     expect(content).toContain('{ name: "gh", value: "gh", brewName: "gh", checked: true');
     expect(content).toContain('npm install -g @anthropic-ai/claude-code');
+    expect(content).toContain('Installing OpenCode CLI...');
+    expect(content).toContain('Installing Codex CLI...');
   });
 
-  it('lets focused setup default to iTerm2 while keeping Ghostty optional', () => {
+  it('lets focused setup use recommended defaults while keeping Codex and Ghostty optional', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
     expect(content).toContain('function selectFocusedWorkflowApps(');
-    expect(content).toContain('Focused setup starts with the recommended AI/dev workflow selected. iTerm2 is the first terminal; Ghostty stays optional.');
-    expect(content).toContain('checked: app.value !== "ghostty",');
+    expect(content).toContain('Focused setup starts with the recommended AI/dev workflow selected, including OpenCode. Codex and Ghostty stay optional.');
+    expect(content).toContain('checked: state !== "not_installed" || (app.checked ?? false),');
     expect(content).toContain('selectedApps = await selectFocusedWorkflowApps(selectableApps, appStates, installItemLabel);');
     expect(content).toContain('let setupPath: SetupPathChoice | "use_detected" = bootstrapSetupPath ?? (isFocusFlag ? "focus" : "focus");');
     expect(content).toContain('message: "Use the recommended setup or keep what is already here?"');

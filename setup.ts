@@ -488,8 +488,8 @@ const APPS: App[] = [
 
   // AI Tools
   { name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
-  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
-  { name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
+  { name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: true, detectCmd: "command -v opencode", desc: "Default AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
+  { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "Optional OpenAI coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
   { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
@@ -738,17 +738,20 @@ async function selectFocusedWorkflowApps(
   appStates: Map<string, AppInstallState>,
   installItemLabel: string,
 ): Promise<string[]> {
-  console.log(`  ${colors.dim}Focused setup starts with the recommended AI/dev workflow selected. iTerm2 is the first terminal; Ghostty stays optional.${colors.reset}`);
+  console.log(`  ${colors.dim}Focused setup starts with the recommended AI/dev workflow selected, including OpenCode. Codex and Ghostty stay optional.${colors.reset}`);
   console.log("");
 
   return checkbox({
     message: `Select ${installItemLabel} for the full AI/dev workflow:`,
-    choices: selectableApps.map((app) => ({
-      name: formatAppChoiceName(app, appStates.get(app.value) ?? "not_installed"),
-      value: app.value,
-      checked: app.value !== "ghostty",
-      disabled: false,
-    })),
+    choices: selectableApps.map((app) => {
+      const state = appStates.get(app.value) ?? "not_installed";
+      return {
+        name: formatAppChoiceName(app, state),
+        value: app.value,
+        checked: state !== "not_installed" || (app.checked ?? false),
+        disabled: false,
+      };
+    }),
     pageSize: 20,
     loop: false,
   });
@@ -2386,7 +2389,7 @@ async function runSetup(): Promise<void> {
                              detectedFeaturesList.length > 0;
 
     console.log(`${colors.cyan}${colors.bold}Welcome to builtby.win/dotfiles!${colors.reset}`);
-    console.log(`${colors.dim}Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal. Uncheck anything you do not want, then review before install.${colors.reset}`);
+    console.log(`${colors.dim}Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal and OpenCode as the default AI coding CLI. You can also select Codex before install.${colors.reset}`);
     console.log("");
 
     // Support --focus flag and bootstrap handoff
@@ -2401,7 +2404,7 @@ async function runSetup(): Promise<void> {
           {
             name: "Recommended full AI/dev workflow",
             value: "focus",
-            description: "iTerm2 is selected as the default terminal; optional alternatives can be checked."
+            description: "iTerm2 and OpenCode are selected by default; optional alternatives like Codex can be checked."
           },
           {
             name: `Keep detected setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`,

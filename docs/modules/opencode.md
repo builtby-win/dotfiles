@@ -14,13 +14,13 @@ The repo keeps OpenCode on a cool blue palette so it visually matches the newer 
 
 ## Apply
 
-Run the interactive setup and select OpenCode, or use the AI Agent preset:
+OpenCode is selected by default in the recommended setup. Codex CLI is also available in the same checklist as an optional AI tool.
 
 ```bash
-# Interactive — select "AI Agent setup" from the menu
+# Recommended setup — OpenCode is preselected; check Codex too if wanted
 bb setup
 
-# Or pass the AI Agent setup path explicitly
+# Or pass the AI Agent setup path explicitly for OpenCode-focused configs
 bb setup --setup-path ai_agent
 ```
 

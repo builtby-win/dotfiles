@@ -59,7 +59,7 @@ If something looks wrong, run `bb setup revert`. The installer records backups a
 
 ## Setup
 
-The default install uses the recommended full AI/dev workflow. It starts with iTerm2 as the first terminal plus Claude Code and GitHub CLI, then gives you one checklist where you can add optional alternatives like Ghostty or uncheck anything you do not want. You still get a review screen before optional installs or file changes happen.
+The default install uses the recommended full AI/dev workflow. It starts with iTerm2 as the first terminal plus Claude Code, OpenCode, and GitHub CLI, then gives you one checklist where you can add optional tools like Codex or Ghostty and uncheck anything you do not want. You still get a review screen before optional installs or file changes happen.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
@@ -200,7 +200,7 @@ bb restore rectangle-pro
 bb restore bettertouchtool
 ```
 
-OpenCode styling is copy-managed from `templates/opencode/`. See `docs/modules/opencode.md`.
+OpenCode is installed by default in the recommended setup, with styling copy-managed from `templates/opencode/`. Codex CLI is available as an optional checkbox. See `docs/modules/opencode.md`.
 
 ## Manual setup (if you prefer)
 

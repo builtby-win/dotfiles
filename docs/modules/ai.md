@@ -5,12 +5,13 @@ AI tool configs are copied from `templates/` because these tools rewrite their f
 ## Included templates
 
 - Claude Code
+- OpenCode
 - Codex CLI
 - Cursor
 
 ## Install
 
-Use the interactive setup to copy templates based on the apps you select:
+Use the interactive setup to copy templates based on the apps you select. OpenCode is selected by default in the recommended setup; Codex CLI is optional in the same checklist:
 
 ```bash
 bb setup

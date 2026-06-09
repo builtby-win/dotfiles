@@ -140,7 +140,7 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('Recommended full AI/dev workflow');
     expect(content).toContain('Keep detected setup');
     expect(content).toContain('Customize manually');
-    expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal.');
+    expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal and OpenCode as the default AI coding CLI.');
     expect(content).not.toContain('Install the recommended shell and dev tools - Standard setup');
     expect(content).not.toContain('Set up only shell basics - Minimal setup');
   });
@@ -265,7 +265,7 @@ describe('Linux bootstrap workflow', () => {
   it('shows safety and recovery context in the setup review and success screens', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
-    expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal. Uncheck anything you do not want, then review before install.');
+    expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal and OpenCode as the default AI coding CLI. You can also select Codex before install.');
     expect(content).toContain('Will modify or create:');
     expect(content).toContain('DOTFILES_PATH_FILE');
     expect(content).toContain('WORKMUX_CONFIG_PATH');
