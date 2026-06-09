@@ -57,4 +57,6 @@ if [[ "${#apply_targets[@]}" -eq 0 ]]; then
 fi
 
 DOTFILES_DIR="$DOTFILES_DIR" chezmoi init --source="$CHEZMOI_SOURCE_DIR"
-DOTFILES_DIR="$DOTFILES_DIR" chezmoi --source="$CHEZMOI_SOURCE_DIR" apply "${apply_targets[@]}"
+# --keep: apply source changes for unmodified files, preserve local modifications silently.
+# No prompts — users shouldn't have to decide between "overwrite" and "keep".
+DOTFILES_DIR="$DOTFILES_DIR" chezmoi --source="$CHEZMOI_SOURCE_DIR" apply --keep "${apply_targets[@]}"

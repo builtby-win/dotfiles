@@ -12,6 +12,7 @@ describe("Neovim module wiring", () => {
   it("includes chezmoi-managed Neovim config files", () => {
     const expectedFiles = [
       "chezmoi/dot_config/nvim/init.lua",
+      "chezmoi/dot_config/nvim/builtby-init.lua",
       "chezmoi/dot_config/nvim/.luarc.json",
       "chezmoi/dot_config/nvim/nvim-pack-lock.json",
       "chezmoi/dot_config/nvim/lua/builtby/init.lua",

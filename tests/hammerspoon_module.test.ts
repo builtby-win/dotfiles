@@ -12,6 +12,7 @@ describe('Hammerspoon module wiring', () => {
   it('includes chezmoi-managed Hammerspoon config files', () => {
     const expectedFiles = [
       'chezmoi/dot_hammerspoon/init.lua',
+      'chezmoi/dot_hammerspoon/builtby-init.lua',
       'chezmoi/dot_hammerspoon/modules/app_launcher.lua',
       'chezmoi/dot_hammerspoon/modules/ghostty.lua',
     ];
@@ -22,7 +23,7 @@ describe('Hammerspoon module wiring', () => {
   });
 
   it('defines hyper app launcher and Ghostty 4-pane hotkey', () => {
-    const initLua = readRepoFile('chezmoi/dot_hammerspoon/init.lua');
+    const initLua = readRepoFile('chezmoi/dot_hammerspoon/builtby-init.lua');
     expect(initLua).toContain("hyper = { 'ctrl', 'alt', 'cmd', 'shift' }");
     expect(initLua).toContain("hs.hotkey.bind(hyper, 'space', appLauncher.show)");
     expect(initLua).toContain("hs.hotkey.bind(hyper, '4', ghostty.fourPane)");

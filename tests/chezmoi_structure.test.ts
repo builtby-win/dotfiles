@@ -22,15 +22,17 @@ describe('chezmoi source tree', () => {
   });
 
   it('covers platform-specific and helper outputs in chezmoi source', () => {
-    expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/config'))).toBe(true);
-    expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/config'))).toBe(true);
+    expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/config.tmpl'))).toBe(true);
+    expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/builtby-config'))).toBe(true);
+    expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/config.tmpl'))).toBe(true);
+    expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/builtby-config'))).toBe(true);
     expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/dot_local/bin/executable_tmux-smart'))).toBe(true);
     expect(fs.existsSync(path.resolve(__dirname, '../chezmoi/dot_config/tmux/executable_sesh-picker.sh'))).toBe(true);
   });
 
   it('keeps Ghostty Catppuccin flavor consistent across platform paths', () => {
-    const xdgGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/config'), 'utf-8');
-    const macGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/config'), 'utf-8');
+    const xdgGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/builtby-config'), 'utf-8');
+    const macGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/builtby-config'), 'utf-8');
 
     expect(xdgGhosttyConfig).toContain('theme = Catppuccin Frappe');
     expect(macGhosttyConfig).toContain('theme = Catppuccin Frappe');
@@ -39,8 +41,8 @@ describe('chezmoi source tree', () => {
   });
 
   it('does not override Ghostty super+a so native select-all still works', () => {
-    const xdgGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/config'), 'utf-8');
-    const macGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/config'), 'utf-8');
+    const xdgGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_config/ghostty/builtby-config'), 'utf-8');
+    const macGhosttyConfig = fs.readFileSync(path.resolve(__dirname, '../chezmoi/Library/Application Support/com.mitchellh.ghostty/builtby-config'), 'utf-8');
 
     expect(xdgGhosttyConfig).not.toContain('keybind = super+a=text:\\x01');
     expect(macGhosttyConfig).not.toContain('keybind = super+a=text:\\x01');
@@ -77,7 +79,7 @@ describe('chezmoi source tree', () => {
     expect(content).toContain('apply_targets=("$@")');
     expect(content).toContain('"$HOME/.zshrc"');
     expect(content).toContain('"$HOME/.config/dotfiles/path"');
-    expect(content).toContain('chezmoi --source="$CHEZMOI_SOURCE_DIR" apply "${apply_targets[@]}"');
+    expect(content).toContain('chezmoi --source="$CHEZMOI_SOURCE_DIR" apply --keep "${apply_targets[@]}"');
     expect(content).not.toContain('chezmoi init --apply');
   });
 });

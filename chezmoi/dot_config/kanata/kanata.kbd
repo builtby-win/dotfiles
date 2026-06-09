@@ -1,3 +1,7 @@
+;; builtby.win/dotfiles — managed by chezmoi (section above this line).
+;; Kanata doesn't support cross-file includes — add personal layers or
+;; overrides below this block. Chezmoi preserves local changes (--keep).
+;;
 ;; BuiltBy non-Sculpt keyboard parity layer for Kanata.
 ;; Goals:
 ;; - This profile handles macOS keyboards except the Microsoft Sculpt receiver.

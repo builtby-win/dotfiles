@@ -1,4 +1,5 @@
 {
+    "_comment": "builtby.win/dotfiles — managed by chezmoi. Add personal modifications to complex_modifications.rules array. Chezmoi preserves local changes (--keep).",
     "profiles": [
         {
             "complex_modifications": {
