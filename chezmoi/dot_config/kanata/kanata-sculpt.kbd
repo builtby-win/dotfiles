@@ -6,8 +6,9 @@
 ;; - Right Option sends Right Command.
 ;; - Caps Lock is Escape when tapped and Control when held
 ;; - Delete Forward acts as Escape
-;; - Letter-letter chords are disabled on the base layer so fast typing stays literal.
-;; - NERU and launcher shortcuts stay reachable through explicit Hyper shortcuts.
+;; - Letter-letter chords use a tight window so intentional chords work while fast typing stays cleaner.
+;; - j+k is app-aware: terminal apps send Ctrl+b; other apps arm a compact Command layer.
+;; - NERU chords: f+j, j+l, d+k, and d+f.
 ;; - F1-F12 behave like the macOS media row by default; hold Fn for raw F keys.
 ;;
 ;; Run:
@@ -69,9 +70,13 @@
 (defchordsv2
   ;; (lctl p), (lctl n), (rctl p), (rctl n) intentionally omitted.
   ;; They conflicted with Hyper + p/n — see kanata.kbd for rationale.
-  ;; Base typing wins: no letter-letter chords here. Fast rolls like jk, jl,
-  ;; dk, df, and fj should always produce text, not commands or modal layers.
-  ;; Use explicit Hyper shortcuts from Neru/Raycast/Hammerspoon for actions.
+  ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
+  ;; sequences stay plain text unless the keys are truly simultaneous.
+  (f j) @neru 75 first-release (nerumode)
+  (j l) @nudge 75 first-release (nerumode)
+  (d k) @scroll 75 first-release (nerumode)
+  (d f) @hints 75 first-release (nerumode)
+  (j k) @jk 75 first-release (neruscroll nerumode)
   (esc spc) XX 80 first-release (nerumode)
 )
 

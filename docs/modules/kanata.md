@@ -33,11 +33,12 @@ re-add the exact binary Finder reveals, then rerun `bb kanata-setup`.
   default, with `Fn` held for raw `F1`-`F12`
 - `Caps Lock` sends `Escape` when tapped and `Control` when held
 - `Delete Forward` sends `Escape`
-- Base-layer letter-letter chords are disabled so fast typing stays literal:
-  `jk`, `jl`, `dk`, `df`, and `fj` type text instead of firing commands
+- Base-layer letter-letter chords are enabled with a tight `75ms` window:
+  `j+k`, `j+l`, `d+k`, `d+f`, and `f+j`
+- On macOS, `j+k` is app-aware with `kanata-vk-agent`: terminal apps send
+  `Ctrl+b`; non-terminal apps arm a compact Command layer for the next keypress
 - Tap modifiers for one-shot next-key behavior, hold them for normal modifier use
 - Held `j` + `Space` still provides deliberate Backspace repeat
-- NERU, launcher, and tmux shortcuts stay reachable through explicit Hyper/app shortcuts
 - `Esc+Space` cancels pending one-shot or launcher state
 - Existing Hammerspoon `Hyper+Space` and `Space+j` interactions are untouched
 - Keep the same muscle memory across macOS, Linux, and Windows
@@ -287,24 +288,29 @@ bundle IDs:
 com.mitchellh.ghostty,com.googlecode.iterm2,com.apple.Terminal,dev.warp.Warp-Stable,net.kovidgoyal.kitty,org.alacritty,io.alacritty,com.github.wez.wezterm,com.cmuxterm.app
 ```
 
-Those IDs are mirrored in both Kanata configs under `defvirtualkeys` for
-app-aware aliases. The base-layer `j+k` chord is intentionally disabled now:
-terminal typing should not emit `Ctrl+b`, and GUI typing should not arm a
-next-key Command layer just because a fast `jk` roll happened.
+Those IDs are mirrored in both Kanata configs under `defvirtualkeys`. The `j+k`
+chord uses `switch` with `input virtual ...`:
 
-`kanata-vk-agent` still matters for app-aware exceptions such as keeping `j`
-plain in GUI editors with Vim mode. Future app-aware chords should live behind
-an explicit layer or modifier chord, not common letter pairs.
+- terminal virtual key pressed: send `Ctrl+b`
+- no terminal virtual key pressed: arm the `cmd` layer for the next keypress
+
+The chord window is intentionally tight at `75ms`: intentional two-key chords
+still work, but fast prose is less likely to trigger tmux leader or a GUI
+Command-layer action by accident.
 
 ## Ergonomic layers
 
-Base typing gets priority over hidden chords:
+These chords are active, but tuned tight:
 
 | Chord | Action | Notes |
 | --- | --- | --- |
 | `j+Space` | `bksp-repeat` | Hold `j`, press `Space` for steady Backspace repeat |
+| `j+k` | app-aware leader / Command layer | `Ctrl+b` in terminals, next-key Command elsewhere |
+| `f+j` | NERU recursive grid | Enters pointer grid mode |
+| `j+l` | NERU nudge | Enters nudge mode |
+| `d+k` | NERU scroll | Enters scroll mode |
+| `d+f` | NERU hints | Opens hints mode |
 | `Esc+Space` | cancel | Clears pending one-shot or launcher state |
-| `jk`, `jl`, `dk`, `df`, `fj` | inactive | Always type text on the base layer |
 
 The base `j` key uses `tap-hold-tap-keys` with common follow-up keys as
 early-tap triggers. Fast rolls such as `ij`, `ji`, `jk`, and `jl` favor the
@@ -312,10 +318,9 @@ plain `j` tap instead of waiting for release and reordering text. Intentional
 holds still activate after the hold timeout, so held `j` then `Space` keeps the
 Backspace-repeat path without making normal typing eat `j`.
 
-The NERU, launcher, and tmux flows should be explicit: use Hyper shortcuts,
-app-native bindings, or a future non-typing layer. Do not put common
-letter-letter rolls back on the base layer unless clean typing stops being the
-priority.
+Typing-sensitive simultaneous chords use a tight `75ms` window. If a chord feels
+hard to hit, raise that value in both profile `defchordsv2` blocks. If it fires
+while typing, lower it.
 
 The existing Hammerspoon `Hyper+Space` launcher path and `Space+j` navigation
 path are unchanged here. The Hyper fallback layer also keeps Hammerspoon's
@@ -332,8 +337,8 @@ When adding another app-aware chord or layer, follow the same convention:
    `BROWSER_BUNDLE_IDS` in `scripts/setup-kanata-macos.sh` if
    `kanata-vk-agent` should track it.
 2. Add the same ID to `defvirtualkeys` in the shared Kanata config.
-3. Avoid common base-layer letter pairs. Prefer explicit modifiers, a held layer,
-   or an app-owned shortcut so fast prose cannot accidentally fire commands.
+3. Keep common base-layer letter pairs on a tight timeout, and document why the
+   shortcut is worth the typing risk.
 4. For next-key layer fallbacks from deliberate chords, use
    `(one-shot <timeout-ms> (layer-while-held <layer>))`.
 
@@ -421,17 +426,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\dotfiles\windows\kana
 
 Kanata is cross-platform, but strict app-aware behavior is not one-to-one across
 Windows, macOS, and Linux without companion tooling. macOS gets app-aware context
-through `kanata-vk-agent`; other platforms should avoid hidden base-layer letter
-chords unless they have equivalent context tooling.
+through `kanata-vk-agent`; other platforms use the same fallback as an
+unclassified macOS app.
 
 Recommended path:
 
 - On macOS, use `bb kanata-setup` so both filtered Kanata daemons and their
   matching `kanata-vk-agent` instances are started.
-- Keep `jk`, `jl`, `dk`, `df`, and `fj` disabled on the base layer. They are too
-  easy to hit during fast prose.
-- Put app-aware shortcuts behind explicit modifiers or layers instead of common
-  typing rolls.
+- Keep `jk`, `jl`, `dk`, `df`, and `fj` on the same tight timeout in both
+  profiles so Sculpt and non-Sculpt muscle memory match.
+- If a chord fires while typing, tune the timeout down first; if it is hard to
+  trigger intentionally, tune it up in both profile `defchordsv2` blocks.
 - Use AutoHotkey only for Windows-only gaps that Kanata cannot handle cleanly.
 
 ## Debugging
