@@ -36,11 +36,10 @@
   fn (tap-hold 200 200 lctl (layer-while-held fn))
   ;; Double-tap semicolon for AltTab's Ctrl+Option+Tab shortcut.
   semi (tap-dance 200 (; (macro C-A-tab)))
-  ;; Hold j via tap-hold: 200ms of j hold at OS level, then hold action
-  ;; keeps j pressed via multi + activates jheld layer so j+space =
-  ;; backspace repeat. Chords (j+k, j+l, f+j) fire within 100ms,
-  ;; before the 200ms tap-hold transition.
-  j-home (tap-hold 200 200 j (multi j (layer-while-held jheld)))
+  ;; Keep j clean while preserving the deliberate held-j + Space Backspace path.
+  ;; tap-hold-tap-keys emits j early on normal rolls instead of waiting for
+  ;; release, so fast typing does not feel laggy or reorder j behind later keys.
+  j-home (tap-hold-tap-keys 200 200 j (multi j (layer-while-held jheld)) (a b c d e f g h i k l m n o p q r s t u v w x y z 4 tab grv ; spc))
   ;; In GUI editors with Vim mode, j is plain for cleanest repeat.
   editor-j (switch
     ((input virtual dev.zed.Zed)) j break
@@ -59,26 +58,8 @@
   mw-down (mwheel-down 50 120)
   mw-left (mwheel-left 50 120)
   mw-right (mwheel-right 50 120)
-  ;; Shared tmux/psmux leader action used by app-aware chords.
-  leader (macro C-b)
-  ;; App-aware aliases keep their switch logic here and expose semantic names
-  ;; to chord definitions in each profile.
-  ;; Outside terminals, j+k arms the Cmd layer for the next keypress only.
-  ;; The timeout is just a safety cap if no next key arrives.
-  cmd-next (one-shot 2000 (layer-while-held cmd))
-  terminal-leader-or-cmd-layer (switch
-    ((input virtual com.mitchellh.ghostty)) @leader break
-    ((input virtual com.googlecode.iterm2)) @leader break
-    ((input virtual com.apple.Terminal)) @leader break
-    ((input virtual dev.warp.Warp-Stable)) @leader break
-    ((input virtual net.kovidgoyal.kitty)) @leader break
-    ((input virtual org.alacritty)) @leader break
-    ((input virtual io.alacritty)) @leader break
-    ((input virtual com.github.wez.wezterm)) @leader break
-    ((input virtual com.cmuxterm.app)) @leader break
-    () @cmd-next break
-  )
-  jk @terminal-leader-or-cmd-layer
+  ;; j+k is intentionally not mapped. It should type normally everywhere,
+  ;; including terminals (no Ctrl+b) and GUI apps (no next-key Cmd layer).
   ctrl-n-or-down (switch
     ((input virtual com.mitchellh.ghostty)) C-n break
     ((input virtual com.googlecode.iterm2)) C-n break

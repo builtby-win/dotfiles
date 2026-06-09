@@ -88,8 +88,8 @@ describe('Kanata module', () => {
     expect(content).toContain('cap (tap-hold 200 200 esc lctl)');
     expect(content).toContain('fn (tap-hold 200 200 lctl (layer-while-held fn))');
     expect(content).toContain('semi (tap-dance 200 (; (macro C-A-tab)))');
-    expect(content).toContain('j-home (tap-hold 200 200 j (multi j (layer-while-held jheld)))');
-    expect(sculpt).toContain('j-home (tap-hold 200 200 j (multi j (layer-while-held jheld)))');
+    expect(content).toContain('j-home (tap-hold-tap-keys 200 200 j (multi j (layer-while-held jheld))');
+    expect(sculpt).toContain('j-home (tap-hold-tap-keys 200 200 j (multi j (layer-while-held jheld))');
     expect(content).toContain('bksp-repeat (macro-repeat-release-cancel bspc 85)');
     expect(sculpt).toContain('bksp-repeat (macro-repeat-release-cancel bspc 85)');
     expect(content).toContain('nav-layer (layer-while-held nav)');
@@ -132,41 +132,26 @@ describe('Kanata module', () => {
     expect(sculpt).toContain(fnRow);
     expect(content).toContain('com.mitchellh.ghostty nop0');
     expect(sculpt).toContain('com.mitchellh.ghostty nop0');
-    expect(content).toContain('((input virtual com.github.wez.wezterm)) @leader break');
     expect(content).toContain('((input virtual com.github.wez.wezterm)) C-n break');
     expect(content).toContain('((input virtual com.github.wez.wezterm)) C-p break');
     expect(content).toContain('() down break');
     expect(content).toContain('() up break');
-    expect(content).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
-    expect(sculpt).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
-    expect(content).toContain('jk @terminal-leader-or-cmd-layer');
-    expect(sculpt).toContain('jk @terminal-leader-or-cmd-layer');
-    expect(content).toContain('() @cmd-next break');
+    expect(content).toContain('j+k is intentionally not mapped');
+    expect(sculpt).toContain('j+k is intentionally not mapped');
+    expect(content).not.toContain('terminal-leader-or-cmd-layer');
+    expect(sculpt).not.toContain('terminal-leader-or-cmd-layer');
+    expect(content).not.toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
+    expect(sculpt).not.toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
     expect(content).not.toContain("(defoverrides");
     expect(sculpt).not.toContain("(defoverrides");
-    const requiredActiveChords = [
-      '(f j) @neru 100 first-release (nerumode)',
-      '(j l) @nudge 100 first-release (nerumode)',
-      '(d k) @scroll 100 first-release (nerumode)',
-      '(d f) @hints 100 first-release (nerumode)',
-      '(j k) @jk 100 first-release (neruscroll nerumode)',
-    ];
+    expect(getActiveChords(content)).toEqual(['(esc spc) XX 100 first-release (nerumode)']);
+    expect(getActiveChords(sculpt)).toEqual(['(esc spc) XX 80 first-release (nerumode)']);
 
     for (const chords of [getActiveChords(content), getActiveChords(sculpt)]) {
-      for (const entry of requiredActiveChords) {
-        expect(chords).toContain(entry);
+      for (const prefix of ['(f j) ', '(j f) ', '(j l) ', '(l j) ', '(d k) ', '(k d) ', '(d f) ', '(f d) ', '(j k) ', '(k j) ', '(s l) ', '(l s) ', '(j spc) ', '(spc j) ']) {
+        expect(chords.some((entry) => entry.startsWith(prefix))).toBe(false);
       }
-
-      expect(chords.some((entry) => entry.startsWith('(j f) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(k d) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(s l) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(l s) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(j spc) '))).toBe(false);
-      expect(chords.some((entry) => entry.startsWith('(spc j) '))).toBe(false);
     }
-
-    expect(getActiveChords(content)).toContain('(esc spc) XX 100 first-release (nerumode)');
-    expect(getActiveChords(sculpt)).toContain('(esc spc) XX 80 first-release (nerumode)');
   });
 
   it('documents the patched macOS Application key installer', () => {
@@ -230,7 +215,7 @@ describe('Kanata module', () => {
     expect(content).toContain('Right Option -> Right Command');
     expect(content).toContain('failed `hidutil` approach');
     expect(content).toContain('kanata-vk-agent');
-    expect(content).toContain('terminal virtual key pressed: send `Ctrl+b`');
+    expect(content).toContain('base-layer `j+k` chord is intentionally disabled');
     expect(content).toContain('AutoHotkey only for Windows-only gaps');
     expect(content).toContain('bb kanata-setup');
   });
