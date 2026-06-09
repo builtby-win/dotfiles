@@ -234,7 +234,7 @@ describe('Linux bootstrap workflow', () => {
 
   it('documents the default install as applying the base chezmoi state', () => {
     const content = fs.readFileSync(readmePath, 'utf-8');
-    expect(content).toContain('This installs dependencies, clones the repo, applies the base chezmoi state, then opens the interactive setup dashboard.');
+    expect(content).toContain('This installs dependencies, clones the repo, applies the base chezmoi state, then opens the guided setup checklist.');
     expect(content).not.toContain('legacy stow/setup lane');
   });
 
@@ -244,7 +244,7 @@ describe('Linux bootstrap workflow', () => {
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
     expect(readme).toContain('What happens during install:');
-    expect(readme).toContain('The setup dashboard backs up managed files before optional replacements.');
+    expect(readme).toContain('Setup backs up managed files before optional replacements.');
     expect(macBootstrap).toContain('Before anything changes, here is the plan:');
     expect(linuxBootstrap).toContain('Before anything changes, here is the plan:');
     expect(macBootstrap).toContain('Continue with this install? [Y/n]');
@@ -269,7 +269,7 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('Will modify or create:');
     expect(content).toContain('DOTFILES_PATH_FILE');
     expect(content).toContain('WORKMUX_CONFIG_PATH');
-    expect(content).toContain('Restore later from: bb setup');
+    expect(content).toContain('Restore later with: bb setup revert');
     expect(content).toContain('Apply these installs and file changes?');
     expect(content).toContain('Change or restore setup later:');
   });

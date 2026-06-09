@@ -12,6 +12,7 @@ describe('focused setup defaults', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
     expect(content).toContain('{ name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true');
+    expect(content).toContain('platforms: { macos: true, linux: true, windows: false }, category: "ai"');
     expect(content).toContain('{ name: "gh", value: "gh", brewName: "gh", checked: true');
     expect(content).toContain('npm install -g @anthropic-ai/claude-code');
   });
@@ -27,6 +28,14 @@ describe('focused setup defaults', () => {
     expect(content).toContain('message: "Use the recommended setup or keep what is already here?"');
     expect(content).toContain('default: "focus"');
     expect(content).not.toContain('selectedApps = ["back2vibing", "tmux", "sesh", "fzf", "ghostty", "starship", "zoxide"]');
+  });
+
+  it('runs setup directly instead of showing the old dashboard menu first', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('if (action === "menu")');
+    expect(content).toContain('await runSetup();');
+    expect(content).not.toContain('await mainMenu();\n  } catch');
   });
 
   it('supports explicit AI Agent setup path from bootstrap and bb helper', () => {

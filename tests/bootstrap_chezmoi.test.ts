@@ -38,6 +38,24 @@ describe('chezmoi-first bootstrap contract', () => {
     expect(callIndex).toBeLessThan(content.indexOf('# Install Homebrew if not present'));
   });
 
+  it('preflights administrator access with sudo -v before privileged installs', () => {
+    const macContent = fs.readFileSync(macBootstrapPath, 'utf-8');
+    const linuxContent = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(macContent).toContain('ensure_sudo_ready()');
+    expect(macContent).toContain('sudo -v < /dev/tty');
+    expect(macContent).toContain('Safe manual check: sudo -v');
+    expect(macContent).toContain('ensure_sudo_ready "installing Homebrew"');
+    expect(macContent.indexOf('ensure_sudo_ready "installing Homebrew"')).toBeLessThan(macContent.indexOf('# Create directory if it doesn\'t exist'));
+    expect(macContent.indexOf('ensure_sudo_ready "installing Homebrew"')).toBeLessThan(macContent.indexOf('https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh'));
+
+    expect(linuxContent).toContain('ensure_sudo_ready()');
+    expect(linuxContent).toContain('sudo -v < /dev/tty');
+    expect(linuxContent).toContain('Safe manual check: sudo -v');
+    expect(linuxContent).toContain('ensure_sudo_ready "installing packages with ${LINUX_PKG_MANAGER}"');
+    expect(linuxContent.indexOf('ensure_sudo_ready "installing packages with ${LINUX_PKG_MANAGER}"')).toBeLessThan(linuxContent.indexOf('case "$LINUX_PKG_MANAGER"'));
+  });
+
   it('does not expose legacy bootstrap modes', () => {
     const macContent = fs.readFileSync(macBootstrapPath, 'utf-8');
     const linuxContent = fs.readFileSync(linuxBootstrapPath, 'utf-8');

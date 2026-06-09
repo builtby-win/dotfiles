@@ -56,6 +56,7 @@ confirm_install_plan() {
   echo -e "${BOLD}Before anything changes, here is the plan:${NC}"
   echo "  1. Use this folder for the dotfiles repo: $DOTFILES_DIR"
   echo "  2. Verify Xcode Command Line Tools, then install or reuse Homebrew, Git, chezmoi, fnm, Node.js, and pnpm"
+  echo "     If Homebrew needs to be installed, we will first check admin access with sudo -v."
   echo "  3. Apply the base chezmoi-managed shell/config files"
   echo "  4. Open an interactive setup dashboard where you review optional apps and configs"
   echo ""
@@ -74,6 +75,51 @@ confirm_install_plan() {
       exit 1
       ;;
   esac
+}
+
+ensure_sudo_ready() {
+  local reason="${1:-installing system tools}"
+  local current_user="${USER:-$(id -un 2>/dev/null || echo user)}"
+
+  if [[ "$(id -u)" -eq 0 ]]; then
+    return 0
+  fi
+
+  if ! command -v sudo >/dev/null 2>&1; then
+    print_error "Administrator access is required for ${reason}, but sudo is not installed."
+    exit 1
+  fi
+
+  if sudo -n -v >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! id -Gn "$current_user" 2>/dev/null | tr ' ' '\n' | grep -qx 'admin'; then
+    print_warning "This macOS account does not appear to be in the admin group."
+  fi
+
+  if [[ ! -r /dev/tty ]]; then
+    print_error "Administrator access is required for ${reason}."
+    print_error "Open Terminal and run: sudo -v"
+    print_error "Then rerun this installer."
+    exit 1
+  fi
+
+  echo ""
+  print_step "Checking administrator access..."
+  echo "  This installer needs administrator access for ${reason}."
+  echo "  If this is your first time using sudo, macOS may show a short safety message."
+  echo "  Enter your computer password when prompted; it will not show as you type."
+  echo "  Safe manual check: sudo -v"
+
+  if sudo -v < /dev/tty; then
+    print_success "Administrator access confirmed"
+    return 0
+  fi
+
+  print_error "Could not confirm administrator access."
+  print_error "Use an administrator account, or run this first: sudo -v"
+  exit 1
 }
 
 ensure_xcode_command_line_tools() {
@@ -261,6 +307,10 @@ DOTFILES_DIR="${DOTFILES_DIR/#\~/$HOME}"
 print_debug "Install directory: $DOTFILES_DIR"
 
 confirm_install_plan
+
+if [[ -z "$(resolve_brew_bin || true)" ]]; then
+  ensure_sudo_ready "installing Homebrew"
+fi
 
 # Create directory if it doesn't exist
 if ! mkdir -p "$DOTFILES_DIR" 2>/dev/null; then

@@ -9,12 +9,12 @@ The macOS and Linux install commands are meant to be run in a terminal. They exp
 What happens during install:
 
 1. The dotfiles repo is cloned or updated, usually at `~/dotfiles`.
-2. Required installer tools are installed or reused: Git, Homebrew or your Linux package manager, chezmoi, Node.js, and pnpm.
+2. Required installer tools are installed or reused: Git, Homebrew or your Linux package manager, chezmoi, Node.js, and pnpm. If a system install needs admin access, the script checks it first with `sudo -v`.
 3. The base shell/config files are applied with chezmoi.
-4. An interactive setup dashboard opens so you can choose apps, configs, and optional features.
-5. Before optional dashboard changes are applied, the dashboard shows what will be installed, which files may change, and how to restore backups.
+4. A guided setup checklist opens with the recommended AI/dev workflow selected by default.
+5. Before optional changes are applied, setup shows what will be installed, which files may change, and how to restore backups.
 
-The setup dashboard backs up managed files before optional replacements. After install, run `bb setup` to change selections or restore backups.
+Setup backs up managed files before optional replacements. After install, run `bb setup` to change selections or `bb setup revert` to restore backups.
 
 macOS:
 
@@ -22,7 +22,9 @@ macOS:
 curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash
 ```
 
-This installs dependencies, clones the repo, applies the base chezmoi state, then opens the interactive setup dashboard.
+This installs dependencies, clones the repo, applies the base chezmoi state, then opens the guided setup checklist.
+
+If you have never used `sudo` in Terminal before, macOS/Linux may show a short safety message and ask for your computer password. The password will not show as you type. The installer uses the safe preflight command `sudo -v` rather than asking you to run `sudo ls`.
 
 Linux:
 
@@ -53,7 +55,7 @@ bb help
 `bb` is a lightweight wrapper that makes common tasks discoverable.
 If `bb` is not found, run `bash scripts/apply-chezmoi.sh` and restart your shell.
 
-If something looks wrong, run `bb setup` and choose the revert option. The installer records backups and the setup manifest under `~/.config/dotfiles/`.
+If something looks wrong, run `bb setup revert`. The installer records backups and the setup manifest under `~/.config/dotfiles/`.
 
 ## Setup
 
@@ -128,13 +130,11 @@ Update dotfiles:
 bb update
 ```
 
-Revert via the interactive UI:
+Revert setup-managed files from backups:
 
 ```bash
-bb setup
+bb setup revert
 ```
-
-Then choose "Revert" from the main menu.
 
 Check what was installed:
 

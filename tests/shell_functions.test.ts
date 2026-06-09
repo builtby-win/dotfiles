@@ -13,7 +13,11 @@ describe('shell helper contract for chezmoi migration', () => {
 
   it('keeps bb setup aligned with guided setup vocabulary', () => {
     const content = fs.readFileSync(functionsPath, 'utf-8');
-    expect(content).toContain('bb setup                Open guided setup to change apps, configs, or restore backups');
+    expect(content).toContain('bb setup                Open the recommended guided setup checklist');
+    expect(content).toContain('bb setup revert         Restore files from setup backups');
+    expect(content).toContain('bb setup menu           Open advanced setup actions');
+    expect(content).toContain('bb setup merge          Merge dotfiles into existing configs à la carte');
+    expect(content).toContain('menu|revert|merge)');
     expect(content).toContain('Apply one selected module intentionally');
     expect(content).not.toContain('stow -d');
   });

@@ -487,7 +487,7 @@ const APPS: App[] = [
   { name: "Zed", value: "zed", brewName: "zed", cask: true, checked: true, detectPath: "/Applications/Zed.app", desc: "High-performance code editor by the Atom creators", url: "https://zed.dev", platforms: { macos: true, linux: true, windows: false }, category: "terminals" },
 
   // AI Tools
-  { name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: false, windows: false }, category: "ai" },
+  { name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
   { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "OpenAI's coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
   { name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: false, detectCmd: "command -v opencode", desc: "AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
   { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
@@ -2751,7 +2751,7 @@ async function runSetup(): Promise<void> {
 
       console.log(`  ${colors.bold}Backups:${colors.reset}`);
       console.log(`    ${colors.dim}The setup dashboard backs up managed files before optional replacements.${colors.reset}`);
-      console.log(`    ${colors.dim}Restore later from: bb setup → Revert to backups${colors.reset}`);
+      console.log(`    ${colors.dim}Restore later with: bb setup revert${colors.reset}`);
 
       if (appsToInstallCount === 0 && configsToInstallCount === 0 && aiConfigs.length === 0) {
         console.log(`  ${colors.bold}Already installed:${colors.reset}`);
@@ -2852,7 +2852,16 @@ async function runSetup(): Promise<void> {
 async function main(): Promise<void> {
   try {
     console.log("");
-    await mainMenu();
+    const action = process.argv[2];
+    if (action === "menu") {
+      await mainMenu();
+    } else if (action === "merge") {
+      await runMergeMode();
+    } else if (action === "revert") {
+      await revertBackups();
+    } else {
+      await runSetup();
+    }
   } catch (error) {
     if ((error as Error).name === "ExitPromptError") {
       console.log("\nAborted.");

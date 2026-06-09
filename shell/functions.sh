@@ -378,7 +378,10 @@ bb() {
       echo ""
       echo "Commands:"
       echo "  bb apply                Apply the base dotfiles state"
-      echo "  bb setup                Open guided setup to change apps, configs, or restore backups"
+      echo "  bb setup                Open the recommended guided setup checklist"
+      echo "  bb setup revert         Restore files from setup backups"
+      echo "  bb setup menu           Open advanced setup actions"
+      echo "  bb setup merge          Merge dotfiles into existing configs à la carte"
       echo "  bb setup <module>       Apply one selected module intentionally"
       echo "  bb setup hammerspoon    Install Hammerspoon module"
       echo "  bb setup iterm2         Apply iTerm2 key defaults"
@@ -427,6 +430,10 @@ bb() {
       fi
 
       case "$module" in
+        menu|revert|merge)
+          (cd "$dotfiles_dir" && pnpm exec tsx setup.ts "$module")
+          return $?
+          ;;
         all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata|iterm2)
           if [[ "$module" == "hammerspoon" || "$module" == "karabiner" || "$module" == "iterm2" ]]; then
             if [[ "$(uname)" != "Darwin" ]]; then
