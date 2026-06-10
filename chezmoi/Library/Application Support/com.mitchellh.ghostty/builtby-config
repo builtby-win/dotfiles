@@ -19,6 +19,7 @@ cursor-style-blink = false
 
 # Shell integration
 shell-integration = zsh
+shell-integration-features = sudo,ssh-terminfo,ssh-env
 
 # Keybindings
 # Forward Shift+Enter as CSI-u so pi/tmux can distinguish it from plain Enter.
