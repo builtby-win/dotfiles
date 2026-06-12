@@ -59,11 +59,18 @@ live_match_update = true
 hide_unmatched = true
 
 [grid.hotkeys]
+# Drag toggle — Cmd+d doesn't consume the `d` grid cell since it's a chord.
+"Cmd+d" = "exec ~/.local/bin/neru-drag-toggle"
+# Click actions (unified with recursive_grid)
+"Space" = ["action left_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+Space" = ["action right_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+Return" = ["action middle_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+# Mode exits
 "," = "action reset"
 "'" = "action reset"
-"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Return" = "action left_click"
+"Escape" = ["exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
 
 [recursive_grid]
 grid_cols = 5
@@ -78,19 +85,16 @@ min_size_height = 1
 max_depth = 10
 
 [recursive_grid.hotkeys]
-# Every path that ends in `idle` also resets the Kanata layer so the
-# fj/dk/jl/df chord doesn't leave us stuck in `nerumode`. Neru has no
-# global on-idle hook, so we have to do this per binding.
-# The 5x5 grid uses most letters, so mode commands intentionally live on
-# non-grid keys to avoid stealing selection cells. `Tab` enters the Kanata
-# nerunudge layer where h/j/k/l → arrow keys for the 5px nudges below.
-# `.` enters scroll mode. Backspace backs up one recursive-grid depth.
+# Drag toggle (unified with grid)
+"Cmd+d" = "exec ~/.local/bin/neru-drag-toggle"
+# Click actions (unified with grid)
+"Space" = ["action left_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+Space" = ["action right_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+Return" = ["action middle_click", "exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
+# Mode navigation (grid-specific)
 "Tab" = "exec ~/.local/bin/kanata-layer nerunudge"
-"Space" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Space" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "." = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "`" = "toggle-cursor-follow-selection"
@@ -98,9 +102,10 @@ max_depth = 10
 "Down" = "action move_mouse_relative --dx=0 --dy=5"
 "Left" = "action move_mouse_relative --dx=-5 --dy=0"
 "Right" = "action move_mouse_relative --dx=5 --dy=0"
-"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
 "Backspace" = "action backspace"
+# Mode exits (unified with grid)
 "'" = "action reset"
+"Escape" = ["exec ~/.local/bin/neru-drag-cleanup", "exec ~/.local/bin/kanata-layer base", "idle"]
 
 [recursive_grid.animation]
 enabled = false
@@ -116,7 +121,7 @@ sub_key_preview = false
 sub_key_preview_autohide_multiplier = 1.0
 font_size = 14
 text_color = "#EE111111"
-line_color = "#33000000"
+line_color = "#CC465FBC"
 highlight_color = "#11FFFFFF"
 
 [scroll]
