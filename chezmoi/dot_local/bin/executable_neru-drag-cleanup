@@ -1,4 +1,0 @@
-#!/bin/bash
-# Remove drag state file. Called on all grid exit paths so dangling state
-# can't accumulate if the process is killed mid-drag.
-rm -f /tmp/neru-drag
