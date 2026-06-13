@@ -38,6 +38,44 @@ print_debug() {
   echo -e "${CYAN}[debug]${NC} $1"
 }
 
+resolve_fnm_bin() {
+  local candidates=(
+    "$HOME/.local/share/fnm/fnm"
+    "$HOME/.fnm/fnm"
+  )
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    [[ -x "$candidate" ]] && echo "$candidate" && return 0
+  done
+  return 1
+}
+
+append_block_once() {
+  local file="$1" marker_start="$2" marker_end="$3" block_content="$4"
+  touch "$file"
+  grep -Fq "$marker_start" "$file" && return
+  { echo ""; echo "$marker_start"; printf "%s\n" "$block_content"; echo "$marker_end"; } >> "$file"
+}
+
+ensure_shell_runtime_blocks() {
+  local fnm_block_bash='if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd --shell bash)"
+fi'
+  local fnm_block_zsh='if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi'
+  local pnpm_block='export PNPM_HOME="${PNPM_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm}"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac'
+
+  append_block_once "$HOME/.bashrc" "# >>> builtby fnm >>>" "# <<< builtby fnm <<<" "$fnm_block_bash"
+  append_block_once "$HOME/.bashrc" "# >>> builtby pnpm >>>" "# <<< builtby pnpm <<<" "$pnpm_block"
+  append_block_once "$HOME/.zshrc" "# >>> builtby fnm >>>" "# <<< builtby fnm <<<" "$fnm_block_zsh"
+  append_block_once "$HOME/.zshrc" "# >>> builtby pnpm >>>" "# <<< builtby pnpm <<<" "$pnpm_block"
+}
+
 ensure_sudo_ready() {
   local reason="${1:-installing system packages}"
 
@@ -330,10 +368,14 @@ print_step "[1/4] Preparing required installer tools..."
 if ! command -v fnm >/dev/null 2>&1; then
   command -v unzip >/dev/null 2>&1 || install_packages unzip
   if curl -fsSL https://fnm.vercel.app/install | bash 2>/dev/null; then
-    [[ -x "$HOME/.local/share/fnm/fnm" ]] && export PATH="$HOME/.local/share/fnm:$PATH"
+    fnm_bin_path="$(resolve_fnm_bin || true)"
+    [[ -n "$fnm_bin_path" ]] && export PATH="$(dirname "$fnm_bin_path"):$PATH"
     command -v fnm >/dev/null 2>&1 && eval "$(fnm env --use-on-cd --shell bash)" || true
   fi
 fi
+
+fnm_bin_path="$(resolve_fnm_bin || true)"
+[[ -n "$fnm_bin_path" ]] && export PATH="$(dirname "$fnm_bin_path"):$PATH"
 
 if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd --shell bash)" 2>/dev/null || true
@@ -354,6 +396,8 @@ if ensure_pnpm_available; then
 else
   print_warning "pnpm is not available; dependency install requires pnpm"
 fi
+
+ensure_shell_runtime_blocks
 
 print_step "[2/4] Installing project dependencies..."
 install_project_dependencies || {
