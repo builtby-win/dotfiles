@@ -37,6 +37,43 @@ alias redo="sudo !!"
 # Zed - default to opening current directory
 zed() { command zed "${@:-.}"; }
 
+# Pi model aliases with fallback support
+#
+# flash:  Try opencode/deepseek-v4-flash-free first, fall back to opencode-go/deepseek-v4-flash
+# pro:    Try opencode/deepseek-v4-pro first, fall back to opencode-go/deepseek-v4-pro
+# pi-*:   Direct model shortcuts without fallback
+
+# Run pi with a primary model; if startup fails (non-zero, not user-cancelled),
+# retry with a fallback model.
+pi-with-fallback() {
+  local primary="$1"
+  local fallback="$2"
+  shift 2
+
+  pi --model "$primary" "$@"
+  local ret=$?
+  # Don't fall back on normal exit (0) or user interrupt (130=SIGINT, 143=SIGTERM)
+  if [ $ret -ne 0 ] && [ $ret -ne 130 ] && [ $ret -ne 143 ]; then
+    echo >&2 "⚠️  Primary model '$primary' failed (exit $ret). Falling back to '$fallback'..."
+    pi --model "$fallback" "$@"
+  fi
+  return $?
+}
+
+# Named model shortcuts with automatic fallback
+flash()  { pi-with-fallback "opencode/deepseek-v4-flash-free" "opencode-go/deepseek-v4-flash" "$@"; }
+pro()    { pi-with-fallback "opencode/deepseek-v4-pro"      "opencode-go/deepseek-v4-pro"      "$@"; }
+
+# Direct model shortcuts (no fallback)
+alias pi-flash="pi --model opencode/deepseek-v4-flash-free"
+alias pi-flash-go="pi --model opencode-go/deepseek-v4-flash"
+alias pi-pro="pi --model opencode/deepseek-v4-pro"
+alias pi-pro-go="pi --model opencode-go/deepseek-v4-pro"
+alias pi-zen="pi --provider opencode"
+alias pi-go="pi --provider opencode-go"
+alias pi-sonnet="pi --model claude-sonnet-4"
+alias pi-opus="pi --model claude-opus-4-7"
+
 # CLI tool shortcuts
 claude() {
   command claude --dangerously-skip-permissions "$@"
