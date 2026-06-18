@@ -147,7 +147,7 @@ describe("tmux profile split", () => {
     expect(coreConf).toContain("set -g pane-border-style 'fg=brightblack'");
     expect(coreConf).toContain("set -g pane-active-border-style 'fg=blue'");
     expect(coreConf).toContain("set -g window-style 'fg=colour245,bg=default'");
-    expect(coreConf).toContain("set -g window-active-style 'fg=default,bg=default'");
+    expect(coreConf).toContain("set -g window-active-style 'fg=white,bg=default'");
     expect(basicConf).toContain("set -g pane-border-status off");
     expect(basicConf).toContain('set -g pane-border-format ""');
     expect(basicConf).not.toContain("set -g pane-border-status bottom");
