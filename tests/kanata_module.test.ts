@@ -13,6 +13,7 @@ describe('Kanata module', () => {
   const macosSetupPath = path.resolve(__dirname, '../scripts/setup-kanata-macos.sh');
   const shellFunctionsPath = path.resolve(__dirname, '../shell/functions.sh');
   const kanataLayerPath = path.resolve(__dirname, '../chezmoi/dot_local/bin/executable_kanata-layer');
+  const kanataVkAgentPollPath = path.resolve(__dirname, '../chezmoi/dot_local/lib/kanata-vk-agent-poll.swift');
 
   function getActiveChords(content: string): string[] {
     const lines = content.split(/\r?\n/);
@@ -165,6 +166,16 @@ describe('Kanata module', () => {
 
     expect(getActiveChords(content)).toContain('(esc spc) XX 100 first-release (nerumode)');
     expect(getActiveChords(sculpt)).toContain('(esc spc) XX 80 first-release (nerumode)');
+  });
+
+  it('keeps app context alive after Kanata daemon restarts', () => {
+    const agent = fs.readFileSync(kanataVkAgentPollPath, 'utf-8');
+
+    expect(agent).toContain('private var lastRefresh = Date.distantPast');
+    expect(agent).toContain('private let refreshInterval: TimeInterval = 1');
+    expect(agent).toContain('if newVk == currentVk');
+    expect(agent).toContain('client.press(new)');
+    expect(agent).toContain('lastRefresh = now');
   });
 
   it('documents the patched macOS Application key installer', () => {

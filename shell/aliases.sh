@@ -119,7 +119,12 @@ alias vb="back2vibing"
 
 # Kanata (advanced — only loaded if installed)
 if command -v kanata &> /dev/null; then
-  alias kr="sudo launchctl kickstart -k system/com.builtbywin.kanata && sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt"
+  kr() {
+    sudo launchctl kickstart -k system/com.builtbywin.kanata &&
+    sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt &&
+    launchctl kickstart -k "gui/$(id -u)/local.kanata-vk-agent" &&
+    launchctl kickstart -k "gui/$(id -u)/local.kanata-vk-agent-sculpt"
+  }
   alias ks="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts"
   alias ksr="npx tsx $DOTFILES_SHELL_DIR/../scripts/kanata-status.ts reload"
 fi

@@ -234,13 +234,15 @@ launchctl print system/com.builtbywin.kanata
 launchctl print system/com.builtbywin.kanata-sculpt
 ```
 
-If you manually restart one Kanata daemon, restart both or reset both live layers.
-Otherwise one keyboard can be back on `base` while the other stays in a modal layer
-such as `neruscroll`:
+If you manually restart Kanata, restart both daemons and both app-context agents.
+The agents re-press the frontmost app virtual key after Kanata's TCP server comes
+back, which keeps `j+k` on the terminal `Ctrl+b` path instead of the GUI Cmd layer:
 
 ```bash
 sudo launchctl kickstart -k system/com.builtbywin.kanata
 sudo launchctl kickstart -k system/com.builtbywin.kanata-sculpt
+launchctl kickstart -k gui/$(id -u)/local.kanata-vk-agent
+launchctl kickstart -k gui/$(id -u)/local.kanata-vk-agent-sculpt
 kanata-layer base
 kanata-layer status
 ```

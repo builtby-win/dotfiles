@@ -73,7 +73,7 @@
   ;; Keep typing-sensitive chords tight so fast rolls and word-final k+Space
   ;; sequences stay plain text unless the keys are truly simultaneous.
   (f j) @neru 75 first-release (nerumode)
-  (j l) @scroll 75 first-release (nerumode)
+  (j l) @nudge 75 first-release (nerumode)
   (d k) @scroll 75 first-release (nerumode)
   (d f) @hints 75 first-release (nerumode)
   (j k) @jk 75 first-release (neruscroll nerumode)

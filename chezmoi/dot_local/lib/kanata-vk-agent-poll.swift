@@ -96,6 +96,9 @@ final class AppWatcher {
     let args: Args
     let client: KanataClient
     private var currentVk: String?
+    // Kanata forgets fake-key state when its daemon restarts; replay current app context.
+    private var lastRefresh = Date.distantPast
+    private let refreshInterval: TimeInterval = 1
 
     init(args: Args) {
         self.args = args
@@ -113,10 +116,18 @@ final class AppWatcher {
 
     func apply(bundleId: String?) {
         let newVk = matchingVk(for: bundleId)
-        if newVk == currentVk { return }
+        let now = Date()
+        if newVk == currentVk {
+            if let new = newVk, now.timeIntervalSince(lastRefresh) >= refreshInterval {
+                client.press(new)
+                lastRefresh = now
+            }
+            return
+        }
         if let old = currentVk { client.release(old) }
         if let new = newVk { client.press(new) }
         currentVk = newVk
+        lastRefresh = now
         NSLog("kanata-vk-agent-poll: app=\(bundleId ?? "<none>") vk=\(newVk ?? "<none>")")
     }
 
