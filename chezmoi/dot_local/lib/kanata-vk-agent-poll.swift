@@ -68,7 +68,7 @@ final class KanataClient {
     func send(name: String, action: String) {
         if stream == nil { connect() }
         let escapedName = name.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
-        let json = "{\"ActOnFakeKey\":{\"name\":\"\(escapedName)\",\"action\":\"\(action)\"}}"
+        let json = "{\"ActOnFakeKey\":{\"name\":\"\(escapedName)\",\"action\":\"\(action)\"}}\n"
         let bytes = Array(json.utf8)
         let wrote = stream?.write(bytes, maxLength: bytes.count) ?? -1
         if wrote != bytes.count {

@@ -170,12 +170,17 @@ describe('Kanata module', () => {
 
   it('keeps app context alive after Kanata daemon restarts', () => {
     const agent = fs.readFileSync(kanataVkAgentPollPath, 'utf-8');
+    const wrapper = fs.readFileSync(path.resolve(__dirname, '../chezmoi/dot_local/bin/executable_kanata-vk-agent-poll'), 'utf-8');
 
     expect(agent).toContain('private var lastRefresh = Date.distantPast');
     expect(agent).toContain('private let refreshInterval: TimeInterval = 1');
+    expect(agent).toContain('\\"}}\\n"');
     expect(agent).toContain('if newVk == currentVk');
     expect(agent).toContain('client.press(new)');
     expect(agent).toContain('lastRefresh = now');
+    expect(wrapper).toContain('LOCK_DIR="${CACHE_DIR}/.build.lock"');
+    expect(wrapper).toContain('mkdir "$LOCK_DIR"');
+    expect(wrapper).toContain('"$BINARY.tmp.$$"');
   });
 
   it('documents the patched macOS Application key installer', () => {
