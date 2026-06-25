@@ -32,6 +32,11 @@
   concurrent-tap-hold yes
   chords-v2-min-idle 100
   override-release-on-activation yes
+  ;; Delay release of tapped keys in tap-hold / one-shot-press release paths
+  ;; by 10ms. Smooths rapid event sequences when kanata competes for CPU,
+  ;; reducing spurious OS-generated key repeats under load. Kanata-internal;
+  ;; does not affect macOS key repeat rate.
+  rapid-event-delay 10
 )
 
 ;; One-shot modifier aliases. Kept per-profile because Sculpt deliberately
