@@ -57,7 +57,22 @@ final class KanataClient {
         let output = retainedWriteStream as OutputStream
         output.open()
         stream = output
-        NSLog("kanata-vk-agent-poll: connected to 127.0.0.1:\(port)")
+        // open() returns with status .opening; write() before .open drops bytes.
+        waitForOpen(timeout: 2)
+        if let s = stream, s.streamStatus == .open {
+            NSLog("kanata-vk-agent-poll: connected to 127.0.0.1:\(port)")
+        } else {
+            let raw = stream?.streamStatus.rawValue ?? 0
+            NSLog("kanata-vk-agent-poll: stream not open after 2s (status=\(raw))")
+        }
+    }
+
+    private func waitForOpen(timeout: TimeInterval) {
+        guard let stream else { return }
+        let deadline = Date().addingTimeInterval(timeout)
+        while stream.streamStatus == .opening, Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.01))
+        }
     }
 
     func close() {
@@ -70,12 +85,19 @@ final class KanataClient {
         let escapedName = name.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
         let json = "{\"ActOnFakeKey\":{\"name\":\"\(escapedName)\",\"action\":\"\(action)\"}}\n"
         let bytes = Array(json.utf8)
-        let wrote = stream?.write(bytes, maxLength: bytes.count) ?? -1
-        if wrote != bytes.count {
-            NSLog("kanata-vk-agent-poll: write failed for \(name) \(action), reconnecting")
-            connect()
-            _ = stream?.write(bytes, maxLength: bytes.count)
+        // Retry with reconnect so transients (kanata restartTCP mid-write,
+        // EAGAIN, etc.) don't drop state. Bounded at 3 attempts so a
+        // permanently dead kanata doesn't spin forever.
+        for attempt in 1...3 {
+            let wrote = stream?.write(bytes, maxLength: bytes.count) ?? -1
+            if wrote == bytes.count { return }
+            NSLog("kanata-vk-agent-poll: write attempt \(attempt)/3 failed for \(name) \(action) (wrote=\(wrote))")
+            if attempt < 3 {
+                connect()
+                RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+            }
         }
+        NSLog("kanata-vk-agent-poll: gave up after 3 attempts: \(name) \(action)")
     }
 
     func press(_ name: String) { send(name: name, action: "Press") }
