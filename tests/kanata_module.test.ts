@@ -14,6 +14,8 @@ describe('Kanata module', () => {
   const shellFunctionsPath = path.resolve(__dirname, '../shell/functions.sh');
   const kanataLayerPath = path.resolve(__dirname, '../chezmoi/dot_local/bin/executable_kanata-layer');
   const kanataVkAgentPollPath = path.resolve(__dirname, '../chezmoi/dot_local/lib/kanata-vk-agent-poll.swift');
+  const regularLaunchDaemonPath = path.resolve(__dirname, '../com.builtbywin.kanata.plist');
+  const sculptLaunchDaemonPath = path.resolve(__dirname, '../com.builtbywin.kanata-sculpt.plist');
 
   function getActiveChords(content: string): string[] {
     const lines = content.split(/\r?\n/);
@@ -71,6 +73,8 @@ describe('Kanata module', () => {
     expect(sculpt).toContain('macos-dev-names-include');
     expect(sculpt).toContain('0xCB1EB82FC081667C');
     expect(sculpt).not.toContain('Karabiner DriverKit VirtualHIDKeyboard 1.8.0');
+    expect(content).toContain('rapid-event-delay 10');
+    expect(sculpt).toContain('rapid-event-delay 10');
     expect(content).toContain(defsrc);
     expect(sculpt).toContain(defsrc);
     expect(content).toContain('hyper (multi lctl lalt lsft lmet reverse-release-order)');
@@ -175,12 +179,26 @@ describe('Kanata module', () => {
     expect(agent).toContain('private var lastRefresh = Date.distantPast');
     expect(agent).toContain('private let refreshInterval: TimeInterval = 1');
     expect(agent).toContain('\\"}}\\n"');
+    expect(agent).toContain('func refresh(_ name: String)');
+    expect(agent).toContain('release(name)');
+    expect(agent).toContain('press(name)');
     expect(agent).toContain('if newVk == currentVk');
-    expect(agent).toContain('client.press(new)');
-    expect(agent).toContain('lastRefresh = now');
+    expect(agent).toContain('client.refresh(new)');
+    expect(agent).not.toContain('client.press(new)\n                lastRefresh = now');
     expect(wrapper).toContain('LOCK_DIR="${CACHE_DIR}/.build.lock"');
     expect(wrapper).toContain('mkdir "$LOCK_DIR"');
     expect(wrapper).toContain('"$BINARY.tmp.$$"');
+  });
+
+  it('keeps Kanata launch daemons non-verbose', () => {
+    const regularLaunchDaemon = fs.readFileSync(regularLaunchDaemonPath, 'utf-8');
+    const sculptLaunchDaemon = fs.readFileSync(sculptLaunchDaemonPath, 'utf-8');
+
+    for (const plist of [regularLaunchDaemon, sculptLaunchDaemon]) {
+      expect(plist).not.toContain('--debug');
+      expect(plist).not.toContain('--trace');
+      expect(plist).not.toContain('<key>Nice</key>');
+    }
   });
 
   it('documents the patched macOS Application key installer', () => {

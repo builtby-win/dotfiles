@@ -103,6 +103,11 @@ final class KanataClient {
     func press(_ name: String) { send(name: name, action: "Press") }
     func release(_ name: String) { send(name: name, action: "Release") }
 
+    func refresh(_ name: String) {
+        release(name)
+        press(name)
+    }
+
     func initialize(current: String?) {
         for bundleId in bundleIds {
             if bundleId == current {
@@ -118,7 +123,8 @@ final class AppWatcher {
     let args: Args
     let client: KanataClient
     private var currentVk: String?
-    // Kanata forgets fake-key state when its daemon restarts; replay current app context.
+    // Kanata forgets fake-key state when its daemon restarts; replay current app
+    // context without stacking duplicate Press events.
     private var lastRefresh = Date.distantPast
     private let refreshInterval: TimeInterval = 1
 
@@ -141,7 +147,7 @@ final class AppWatcher {
         let now = Date()
         if newVk == currentVk {
             if let new = newVk, now.timeIntervalSince(lastRefresh) >= refreshInterval {
-                client.press(new)
+                client.refresh(new)
                 lastRefresh = now
             }
             return
