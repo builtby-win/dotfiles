@@ -61,6 +61,9 @@ window-padding-y = 8
 # Theme (supports light:X,dark:Y for auto-switching)
 theme = Catppuccin Frappe
 
+# Terminal type — use xterm-256color so tmux and remote hosts recognize it
+term = xterm-256color
+
 # Behavior
 copy-on-select = true
 shell-integration = detect

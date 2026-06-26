@@ -7,7 +7,7 @@ should_exit_after_passthrough = false
 "Primary+Shift+G" = "__disabled__"
 "Primary+Shift+C" = "__disabled__"
 "Primary+Shift+S" = "__disabled__"
-"Cmd+Ctrl+Alt+Shift+K" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+K" = "grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+S" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+F" = "hints"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
@@ -53,7 +53,8 @@ additional_electron_bundles = []
 additional_chromium_bundles = []
 additional_firefox_bundles = []
 
-[grid]
+characters = "rtyuifghjkvbnml"
+sublayer_keys = "rtyfghvbn"
 prewarm_enabled = true
 live_match_update = true
 hide_unmatched = true
@@ -68,6 +69,9 @@ hide_unmatched = true
 "Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
 "Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+# Mode navigation
+"s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
+"." = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
 # Mode exits
 "," = "action reset"
 "'" = "action reset"
