@@ -53,7 +53,8 @@ additional_electron_bundles = []
 additional_chromium_bundles = []
 additional_firefox_bundles = []
 
-characters = "ertyuifghjkcvbnm"
+[grid]
+characters = "ertyufghjkcvbnmdwiol"
 sublayer_keys = "rtyfghvbn"
 prewarm_enabled = true
 live_match_update = true
