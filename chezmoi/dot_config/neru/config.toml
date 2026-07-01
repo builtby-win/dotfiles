@@ -54,7 +54,7 @@ additional_chromium_bundles = []
 additional_firefox_bundles = []
 
 [grid]
-characters = "ertyufghjkcvbnmdwiol"
+characters = "ertyufghjkcvbnmd"
 sublayer_keys = "rtyfghvbn"
 prewarm_enabled = true
 live_match_update = true
