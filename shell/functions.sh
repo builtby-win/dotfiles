@@ -39,6 +39,16 @@ pr() {
     return 1
   fi
 
+  if [[ -n "$(command git status --porcelain --untracked-files=all)" ]]; then
+    command git add -A || return 1
+    if command git diff --cached --quiet --ignore-submodules --; then
+      echo "pr: nothing to commit."
+      return 1
+    fi
+    command git commit -m "wip: $branch" || return 1
+  fi
+
+
   command git push -u origin HEAD || return 1
 
   pr_url="$(command gh pr list --head "$branch" --state open --json url --jq '.[0].url // empty')"

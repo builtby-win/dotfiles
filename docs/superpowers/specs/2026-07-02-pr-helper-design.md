@@ -7,9 +7,10 @@ Add a tiny `pr()` shell function for the current worktree / current branch.
 - Operates on the current git worktree only.
 - Uses the current branch name from `git`.
 - Fails fast if the shell is not inside a git repo or if HEAD is detached.
+- If the worktree has changes, stage everything and create a `wip: <branch>` commit before pushing.
 - Pushes the current branch to `origin` on every invocation.
 - After the push, if an open PR already exists for that branch, it leaves the PR alone and prints its URL.
-- If no open PR exists, it creates one with `gh pr create --fill` against the repo’s default branch.
+- If no open PR exists, it creates one with `gh pr create --fill` against the repo’s default branch so the commit title/body populate the PR.
 
 ## Implementation
 - Add the function to `shell/functions.sh`, where the other shell helpers live.
@@ -19,10 +20,11 @@ Add a tiny `pr()` shell function for the current worktree / current branch.
 
 ## Suggested command flow
 1. Determine the current branch.
-2. Push the branch to `origin`.
-3. Resolve the open PR for that branch via `gh pr list --head "$branch" --state open`.
-4. If a PR exists, print the URL.
-5. Otherwise create the PR with `gh pr create --fill`.
+2. If the worktree is dirty, stage all changes and create a `wip: <branch>` commit.
+3. Push the branch to `origin`.
+4. Resolve the open PR for that branch via `gh pr list --head "$branch" --state open`.
+5. If a PR exists, print the URL.
+6. Otherwise create the PR with `gh pr create --fill`.
 
 ## Error handling
 - Detached HEAD: print a short error and return non-zero.
