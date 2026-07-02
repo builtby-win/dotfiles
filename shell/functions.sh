@@ -20,6 +20,36 @@ cob() {
   git checkout -b "$(echo $* | tr ' ' -)"
 }
 
+# Create or update a pull request for the current branch
+pr() {
+  command -v gh >/dev/null 2>&1 || {
+    echo "pr: gh is not installed."
+    return 1
+  }
+
+  command git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "pr: not inside a git repo."
+    return 1
+  }
+
+  local branch pr_url
+  branch="$(command git branch --show-current)"
+  if [[ -z "$branch" ]]; then
+    echo "pr: detached HEAD."
+    return 1
+  fi
+
+  command git push -u origin HEAD || return 1
+
+  pr_url="$(command gh pr list --head "$branch" --state open --json url --jq '.[0].url // empty')"
+  if [[ -n "$pr_url" ]]; then
+    printf '%s\n' "$pr_url"
+    return 0
+  fi
+
+  command gh pr create --fill
+}
+
 # Download audio as mp3 (requires yt-dlp)
 mp3() {
   if [[ $# -gt 0 ]]; then
