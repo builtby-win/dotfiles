@@ -57,7 +57,41 @@ pr() {
     return 0
   fi
 
-  command gh pr create --fill
+  local base_ref prompt ai_output title body fallback_suffix
+  base_ref="$(command git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || printf '%s\n' origin/main)"
+  prompt="$(cat <<EOF
+Return strict JSON only with keys "title" and "body".
+Write a concise GitHub pull request title and body for the changes below.
+Keep the title short. Keep the body short, markdown-friendly, and useful.
+No code fences. No extra prose.
+
+Branch: $branch
+
+Commit log:
+$(command git log --oneline --no-merges --max-count=20 "$base_ref..HEAD")
+
+Diff stat:
+$(command git diff --stat "$base_ref...HEAD")
+EOF
+)"
+
+  title=""
+  body=""
+  if command -v pi >/dev/null 2>&1; then
+    ai_output="$(command pi --model opencode/gpt-5.4 "$prompt" 2>/dev/null || true)"
+    if command -v jq >/dev/null 2>&1; then
+      title="$(printf '%s' "$ai_output" | jq -r '.title // empty' 2>/dev/null)"
+      body="$(printf '%s' "$ai_output" | jq -r '.body // empty' 2>/dev/null)"
+    fi
+  fi
+
+  if [[ -z "$title" || -z "$body" ]]; then
+    fallback_suffix="$(printf '%04x' "$RANDOM")"
+    printf -v title 'wip: %s %s' "$branch" "$fallback_suffix"
+    printf -v body 'Automated PR generated without AI.\n\nBranch: %s\nFallback: %s' "$branch" "$fallback_suffix"
+  fi
+
+  command gh pr create --title "$title" --body "$body"
 }
 
 # Download audio as mp3 (requires yt-dlp)
