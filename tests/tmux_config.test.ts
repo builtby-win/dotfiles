@@ -104,6 +104,7 @@ describe("tmux profile split", () => {
     expect(basicConf).toMatch(/set -g prefix 'C-b'/);
     expect(basicConf).toMatch(/bind 'C-b' send-prefix/);
     expect(basicConf).toContain('bind u copy-mode');
+    expect(basicConf).toContain("set -g @fzf-url-bind 'U'");
   });
 
   it("updates session environment from the attached terminal", () => {

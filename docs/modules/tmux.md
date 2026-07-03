@@ -149,7 +149,8 @@ bb update
 | --- | --- |
 | `Leader+f` | tmux-fingers quick copy |
 | `Leader+v` | Enter copy mode |
-| `Leader+u` | Scroll mode | Enter tmux copy mode for scrollback |
+| `Leader+u` | Scroll mode — enter tmux copy mode for scrollback |
+| `Leader+U` | URL picker — tmux-fzf-url |
 | `v` / `y` | Select and copy in copy mode |
 
 ## Plugins
