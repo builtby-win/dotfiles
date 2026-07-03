@@ -42,7 +42,7 @@ Version notes:
 
 ## Prefix
 
-- Prefix is `Ctrl+b` in `basic`
+- Prefix is `Ctrl+u` in `basic`
 - `pro` keeps your existing prefix/settings
 - With Karabiner in terminals, hold `j+k` to send the prefix
 
@@ -114,7 +114,7 @@ tmux new-session -s work
 tmux attach -t work
 ```
 
-For keyboard parity, Kanata maps `j+k` to `Ctrl+b`, matching the Karabiner terminal leader behavior on macOS. See `docs/modules/kanata.md`.
+For keyboard parity, Kanata maps `j+k` to `Ctrl+u`, matching the Karabiner terminal leader behavior on macOS. See `docs/modules/kanata.md`.
 
 The Windows setup installs psmux from `windows/packages.json`. Reapply with:
 

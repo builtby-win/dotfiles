@@ -262,7 +262,7 @@ describe('Kanata module', () => {
     expect(content).toContain('Right Option -> Right Command');
     expect(content).toContain('failed `hidutil` approach');
     expect(content).toContain('kanata-vk-agent');
-    expect(content).toContain('terminal virtual key pressed: send `Ctrl+b`');
+    expect(content).toContain('terminal virtual key pressed: send `Ctrl+u`');
     expect(content).toContain('AutoHotkey only for Windows-only gaps');
     expect(content).toContain('bb kanata-setup');
   });

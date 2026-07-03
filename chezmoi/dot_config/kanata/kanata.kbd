@@ -10,7 +10,7 @@
 ;; - Caps Lock is Escape when tapped and Control when held
 ;; - Delete Forward acts as Escape
 ;; - Letter-letter chords use a tight window so intentional chords work while fast typing stays cleaner.
-;; - j+k is app-aware: terminal apps send Ctrl+b; other apps arm a compact Command layer.
+;; - j+k is app-aware: terminal apps send Ctrl+u; other apps arm a compact Command layer.
 ;; - NERU chords: f+j, j+l, d+k, and d+f.
 ;; - F1-F12 behave like the macOS media row by default; hold Fn for raw F keys.
 ;;

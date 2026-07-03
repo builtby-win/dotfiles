@@ -69,8 +69,7 @@
                             }
                         ]
                     },
-                    {
-                        "description": "jk held together → Ctrl+b (tmux prefix) in terminals",
+                        "description": "jk held together → Ctrl+u (tmux prefix) in terminals",
                         "manipulators": [
                             {
                                 "conditions": [
