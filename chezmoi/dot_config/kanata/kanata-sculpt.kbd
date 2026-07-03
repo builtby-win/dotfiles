@@ -54,7 +54,7 @@
 )
 
 (deflayer base
-  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h @editor-j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer cmd

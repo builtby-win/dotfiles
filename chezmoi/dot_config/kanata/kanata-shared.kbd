@@ -78,38 +78,36 @@
     () @cmd-next break
   )
   jk @terminal-leader-or-cmd-layer
+  ;; Physical Ctrl + h/j/k/l/n/p becomes arrows; plain keys stay normal.
+  ;; `input real` keeps virtual Hyper/Cmd-layer chords from tripping these.
+  ctrl-h-or-left (switch
+    ((input real lctl)) left break
+    ((input real rctl)) left break
+    () h break
+  )
+  ctrl-j-or-down (switch
+    ((input real lctl)) down break
+    ((input real rctl)) down break
+    () @editor-j break
+  )
+  ctrl-k-or-up (switch
+    ((input real lctl)) up break
+    ((input real rctl)) up break
+    () k break
+  )
+  ctrl-l-or-right (switch
+    ((input real lctl)) rght break
+    ((input real rctl)) rght break
+    () l break
+  )
   ctrl-n-or-down (switch
-    ((input virtual com.mitchellh.ghostty)) C-n break
-    ((input virtual com.googlecode.iterm2)) C-n break
-    ((input virtual com.apple.Terminal)) C-n break
-    ((input virtual dev.warp.Warp-Stable)) C-n break
-    ((input virtual net.kovidgoyal.kitty)) C-n break
-    ((input virtual org.alacritty)) C-n break
-    ((input virtual io.alacritty)) C-n break
-    ((input virtual com.github.wez.wezterm)) C-n break
-    ((input virtual com.cmuxterm.app)) C-n break
-    () down break
-  )
-  ctrl-p-or-up (switch
-    ((input virtual com.mitchellh.ghostty)) C-p break
-    ((input virtual com.googlecode.iterm2)) C-p break
-    ((input virtual com.apple.Terminal)) C-p break
-    ((input virtual dev.warp.Warp-Stable)) C-p break
-    ((input virtual net.kovidgoyal.kitty)) C-p break
-    ((input virtual org.alacritty)) C-p break
-    ((input virtual io.alacritty)) C-p break
-    ((input virtual com.github.wez.wezterm)) C-p break
-    ((input virtual com.cmuxterm.app)) C-p break
-    () up break
-  )
-  ;; Vivaldi: Ctrl+n → Down, Ctrl+p → Up.
-  ;; Only fires when lctl is held — plain n/p still type normally.
-  vian (switch
-    ((input virtual com.vivaldi.Vivaldi) (input real lctl)) down break
+    ((input real lctl)) down break
+    ((input real rctl)) down break
     () n break
   )
-  viap (switch
-    ((input virtual com.vivaldi.Vivaldi) (input real lctl)) up break
+  ctrl-p-or-up (switch
+    ((input real lctl)) up break
+    ((input real rctl)) up break
     () p break
   )
   neru (multi (macro C-A-S-M-k) (layer-switch nerumode))
