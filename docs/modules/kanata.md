@@ -36,7 +36,7 @@ re-add the exact binary Finder reveals, then rerun `bb kanata-setup`.
 - Base-layer letter-letter chords are enabled with a tight `75ms` window:
   `j+k`, `j+l`, `d+k`, `d+f`, and `f+j`
 - On macOS, `j+k` is app-aware with `kanata-vk-agent`: terminal apps send
-  `Ctrl+u`; non-terminal apps arm a compact Command layer for the next keypress
+  `Ctrl+b`; non-terminal apps arm a compact Command layer for the next keypress
 - Tap modifiers for one-shot next-key behavior, hold them for normal modifier use
 - Held `j` + `Space` still provides deliberate Backspace repeat
 - `Esc+Space` cancels pending one-shot or launcher state
@@ -293,7 +293,7 @@ com.mitchellh.ghostty,com.googlecode.iterm2,com.apple.Terminal,dev.warp.Warp-Sta
 Those IDs are mirrored in both Kanata configs under `defvirtualkeys`. The `j+k`
 chord uses `switch` with `input virtual ...`:
 
-- terminal virtual key pressed: send `Ctrl+u`
+- terminal virtual key pressed: send `Ctrl+b`
 - no terminal virtual key pressed: arm the `cmd` layer for the next keypress
 
 The chord window is intentionally tight at `75ms`: intentional two-key chords
@@ -307,7 +307,7 @@ These chords are active, but tuned tight:
 | Chord | Action | Notes |
 | --- | --- | --- |
 | `j+Space` | `bksp-repeat` | Hold `j`, press `Space` for steady Backspace repeat |
-| `j+k` | app-aware leader / Command layer | `Ctrl+u` in terminals, next-key Command elsewhere |
+| `j+k` | app-aware leader / Command layer | `Ctrl+b` in terminals, next-key Command elsewhere |
 | `f+j` | NERU recursive grid | Enters pointer grid mode |
 | `j+l` | NERU nudge | Enters nudge mode |
 | `d+k` | NERU scroll | Enters scroll mode |

@@ -59,7 +59,7 @@
   mw-left (mwheel-left 50 120)
   mw-right (mwheel-right 50 120)
   ;; Shared tmux/psmux leader action used by app-aware chords.
-  leader (macro C-u)
+  leader (macro C-b)
   ;; App-aware aliases keep their switch logic here and expose semantic names
   ;; to chord definitions in each profile.
   ;; Outside terminals, j+k arms the Cmd layer for the next keypress only.

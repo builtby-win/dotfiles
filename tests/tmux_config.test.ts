@@ -101,8 +101,9 @@ describe("tmux profile split", () => {
 
   it("puts shared defaults in core and prefix in basic", () => {
     expect(coreConf).toContain("set -g mouse on");
-    expect(basicConf).toMatch(/set -g prefix 'C-u'/);
-    expect(basicConf).toMatch(/bind 'C-u' send-prefix/);
+    expect(basicConf).toMatch(/set -g prefix 'C-b'/);
+    expect(basicConf).toMatch(/bind 'C-b' send-prefix/);
+    expect(basicConf).toContain('bind u copy-mode');
   });
 
   it("updates session environment from the attached terminal", () => {
