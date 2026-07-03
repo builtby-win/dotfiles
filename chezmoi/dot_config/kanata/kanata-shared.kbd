@@ -78,36 +78,42 @@
     () @cmd-next break
   )
   jk @terminal-leader-or-cmd-layer
-  ;; Physical Ctrl + h/j/k/l/n/p becomes arrows; plain keys stay normal.
+  ;; Physical/Caps Ctrl + h/j/k/l/n/p becomes arrows; plain keys stay normal.
   ;; `input real` keeps virtual Hyper/Cmd-layer chords from tripping these.
   ctrl-h-or-left (switch
     ((input real lctl)) left break
     ((input real rctl)) left break
+    ((input real caps)) left break
     () h break
   )
   ctrl-j-or-down (switch
     ((input real lctl)) down break
     ((input real rctl)) down break
+    ((input real caps)) down break
     () @editor-j break
   )
   ctrl-k-or-up (switch
     ((input real lctl)) up break
     ((input real rctl)) up break
+    ((input real caps)) up break
     () k break
   )
   ctrl-l-or-right (switch
     ((input real lctl)) rght break
     ((input real rctl)) rght break
+    ((input real caps)) rght break
     () l break
   )
   ctrl-n-or-down (switch
     ((input real lctl)) down break
     ((input real rctl)) down break
+    ((input real caps)) down break
     () n break
   )
   ctrl-p-or-up (switch
     ((input real lctl)) up break
     ((input real rctl)) up break
+    ((input real caps)) up break
     () p break
   )
   neru (multi (macro C-A-S-M-k) (layer-switch nerumode))

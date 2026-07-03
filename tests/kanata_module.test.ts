@@ -152,6 +152,7 @@ describe('Kanata module', () => {
         expect(target).toContain(`${alias} (switch`);
         expect(target).toContain(`((input real lctl)) ${arrow} break`);
         expect(target).toContain(`((input real rctl)) ${arrow} break`);
+        expect(target).toContain(`((input real caps)) ${arrow} break`);
         expect(target).toContain(`() ${fallback} break`);
       }
     }
