@@ -102,6 +102,16 @@
     ((input virtual com.cmuxterm.app)) C-p break
     () up break
   )
+  ;; Vivaldi: Ctrl+n → Down, Ctrl+p → Up.
+  ;; Only fires when lctl is held — plain n/p still type normally.
+  vian (switch
+    ((input virtual com.vivaldi.Vivaldi) (input real lctl)) down break
+    () n break
+  )
+  viap (switch
+    ((input virtual com.vivaldi.Vivaldi) (input real lctl)) up break
+    () p break
+  )
   neru (multi (macro C-A-S-M-k) (layer-switch nerumode))
   nudge (multi (macro C-A-S-M-;) (layer-switch nerumode))
   scroll (multi (macro C-A-S-M-s) (layer-switch nerumode))

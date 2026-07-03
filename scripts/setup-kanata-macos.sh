@@ -11,6 +11,7 @@ DOTFILES_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 KANATA_BIN="${CARGO_HOME:-$HOME/.cargo}/bin/kanata"
 KANATA_CFG="$HOME/.config/kanata/kanata.kbd"
 KANATA_SCULPT_CFG="$HOME/.config/kanata/kanata-sculpt.kbd"
+KANATA_SHARED_CFG="$HOME/.config/kanata/kanata-shared.kbd"
 KANATA_TCP_PORT="5829"
 KANATA_SCULPT_TCP_PORT="5830"
 PLIST_LABEL="com.builtbywin.kanata"
@@ -20,6 +21,11 @@ VK_AGENT_LABEL="local.kanata-vk-agent"
 VK_AGENT_SCULPT_LABEL="local.kanata-vk-agent-sculpt"
 OTHER_VK_AGENT_LABEL="local.kanata-vk-agent-other"
 VK_AGENT_PLIST_DIR="$HOME/Library/LaunchAgents"
+KANATA_LAUNCH_WRAPPER="/usr/local/bin/builtbywin-kanata-launchd"
+KANATA_BOOT_DELAY_SECONDS="${KANATA_BOOT_DELAY_SECONDS:-20}"
+KANATA_WAIT_SECONDS="${KANATA_WAIT_SECONDS:-120}"
+KANATA_SCULPT_DEVICE_WAIT_SECONDS="${KANATA_SCULPT_DEVICE_WAIT_SECONDS:-90}"
+SCULPT_DEVICE_HASH="0xCB1EB82FC081667C"
 SCULPT_HIDUTIL_LABEL="local.microsoft-sculpt-hidutil"
 # Keep these lists mirrored with defvirtualkeys and app-aware switch aliases
 # in chezmoi/dot_config/kanata/*.kbd. kanata-vk-agent presses these virtual
@@ -64,11 +70,94 @@ open_privacy_panes() {
   open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility'
 }
 
+write_launch_wrapper() {
+  local tmp_wrapper="$1"
+
+  cat > "$tmp_wrapper" <<'WRAPPER'
+#!/usr/bin/env bash
+set -euo pipefail
+
+label="${1:?label required}"
+cfg="${2:?config path required}"
+port="${3:?TCP port required}"
+device_hash="${4:-}"
+
+kanata_bin="${BUILTBYWIN_KANATA_BIN:?BUILTBYWIN_KANATA_BIN is required}"
+boot_delay="${BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS:-20}"
+wait_seconds="${BUILTBYWIN_KANATA_WAIT_SECONDS:-120}"
+device_wait_seconds="${BUILTBYWIN_KANATA_DEVICE_WAIT_SECONDS:-90}"
+console_user="${BUILTBYWIN_KANATA_CONSOLE_USER:-}"
+
+log() {
+  printf '%s builtbywin-kanata-launchd[%s]: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$label" "$*" >&2
+}
+
+wait_until() {
+  local description="$1"
+  local timeout="$2"
+  shift 2
+  local deadline=$((SECONDS + timeout))
+
+  until "$@"; do
+    if (( SECONDS >= deadline )); then
+      log "timeout waiting for ${description}; continuing anyway"
+      return 1
+    fi
+    sleep 2
+  done
+
+  log "ready: ${description}"
+}
+
+kanata_lists_device() {
+  local needle="$1"
+  "$kanata_bin" --list 2>/dev/null | grep -Fq "$needle"
+}
+
+if [[ "$boot_delay" =~ ^[0-9]+$ ]] && (( boot_delay > 0 )); then
+  log "delaying ${boot_delay}s so login/HID services can settle"
+  sleep "$boot_delay"
+fi
+
+wait_until "kanata binary $kanata_bin" "$wait_seconds" test -x "$kanata_bin" || true
+wait_until "kanata config $cfg" "$wait_seconds" test -r "$cfg" || true
+
+if [[ -n "$console_user" ]]; then
+  wait_until "console user $console_user" "$wait_seconds" bash -c '[[ "$(/usr/bin/stat -f %Su /dev/console 2>/dev/null || true)" == "$0" ]]' "$console_user" || true
+fi
+
+# kanata waits for the Karabiner DriverKit VirtualHIDKeyboard internally (it
+# polls virtual_hid_keyboard_ready), and that output device never appears in
+# `kanata --list`, so there is nothing useful to gate on here. The console-user
+# wait above is what resolves the boot race: Input Monitoring only takes effect
+# after a user logs in.
+
+if [[ -n "$device_hash" ]]; then
+  wait_until "device $device_hash" "$device_wait_seconds" kanata_lists_device "$device_hash" || true
+fi
+
+log "exec $kanata_bin --cfg $cfg --port $port"
+exec "$kanata_bin" --cfg "$cfg" --port "$port"
+WRAPPER
+
+  chmod 755 "$tmp_wrapper"
+}
+
+install_launch_wrapper() {
+  local tmp_wrapper
+  tmp_wrapper="$(mktemp /tmp/builtbywin-kanata-launchd.XXXXXX)"
+
+  write_launch_wrapper "$tmp_wrapper"
+  run_admin "mkdir -p '/usr/local/bin'; cp '$tmp_wrapper' '$KANATA_LAUNCH_WRAPPER'; chown root:wheel '$KANATA_LAUNCH_WRAPPER'; chmod 755 '$KANATA_LAUNCH_WRAPPER'"
+  rm -f "$tmp_wrapper"
+}
+
 write_plist() {
   local label="$1"
   local cfg="$2"
   local port="$3"
-  local tmp_plist="$4"
+  local device_hash="$4"
+  local tmp_plist="$5"
 
   cat > "$tmp_plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -79,12 +168,25 @@ write_plist() {
     <string>${label}</string>
     <key>ProgramArguments</key>
     <array>
-        <string>${KANATA_BIN}</string>
-        <string>--cfg</string>
+        <string>${KANATA_LAUNCH_WRAPPER}</string>
+        <string>${label}</string>
         <string>${cfg}</string>
-        <string>--port</string>
         <string>${port}</string>
+        <string>${device_hash}</string>
     </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>BUILTBYWIN_KANATA_BIN</key>
+        <string>${KANATA_BIN}</string>
+        <key>BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS</key>
+        <string>${KANATA_BOOT_DELAY_SECONDS}</string>
+        <key>BUILTBYWIN_KANATA_WAIT_SECONDS</key>
+        <string>${KANATA_WAIT_SECONDS}</string>
+        <key>BUILTBYWIN_KANATA_DEVICE_WAIT_SECONDS</key>
+        <string>${KANATA_SCULPT_DEVICE_WAIT_SECONDS}</string>
+        <key>BUILTBYWIN_KANATA_CONSOLE_USER</key>
+        <string>${USER}</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
@@ -190,11 +292,12 @@ install_launchdaemon() {
   local label="$1"
   local cfg="$2"
   local port="$3"
+  local device_hash="${4:-}"
   local plist_path="/Library/LaunchDaemons/${label}.plist"
   local tmp_plist
   tmp_plist="$(mktemp "/tmp/${label}.XXXXXX.plist")"
 
-  write_plist "$label" "$cfg" "$port" "$tmp_plist"
+  write_plist "$label" "$cfg" "$port" "$device_hash" "$tmp_plist"
   run_admin "cp '$tmp_plist' '$plist_path'; chown root:wheel '$plist_path'; chmod 644 '$plist_path'; launchctl bootout system/$label 2>/dev/null || true; : > /tmp/$label.out.log; : > /tmp/$label.err.log; launchctl enable system/$label; launchctl bootstrap system '$plist_path'; launchctl kickstart -k system/$label"
   rm -f "$tmp_plist"
 }
@@ -312,7 +415,7 @@ CHECKLIST
 }
 
 step "Apply chezmoi-managed Kanata configs"
-chezmoi apply --force --source="$DOTFILES_DIR/chezmoi" "$KANATA_CFG" "$KANATA_SCULPT_CFG"
+chezmoi apply --force --source="$DOTFILES_DIR/chezmoi" "$KANATA_CFG" "$KANATA_SCULPT_CFG" "$KANATA_SHARED_CFG"
 
 step "Install patched Kanata with Cargo"
 if ! command -v cargo >/dev/null 2>&1; then
@@ -352,9 +455,12 @@ remove_legacy_vk_agent_launchagent "$SCULPT_HIDUTIL_LABEL"
 remove_legacy_vk_agent_launchagent "$OTHER_VK_AGENT_LABEL"
 remove_legacy_launchdaemon "$OTHER_PLIST_LABEL"
 
+step "Install Kanata launchd wrapper"
+install_launch_wrapper
+
 step "Install and restart Kanata LaunchDaemons"
 install_launchdaemon "$PLIST_LABEL" "$KANATA_CFG" "$KANATA_TCP_PORT"
-install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT"
+install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT" "$SCULPT_DEVICE_HASH"
 
 step "Install and restart kanata-vk-agent LaunchAgents"
 install_vk_agent_launchagent "$VK_AGENT_LABEL" "$KANATA_TCP_PORT"
