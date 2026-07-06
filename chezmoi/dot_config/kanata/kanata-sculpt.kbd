@@ -54,21 +54,21 @@
 )
 
 (deflayer base
-  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer cmd
-  _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _
+  _ _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _
 )
 
 ;; Neru scroll mode needs raw, repeatable motion keys. Keep j out of its
 ;; tap-hold behavior while Neru owns modal scrolling.
 (deflayer neruscroll
-  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @hyper-key @cap @fn esc @semi tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 (deflayer nerumode
-  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn (multi esc (layer-switch base)) @semi tab grv (multi esc (layer-switch base)) (multi spc (layer-switch base)) h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
+  @os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @hyper-key @cap @fn (multi esc (layer-switch base)) @semi tab grv (multi esc (layer-switch base)) (multi spc (layer-switch base)) h j k l u d a e w b f c v x z q m r t y i o p s g n 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu
 )
 
 ;; fj, dk, and sl are intentionally reserved for future layers and remain unmapped in this pass.

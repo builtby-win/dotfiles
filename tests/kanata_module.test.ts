@@ -57,13 +57,13 @@ describe('Kanata module', () => {
     const shared = fs.readFileSync(sharedConfigPath, 'utf-8');
     const content = `${fs.readFileSync(configPath, 'utf-8')}\n${shared}`;
     const sculpt = `${fs.readFileSync(sculptConfigPath, 'utf-8')}\n${shared}`;
-    const defsrc = 'lctl lsft lalt lmet ralt rmet rctl rsft menu caps fn del ; tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
-    const nonSculptBase = '@os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
-    const sculptBase = '@os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
-    const hyperlayer = '_ _ _ _ _ _ _ _ _ _ _ _ _ C-A-S-M-tab C-A-S-M-grv C-A-S-M-esc C-A-S-M-spc C-A-S-M-h C-A-S-M-j C-A-S-M-k C-A-S-M-l C-A-S-M-u C-A-S-M-d C-A-S-M-a C-A-S-M-e C-A-S-M-w C-A-S-M-b C-A-S-M-f C-A-S-M-c C-A-S-M-v C-A-S-M-x C-A-S-M-z C-A-S-M-q C-A-S-M-m C-A-S-M-r C-A-S-M-t C-A-S-M-y C-A-S-M-i C-A-S-M-o C-A-S-M-p C-A-S-M-s C-A-S-M-g C-A-S-M-n C-A-S-M-4 C-A-S-M-f1 C-A-S-M-f2 C-A-S-M-f3 C-A-S-M-f4 C-A-S-M-f5 C-A-S-M-f6 C-A-S-M-f7 C-A-S-M-f8 C-A-S-M-f9 C-A-S-M-f10 C-A-S-M-f11 C-A-S-M-f12';
-    const cmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ _ M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
-    const sculptCmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
-    const fnRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
+    const defsrc = 'lctl lsft lalt lmet ralt rmet rctl rsft menu ins caps fn del ; tab grv esc spc h j k l u d a e w b f c v x z q m r t y i o p s g n 4 f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
+    const nonSculptBase = '@os-ctl @os-sft @os-alt @os-cmd @hyper-key @os-rcmd @os-rctl @os-rsft @hyper-key @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
+    const sculptBase = '@os-ctl @os-sft @os-cmd @os-alt @os-rcmd @os-rcmd @os-rctl @os-rsft @hyper-key @hyper-key @cap @fn esc @semi tab grv esc spc @ctrl-h-or-left @ctrl-j-or-down @ctrl-k-or-up @ctrl-l-or-right u d a e w b f c v x z q m r t y i o @ctrl-p-or-up s g @ctrl-n-or-down 4 brdn brup mctl lpad bldn blup prev pp next mute voldwn volu';
+    const hyperlayer = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ C-A-S-M-tab C-A-S-M-grv C-A-S-M-esc C-A-S-M-spc C-A-S-M-h C-A-S-M-j C-A-S-M-k C-A-S-M-l C-A-S-M-u C-A-S-M-d C-A-S-M-a C-A-S-M-e C-A-S-M-w C-A-S-M-b C-A-S-M-f C-A-S-M-c C-A-S-M-v C-A-S-M-x C-A-S-M-z C-A-S-M-q C-A-S-M-m C-A-S-M-r C-A-S-M-t C-A-S-M-y C-A-S-M-i C-A-S-M-o C-A-S-M-p C-A-S-M-s C-A-S-M-g C-A-S-M-n C-A-S-M-4 C-A-S-M-f1 C-A-S-M-f2 C-A-S-M-f3 C-A-S-M-f4 C-A-S-M-f5 C-A-S-M-f6 C-A-S-M-f7 C-A-S-M-f8 C-A-S-M-f9 C-A-S-M-f10 C-A-S-M-f11 C-A-S-M-f12';
+    const cmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ _ M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
+    const sculptCmdRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ M-tab M-grv _ M-spc M-h M-j M-k M-l M-u M-d M-a M-e M-w M-b M-f M-c M-v M-x M-z M-q M-m M-r M-t M-y M-i M-o M-p M-s M-g M-n _ _ _ _ _ _ _ _ _ _ _ _ _';
+    const fnRow = '_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12';
 
     expect(content).toContain('(defsrc');
     expect(content).toContain('macos-dev-names-exclude');
@@ -75,6 +75,9 @@ describe('Kanata module', () => {
     expect(sculpt).not.toContain('Karabiner DriverKit VirtualHIDKeyboard 1.8.0');
     expect(content).toContain('rapid-event-delay 10');
     expect(sculpt).toContain('rapid-event-delay 10');
+    // Microsoft Sculpt Application/Menu reports macOS keyCode 110, which Kanata maps to `ins`.
+    expect(content).toContain('menu ins caps');
+    expect(sculpt).toContain('menu ins caps');
     expect(content).toContain(defsrc);
     expect(sculpt).toContain(defsrc);
     expect(content).toContain('hyper (multi lctl lalt lsft lmet reverse-release-order)');
