@@ -6,12 +6,25 @@
     <string>com.builtbywin.kanata-sculpt</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/winstonzhao/.cargo/bin/kanata</string>
-        <string>--cfg</string>
+        <string>/usr/local/bin/builtbywin-kanata-launchd</string>
+        <string>com.builtbywin.kanata-sculpt</string>
         <string>/Users/winstonzhao/.config/kanata/kanata-sculpt.kbd</string>
-        <string>--port</string>
         <string>5830</string>
+        <string>0xCB1EB82FC081667C</string>
     </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>BUILTBYWIN_KANATA_BIN</key>
+        <string>/Users/winstonzhao/.cargo/bin/kanata</string>
+        <key>BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS</key>
+        <string>20</string>
+        <key>BUILTBYWIN_KANATA_WAIT_SECONDS</key>
+        <string>120</string>
+        <key>BUILTBYWIN_KANATA_DEVICE_WAIT_SECONDS</key>
+        <string>90</string>
+        <key>BUILTBYWIN_KANATA_CONSOLE_USER</key>
+        <string>winstonzhao</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

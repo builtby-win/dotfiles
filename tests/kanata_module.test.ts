@@ -204,13 +204,21 @@ describe('Kanata module', () => {
   });
 
   it('keeps Kanata launch daemons non-verbose', () => {
-    const regularLaunchDaemon = fs.readFileSync(regularLaunchDaemonPath, 'utf-8');
-    const sculptLaunchDaemon = fs.readFileSync(sculptLaunchDaemonPath, 'utf-8');
+    const launchDaemons = [
+      [regularLaunchDaemonPath, 'com.builtbywin.kanata'],
+      [sculptLaunchDaemonPath, 'com.builtbywin.kanata-sculpt'],
+    ] as const;
 
-    for (const plist of [regularLaunchDaemon, sculptLaunchDaemon]) {
+    for (const [launchDaemonPath, label] of launchDaemons) {
+      const plist = fs.readFileSync(launchDaemonPath, 'utf-8');
+
       expect(plist).not.toContain('--debug');
       expect(plist).not.toContain('--trace');
       expect(plist).not.toContain('<key>Nice</key>');
+      expect(plist).toContain('<string>/usr/local/bin/builtbywin-kanata-launchd</string>');
+      expect(plist).toContain('<key>BUILTBYWIN_KANATA_CONSOLE_USER</key>');
+      expect(plist).toContain(`<string>/tmp/${label}.out.log</string>`);
+      expect(plist).toContain(`<string>/tmp/${label}.err.log</string>`);
     }
   });
 

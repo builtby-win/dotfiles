@@ -12,7 +12,7 @@ not work on the first try, check the logs before changing the config:
 ```bash
 launchctl print system/com.builtbywin.kanata
 launchctl print system/com.builtbywin.kanata-sculpt
-less /tmp/kanata.err.log
+less /tmp/com.builtbywin.kanata.err.log
 less /tmp/com.builtbywin.kanata-sculpt.err.log
 ```
 
@@ -233,6 +233,10 @@ After restarting your Mac and logging in, verify the root daemons:
 launchctl print system/com.builtbywin.kanata
 launchctl print system/com.builtbywin.kanata-sculpt
 ```
+
+If either daemon shows `program = /Users/.../.cargo/bin/kanata`, it is using a
+stale direct plist that can race login/HID startup. Rerun `bb kanata-setup`; the
+current daemon should run `/usr/local/bin/builtbywin-kanata-launchd`.
 
 If you manually restart Kanata, restart both daemons and both app-context agents.
 The agents re-press the frontmost app virtual key after Kanata's TCP server comes

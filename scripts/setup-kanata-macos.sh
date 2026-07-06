@@ -89,7 +89,7 @@ device_wait_seconds="${BUILTBYWIN_KANATA_DEVICE_WAIT_SECONDS:-90}"
 console_user="${BUILTBYWIN_KANATA_CONSOLE_USER:-}"
 
 log() {
-  printf '%s builtbywin-kanata-launchd[%s]: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$label" "$*" >&2
+  printf '%s builtbywin-kanata-launchd[%s]: %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$label" "$*"
 }
 
 wait_until() {
@@ -354,6 +354,9 @@ remove_legacy_vk_agent_launchagent() {
 
 check_logs() {
   local label="$1"
+  local out_log="/tmp/$label.out.log"
+  local err_log="/tmp/$label.err.log"
+  local unexpected_stderr
 
   sleep 4
   if ! launchctl print "system/$label" >/dev/null 2>&1; then
@@ -361,24 +364,32 @@ check_logs() {
     return 1
   fi
 
-  if [[ -s /tmp/$label.err.log ]]; then
-    warn "Kanata stderr is not empty for $label:"
-    sed 's/^/  /' "/tmp/$label.err.log"
-    if grep -q 'IOHIDDeviceOpen.*not permitted' "/tmp/$label.err.log"; then
+  if [[ -s "$err_log" ]]; then
+    if grep -q 'IOHIDDeviceOpen.*not permitted' "$err_log"; then
       warn "macOS is still denying Input Monitoring for the Kanata binary. Remove and re-add $KANATA_BIN in Input Monitoring and Accessibility, then rerun this script."
+      sed 's/^/  /' "$err_log"
+      return 1
     fi
-    return 1
+
+    unexpected_stderr="$(grep -v 'IOHIDDeviceOpen.*exclusive access and device already open' "$err_log" || true)"
+    if [[ -n "$unexpected_stderr" ]]; then
+      warn "Kanata stderr is not empty for $label:"
+      printf '%s\n' "$unexpected_stderr" | sed 's/^/  /'
+      return 1
+    fi
   fi
 
-  if grep -q 'Starting kanata proper' "/tmp/$label.out.log"; then
+  if grep -q 'Starting kanata proper' "$out_log"; then
     echo "✓ $label reached the processing loop."
   else
-    warn "Kanata started, but the expected readiness line was not found yet. Check /tmp/$label.out.log."
+    warn "Kanata started, but the expected readiness line was not found yet. Check $out_log."
   fi
 }
 
 check_vk_agent_logs() {
   local label="$1"
+  local port="$2"
+  local err_log="/tmp/$label.err.log"
 
   sleep 2
   if ! launchctl print "gui/$(id -u)/$label" >/dev/null 2>&1; then
@@ -386,14 +397,14 @@ check_vk_agent_logs() {
     return 1
   fi
 
-  if [[ -s /tmp/$label.err.log ]]; then
-    warn "kanata-vk-agent stderr is not empty for $label:"
-    sed 's/^/  /' "/tmp/$label.err.log"
+  if [[ -s "$err_log" ]] && ! grep -q "connected to 127.0.0.1:$port" "$err_log"; then
+    warn "kanata-vk-agent stderr does not show a TCP connection for $label:"
+    sed 's/^/  /' "$err_log"
     warn "App-aware j+k depends on $label connecting to its Kanata TCP port."
     return 1
   fi
 
-  echo "✓ $label LaunchAgent is loaded."
+  echo "✓ $label LaunchAgent is loaded and connected to port $port."
 }
 
 print_restart_checklist() {
@@ -471,8 +482,8 @@ check_logs "$PLIST_LABEL"
 check_logs "$SCULPT_PLIST_LABEL"
 
 step "Verify kanata-vk-agent LaunchAgent logs"
-check_vk_agent_logs "$VK_AGENT_LABEL"
-check_vk_agent_logs "$VK_AGENT_SCULPT_LABEL"
+check_vk_agent_logs "$VK_AGENT_LABEL" "$KANATA_TCP_PORT"
+check_vk_agent_logs "$VK_AGENT_SCULPT_LABEL" "$KANATA_SCULPT_TCP_PORT"
 
 echo ""
 echo "Kanata macOS setup is complete. Active profiles: $PLIST_LABEL and $SCULPT_PLIST_LABEL."
