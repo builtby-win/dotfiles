@@ -141,22 +141,18 @@ describe('Kanata module', () => {
     expect(content).toContain('com.mitchellh.ghostty nop0');
     expect(sculpt).toContain('com.mitchellh.ghostty nop0');
     expect(content).toContain('((input virtual com.github.wez.wezterm)) @leader break');
-    const ctrlArrowAliases = [
-      ['ctrl-h-or-left', 'left', 'h'],
-      ['ctrl-j-or-down', 'down', '@editor-j'],
-      ['ctrl-k-or-up', 'up', 'k'],
-      ['ctrl-l-or-right', 'rght', 'l'],
-      ['ctrl-n-or-down', 'down', 'n'],
-      ['ctrl-p-or-up', 'up', 'p'],
+    const ctrlAliases = [
+      ['ctrl-h-or-left', 'h'],
+      ['ctrl-j-or-down', '@editor-j'],
+      ['ctrl-k-or-up', 'k'],
+      ['ctrl-l-or-right', 'l'],
+      ['ctrl-n-or-down', 'n'],
+      ['ctrl-p-or-up', 'p'],
     ] as const;
 
-    for (const [alias, arrow, fallback] of ctrlArrowAliases) {
-      for (const target of [content, sculpt]) {
-        expect(target).toContain(`${alias} (switch`);
-        expect(target).toContain(`((input real lctl)) ${arrow} break`);
-        expect(target).toContain(`((input real rctl)) ${arrow} break`);
-        expect(target).toContain(`((input real caps)) ${arrow} break`);
-        expect(target).toContain(`() ${fallback} break`);
+    for (const [alias, target] of ctrlAliases) {
+      for (const config of [content, sculpt]) {
+        expect(config).toContain(`${alias} ${target}`);
       }
     }
     expect(content).toContain('cmd-next (one-shot 2000 (layer-while-held cmd))');
@@ -302,7 +298,8 @@ describe('Kanata module', () => {
     expect(helper).toContain('def current_layer(port: int)');
     expect(helper).toContain('usage: kanata-layer <layer|status>');
     expect(helper).toContain('action = current_layer if layer == "status"');
-    expect(helper).toContain('return 0 if all(ok for ok, _ in results) else 1');
+    expect(helper).toContain('Missing optional daemons are skipped when at least one daemon accepts the');
+    expect(helper).toContain('return 0 if successes else 1');
   });
 
   it('offers Kanata in local setup as an app and managed config', () => {

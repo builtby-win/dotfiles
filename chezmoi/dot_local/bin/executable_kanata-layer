@@ -7,9 +7,9 @@ Performance notes:
 - We never do a probe `recv()` after connect. Kanata's TCP server only emits
   events when a layer change happens; on a fresh connection there is nothing
   to drain, so the old probe just burned the full socket timeout (~1s/port).
-- Timeout is short on purpose. If kanata is healthy the round-trip is well
-  under 50ms; anything beyond ~250ms means the daemon is wedged or absent and
-  we should fail loudly rather than block the caller (Neru, hot keys, etc).
+- Missing optional daemons are skipped when at least one daemon accepts the
+  layer change. A disconnected Sculpt receiver should not break the MacBook
+  keyboard path.
 """
 
 from __future__ import annotations
@@ -105,7 +105,7 @@ def main() -> int:
     if failures:
         print("\n".join(failures), file=sys.stderr)
 
-    return 0 if all(ok for ok, _ in results) else 1
+    return 0 if successes else 1
 
 
 if __name__ == "__main__":
