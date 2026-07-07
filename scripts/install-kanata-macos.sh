@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Build Kanata with the local macOS Application/Menu-key input fix.
-# Kanata 1.11.0 can emit KEY_COMPOSE as HID page 0x07/code 0x65, but the
-# crates.io macOS reverse table does not recognize that physical input event.
+# Microsoft Sculpt reports its Application key as HID page 0x07/code 0x65,
+# which also reaches Kanata's macOS key-code path as keyCode 110.
 
 KANATA_VERSION="1.11.0"
 PARSER_VERSION="0.1110.0"
@@ -31,7 +31,7 @@ import sys
 
 path = Path(sys.argv[1])
 text = path.read_text()
-needle = """            PageCode {
+page_needle = """            PageCode {
                 page: 0x07,
                 code: 0x64,
             } => Ok(OsCode::KEY_102ND),
@@ -40,7 +40,7 @@ needle = """            PageCode {
                 code: 0x66,
             } => Ok(OsCode::KEY_POWER),
 """
-replacement = """            PageCode {
+page_replacement = """            PageCode {
                 page: 0x07,
                 code: 0x64,
             } => Ok(OsCode::KEY_102ND),
@@ -53,14 +53,25 @@ replacement = """            PageCode {
                 code: 0x66,
             } => Ok(OsCode::KEY_POWER),
 """
+keycode_needle = "            110 => Some(OsCode::KEY_INSERT),\n"
+keycode_replacement = "            110 => Some(OsCode::KEY_COMPOSE),\n"
 
-if replacement in text:
-    print(f"Kanata parser already has the 0x07/0x65 input mapping: {path}")
-elif needle in text:
-    path.write_text(text.replace(needle, replacement))
-    print(f"Patched Kanata parser 0x07/0x65 input mapping: {path}")
-else:
-    raise SystemExit(f"Expected mapping block not found in {path}")
+changed = False
+for label, needle, replacement in (
+    ("0x07/0x65 PageCode", page_needle, page_replacement),
+    ("macOS keyCode 110", keycode_needle, keycode_replacement),
+):
+    if replacement in text:
+        print(f"Kanata parser already has the {label} input mapping: {path}")
+    elif needle in text:
+        text = text.replace(needle, replacement)
+        changed = True
+        print(f"Patched Kanata parser {label} input mapping: {path}")
+    else:
+        raise SystemExit(f"Expected {label} mapping block not found in {path}")
+
+if changed:
+    path.write_text(text)
 PY
 
 cargo install --path "$kanata_dir" --features cmd --force

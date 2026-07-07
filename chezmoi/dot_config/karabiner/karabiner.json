@@ -69,6 +69,7 @@
                             }
                         ]
                     },
+                    {
                         "description": "jk held together → Ctrl+b (tmux prefix) in terminals",
                         "manipulators": [
                             {
@@ -365,6 +366,14 @@
                         "product_id": 45929,
                         "vendor_id": 1133
                     }
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 1957,
+                        "vendor_id": 1118
+                    },
+                    "ignore": true
                 },
                 {
                     "identifiers": {
