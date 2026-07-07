@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Build Kanata with the local macOS Application/Menu-key input fix.
-# Microsoft Sculpt reports its Application key as HID page 0x07/code 0x65,
-# which also reaches Kanata's macOS key-code path as keyCode 110.
+# Microsoft Sculpt reports its Application key as HID page 0x07/code 0x65.
+# Kanata must also ignore macOS aggregate HID reports or the raw key leaks through.
 
 KANATA_VERSION="1.11.0"
 PARSER_VERSION="0.1110.0"
@@ -74,7 +74,39 @@ if changed:
     path.write_text(text)
 PY
 
-cargo install --path "$kanata_dir" --features cmd --force
+macos_loop_file="$kanata_dir/src/kanata/macos.rs"
+python3 - "$macos_loop_file" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+needle = """            let mut key_event = match KeyEvent::try_from(event) {
+"""
+replacement = """            if event.value > 1 || event.code == 0xffffffff || event.code == 0x1 {
+                log::debug!(\"{event:?} is an aggregate HID report; ignoring\");
+                continue;
+            }
+
+            let mut key_event = match KeyEvent::try_from(event) {
+"""
+
+if replacement in text:
+    print(f"Kanata macOS event loop already ignores aggregate HID reports: {path}")
+elif needle in text:
+    text = text.replace(needle, replacement)
+    path.write_text(text)
+    print(f"Patched Kanata macOS event loop to ignore aggregate HID reports: {path}")
+else:
+    raise SystemExit(f"Expected macOS event loop block not found in {path}")
+PY
+
+# Build in a fresh target dir: cargo fingerprints registry sources as
+# immutable, so a cached kanata-parser artifact silently ignores the patch
+# above (config target-dir or CARGO_TARGET_DIR would reuse one).
+build_target="$(mktemp -d)"
+trap 'rm -rf "$build_target"' EXIT
+cargo install --path "$kanata_dir" --features cmd --force --target-dir "$build_target"
 codesign --force --sign - --identifier com.builtbywin.kanata "${CARGO_HOME:-$HOME/.cargo}/bin/kanata"
 
 echo "Installed patched Kanata at ${CARGO_HOME:-$HOME/.cargo}/bin/kanata"

@@ -370,14 +370,6 @@
                 {
                     "identifiers": {
                         "is_keyboard": true,
-                        "product_id": 1957,
-                        "vendor_id": 1118
-                    },
-                    "ignore": true
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
                         "product_id": 18804,
                         "vendor_id": 12951
                     },

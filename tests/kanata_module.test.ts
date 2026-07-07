@@ -233,6 +233,8 @@ describe('Kanata module', () => {
     expect(installer).toContain('110 => Some(OsCode::KEY_INSERT)');
     expect(installer).toContain('110 => Some(OsCode::KEY_COMPOSE)');
     expect(installer).toContain('Ok(OsCode::KEY_COMPOSE)');
+    expect(installer).toContain('event.code == 0xffffffff');
+    expect(installer).toContain('aggregate HID report');
     expect(docs).toContain('scripts/install-kanata-macos.sh');
     expect(docs).toContain('page: 7, code: 101');
   });

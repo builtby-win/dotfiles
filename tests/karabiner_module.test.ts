@@ -13,21 +13,6 @@ describe('Karabiner module wiring', () => {
     expect(fs.existsSync(path.join(repoRoot, 'chezmoi/dot_config/karabiner/karabiner.json'))).toBe(true);
   });
 
-  it('lets Kanata own the Microsoft Sculpt receiver', () => {
-    const config = JSON.parse(readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'));
-    const devices = config.profiles[0].devices;
-
-    expect(devices).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        identifiers: expect.objectContaining({
-          is_keyboard: true,
-          product_id: 1957,
-          vendor_id: 1118,
-        }),
-        ignore: true,
-      }),
-    ]));
-  });
 
   it('supports both push and pull sync directions', () => {
     const script = readRepoFile('scripts/sync-karabiner.sh');
