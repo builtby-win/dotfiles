@@ -1,5 +1,0 @@
-14:29:27.5247 [0m[34m[INFO] [0mkanata v1.11.0 starting
-14:29:27.5248 [0m[34m[INFO] [0mvalidating config only and exiting
-14:29:27.5252 [0m[34m[INFO] [0mprocess unmapped keys: true
-14:29:27.5252 [0m[34m[INFO] [0mNOTE: kanata was compiled to never allow cmd
-14:29:27.5259 [0m[34m[INFO] [0mconfig file is valid
