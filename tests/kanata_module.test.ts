@@ -252,6 +252,7 @@ describe('Kanata module', () => {
     expect(helper).toContain('launchctl kickstart -k "gui/$(id -u)/$label"');
     expect(helper).toContain('KANATA_TCP_PORT="5829"');
     expect(helper).toContain('KANATA_SCULPT_TCP_PORT="5830"');
+    expect(helper).toContain('install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT"');
     expect(helper).toContain('com.builtbywin.kanata-sculpt');
     expect(helper).toContain('com.builtbywin.kanata-other');
     expect(helper).toContain('local.kanata-vk-agent-other');
@@ -273,6 +274,8 @@ describe('Kanata module', () => {
     expect(helper).toContain('bb kanata-setup');
     expect(shellFunctions).toContain('bb kanata-setup');
     expect(setupTs).toContain('setup-kanata-macos.sh');
+    expect(helper).not.toContain('BUILTBYWIN_KANATA_DEVICE_WAIT_SECONDS');
+    expect(helper).not.toContain('SCULPT_DEVICE_HASH');
   });
 
   it('documents app-scope limitations', () => {

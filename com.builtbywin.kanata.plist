@@ -10,7 +10,6 @@
         <string>com.builtbywin.kanata</string>
         <string>/Users/winstonzhao/.config/kanata/kanata.kbd</string>
         <string>5829</string>
-        <string></string>
     </array>
     <key>EnvironmentVariables</key>
     <dict>
@@ -20,8 +19,6 @@
         <string>20</string>
         <key>BUILTBYWIN_KANATA_WAIT_SECONDS</key>
         <string>120</string>
-        <key>BUILTBYWIN_KANATA_DEVICE_WAIT_SECONDS</key>
-        <string>90</string>
         <key>BUILTBYWIN_KANATA_CONSOLE_USER</key>
         <string>winstonzhao</string>
     </dict>
