@@ -196,6 +196,7 @@ try {
     Refresh-PathFromRegistry
     Initialize-NodeSession
     fnm install --lts
+    fnm default lts-latest
     fnm use lts-latest
     if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
         npm install -g pnpm

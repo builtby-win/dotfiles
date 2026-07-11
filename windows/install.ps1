@@ -226,6 +226,7 @@ Set-Content -Path (Join-Path $dotfilesConfigDir "path") -Value $dotfilesDir -NoN
 # 4.0.1 PATH-safe bb helper
 Add-UserPath (Join-Path $dotfilesDir "windows/bin")
 Add-UserPath (Join-Path $HOME ".cargo/bin")
+Add-UserPath (Join-Path $HOME ".local/bin")
 $env:DOTFILES_DIR = $dotfilesDir
 
 # 4.0.2 Node session tools

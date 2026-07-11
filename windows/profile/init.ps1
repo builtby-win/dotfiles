@@ -11,9 +11,8 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 }
 
 # 3. Initialize Fnm (Fast Node Manager)
-if (Get-Command fnm -ErrorAction SilentlyContinue) {
-    fnm env --use-on-cd | Out-String | Invoke-Expression
-}
+# Initialize-NodeSession refreshes PATH before running fnm env --use-on-cd.
+Initialize-NodeSession
 
 # 4. FZF Integration (Fuzzy Finder)
 if (Get-Command fzf -ErrorAction SilentlyContinue) {

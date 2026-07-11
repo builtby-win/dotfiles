@@ -37,16 +37,16 @@ Set-Alias -Name - -Value 'Pop-Location' -ErrorAction SilentlyContinue # Close en
 function rc { . $PROFILE }
 
 # 3.1 AI CLI shortcuts
-function claude { & (Get-Command claude -CommandType Application).Source --dangerously-skip-permissions @args }
+function claude { Invoke-CliCommand claude @('--dangerously-skip-permissions') @args }
 function c { claude @args }
-function o { opencode @args }
-function gemini { & (Get-Command gemini -CommandType Application).Source --yolo @args }
+function o { Invoke-CliCommand opencode @() @args }
+function gemini { Invoke-CliCommand gemini @('--yolo') @args }
 function g { gemini @args }
 function codex {
     $previousBypassAgentWizard = $env:B2V_BYPASS_AGENT_WIZARD
     $env:B2V_BYPASS_AGENT_WIZARD = '1'
     try {
-        & (Get-Command codex -CommandType Application) --dangerously-bypass-approvals-and-sandbox @args
+        Invoke-CliCommand codex @('--dangerously-bypass-approvals-and-sandbox') @args
     } finally {
         if ($null -eq $previousBypassAgentWizard) {
             Remove-Item Env:\B2V_BYPASS_AGENT_WIZARD -ErrorAction SilentlyContinue
@@ -57,6 +57,14 @@ function codex {
 }
 
 # 4. Package managers (pnpm)
+function pnpm {
+    $command = Get-PnpmCommand
+    if (!$command) {
+        Write-Host "pnpm not found. Run: bb update" -ForegroundColor Red
+        return 1
+    }
+    & $command.Source @args
+}
 function pp { pnpm @args }
 function po { pnpm run @args }
 function ppr { pnpm run @args }

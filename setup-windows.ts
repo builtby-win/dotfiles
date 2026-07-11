@@ -84,7 +84,10 @@ function isInstalled(choice: OptionalChoice): boolean {
 }
 
 function markInstalled(choices: OptionalChoice[]): OptionalChoice[] {
-  return choices.map((choice) => ({ ...choice, checked: isInstalled(choice) }));
+  return choices.map((choice) => ({
+    ...choice,
+    checked: choice.checked || isInstalled(choice),
+  }));
 }
 
 function installWingetApp(name: string, id: string) {
@@ -162,8 +165,8 @@ async function runSetup() {
 
   const aiChoices = markInstalled([
     { name: "Gemini CLI (npm)", value: "gemini", command: "gemini.cmd" },
-    { name: "Claude Code (PowerShell installer)", value: "claude", command: "claude.cmd" },
-    { name: "OpenCode CLI (npm)", value: "opencode", command: "opencode.cmd" },
+    { name: "Claude Code (PowerShell installer)", value: "claude", command: "claude.exe", checked: true },
+    { name: "OpenCode CLI (npm)", value: "opencode", command: "opencode.cmd", checked: true },
   ]);
 
   const miscChoices = markInstalled([

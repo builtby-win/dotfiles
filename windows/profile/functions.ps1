@@ -106,12 +106,51 @@ function Initialize-NodeSession {
     }
 }
 
+function Get-PreferredApplicationCommand {
+    param([Parameter(Mandatory = $true)][string]$Name)
+
+    # PowerShell prefers a same-named .ps1 shim over .cmd. That breaks Node
+    # package-manager shims on machines whose execution policy blocks scripts.
+    # Select native/application shims first without weakening that policy.
+    Get-Command $Name -CommandType Application -All -ErrorAction SilentlyContinue |
+        Sort-Object @{ Expression = {
+            switch ([IO.Path]::GetExtension($_.Source).ToLowerInvariant()) {
+                ".exe" { 0 }
+                ".cmd" { 1 }
+                ".bat" { 2 }
+                default { 3 }
+            }
+        } } |
+        Select-Object -First 1
+}
+
+function Invoke-CliCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string[]]$DefaultArguments = @(),
+        [Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments
+    )
+
+    $command = Get-PreferredApplicationCommand $Name
+    if (!$command) {
+        Initialize-NodeSession
+        $command = Get-PreferredApplicationCommand $Name
+    }
+
+    if (!$command) {
+        Write-Host "$Name not found. Install it first, then restart the shell." -ForegroundColor Red
+        return 1
+    }
+
+    & $command.Source @DefaultArguments @Arguments
+}
+
 function Get-PnpmCommand {
-    $pnpm = Get-Command pnpm -ErrorAction SilentlyContinue
+    $pnpm = Get-PreferredApplicationCommand pnpm
     if ($pnpm) { return $pnpm }
 
     Initialize-NodeSession
-    $pnpm = Get-Command pnpm -ErrorAction SilentlyContinue
+    $pnpm = Get-PreferredApplicationCommand pnpm
     if ($pnpm) { return $pnpm }
 
     if (Get-Command npm -ErrorAction SilentlyContinue) {
@@ -119,7 +158,7 @@ function Get-PnpmCommand {
         Initialize-NodeSession
     }
 
-    return Get-Command pnpm -ErrorAction SilentlyContinue
+    return Get-PreferredApplicationCommand pnpm
 }
 
 function bbup {

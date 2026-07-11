@@ -30,7 +30,7 @@ describe('Windows Interactive Setup (setup-windows.ts)', () => {
   it('should preselect optional installs that are already installed', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
     expect(content).toContain('function markInstalled');
-    expect(content).toContain('checked: isInstalled(choice)');
+    expect(content).toContain('checked: choice.checked || isInstalled(choice)');
     expect(content).toContain('winget list --id');
     expect(content).toContain('where.exe');
   });

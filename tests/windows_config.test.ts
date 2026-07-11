@@ -35,6 +35,11 @@ describe('Windows Configuration Linking (install.ps1)', () => {
     expect(content).toContain('npm install -g pnpm');
   });
 
+  it('should expose standalone user CLIs such as Claude Code', () => {
+    const content = fs.readFileSync(scriptPath, 'utf-8');
+    expect(content).toContain('Add-UserPath (Join-Path $HOME ".local/bin")');
+  });
+
   it('should contain logic to sync tmux config for psmux', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
     expect(content).toContain('chezmoi/dot_config/tmux');
