@@ -21,9 +21,9 @@ describe("tmux profile split", () => {
   });
 
   it("loads core + basic + user overrides in bootstrap", () => {
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/core.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/basic.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.tmux.local.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/core.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/basic.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.tmux.local.conf\"");
   });
 
   it("keeps command palette delimiter in basic profile", () => {
