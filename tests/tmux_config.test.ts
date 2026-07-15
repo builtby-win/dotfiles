@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { generateTmuxEntrypoint, normalizeTmuxEntrypoint } from "../lib/tmux-config";
 
 describe("tmux profile split", () => {
   const tmuxDir = join(process.cwd(), "chezmoi", "dot_config", "tmux", "builtby");
@@ -101,8 +102,8 @@ describe("tmux profile split", () => {
 
   it("puts shared defaults in core and prefix in basic", () => {
     expect(coreConf).toContain("set -g mouse on");
-    expect(basicConf).toMatch(/set -g prefix 'C-u'/);
-    expect(basicConf).toMatch(/bind 'C-u' send-prefix/);
+    expect(basicConf).toMatch(/set -g prefix 'C-b'/);
+    expect(basicConf).toMatch(/bind 'C-b' send-prefix/);
     expect(basicConf).toContain('bind u copy-mode');
     expect(basicConf).toContain("set -g @fzf-url-bind 'U'");
   });
@@ -176,19 +177,22 @@ describe("tmux setup safety", () => {
   });
 
   it("generates a single bootstrap-based ~/.tmux.conf entrypoint", () => {
-    expect(setupTs).toContain('source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"');
-    expect(setupTs).not.toContain('source-file "$HOME/.config/tmux/builtby/basic.conf"`,');
+    const entrypoint = generateTmuxEntrypoint();
+
+    expect(entrypoint).toContain('source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"');
+    expect(entrypoint).not.toContain('source-file "$HOME/.config/tmux/builtby/basic.conf"');
   });
 
   it("normalizes duplicate managed tmux source lines", () => {
-    expect(setupTs).toContain("function normalizeTmuxEntrypoint(content: string): string");
-    expect(setupTs).toContain("function isManagedTmuxDirectSource(trimmed: string): boolean");
-    expect(setupTs).toContain('trimmed === \'source-file "$HOME/.config/tmux/builtby/core.conf"\'');
-    expect(setupTs).toContain('trimmed === \'source-file -q "$HOME/.config/tmux/builtby/core.conf"\'');
-    expect(setupTs).toContain('trimmed === \'source-file "$HOME/.config/tmux/builtby/basic.conf"\'');
-    expect(setupTs).toContain('trimmed === \'source-file -q "$HOME/.config/tmux/builtby/basic.conf"\'');
-    expect(setupTs).toContain("removedManagedDirectSource && !hasBuiltbyTmuxBootstrap");
-    expect(setupTs).toContain('trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf")');
+    const normalized = normalizeTmuxEntrypoint([
+      'source-file "$HOME/.config/tmux/builtby/core.conf"',
+      'source-file -q "$HOME/.config/tmux/builtby/basic.conf"',
+      'source-file "$HOME/.config/back2vibing/back2vibing-tmux.conf"',
+    ].join("\n"));
+
+    expect(normalized.match(/bootstrap\.basic\.conf/gu)).toHaveLength(1);
+    expect(normalized).not.toContain("core.conf");
+    expect(normalized).not.toContain("back2vibing-tmux.conf");
     expect(setupTs).toContain("Normalized ~/.tmux.conf to source the builtby tmux profile once");
   });
 

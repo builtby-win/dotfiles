@@ -7,6 +7,23 @@ import { homedir, platform } from "os";
 import * as manifest from "./lib/manifest";
 import { createLinuxPackageManager, type SystemCommands } from "./lib/linux";
 import { backupExistingPath, getBuiltbyBackupDir, getSafeBackupName } from "./lib/backup-policy";
+import {
+  appendSectionsToFile,
+  DOTFILES_MARKER_END,
+  DOTFILES_MARKER_START,
+  findConflictingSections,
+  findNewSections,
+  generateDiff,
+  parseShellFile,
+  type ParsedSection,
+} from "./lib/shell-merge";
+import {
+  generateTmuxEntrypoint,
+  hasBuiltbyTmuxBootstrap,
+  normalizeTmuxEntrypoint,
+  TMUX_MERGE_MARKER_START,
+  upsertTmuxMergeBlock,
+} from "./lib/tmux-config";
 
 // ============================================
 // Auto-Detection for Existing Users
@@ -92,248 +109,6 @@ const log = {
   info: (msg: string) => console.log(`  ${colors.dim}${msg}${colors.reset}`),
 };
 
-// ============================================
-// Merge/Diff Utilities
-// ============================================
-
-interface ParsedSection {
-  name: string;
-  type: "alias" | "function" | "export" | "comment" | "code" | "conditional";
-  content: string;
-  description?: string;
-}
-
-// Parse shell file into logical sections
-function parseShellFile(content: string): ParsedSection[] {
-  const lines = content.split("\n");
-  const sections: ParsedSection[] = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-    const trimmed = line.trim();
-
-    // Skip empty lines
-    if (!trimmed) {
-      i++;
-      continue;
-    }
-
-    // Comment block (potential section header)
-    if (trimmed.startsWith("#") && !trimmed.startsWith("#!")) {
-      // Collect consecutive comments
-      let commentBlock = line + "\n";
-      let description = trimmed.replace(/^#\s*/, "");
-      i++;
-      while (i < lines.length && lines[i].trim().startsWith("#") && !lines[i].trim().startsWith("#!")) {
-        commentBlock += lines[i] + "\n";
-        i++;
-      }
-      // Check if followed by code
-      if (i < lines.length && lines[i].trim() && !lines[i].trim().startsWith("#")) {
-        // This comment is a header for the next section, continue to parse that
-        continue;
-      }
-      sections.push({
-        name: description.slice(0, 50),
-        type: "comment",
-        content: commentBlock.trimEnd(),
-        description,
-      });
-      continue;
-    }
-
-    // Alias definition
-    if (trimmed.startsWith("alias ")) {
-      const aliasMatch = trimmed.match(/^alias\s+([\w-]+)=/);
-      if (aliasMatch) {
-        sections.push({
-          name: aliasMatch[1],
-          type: "alias",
-          content: line,
-          description: `Alias: ${aliasMatch[1]}`,
-        });
-      }
-      i++;
-      continue;
-    }
-
-    // Export/environment variable
-    if (trimmed.startsWith("export ")) {
-      const exportMatch = trimmed.match(/^export\s+(\w+)=/);
-      if (exportMatch) {
-        sections.push({
-          name: exportMatch[1],
-          type: "export",
-          content: line,
-          description: `Environment: ${exportMatch[1]}`,
-        });
-      }
-      i++;
-      continue;
-    }
-
-    // Function definition (name() { or function name {)
-    const funcMatch = trimmed.match(/^(\w+)\s*\(\)\s*\{/) || trimmed.match(/^function\s+(\w+)/);
-    if (funcMatch) {
-      const funcName = funcMatch[1];
-      let funcContent = line + "\n";
-      let braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
-      i++;
-      while (i < lines.length && braceCount > 0) {
-        funcContent += lines[i] + "\n";
-        braceCount += (lines[i].match(/\{/g) || []).length - (lines[i].match(/\}/g) || []).length;
-        i++;
-      }
-      sections.push({
-        name: funcName,
-        type: "function",
-        content: funcContent.trimEnd(),
-        description: `Function: ${funcName}()`,
-      });
-      continue;
-    }
-
-    // Conditional block (if/case)
-    if (trimmed.startsWith("if ") || trimmed.startsWith("case ")) {
-      let blockContent = line + "\n";
-      let depth = 1;
-      const isIf = trimmed.startsWith("if ");
-      i++;
-      while (i < lines.length && depth > 0) {
-        const currentLine = lines[i];
-        const currentTrimmed = currentLine.trim();
-        if (isIf) {
-          if (currentTrimmed.startsWith("if ")) depth++;
-          if (currentTrimmed === "fi") depth--;
-        } else {
-          if (currentTrimmed.startsWith("case ")) depth++;
-          if (currentTrimmed === "esac") depth--;
-        }
-        blockContent += currentLine + "\n";
-        i++;
-      }
-      const desc = trimmed.slice(0, 40) + (trimmed.length > 40 ? "..." : "");
-      sections.push({
-        name: desc,
-        type: "conditional",
-        content: blockContent.trimEnd(),
-        description: `Conditional: ${desc}`,
-      });
-      continue;
-    }
-
-    // Other code lines - group them together
-    let codeBlock = line + "\n";
-    i++;
-    while (i < lines.length) {
-      const nextLine = lines[i];
-      const nextTrimmed = nextLine.trim();
-      // Stop at comments, functions, aliases, exports, or conditionals
-      if (nextTrimmed.startsWith("#") ||
-          nextTrimmed.startsWith("alias ") ||
-          nextTrimmed.startsWith("export ") ||
-          nextTrimmed.match(/^\w+\s*\(\)\s*\{/) ||
-          nextTrimmed.match(/^function\s+\w+/) ||
-          nextTrimmed.startsWith("if ") ||
-          nextTrimmed.startsWith("case ") ||
-          !nextTrimmed) {
-        break;
-      }
-      codeBlock += nextLine + "\n";
-      i++;
-    }
-    sections.push({
-      name: trimmed.slice(0, 40),
-      type: "code",
-      content: codeBlock.trimEnd(),
-      description: "Code block",
-    });
-  }
-
-  return sections;
-}
-
-// Generate a simple diff between two strings
-function generateDiff(userContent: string, dotfilesContent: string): string {
-  const userLines = userContent.split("\n");
-  const dotfilesLines = dotfilesContent.split("\n");
-  const diff: string[] = [];
-
-  // Simple line-by-line comparison for display
-  const maxLen = Math.max(userLines.length, dotfilesLines.length);
-
-  for (let i = 0; i < maxLen; i++) {
-    const userLine = userLines[i];
-    const dotfilesLine = dotfilesLines[i];
-
-    if (userLine === dotfilesLine) {
-      diff.push(`  ${userLine ?? ""}`);
-    } else if (userLine === undefined) {
-      diff.push(`${colors.green}+ ${dotfilesLine}${colors.reset}`);
-    } else if (dotfilesLine === undefined) {
-      diff.push(`${colors.red}- ${userLine}${colors.reset}`);
-    } else {
-      diff.push(`${colors.red}- ${userLine}${colors.reset}`);
-      diff.push(`${colors.green}+ ${dotfilesLine}${colors.reset}`);
-    }
-  }
-
-  return diff.join("\n");
-}
-
-// Find items in dotfiles that don't exist in user's config
-function findNewSections(userSections: ParsedSection[], dotfilesSections: ParsedSection[]): ParsedSection[] {
-  const userNames = new Set(userSections.map(s => s.name.toLowerCase()));
-  return dotfilesSections.filter(s => !userNames.has(s.name.toLowerCase()));
-}
-
-// Find items that exist in both but are different
-function findConflictingSections(userSections: ParsedSection[], dotfilesSections: ParsedSection[]): { user: ParsedSection; dotfiles: ParsedSection }[] {
-  const conflicts: { user: ParsedSection; dotfiles: ParsedSection }[] = [];
-
-  for (const dotSection of dotfilesSections) {
-    const userSection = userSections.find(s => s.name.toLowerCase() === dotSection.name.toLowerCase() && s.type === dotSection.type);
-    if (userSection && userSection.content !== dotSection.content) {
-      conflicts.push({ user: userSection, dotfiles: dotSection });
-    }
-  }
-
-  return conflicts;
-}
-
-// Marker for dotfiles additions
-const DOTFILES_MARKER_START = "# === Added from builtby.win/dotfiles ===";
-const DOTFILES_MARKER_END = "# === End builtby.win/dotfiles ===";
-
-// Append sections to a file with markers
-function appendSectionsToFile(filePath: string, sections: ParsedSection[]): void {
-  if (sections.length === 0) return;
-
-  let content = existsSync(filePath) ? readFileSync(filePath, "utf-8") : "";
-
-  // Remove existing dotfiles additions if present
-  const startIdx = content.indexOf(DOTFILES_MARKER_START);
-  const endIdx = content.indexOf(DOTFILES_MARKER_END);
-  if (startIdx !== -1 && endIdx !== -1) {
-    content = content.slice(0, startIdx) + content.slice(endIdx + DOTFILES_MARKER_END.length);
-  }
-
-  // Ensure file ends with newline
-  if (content && !content.endsWith("\n")) {
-    content += "\n";
-  }
-
-  // Add new sections
-  content += "\n" + DOTFILES_MARKER_START + "\n";
-  for (const section of sections) {
-    content += section.content + "\n\n";
-  }
-  content += DOTFILES_MARKER_END + "\n";
-
-  writeFileSync(filePath, content);
-}
-
 // Get dotfiles directory from script location (where user cloned it)
 const DOTFILES_DIR = dirname(new URL(import.meta.url).pathname);
 const HOME = homedir();
@@ -347,8 +122,6 @@ const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml");
 const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml");
 const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "bootstrap.basic.conf");
 const TMUX_BASIC_CONF_SOURCE = join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "basic.conf");
-const TMUX_MERGE_MARKER_START = "# === Added from builtby.win/dotfiles (tmux) ===";
-const TMUX_MERGE_MARKER_END = "# === End builtby.win/dotfiles (tmux) ===";
 const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ===";
 const ZSHRC_MARKER_END = "# === End builtby.win/dotfiles (zsh) ===";
 
@@ -1369,85 +1142,6 @@ function setupZshEntrypoint(): void {
   ensureLocalShellOverridesFile();
 }
 
-function upsertTmuxMergeBlock(content: string): string {
-  const block = [
-    TMUX_MERGE_MARKER_START,
-    `if-shell '[ -f "$HOME/.config/tmux/builtby/bootstrap.pro.conf" ]' 'source-file "$HOME/.config/tmux/builtby/bootstrap.pro.conf"'`,
-    TMUX_MERGE_MARKER_END,
-  ].join("\n");
-
-  const startIdx = content.indexOf(TMUX_MERGE_MARKER_START);
-  const endIdx = content.indexOf(TMUX_MERGE_MARKER_END);
-  let next = content;
-
-  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-    next = content.slice(0, startIdx) + content.slice(endIdx + TMUX_MERGE_MARKER_END.length);
-  }
-
-  if (next && !next.endsWith("\n")) {
-    next += "\n";
-  }
-
-  return `${next}\n${block}\n`;
-}
-
-function generateTmuxEntrypoint(): string {
-  return [
-    "# =============================================================================",
-    "# Tmux bootstrap",
-    "# =============================================================================",
-    "",
-    `source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"`,
-  ].join("\n") + "\n";
-}
-
-function isManagedTmuxDirectSource(trimmed: string): boolean {
-  return (
-    trimmed === 'source-file "$HOME/.config/tmux/builtby/core.conf"' ||
-    trimmed === 'source-file -q "$HOME/.config/tmux/builtby/core.conf"' ||
-    trimmed === 'source-file "$HOME/.config/tmux/builtby/basic.conf"' ||
-    trimmed === 'source-file -q "$HOME/.config/tmux/builtby/basic.conf"'
-  );
-}
-
-function hasBuiltbyTmuxBootstrap(content: string): boolean {
-  return content.includes("bootstrap.basic.conf") || content.includes("bootstrap.pro.conf");
-}
-
-function normalizeTmuxEntrypoint(content: string): string {
-  const lines = content.split(/\r?\n/);
-  const normalized: string[] = [];
-  let removedManagedDirectSource = false;
-
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    const trimmed = line.trim();
-    const nextLine = lines[index + 1]?.trim() ?? "";
-
-    if (trimmed === "# Back2Vibing Integration" && nextLine.includes("back2vibing-tmux.conf")) {
-      continue;
-    }
-
-    if (isManagedTmuxDirectSource(trimmed)) {
-      removedManagedDirectSource = true;
-      continue;
-    }
-
-    if (trimmed.startsWith("source-file ") && trimmed.includes("back2vibing-tmux.conf")) {
-      continue;
-    }
-
-    normalized.push(line);
-  }
-
-  if (removedManagedDirectSource && !hasBuiltbyTmuxBootstrap(normalized.join("\n"))) {
-    normalized.push('source-file "$HOME/.config/tmux/builtby/bootstrap.basic.conf"');
-  }
-
-  const next = normalized.join("\n").replace(/\n{3,}$/u, "\n\n").replace(/[ \t]+\n/gu, "\n");
-  return next.endsWith("\n") ? next : `${next}\n`;
-}
-
 async function setupTmuxEntrypoint(): Promise<boolean> {
   const tmuxConfPath = join(HOME, ".tmux.conf");
 
@@ -1458,8 +1152,10 @@ async function setupTmuxEntrypoint(): Promise<boolean> {
         unlinkSync(tmuxConfPath);
         log.info("Removed stale ~/.tmux.conf symlink");
       }
-    } catch {
-      // Path truly does not exist.
+    } catch (error) {
+      if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) {
+        throw error;
+      }
     }
   }
 
@@ -1917,8 +1613,9 @@ async function revertBackups(): Promise<void> {
       manifest.entries = manifest.entries.filter(
         (e) => !(e.original === entry.original && e.backup === entry.backup)
       );
-    } catch (err) {
-      log.error(`Failed to restore ${entry.original}: ${err}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      log.error(`Failed to restore ${entry.original}: ${message}`);
     }
   }
 
@@ -2753,7 +2450,7 @@ async function runSetup(): Promise<void> {
       }
 
       console.log(`  ${colors.bold}Backups:${colors.reset}`);
-      console.log(`    ${colors.dim}The setup dashboard backs up managed files before optional replacements.${colors.reset}`);
+      console.log(`    ${colors.dim}Guided setup backs up managed files before optional replacements.${colors.reset}`);
       console.log(`    ${colors.dim}Restore later with: bb setup revert${colors.reset}`);
 
       if (appsToInstallCount === 0 && configsToInstallCount === 0 && aiConfigs.length === 0) {
