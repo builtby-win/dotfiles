@@ -57,3 +57,4 @@ function amend { git commit --amend --no-verify @args }
 function rename { git branch -m @args }
 
 # 6. Standard Unix utilities missing or different in PS
+function which { Get-Command @args }

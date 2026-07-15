@@ -19,6 +19,12 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain("bind w if-shell");
   });
 
+  it("adds a manual rebalance binding instead of auto-rebalancing every split", () => {
+    expect(basicConf).toContain("bind d split-window -h -c \"#{pane_current_path}\"");
+    expect(basicConf).toContain("bind D split-window -v -c \"#{pane_current_path}\"");
+    expect(basicConf).toContain("bind b select-layout -E");
+  });
+
   it("adds workmux dashboard and quick-add bindings", () => {
     expect(basicConf).toContain("unbind n");
     expect(basicConf).toContain("unbind s");
@@ -31,17 +37,12 @@ describe("tmux profile split", () => {
   it("uses session mode and multi-window workmux template", () => {
     expect(workmuxConfigTemplate).toContain("mode: session");
     expect(workmuxConfigTemplate).toContain("windows:");
-    expect(workmuxConfigTemplate).toContain("- name: agents");
-    expect(workmuxConfigTemplate).toContain("command: gemini");
-    expect(workmuxConfigTemplate).toContain("command: opencode --model openai/gpt-5.3-codex");
-    expect(workmuxConfigTemplate).toContain(
-      "command: claude --dangerously-skip-permissions",
-    );
-    expect(workmuxConfigTemplate).toContain(
-      "command: opencode --model gpt-5.3-codex-spark",
-    );
-    expect(workmuxConfigTemplate).toContain("command: lazygit");
-    expect(workmuxConfigTemplate).toContain("command: dev");
+    expect(workmuxConfigTemplate).toContain("- name: work");
+    expect(workmuxConfigTemplate).toContain("command: opencode run");
+    expect(workmuxConfigTemplate).toContain("- command: opencode");
+    expect(workmuxConfigTemplate).toContain("split: horizontal");
+    expect(workmuxConfigTemplate).toContain("percentage: 50");
+    expect(workmuxConfigTemplate).toContain("focus: true");
   });
 
   it("keeps pro profile non-invasive for keybinds", () => {
@@ -50,9 +51,9 @@ describe("tmux profile split", () => {
   });
 
   it("loads core + basic + user overrides in bootstrap", () => {
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/core.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/basic.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.tmux.local.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/core.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/basic.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.tmux.local.conf\"");
   });
 
   it("keeps command palette delimiter in basic profile", () => {
