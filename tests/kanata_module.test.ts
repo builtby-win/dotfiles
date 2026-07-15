@@ -234,6 +234,11 @@ describe('Kanata module', () => {
     expect(installer).toContain('110 => Some(OsCode::KEY_INSERT)');
     expect(installer).toContain('110 => Some(OsCode::KEY_COMPOSE)');
     expect(installer).toContain('Ok(OsCode::KEY_COMPOSE)');
+    expect(installer).toContain('DRIVERKIT_VERSION="0.2.2"');
+    expect(installer).toContain('DriverKit captures the matching device when macOS attaches it');
+    expect(installer).toContain('registered_devices_hashes.insert(device_hash)');
+    expect(installer).toContain('subscribe_to_notification(kIOFirstMatchNotification');
+    expect(installer).toContain('opened_device_refs.find(device_hash)');
     expect(installer).toContain('event.code == 0xffffffff');
     expect(installer).toContain('aggregate HID report');
     expect(docs).toContain('scripts/install-kanata-macos.sh');
