@@ -35,18 +35,12 @@ describe("tmux profile split", () => {
   it("uses session mode and multi-window workmux template", () => {
     expect(workmuxConfigTemplate).toContain("mode: session");
     expect(workmuxConfigTemplate).toContain("windows:");
-    expect(workmuxConfigTemplate).toContain("- name: agents");
-    expect(workmuxConfigTemplate).toContain("\"bash -lc 'hydra'\"");
-    expect(workmuxConfigTemplate).toContain("command: \"bash -lc 'gemini'\"");
-    expect(workmuxConfigTemplate).toContain("command: opencode --model openai/gpt-5.3-codex");
-    expect(workmuxConfigTemplate).toContain(
-      "command: \"bash -lc 'claude --dangerously-skip-permissions'\"",
-    );
-    expect(workmuxConfigTemplate).toContain(
-      "command: opencode --model gpt-5.3-codex-spark",
-    );
-    expect(workmuxConfigTemplate).toContain("command: lazygit");
-    expect(workmuxConfigTemplate).toContain("command: dev");
+    expect(workmuxConfigTemplate).toContain("- name: work");
+    expect(workmuxConfigTemplate).toContain("command: opencode run");
+    expect(workmuxConfigTemplate).toContain("- command: opencode");
+    expect(workmuxConfigTemplate).toContain("split: horizontal");
+    expect(workmuxConfigTemplate).toContain("percentage: 50");
+    expect(workmuxConfigTemplate).toContain("focus: true");
   });
 
   it("keeps pro profile non-invasive for keybinds", () => {
@@ -55,9 +49,9 @@ describe("tmux profile split", () => {
   });
 
   it("loads core + basic + user overrides in bootstrap", () => {
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/core.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.config/tmux/builtby/basic.conf\"");
-    expect(bootstrapBasicConf).toContain("source-file \"$HOME/.tmux.local.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/core.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.config/tmux/builtby/basic.conf\"");
+    expect(bootstrapBasicConf).toContain("source-file -q \"$HOME/.tmux.local.conf\"");
   });
 
   it("keeps command palette delimiter in basic profile", () => {
