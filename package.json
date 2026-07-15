@@ -4,15 +4,19 @@
   "description": "Winston's dotfiles - shell configs, AI tool settings, and more",
   "type": "module",
   "scripts": {
+    "check": "pnpm run lint && pnpm run typecheck && pnpm test",
+    "lint": "biome lint --only=lint/suspicious/noExplicitAny --only=lint/suspicious/noDoubleEquals setup.ts setup-windows.ts lib scripts tests",
     "setup": "pnpm exec tsx setup.ts",
     "setup:windows": "pnpm exec tsx setup-windows.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "packageManager": "pnpm@10.28.2",
   "dependencies": {
     "@inquirer/prompts": "^7.2.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
     "@types/node": "^22.10.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
