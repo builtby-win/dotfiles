@@ -135,15 +135,14 @@ describe("tmux profile split", () => {
     expect(coreConf).toContain("set-hook -gu after-select-pane");
   });
 
-  it("keeps the bottom status tabs and leader indicator enabled", () => {
+  it("keeps the top status pills and leader indicator enabled", () => {
     expect(coreConf).toContain("set -g status on");
-    expect(coreConf).toContain("set -g status-position bottom");
-    expect(coreConf).toContain("set -g window-status-style 'fg=brightblack,bg=default'");
-    expect(coreConf).toContain("set -g window-status-current-style 'fg=blue,bg=default,bold'");
-    expect(coreConf).toContain("set -g window-status-format '#I:#W'");
-    expect(coreConf).toContain("set -g window-status-current-format '[#I:#W]'");
+    expect(coreConf).toContain("set -g status-position top");
     expect(coreConf).toContain("set -g window-status-separator ' '");
-    expect(coreConf).toContain("#{?client_prefix,#[fg=yellow bold] LEADER ,}");
+    expect(coreConf).toContain("#I #W");
+    expect(coreConf).toContain("#{?client_prefix,");
+    expect(coreConf).toContain("LEADER");
+    expect(coreConf).not.toContain("set -g status-position bottom");
   });
 
   it("dims inactive pane contents and keeps active pane readable", () => {
