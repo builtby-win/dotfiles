@@ -257,9 +257,9 @@ describe('Linux bootstrap workflow', () => {
     expect(macBootstrap).toContain('[1/4] Preparing required installer tools');
     expect(macBootstrap).toContain('[2/4] Installing project dependencies');
     expect(macBootstrap).toContain('[3/4] Applying base dotfiles');
-    expect(macBootstrap).toContain('[4/4] Opening interactive setup dashboard');
+    expect(macBootstrap).toContain('[4/4] Opening guided setup');
     expect(linuxBootstrap).toContain('[1/4] Preparing required installer tools');
-    expect(linuxBootstrap).toContain('[4/4] Opening interactive setup dashboard');
+    expect(linuxBootstrap).toContain('[4/4] Opening guided setup');
   });
 
   it('shows safety and recovery context in the setup review and success screens', () => {
@@ -278,9 +278,9 @@ describe('Linux bootstrap workflow', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 
-    expect(macBootstrap).toContain('print_step "[4/4] Opening interactive setup dashboard..."');
+    expect(macBootstrap).toContain('print_step "[4/4] Opening guided setup..."');
     expect(macBootstrap).toContain('"$SHELL" -l -c "cd \'$DOTFILES_DIR\' && exec pnpm exec tsx setup.ts');
-    expect(linuxBootstrap).toContain('print_step "[4/4] Opening interactive setup dashboard..."');
+    expect(linuxBootstrap).toContain('print_step "[4/4] Opening guided setup..."');
     expect(linuxBootstrap).toContain('"$SHELL" -l -c "cd \'$DOTFILES_DIR\' && exec pnpm exec tsx setup.ts');
   });
 

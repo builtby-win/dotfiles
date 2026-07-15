@@ -158,9 +158,9 @@ confirm_install_plan() {
   echo "  2. Install or reuse the required tools: Git, curl, unzip, chezmoi, fnm, Node.js, and pnpm"
   echo "     If system packages need to be installed, we will first check admin access with sudo -v."
   echo "  3. Apply the base chezmoi-managed shell/config files"
-  echo "  4. Open an interactive setup dashboard where you review optional commands and configs"
+  echo "  4. Open a guided setup where you review optional commands and configs"
   echo ""
-  echo -e "${BOLD}Safety:${NC} the setup dashboard backs up managed files before optional replacements."
+  echo -e "${BOLD}Safety:${NC} guided setup backs up managed files before optional replacements."
   echo "You can later change selections or restore backups from: bb setup"
   echo ""
   read -r -p "Continue with this install? [Y/n] " confirm < /dev/tty || {
@@ -379,7 +379,7 @@ print_success "Chezmoi dotfiles applied"
 if [[ "$NON_INTERACTIVE" -eq 1 ]]; then
   print_warning "Skipping interactive setup in non-interactive mode"
 else
-  print_step "[4/4] Opening interactive setup dashboard..."
+  print_step "[4/4] Opening guided setup..."
 
   # Try login shell first (ideal when $SHELL matches the real login
   # shell), then fall back to direct pnpm exec, tsx, or npm exec.

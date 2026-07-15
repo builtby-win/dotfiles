@@ -58,9 +58,9 @@ confirm_install_plan() {
   echo "  2. Verify Xcode Command Line Tools, then install or reuse Homebrew, Git, chezmoi, fnm, Node.js, and pnpm"
   echo "     If Homebrew needs to be installed, we will first check admin access with sudo -v."
   echo "  3. Apply the base chezmoi-managed shell/config files"
-  echo "  4. Open an interactive setup dashboard where you review optional apps and configs"
+  echo "  4. Open a guided setup where you review optional apps and configs"
   echo ""
-  echo -e "${BOLD}Safety:${NC} the setup dashboard backs up managed files before optional replacements."
+  echo -e "${BOLD}Safety:${NC} guided setup backs up managed files before optional replacements."
   echo "You can later change selections or restore backups from: bb setup"
   echo ""
   read -r -p "Continue with this install? [Y/n] " confirm < /dev/tty || {
@@ -524,7 +524,7 @@ fi
 print_success "Chezmoi dotfiles applied!"
 
 echo ""
-print_step "[4/4] Opening interactive setup dashboard..."
+print_step "[4/4] Opening guided setup..."
 
 # Try several strategies to launch the interactive setup.
 # A login shell is ideal — it sources brew shellenv, fnm, and other

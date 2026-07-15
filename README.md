@@ -99,7 +99,7 @@ This is ideal if you want to add pieces over time.
 | Neovim | `bb setup nvim` | bleeding-edge vim.pack config for Neovim 0.12+ | `docs/modules/nvim.md` |
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS only, jk to tmux prefix, `bb sync karabiner pull` imports live config | `docs/modules/karabiner.md` |
-|| Kanata (advanced) | `bb kanata-setup` | Cross-platform remaps (advanced alt. to Karabiner). Needs Cargo, DriverKit, root daemons | `docs/modules/kanata.md` |
+| Kanata (advanced) | `bb kanata-setup` | Cross-platform remaps (advanced alt. to Karabiner). Needs Cargo, DriverKit, root daemons | `docs/modules/kanata.md` |
 | iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
 | Ghostty | `bb setup ghostty` | optional terminal config | `docs/modules/ghostty.md` |
 | App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
