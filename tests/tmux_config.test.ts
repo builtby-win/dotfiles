@@ -135,24 +135,28 @@ describe("tmux profile split", () => {
     expect(coreConf).toContain("set-hook -gu after-select-pane");
   });
 
-  it("keeps the top status pills and leader indicator enabled", () => {
+  it("keeps the flat top status and leader indicator enabled", () => {
     expect(coreConf).toContain("set -g status on");
     expect(coreConf).toContain("set -g status-position top");
     expect(coreConf).toContain("set -g window-status-separator ' '");
     expect(coreConf).toContain("#I #W");
     expect(coreConf).toContain("#{?client_prefix,");
     expect(coreConf).toContain("LEADER");
+    expect(coreConf).not.toContain("\uE0B6");
+    expect(coreConf).not.toContain("\uE0B4");
     expect(coreConf).not.toContain("set -g status-position bottom");
   });
 
-  it("dims inactive pane contents and keeps active pane readable", () => {
+  it("dims inactive panes and labels the active pane", () => {
     expect(coreConf).toContain("set -g pane-border-style 'fg=brightblack'");
     expect(coreConf).toContain("set -g pane-active-border-style 'fg=blue'");
     expect(coreConf).toContain("set -g window-style 'fg=colour245,bg=default'");
     expect(coreConf).toContain("set -g window-active-style 'fg=white,bg=default'");
-    expect(basicConf).toContain("set -g pane-border-status off");
-    expect(basicConf).toContain('set -g pane-border-format ""');
-    expect(basicConf).not.toContain("set -g pane-border-status bottom");
+    expect(basicConf).toContain("set -g pane-border-status bottom");
+    expect(basicConf).toContain("#{?pane_active,");
+    expect(basicConf).toContain("#[align=right#,fg=#737994]");
+    expect(basicConf).toContain("#{pane_id}");
+    expect(basicConf).not.toContain("set -g pane-border-status off");
   });
 
   it("keeps automatic session layouts opt-in", () => {
