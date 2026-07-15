@@ -16,7 +16,7 @@
         <key>BUILTBYWIN_KANATA_BIN</key>
         <string>/Users/winstonzhao/.cargo/bin/kanata</string>
         <key>BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS</key>
-        <string>20</string>
+        <string>30</string>
         <key>BUILTBYWIN_KANATA_WAIT_SECONDS</key>
         <string>120</string>
         <key>BUILTBYWIN_KANATA_CONSOLE_USER</key>

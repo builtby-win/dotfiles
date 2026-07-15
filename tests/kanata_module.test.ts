@@ -219,6 +219,11 @@ describe('Kanata module', () => {
       expect(plist).toContain(`<string>/tmp/${label}.out.log</string>`);
       expect(plist).toContain(`<string>/tmp/${label}.err.log</string>`);
     }
+
+    const regular = fs.readFileSync(regularLaunchDaemonPath, 'utf-8');
+    const sculpt = fs.readFileSync(sculptLaunchDaemonPath, 'utf-8');
+    expect(regular).toMatch(/BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS<\/key>\s*<string>20<\/string>/);
+    expect(sculpt).toMatch(/BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS<\/key>\s*<string>30<\/string>/);
   });
 
   it('documents the patched macOS Application key installer', () => {
@@ -252,7 +257,8 @@ describe('Kanata module', () => {
     expect(helper).toContain('launchctl kickstart -k "gui/$(id -u)/$label"');
     expect(helper).toContain('KANATA_TCP_PORT="5829"');
     expect(helper).toContain('KANATA_SCULPT_TCP_PORT="5830"');
-    expect(helper).toContain('install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT"');
+    expect(helper).toContain('KANATA_SCULPT_BOOT_DELAY_SECONDS="${KANATA_SCULPT_BOOT_DELAY_SECONDS:-30}"');
+    expect(helper).toContain('install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT" "$KANATA_SCULPT_BOOT_DELAY_SECONDS"');
     expect(helper).toContain('com.builtbywin.kanata-sculpt');
     expect(helper).toContain('com.builtbywin.kanata-other');
     expect(helper).toContain('local.kanata-vk-agent-other');

@@ -23,6 +23,7 @@ OTHER_VK_AGENT_LABEL="local.kanata-vk-agent-other"
 VK_AGENT_PLIST_DIR="$HOME/Library/LaunchAgents"
 KANATA_LAUNCH_WRAPPER="/usr/local/bin/builtbywin-kanata-launchd"
 KANATA_BOOT_DELAY_SECONDS="${KANATA_BOOT_DELAY_SECONDS:-20}"
+KANATA_SCULPT_BOOT_DELAY_SECONDS="${KANATA_SCULPT_BOOT_DELAY_SECONDS:-30}"
 KANATA_WAIT_SECONDS="${KANATA_WAIT_SECONDS:-120}"
 
 SCULPT_HIDUTIL_LABEL="local.microsoft-sculpt-hidutil"
@@ -143,7 +144,8 @@ write_plist() {
   local label="$1"
   local cfg="$2"
   local port="$3"
-  local tmp_plist="$4"
+  local boot_delay="$4"
+  local tmp_plist="$5"
 
   cat > "$tmp_plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -164,7 +166,7 @@ write_plist() {
         <key>BUILTBYWIN_KANATA_BIN</key>
         <string>${KANATA_BIN}</string>
         <key>BUILTBYWIN_KANATA_BOOT_DELAY_SECONDS</key>
-        <string>${KANATA_BOOT_DELAY_SECONDS}</string>
+        <string>${boot_delay}</string>
         <key>BUILTBYWIN_KANATA_WAIT_SECONDS</key>
         <string>${KANATA_WAIT_SECONDS}</string>
         <key>BUILTBYWIN_KANATA_CONSOLE_USER</key>
@@ -275,11 +277,12 @@ install_launchdaemon() {
   local label="$1"
   local cfg="$2"
   local port="$3"
+  local boot_delay="${4:-$KANATA_BOOT_DELAY_SECONDS}"
   local plist_path="/Library/LaunchDaemons/${label}.plist"
   local tmp_plist
   tmp_plist="$(mktemp "/tmp/${label}.XXXXXX.plist")"
 
-  write_plist "$label" "$cfg" "$port" "$tmp_plist"
+  write_plist "$label" "$cfg" "$port" "$boot_delay" "$tmp_plist"
   run_admin "cp '$tmp_plist' '$plist_path'; chown root:wheel '$plist_path'; chmod 644 '$plist_path'; launchctl bootout system/$label 2>/dev/null || true; : > /tmp/$label.out.log; : > /tmp/$label.err.log; launchctl enable system/$label; launchctl bootstrap system '$plist_path'; launchctl kickstart -k system/$label"
   rm -f "$tmp_plist"
 }
@@ -453,7 +456,7 @@ install_launch_wrapper
 
 step "Install and restart Kanata LaunchDaemons"
 install_launchdaemon "$PLIST_LABEL" "$KANATA_CFG" "$KANATA_TCP_PORT"
-install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT"
+install_launchdaemon "$SCULPT_PLIST_LABEL" "$KANATA_SCULPT_CFG" "$KANATA_SCULPT_TCP_PORT" "$KANATA_SCULPT_BOOT_DELAY_SECONDS"
 
 step "Install and restart kanata-vk-agent LaunchAgents"
 install_vk_agent_launchagent "$VK_AGENT_LABEL" "$KANATA_TCP_PORT"
