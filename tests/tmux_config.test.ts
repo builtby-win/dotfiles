@@ -142,6 +142,8 @@ describe("tmux profile split", () => {
     expect(coreConf).toContain("#I #W");
     expect(coreConf).toContain("#{?client_prefix,");
     expect(coreConf).toContain("LEADER");
+    expect(coreConf).toContain("#[fg=#303446#,bg=#99d1db#,bold] LEADER");
+    expect(coreConf).toContain(",}#[fg=#c6d0f5,bg=#414559] %H:%M:%S");
     expect(coreConf).not.toContain("\uE0B6");
     expect(coreConf).not.toContain("\uE0B4");
     expect(coreConf).not.toContain("set -g status-position bottom");
