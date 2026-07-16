@@ -29,7 +29,7 @@ describe('Windows Kanata autostart', () => {
     expect(lines[0]).toBe('param(');
   });
 
-  it('starts Kanata with the shared config', () => {
+  it('starts Kanata with the Windows config', () => {
     const content = fs.readFileSync(startPath, 'utf-8');
     expect(content).toContain('.config/kanata/kanata.kbd');
     expect(content).toContain('--cfg');

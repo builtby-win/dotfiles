@@ -461,7 +461,6 @@ bb() {
       echo "  bb setup iterm2         Apply iTerm2 key defaults"
       echo "  bb setup nvim           Install Neovim module"
       echo "  bb sync karabiner       Sync Karabiner config"
-      echo "  bb kanata-setup         [Advanced] Guided macOS Kanata install + permissions"
       echo "  bb sync macos-apps      Sync Raycast/Rectangle/BTT exports"
       echo "  bb restore <target>     Reveal macOS app backup exports"
       echo "  bb update               Pull updates and optionally rerun setup"
@@ -472,7 +471,7 @@ bb() {
       echo "  bb help                 Show this help"
       echo ""
       echo "Modules:"
-      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, kanata, iterm2"
+      echo "  shell (zsh), tmux, nvim, hammerspoon, karabiner, ghostty, iterm2"
       echo "Restore targets:"
       echo "  raycast, rectangle-pro, bettertouchtool, macos-apps"
       return 0
@@ -508,7 +507,7 @@ bb() {
           (cd "$dotfiles_dir" && pnpm exec tsx setup.ts "$module")
           return $?
           ;;
-        all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|kanata|iterm2)
+        all|shell|zsh|tmux|nvim|hammerspoon|karabiner|ghostty|iterm2)
           if [[ "$module" == "hammerspoon" || "$module" == "karabiner" || "$module" == "iterm2" ]]; then
             if [[ "$(uname)" != "Darwin" ]]; then
               echo "$module is macOS only."
@@ -549,9 +548,6 @@ bb() {
           if [[ "$module" == "karabiner" && -x "$dotfiles_dir/scripts/sync-karabiner.sh" ]]; then
             "$dotfiles_dir/scripts/sync-karabiner.sh" push
           fi
-          if [[ "$module" == "kanata" && "$(uname)" == "Darwin" && -x "$dotfiles_dir/scripts/setup-kanata-macos.sh" ]]; then
-            "$dotfiles_dir/scripts/setup-kanata-macos.sh"
-          fi
           ;;
         *)
           echo "Unknown module: $module"
@@ -559,21 +555,6 @@ bb() {
           return 1
           ;;
       esac
-      ;;
-    kanata-setup)
-      if [[ "$(uname)" != "Darwin" ]]; then
-        echo "Kanata guided setup is macOS only."
-        return 1
-      fi
-      if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
-        echo "Error: Dotfiles directory not found. Set DOTFILES_DIR or run setup first."
-        return 1
-      fi
-      if [[ ! -x "$dotfiles_dir/scripts/setup-kanata-macos.sh" ]]; then
-        echo "Kanata macOS setup script not found."
-        return 1
-      fi
-      "$dotfiles_dir/scripts/setup-kanata-macos.sh"
       ;;
     sync)
       if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then

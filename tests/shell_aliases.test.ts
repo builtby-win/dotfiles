@@ -18,10 +18,4 @@ describe("shell aliases", () => {
     expect(aliasesSh).toContain('B2V_BYPASS_AGENT_WIZARD=1 command codex --dangerously-bypass-approvals-and-sandbox "$@"');
   });
 
-  it("restarts Kanata app-context agents with the daemons", () => {
-    expect(aliasesSh).toContain("kr() {");
-    expect(aliasesSh).toContain("sudo launchctl kickstart -k system/com.builtbywin.kanata");
-    expect(aliasesSh).toContain('launchctl kickstart -k "gui/$(id -u)/local.kanata-vk-agent"');
-    expect(aliasesSh).toContain('launchctl kickstart -k "gui/$(id -u)/local.kanata-vk-agent-sculpt"');
-  });
 });

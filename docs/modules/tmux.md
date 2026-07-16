@@ -114,7 +114,7 @@ tmux new-session -s work
 tmux attach -t work
 ```
 
-For keyboard parity, Kanata maps `j+k` to `Ctrl+b`, matching the Karabiner terminal leader behavior on macOS. See `docs/modules/kanata.md`.
+For keyboard parity, the Windows Kanata config maps `j+k` to `Ctrl+b`, matching the Karabiner terminal leader behavior on macOS. See `WINDOWS_README.md`.
 
 The Windows setup installs psmux from `windows/packages.json`. Reapply with:
 

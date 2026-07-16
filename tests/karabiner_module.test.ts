@@ -39,7 +39,7 @@ describe('Karabiner module wiring', () => {
     expect(docs).toContain('./scripts/sync-karabiner.sh pull');
     expect(docs).toContain('bb sync karabiner pull');
   });
-  it('ports Kanata chords, app context, and Sculpt handling into Karabiner', () => {
+  it('provides chords, app context, and Sculpt handling in Karabiner', () => {
     const config = JSON.parse(
       readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'),
     );
@@ -86,7 +86,6 @@ describe('Karabiner module wiring', () => {
     expect(neru).toContain('~/.local/bin/karabiner-layer scroll');
     expect(neru).toContain('~/.local/bin/karabiner-layer nudge');
     expect(neru).toContain('~/.local/bin/karabiner-layer off');
-    expect(neru).not.toContain('~/.local/bin/kanata-layer');
     const resetLines = neru.split('\n').filter((line) => line.includes('action reset'));
     expect(resetLines).toHaveLength(3);
     expect(resetLines.every((line) => line.includes('karabiner-layer off'))).toBe(true);

@@ -1,4 +1,4 @@
-# windows/kanata-start.ps1 - Start Kanata with the shared dotfiles config
+# windows/kanata-start.ps1 - Start Kanata with the Windows dotfiles config
 
 $ErrorActionPreference = "Stop"
 

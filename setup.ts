@@ -278,7 +278,6 @@ const APPS: App[] = [
   // Input (macOS only)
   { name: "Hammerspoon", value: "hammerspoon", brewName: "hammerspoon", cask: true, detectPath: "/Applications/Hammerspoon.app", desc: "Lua automation and system hotkeys for macOS", url: "https://www.hammerspoon.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
   { name: "Karabiner Elements", value: "karabiner-elements", brewName: "karabiner-elements", cask: true, detectPath: "/Applications/Karabiner-Elements.app", desc: "Powerful keyboard customization", url: "https://karabiner-elements.pqrs.org", platforms: { macos: true, windows: false, linux: false }, category: "input" },
-  { name: "Kanata", value: "kanata", brewName: "", checked: false, detectCmd: "command -v kanata", desc: "Cross-platform keyboard remapper (installed via Cargo with cmd support)", url: "https://github.com/jtroo/kanata", platforms: { macos: true, windows: false, linux: false }, category: "input" },
   { name: "LinearMouse", value: "linearmouse", brewName: "linearmouse", cask: true, detectPath: "/Applications/LinearMouse.app", desc: "Mouse and trackpad customization", url: "https://linearmouse.app", platforms: { macos: true, windows: false, linux: false }, category: "input" },
 
   // Security (cross-platform)
@@ -310,7 +309,6 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Neovim", value: "nvim", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
   { name: "Hammerspoon", value: "hammerspoon", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "App-aware chords, Hyper, and Neru keyboard modes" },
-  { name: "Kanata (advanced)", value: "kanata", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Optional cross-platform remapper with root daemons" },
   { name: "iTerm2 defaults", value: "iterm2", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
   { name: "Ghostty", value: "ghostty", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for optional GPU terminal" },
 ];
@@ -753,70 +751,6 @@ function installPackage(name: string, cask = false): boolean {
   return false;
 }
 
-function ensureCargoBinInPath(): void {
-  const cargoBin = join(HOME, ".cargo", "bin");
-  const currentPath = process.env.PATH ?? "";
-  const pathEntries = currentPath.split(":").filter(Boolean);
-
-  if (!pathEntries.includes(cargoBin)) {
-    process.env.PATH = currentPath ? `${cargoBin}:${currentPath}` : cargoBin;
-  }
-}
-
-function installKanataCli(): boolean {
-  ensureCargoBinInPath();
-
-  if (runCommand("command -v kanata", true)) {
-    log.success("Kanata already installed");
-    return true;
-  }
-
-  if (!runCommand("command -v cargo", true)) {
-    log.warning("Cargo is required to install Kanata with cmd support");
-    log.warning("Install Rust first: https://rustup.rs");
-    return false;
-  }
-
-  const macosInstaller = join(DOTFILES_DIR, "scripts", "install-kanata-macos.sh");
-  const installCommand = platform() === "darwin" && existsSync(macosInstaller)
-    ? `bash ${macosInstaller}`
-    : "cargo install kanata --features cmd";
-
-  log.info("Installing Kanata via Cargo with cmd support...");
-  if (!runCommand(installCommand, true)) {
-    log.warning("Failed to install Kanata via Cargo");
-    return false;
-  }
-
-  ensureCargoBinInPath();
-  if (runCommand("command -v kanata", true)) {
-    log.success("Kanata installed");
-    return true;
-  }
-
-  const kanataPath = join(HOME, ".cargo", "bin", "kanata");
-  if (existsSync(kanataPath)) {
-    log.success(`Kanata installed at ${kanataPath}`);
-    return true;
-  }
-
-  log.warning("Kanata installation completed but binary was not found in PATH");
-  return false;
-}
-
-function runKanataMacOSSetupHelper(): void {
-  if (platform() !== "darwin") return;
-
-  const helper = join(DOTFILES_DIR, "scripts", "setup-kanata-macos.sh");
-  if (!existsSync(helper)) {
-    log.warning(`Kanata macOS setup helper not found: ${helper}`);
-    return;
-  }
-
-  log.step("Launching guided Kanata macOS setup...");
-  runCommand(`bash ${helper}`);
-}
-
 function getManualDownloadApps(apps: string[]): App[] {
   return APPS.filter((app) => apps.includes(app.value) && app.manualDownload);
 }
@@ -905,9 +839,6 @@ async function installApps(apps: string[]): Promise<void> {
     }
   }
 
-  if (apps.includes("kanata")) {
-    installKanataCli();
-  }
 }
 
 function writeDotfilesPath(): void {
@@ -935,7 +866,6 @@ const CHEZMOI_TARGETS: Record<string, string[]> = {
     ".config/neru/config.toml",
     ".local/bin/karabiner-layer",
   ],
-  kanata: [".config/kanata/kanata.kbd", ".config/kanata/kanata-sculpt.kbd"],
   ghostty: process.platform === "darwin"
     ? [
         ".config/ghostty/config",
@@ -1320,9 +1250,6 @@ async function setupManagedConfigs(configs: string[]): Promise<void> {
     log.success("Selected chezmoi-managed configs applied");
     if (configs.includes("tmux")) {
       setupTpm();
-    }
-    if (configs.includes("kanata")) {
-      runKanataMacOSSetupHelper();
     }
   } else {
     log.error("Failed to apply chezmoi-managed configs");
@@ -2039,7 +1966,7 @@ async function runSetup(): Promise<void> {
     ? platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))
     : platformApps;
   const selectableManagedConfigs = currentPlatform === "linux"
-    ? platformManagedConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim" || config.value === "kanata")
+    ? platformManagedConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim")
     : platformManagedConfigs;
   const installItemLabel = currentPlatform === "linux" ? "commands" : "apps";
 

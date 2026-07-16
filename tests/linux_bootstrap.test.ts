@@ -177,7 +177,7 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('const linuxCommandCategories = new Set<AppCategory>(["cli", "ai"])');
     expect(content).toContain('platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))');
     expect(content).toContain('const selectableManagedConfigs = currentPlatform === "linux"');
-    expect(content).toContain('platformManagedConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim" || config.value === "kanata")');
+    expect(content).toContain('platformManagedConfigs.filter((config) => config.value === "zsh" || config.value === "tmux" || config.value === "nvim")');
   });
 
   it('adds OpenCode CLI install path for Linux', () => {

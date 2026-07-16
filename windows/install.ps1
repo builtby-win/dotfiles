@@ -246,7 +246,7 @@ Set-DotfileLink $starshipSource $starshipDest
 # 4.1.1 Kanata
 $kanataConfigDir = Join-Path $starshipConfigDir "kanata"
 if (!(Test-Path $kanataConfigDir)) { New-Item -ItemType Directory $kanataConfigDir }
-$kanataSource = Join-Path $dotfilesDir "chezmoi/dot_config/kanata/kanata.kbd"
+$kanataSource = Join-Path $dotfilesDir "windows/kanata.kbd"
 $kanataDest = Join-Path $kanataConfigDir "kanata.kbd"
 if (Test-Path $kanataSource) {
     Write-Host "Linking kanata.kbd..." -ForegroundColor Yellow

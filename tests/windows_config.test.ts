@@ -14,7 +14,7 @@ describe('Windows Configuration Linking (install.ps1)', () => {
   it('should contain logic to link Kanata configuration', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
     expect(content).toContain('kanata.kbd');
-    expect(content).toContain('chezmoi/dot_config/kanata/kanata.kbd');
+    expect(content).toContain('windows/kanata.kbd');
   });
 
   it('should contain logic to install Kanata CLI', () => {

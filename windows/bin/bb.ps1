@@ -80,7 +80,7 @@ switch ($Command) {
         Write-Host "  bb update           Pull updates and reapply Windows setup"
         Write-Host "  bb setup            Run the interactive Windows setup"
         Write-Host "  bb status           Show Windows setup status"
-        Write-Host "  bb kanata           Run Kanata with the shared config"
+        Write-Host "  bb kanata           Run Kanata with the Windows config"
         Write-Host "  bb kanata-debug     Run Kanata with debug output"
         Write-Host "  bb kanata-install   Install Kanata login autostart task"
         Write-Host "  bb kanata-uninstall Remove Kanata login autostart task"

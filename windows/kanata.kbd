@@ -1,0 +1,24 @@
+;; Windows-only keyboard parity layer.
+;; macOS uses Karabiner Elements.
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+)
+
+(defalias
+  hyper (multi lctl lalt lsft lmet reverse-release-order)
+  leader (macro C-b)
+)
+
+(defsrc
+  menu j k
+)
+
+(deflayer base
+  @hyper j k
+)
+
+(defchordsv2
+  (j k) @leader 75 first-release ()
+)

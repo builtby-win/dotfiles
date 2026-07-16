@@ -197,19 +197,17 @@ The apply layer must respect those choices.
 5. Re-running setup must update the manifest and reconcile selections intentionally.
 6. A skipped config should not be silently removed unless the user chooses a restore/remove flow.
 
-### Kanata example
+### Optional module example
 
-If the user does not choose Kanata:
+If the user does not choose Hammerspoon:
 
-- Do not install Kanata.
-- Do not run Kanata permission/setup helpers.
-- Do not apply `~/.config/kanata/kanata.kbd`.
-- Do not add Kanata shell helpers as active first-run affordances.
-- `bb kanata-setup` may still exist as an explicit command for later.
+- Do not install Hammerspoon.
+- Do not apply `~/.hammerspoon`.
+- Do not add Hammerspoon as an active first-run affordance.
 
-If the user chooses Kanata:
+If the user chooses Hammerspoon:
 
-- Show that keyboard remapping requires extra permissions.
+- Show that automation requires Accessibility permission.
 - Show which files will be written.
 - Show how to disable or restore later.
 
@@ -222,7 +220,7 @@ Selected configs:
   shell, tmux, nvim
 
 Skipped configs:
-  kanata, karabiner, hammerspoon
+  karabiner, hammerspoon
 
 Will modify or create:
   ~/.zshrc
@@ -230,7 +228,7 @@ Will modify or create:
   ~/.config/nvim
 
 Will not touch:
-  ~/.config/kanata/kanata.kbd
+  ~/.hammerspoon/init.lua
 ```
 
 ## Recovery matrix

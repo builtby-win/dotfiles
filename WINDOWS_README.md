@@ -69,7 +69,7 @@ The PowerShell profile includes Unix-style helper commands:
 bb status      # show installed tool status
 bb update      # pull dotfiles and reapply Windows setup
 bb setup       # rerun interactive setup
-bb kanata      # run shared Kanata config
+bb kanata      # run Windows Kanata config
 bb kanata-debug
 bb kanata-install    # install login autostart task
 bb kanata-status     # inspect login autostart task
@@ -92,7 +92,7 @@ Install Kanata GUI manually if needed:
 winget install --id jtroo.kanata_gui -e
 ```
 
-Run the shared Kanata config:
+Run the Windows Kanata config:
 
 ```powershell
 kanata --cfg "$HOME\.config\kanata\kanata.kbd"
