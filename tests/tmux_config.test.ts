@@ -69,9 +69,9 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain("[Panes] ::: Rebalance Panes ::: Leader + b ::: tmux select-layout -E");
   });
 
-  it("binds Leader+Space directly to the sesh picker script", () => {
-    expect(basicConf).toContain('bind-key "Space" display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
-    expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
+  it("opens the sesh picker with mobile-friendly popup space", () => {
+    expect(basicConf).toContain('bind-key "Space" display-popup -E -w 90% -h 85% "$HOME/.config/tmux/sesh-picker.sh"');
+    expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 90% -h 85% "$HOME/.config/tmux/sesh-picker.sh"');
     expect(basicConf).toContain("unbind S");
     expect(basicConf).not.toContain('bind-key "S" display-popup');
   });

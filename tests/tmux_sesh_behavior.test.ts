@@ -234,6 +234,8 @@ exit 1
     expect(seshPickerSh).toContain("--input-label ' Search '");
     expect(seshPickerSh).toContain("--list-label ' Results '");
     expect(seshPickerSh).toContain("--preview-label ' Details '");
+    expect(seshPickerSh).toContain("--preview-window 'right:42%,nowrap,border-rounded,<50(down:38%,nowrap,border-rounded)'");
+    expect(seshPickerSh).toContain("--footer ' ↵ open  ^A all  ^T open  ^P preview  ^X kill '");
     expect(seshPickerSh).toContain("ctrl-a:reload($sesh_bin list --icons --hide-duplicates)");
     expect(seshPickerSh).toContain("ctrl-t:reload($sesh_bin list -t --icons)");
     expect(seshPickerSh).toContain("ctrl-x:execute-silent(tmux kill-session");

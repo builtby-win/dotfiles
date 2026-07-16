@@ -22,8 +22,8 @@ selection="$(
     --list-label ' Results ' \
     --preview-border=rounded \
     --preview-label ' Details ' \
-    --preview-window 'right:42%,border-rounded' \
-    --footer ' enter open  ↑↓ move  ^x kill  ^a all  ^t open  ^g configs  ^z folders  ^p preview ' \
+    --preview-window 'right:42%,nowrap,border-rounded,<50(down:38%,nowrap,border-rounded)' \
+    --footer ' ↵ open  ^A all  ^T open  ^P preview  ^X kill ' \
     --footer-border=line \
     --info=inline-right \
     --prompt 'Open ›  ' \
