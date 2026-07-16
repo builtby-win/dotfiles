@@ -76,6 +76,33 @@ describe('Karabiner module wiring', () => {
     expect(builtInKeyboard?.ignore).not.toBe(true);
   });
 
+  it('clears the Neru mode when Enter or Escape dismisses it', () => {
+    const config = JSON.parse(
+      readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'),
+    );
+    const rule = config.profiles[0].complex_modifications.rules.find(
+      (candidate: { description: string }) =>
+        candidate.description === 'Neru external modes (Karabiner variable API)',
+    );
+    const dismissalKeys = rule.manipulators
+      .filter(
+        (manipulator: {
+          conditions: Array<{ name?: string; value?: number }>;
+          to: Array<{ set_variable?: { name: string; value: number } }>;
+        }) =>
+          manipulator.conditions.some(
+            (condition) => condition.name === 'neru_mode' && condition.value === 1,
+          ) &&
+          manipulator.to.some(
+            (event) => event.set_variable?.name === 'neru_mode' && event.set_variable.value === 0,
+          ),
+      )
+      .map((manipulator: { from: { key_code?: string } }) => manipulator.from.key_code)
+      .filter(Boolean);
+
+    expect(dismissalKeys).toEqual(expect.arrayContaining(['return_or_enter', 'escape']));
+  });
+
   it('wires Neru mode changes through the Karabiner CLI helper', () => {
     const helper = readRepoFile('chezmoi/dot_local/bin/executable_karabiner-layer');
     const neru = readRepoFile('chezmoi/dot_config/neru/config.toml');
