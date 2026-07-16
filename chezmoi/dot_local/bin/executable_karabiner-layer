@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+cli='/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli'
+
+case "${1:-}" in
+  off) mode=0 ;;
+  grid) mode=1 ;;
+  scroll) mode=2 ;;
+  nudge) mode=3 ;;
+  *) echo 'usage: karabiner-layer <off|grid|scroll|nudge>' >&2; exit 2 ;;
+esac
+
+exec "$cli" --set-variables "{\"neru_mode\":$mode}"

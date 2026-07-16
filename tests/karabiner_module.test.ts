@@ -39,4 +39,46 @@ describe('Karabiner module wiring', () => {
     expect(docs).toContain('./scripts/sync-karabiner.sh pull');
     expect(docs).toContain('bb sync karabiner pull');
   });
+  it('ports Kanata chords, app context, and Sculpt handling into Karabiner', () => {
+    const config = JSON.parse(
+      readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'),
+    );
+    const rules = config.profiles[0].complex_modifications.rules;
+    const descriptions = rules.map((rule: { description: string }) => rule.description);
+
+    expect(descriptions).toContain('Neru chords: fj grid, jl recursive grid, dk scroll, df hints');
+    expect(descriptions).toContain('jk chord: terminal leader or next-key Command');
+    expect(descriptions).toContain('Hold j then Space for repeating Backspace outside GUI Vim editors');
+    expect(descriptions).toContain('One-shot modifiers with Microsoft Sculpt layout parity');
+    expect(descriptions).toContain('Right Option and Sculpt Menu: tap for next-key Hyper, hold for Hyper');
+
+    const serializedRules = JSON.stringify(rules);
+    expect(serializedRules).toContain('frontmost_application_if');
+    expect(serializedRules).toContain('frontmost_application_unless');
+    expect(serializedRules).toContain('device_if');
+    expect(serializedRules).toContain('sticky_modifier');
+    expect(serializedRules).toContain('neru_mode');
+
+    const builtInKeyboard = config.profiles[0].devices.find(
+      (device: { identifiers: { product_id?: number; vendor_id?: number }; ignore?: boolean }) =>
+        device.identifiers.vendor_id === 1452 && device.identifiers.product_id === 834,
+    );
+    expect(builtInKeyboard?.ignore).not.toBe(true);
+  });
+
+  it('wires Neru mode changes through the Karabiner CLI helper', () => {
+    const helper = readRepoFile('chezmoi/dot_local/bin/executable_karabiner-layer');
+    const neru = readRepoFile('chezmoi/dot_config/neru/config.toml');
+    const setup = readRepoFile('setup.ts');
+
+    expect(helper).toContain('karabiner_cli');
+    expect(helper).toContain('--set-variables');
+    expect(neru).toContain('~/.local/bin/karabiner-layer scroll');
+    expect(neru).toContain('~/.local/bin/karabiner-layer nudge');
+    expect(neru).toContain('~/.local/bin/karabiner-layer off');
+    expect(neru).not.toContain('~/.local/bin/kanata-layer');
+    expect(setup).toContain('\".local/bin/karabiner-layer\"');
+    expect(setup).toContain('\".config/neru/config.toml\"');
+  });
+
 });

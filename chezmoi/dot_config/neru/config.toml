@@ -8,7 +8,7 @@ should_exit_after_passthrough = false
 "Primary+Shift+C" = "__disabled__"
 "Primary+Shift+S" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+K" = "grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+S" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
+"Cmd+Ctrl+Alt+Shift+S" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+F" = "hints"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
 "Cmd+Ctrl+Alt+Shift+Space" = "__disabled__"
@@ -37,14 +37,14 @@ parallel_threshold = 20
 detect_mission_control = false
 
 [hints.hotkeys]
-# Every path that ends in `idle` also resets the Kanata layer so the
-# fj/dk/jl/df chord doesn't leave us stuck in `nerumode`. Neru has no
+# Every path that ends in `idle` also resets the Karabiner mode so the
+# fj/dk/jl/df chord doesn't leave normal remaps disabled. Neru has no
 # global on-idle hook, so we have to do this per binding.
-"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "Backspace" = "action backspace"
-"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+L" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+R" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+L" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+R" = ["action right_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
 "Shift+Return" = "action left_click"
 
 [hints.additional_ax_support]
@@ -65,18 +65,18 @@ hide_unmatched = true
 "1" = "action mouse_down"
 "2" = "action mouse_up"
 # Click actions (unified with recursive_grid)
-"Space" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Space" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Space" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+Space" = ["action right_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+Return" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
 # Mode navigation
-"s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
-"." = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
+"s" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
+"." = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 # Mode exits
 "," = "action reset"
 "'" = "action reset"
-"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 
 [recursive_grid]
 grid_cols = 4
@@ -96,15 +96,15 @@ max_depth = 10
 "1" = "action mouse_down"
 "2" = "action mouse_up"
 # Click actions (unified with grid)
-"Space" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Space" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Return" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+Return" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Space" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+Space" = ["action right_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+Return" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
 # Mode navigation (grid-specific)
-"Tab" = "exec ~/.local/bin/kanata-layer nerunudge"
-"s" = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
-"." = ["exec ~/.local/bin/kanata-layer neruscroll", "scroll"]
+"Tab" = "exec ~/.local/bin/karabiner-layer nudge"
+"s" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
+"." = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 "`" = "toggle-cursor-follow-selection"
 "Up" = "action move_mouse_relative --dx=0 --dy=-5"
 "Down" = "action move_mouse_relative --dx=0 --dy=5"
@@ -113,7 +113,7 @@ max_depth = 10
 "Backspace" = "action backspace"
 # Mode exits (unified with grid)
 "'" = "action reset"
-"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 
 [recursive_grid.animation]
 enabled = false
@@ -137,7 +137,7 @@ scroll_step = 40
 scroll_step_half = 500
 
 [scroll.hotkeys]
-"Escape" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "k" = "action scroll_up"
 "j" = "action scroll_down"
 "h" = "action scroll_left"
@@ -148,48 +148,48 @@ scroll_step_half = 500
 "PageUp" = "action page_up"
 "d" = "action page_down"
 "PageDown" = "action page_down"
-"Shift+L" = ["action left_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+R" = ["action right_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+M" = ["action middle_click", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+I" = ["action mouse_down", "exec ~/.local/bin/kanata-layer base", "idle"]
-"Shift+U" = ["action mouse_up", "exec ~/.local/bin/kanata-layer base", "idle"]
+"Shift+L" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+R" = ["action right_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+I" = ["action mouse_down", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+U" = ["action mouse_up", "exec ~/.local/bin/karabiner-layer off", "idle"]
 "Up" = "action move_mouse_relative --dx=0 --dy=-10"
 "Down" = "action move_mouse_relative --dx=0 --dy=10"
 "Left" = "action move_mouse_relative --dx=-10 --dy=0"
 "Right" = "action move_mouse_relative --dx=10 --dy=0"
-"a" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"b" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"c" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"e" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"f" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"i" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"m" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"n" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"o" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"p" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"q" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"r" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"s" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"t" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"v" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"w" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"x" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"y" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"z" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"0" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"1" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"2" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"3" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"4" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"5" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"6" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"7" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"8" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"9" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"Return" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"Tab" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"Space" = ["exec ~/.local/bin/kanata-layer base", "idle"]
-"Backspace" = ["exec ~/.local/bin/kanata-layer base", "idle"]
+"a" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"b" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"c" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"e" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"f" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"i" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"m" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"n" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"o" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"p" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"q" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"r" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"s" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"t" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"v" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"w" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"x" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"y" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"z" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"0" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"1" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"2" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"3" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"4" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"5" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"6" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"7" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"8" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"9" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"Return" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"Tab" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"Space" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"Backspace" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 
 [mode_indicator.scroll]
 enabled = true

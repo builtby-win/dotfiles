@@ -57,6 +57,6 @@ if [[ "${#apply_targets[@]}" -eq 0 ]]; then
 fi
 
 DOTFILES_DIR="$DOTFILES_DIR" chezmoi init --source="$CHEZMOI_SOURCE_DIR"
-# --keep: apply source changes for unmodified files, preserve local modifications silently.
-# No prompts — users shouldn't have to decide between "overwrite" and "keep".
-DOTFILES_DIR="$DOTFILES_DIR" chezmoi --source="$CHEZMOI_SOURCE_DIR" apply --keep "${apply_targets[@]}"
+# Selected setup targets are backed up before this helper runs. Force keeps the
+# apply non-interactive and is supported by current chezmoi releases.
+DOTFILES_DIR="$DOTFILES_DIR" chezmoi --source="$CHEZMOI_SOURCE_DIR" apply --force "${apply_targets[@]}"

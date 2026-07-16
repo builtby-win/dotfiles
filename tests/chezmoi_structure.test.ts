@@ -79,7 +79,7 @@ describe('chezmoi source tree', () => {
     expect(content).toContain('apply_targets=("$@")');
     expect(content).toContain('"$HOME/.zshrc"');
     expect(content).toContain('"$HOME/.config/dotfiles/path"');
-    expect(content).toContain('chezmoi --source="$CHEZMOI_SOURCE_DIR" apply --keep "${apply_targets[@]}"');
+    expect(content).toContain('chezmoi --source="$CHEZMOI_SOURCE_DIR" apply --force "${apply_targets[@]}"');
     expect(content).not.toContain('chezmoi init --apply');
   });
 });

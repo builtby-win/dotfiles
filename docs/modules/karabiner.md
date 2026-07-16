@@ -1,6 +1,6 @@
 # Karabiner Elements module (macOS)
 
-Karabiner Elements provides keyboard remaps and tmux integration.
+Karabiner Elements provides the macOS keyboard layer, app-aware chords, and Neru mode integration.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Chezmoi apply:
 bb setup karabiner
 ```
 
-This applies the chezmoi-managed config and restarts Karabiner Elements.
+This applies the Karabiner config, Neru integration, and `karabiner-layer` helper, then restarts Karabiner Elements.
 
 Manual sync and restart:
 
@@ -33,14 +33,24 @@ bb sync karabiner pull
 
 ## Key mappings
 
-- `j` + `k` held together in terminals sends tmux prefix (`Ctrl+b`)
-- `Caps Lock` and `Fn` become `Control`
-- `Delete` (forward delete) becomes `Escape`
-- Double semicolon (`;;`) opens AltTab (Ctrl+Opt+Tab)
+- `f+j` opens the Neru pointer grid
+- `j+l` opens the Neru recursive grid
+- `d+k` opens Neru scroll mode
+- `d+f` opens Neru hints
+- `j+k` sends `Ctrl+b` in terminals and arms Command for the next key elsewhere
+- Holding `j`, then pressing Space repeatedly, sends Backspace outside GUI Vim editors
+- Tapping Right Option arms Hyper for the next key; holding it holds Hyper
+- Tapping a modifier arms it for the next key; holding it behaves normally
+- `Caps Lock` is Escape when tapped and Control when held
+- `Fn` exposes raw function keys and taps as Control
+- Forward Delete becomes Escape
+- Double semicolon (`;;`) opens AltTab
 
-External keyboard (Windows layout):
+Neru calls `karabiner-layer` to switch between grid, scroll, nudge, and normal modes through Karabiner variables. App-specific behavior uses Karabiner's native foreground-application conditions; no polling agent is required.
 
-- Left Alt -> Command
-- Left Windows -> Option
-- Right Alt -> Command
-- Menu key -> Hyper (Ctrl+Opt+Shift+Cmd)
+Microsoft Sculpt keyboards are detected by vendor/product ID:
+
+- Left Alt becomes Command
+- Left Windows becomes Option
+- Right Alt becomes Command
+- Menu becomes tap/hold Hyper

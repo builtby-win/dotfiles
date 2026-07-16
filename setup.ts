@@ -309,8 +309,8 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "core profile + optional basic keymap, preserves existing setups" },
   { name: "Neovim", value: "nvim", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
   { name: "Hammerspoon", value: "hammerspoon", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
-  { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Caps Lock → Escape/Ctrl, keyboard customization" },
-  { name: "Kanata (advanced)", value: "kanata", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Shared j+k tmux leader and Hyper-key keyboard layer — advanced alternative to Karabiner Elements" },
+  { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "App-aware chords, Hyper, and Neru keyboard modes" },
+  { name: "Kanata (advanced)", value: "kanata", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Optional cross-platform remapper with root daemons" },
   { name: "iTerm2 defaults", value: "iterm2", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
   { name: "Ghostty", value: "ghostty", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for optional GPU terminal" },
 ];
@@ -930,7 +930,11 @@ const CHEZMOI_TARGETS: Record<string, string[]> = {
   ],
   nvim: [".config/nvim"],
   hammerspoon: [".hammerspoon"],
-  karabiner: [".config/karabiner/karabiner.json"],
+  karabiner: [
+    ".config/karabiner/karabiner.json",
+    ".config/neru/config.toml",
+    ".local/bin/karabiner-layer",
+  ],
   kanata: [".config/kanata/kanata.kbd", ".config/kanata/kanata-sculpt.kbd"],
   ghostty: process.platform === "darwin"
     ? [
