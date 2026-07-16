@@ -9,20 +9,34 @@ if [[ ! -x "$sesh_bin" ]]; then
 fi
 
 selection="$(
-  "$sesh_bin" list --icons --hide-duplicates | fzf \
-    --no-sort --ansi --disabled \
-    --prompt '⚡  ' \
-    --header '  j/k nav  / search  esc close/nav  enter select  x kill  ^a all  ^t tmux  ^g configs  ^x zoxide' \
-    --bind 'j:down,k:up' \
-    --bind '/:enable-search+change-prompt(🔍  )+unbind(j,k)+unbind(esc)' \
-    --bind 'esc:abort' \
-    --bind "x:execute(tmux kill-session -t {2..})+reload($sesh_bin list --icons --hide-duplicates)" \
-    --bind "ctrl-a:disable-search+change-prompt(⚡  )+rebind(j,k,esc)+reload($sesh_bin list --icons --hide-duplicates)" \
-    --bind "ctrl-t:disable-search+change-prompt(🪟  )+rebind(j,k,esc)+reload($sesh_bin list -t --icons)" \
-    --bind "ctrl-g:disable-search+change-prompt(⚙️  )+rebind(j,k,esc)+reload($sesh_bin list -c --icons)" \
-    --bind "ctrl-x:disable-search+change-prompt(📁  )+rebind(j,k,esc)+reload($sesh_bin list -z --icons)" \
-    --preview-window 'right:55%' \
-    --preview "echo \"Windows:\" && tmux list-windows -t {2..} -F \" #I: #W (#{window_panes} panes)\" && echo \"\\nPreview:\" && $sesh_bin preview {2..}"
+  "$sesh_bin" list -t --icons | fzf \
+    --ansi \
+    --layout=reverse \
+    --cycle \
+    --highlight-line \
+    --border=rounded \
+    --border-label ' Sessions ' \
+    --input-border=rounded \
+    --input-label ' Search ' \
+    --list-border=rounded \
+    --list-label ' Results ' \
+    --preview-border=rounded \
+    --preview-label ' Details ' \
+    --preview-window 'right:42%,border-rounded' \
+    --footer ' enter open  ↑↓ move  ^x kill  ^a all  ^t open  ^g configs  ^z folders  ^p preview ' \
+    --footer-border=line \
+    --info=inline-right \
+    --prompt 'Open ›  ' \
+    --pointer '›' \
+    --padding '0,1' \
+    --color 'bg:#303446,bg+:#414559,fg:#c6d0f5,fg+:#c6d0f5,hl:#8caaee,hl+:#8caaee,border:#737994,label:#ca9ee6,prompt:#99d1db,pointer:#99d1db,info:#a5adce,header:#a5adce' \
+    --bind 'ctrl-j:down,ctrl-k:up,ctrl-p:toggle-preview' \
+    --bind "ctrl-x:execute-silent(tmux kill-session -t {2..})+reload($sesh_bin list -t --icons)+change-prompt(Open ›  )+clear-query" \
+    --bind "ctrl-a:reload($sesh_bin list --icons --hide-duplicates)+change-prompt(All ›  )+clear-query" \
+    --bind "ctrl-t:reload($sesh_bin list -t --icons)+change-prompt(Open ›  )+clear-query" \
+    --bind "ctrl-g:reload($sesh_bin list -c --icons)+change-prompt(Configs ›  )+clear-query" \
+    --bind "ctrl-z:reload($sesh_bin list -z --icons)+change-prompt(Folders ›  )+clear-query" \
+    --preview "if tmux has-session -t {2..} 2>/dev/null; then printf 'Windows\n\n'; tmux list-windows -t {2..} -F '  #I  #W  · #{window_panes} panes'; printf '\nPanes\n\n'; tmux list-panes -s -t {2..} -F '  #I.#P  #{pane_current_command}  · #{pane_current_path}'; else printf 'Project\n\n  %s\n' {2..}; fi"
 )" || exit 0
 
 [[ -z "$selection" ]] && exit 0

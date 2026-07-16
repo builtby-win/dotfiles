@@ -218,15 +218,28 @@ exit 1
     expect(result.stderr).toContain("tmux-smart: --root requires a path.");
   });
 
-  it("keeps the current search query when entering fuzzy mode", () => {
-    expect(seshPickerSh).toContain('"$sesh_bin" list --icons --hide-duplicates');
-    expect(seshPickerSh).toContain('| fzf \\');
-    expect(seshPickerSh).not.toContain('fzf-tmux -p 80%,70%');
+  it("searches open tmux sessions by default and ranks matching sessions", () => {
+    expect(seshPickerSh).toContain('"$sesh_bin" list -t --icons | fzf \\');
+    expect(seshPickerSh).toContain("--layout=reverse");
+    expect(seshPickerSh).toContain("--highlight-line");
+    expect(seshPickerSh).toContain("ctrl-j:down,ctrl-k:up");
+    expect(seshPickerSh).not.toContain("--disabled");
+    expect(seshPickerSh).not.toContain("--no-sort");
     expect(seshPickerSh).toContain('selection="$(');
     expect(seshPickerSh).toContain('|| exit 0');
     expect(seshPickerSh).toContain('[[ -z "$selection" ]] && exit 0');
-    expect(seshPickerSh).toContain("/:enable-search+change-prompt(🔍  )+unbind(j,k)+unbind(esc)");
-    expect(seshPickerSh).not.toContain("clear-query");
+  });
+
+  it("labels picker regions and exposes explicit session filters", () => {
+    expect(seshPickerSh).toContain("--input-label ' Search '");
+    expect(seshPickerSh).toContain("--list-label ' Results '");
+    expect(seshPickerSh).toContain("--preview-label ' Details '");
+    expect(seshPickerSh).toContain("ctrl-a:reload($sesh_bin list --icons --hide-duplicates)");
+    expect(seshPickerSh).toContain("ctrl-t:reload($sesh_bin list -t --icons)");
+    expect(seshPickerSh).toContain("ctrl-x:execute-silent(tmux kill-session");
+    expect(seshPickerSh).toContain("ctrl-p:toggle-preview");
+    expect(seshPickerSh).toContain("tmux list-panes -s");
+    expect(seshPickerSh).not.toContain("$sesh_bin preview");
   });
 
   it("prefers a real sesh binary over the applied shim", () => {

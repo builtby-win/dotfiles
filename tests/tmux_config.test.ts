@@ -72,6 +72,8 @@ describe("tmux profile split", () => {
   it("binds Leader+Space directly to the sesh picker script", () => {
     expect(basicConf).toContain('bind-key "Space" display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
     expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 80% -h 70% "$HOME/.config/tmux/sesh-picker.sh"');
+    expect(basicConf).toContain("unbind S");
+    expect(basicConf).not.toContain('bind-key "S" display-popup');
   });
 
   it("reloads through the single tmux bootstrap entrypoint", () => {
@@ -83,7 +85,6 @@ describe("tmux profile split", () => {
   it("uses the local sesh shim and lets TPM load tmux-fingers", () => {
     expect(basicConf).toContain("No previous sesh session yet");
     expect(basicConf).toContain('run-shell "$HOME/.local/bin/sesh last >/dev/null 2>&1 || tmux display-message');
-    expect(basicConf).toContain("$HOME/.local/bin/sesh list --icons");
     expect(basicConf).toContain("run '~/.tmux/plugins/tpm/tpm'");
     expect(basicConf).toContain("set -g @plugin 'Morantron/tmux-fingers'");
     expect(basicConf).not.toContain('tmux-fingers load-config');
