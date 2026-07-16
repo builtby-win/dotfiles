@@ -496,7 +496,7 @@
                                     }
                                 ],
                                 "parameters": {
-                                    "basic.simultaneous_threshold_milliseconds": 75
+                                    "basic.simultaneous_threshold_milliseconds": 120
                                 }
                             },
                             {
@@ -551,7 +551,7 @@
                                     }
                                 ],
                                 "parameters": {
-                                    "basic.simultaneous_threshold_milliseconds": 75
+                                    "basic.simultaneous_threshold_milliseconds": 120
                                 }
                             }
                         ]

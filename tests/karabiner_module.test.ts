@@ -52,6 +52,16 @@ describe('Karabiner module wiring', () => {
     expect(descriptions).toContain('One-shot modifiers with Microsoft Sculpt layout parity');
     expect(descriptions).toContain('Right Option and Sculpt Menu: tap for next-key Hyper, hold for Hyper');
 
+    const jkRule = rules.find(
+      (rule: { description: string }) => rule.description === 'jk chord: terminal leader or next-key Command',
+    );
+    expect(
+      jkRule.manipulators.map(
+        (manipulator: { parameters: { 'basic.simultaneous_threshold_milliseconds': number } }) =>
+          manipulator.parameters['basic.simultaneous_threshold_milliseconds'],
+      ),
+    ).toEqual([120, 120]);
+
     const serializedRules = JSON.stringify(rules);
     expect(serializedRules).toContain('frontmost_application_if');
     expect(serializedRules).toContain('frontmost_application_unless');
@@ -77,6 +87,9 @@ describe('Karabiner module wiring', () => {
     expect(neru).toContain('~/.local/bin/karabiner-layer nudge');
     expect(neru).toContain('~/.local/bin/karabiner-layer off');
     expect(neru).not.toContain('~/.local/bin/kanata-layer');
+    const resetLines = neru.split('\n').filter((line) => line.includes('action reset'));
+    expect(resetLines).toHaveLength(3);
+    expect(resetLines.every((line) => line.includes('karabiner-layer off'))).toBe(true);
     expect(setup).toContain('\".local/bin/karabiner-layer\"');
     expect(setup).toContain('\".config/neru/config.toml\"');
   });

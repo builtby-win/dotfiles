@@ -74,8 +74,8 @@ hide_unmatched = true
 "s" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 "." = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 # Mode exits
-"," = "action reset"
-"'" = "action reset"
+"," = ["exec ~/.local/bin/karabiner-layer off", "action reset"]
+"'" = ["exec ~/.local/bin/karabiner-layer off", "action reset"]
 "Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 
 [recursive_grid]
@@ -112,7 +112,7 @@ max_depth = 10
 "Right" = "action move_mouse_relative --dx=5 --dy=0"
 "Backspace" = "action backspace"
 # Mode exits (unified with grid)
-"'" = "action reset"
+"'" = ["exec ~/.local/bin/karabiner-layer off", "action reset"]
 "Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 
 [recursive_grid.animation]
