@@ -241,7 +241,7 @@ exit 1
     expect(seshPickerSh).toContain("--input-label ' Search '");
     expect(seshPickerSh).toContain("--list-label ' Results '");
     expect(seshPickerSh).toContain("--preview-label ' Active pane '");
-    expect(seshPickerSh).toContain("--preview-window 'right:42%,follow,nowrap,border-rounded,<50(down:50%,follow,nowrap,border-rounded)'");
+    expect(seshPickerSh).toContain("--preview-window 'right:42%,follow,nowrap,border-rounded,<50(hidden)'");
     expect(seshPickerSh).toContain("--footer ' nav j/k  / search  esc close  ↵ open '");
     expect(seshPickerSh).toContain("tmux capture-pane -ep -t {2..}");
     expect(seshPickerSh).toContain("not running · Enter starts it");

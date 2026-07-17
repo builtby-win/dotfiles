@@ -23,7 +23,7 @@ selection="$(
     --list-label ' Results ' \
     --preview-border=rounded \
     --preview-label ' Active pane ' \
-    --preview-window 'right:42%,follow,nowrap,border-rounded,<50(down:50%,follow,nowrap,border-rounded)' \
+    --preview-window 'right:42%,follow,nowrap,border-rounded,<50(hidden)' \
     --footer ' nav j/k  / search  esc close  ↵ open ' \
     --footer-border=line \
     --info=inline-right \
