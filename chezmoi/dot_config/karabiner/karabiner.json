@@ -611,12 +611,7 @@
                                 "parameters": {
                                     "basic.simultaneous_threshold_milliseconds": 120
                                 }
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Hold j then Space for repeating Backspace outside GUI Vim editors",
-                        "manipulators": [
+                            },
                             {
                                 "type": "basic",
                                 "conditions": [
@@ -624,14 +619,6 @@
                                         "type": "variable_if",
                                         "name": "neru_mode",
                                         "value": 0
-                                    },
-                                    {
-                                        "type": "frontmost_application_unless",
-                                        "bundle_identifiers": [
-                                            "^dev\\.zed\\.Zed$",
-                                            "^com\\.microsoft\\.VSCode$",
-                                            "^com\\.todesktop\\.230313mzl4w4u92$"
-                                        ]
                                     }
                                 ],
                                 "from": {
@@ -644,28 +631,10 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "j"
+                                        "key_code": "j",
+                                        "repeat": true
                                     }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "neru_mode",
-                                            "value": 4
-                                        }
-                                    }
-                                ],
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "neru_mode",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "parameters": {
-                                    "basic.to_if_held_down_threshold_milliseconds": 200
-                                }
+                                ]
                             },
                             {
                                 "type": "basic",
@@ -673,11 +642,11 @@
                                     {
                                         "type": "variable_if",
                                         "name": "neru_mode",
-                                        "value": 4
+                                        "value": 0
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "spacebar",
+                                    "key_code": "k",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -686,7 +655,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "delete_or_backspace",
+                                        "key_code": "k",
                                         "repeat": true
                                     }
                                 ]

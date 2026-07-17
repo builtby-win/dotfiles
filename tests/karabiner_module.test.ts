@@ -48,7 +48,7 @@ describe('Karabiner module wiring', () => {
 
     expect(descriptions).toContain('Neru chords: fj grid, jl recursive grid, dk scroll, df hints');
     expect(descriptions).toContain('jk chord: terminal leader or next-key Command');
-    expect(descriptions).toContain('Hold j then Space for repeating Backspace outside GUI Vim editors');
+    expect(descriptions).not.toContain('Hold j then Space for repeating Backspace outside GUI Vim editors');
     expect(descriptions).toContain('One-shot modifiers with Microsoft Sculpt layout parity');
     expect(descriptions).toContain('Right Option and Sculpt Menu: tap for next-key Hyper, hold for Hyper');
 
@@ -56,11 +56,30 @@ describe('Karabiner module wiring', () => {
       (rule: { description: string }) => rule.description === 'jk chord: terminal leader or next-key Command',
     );
     expect(
-      jkRule.manipulators.map(
-        (manipulator: { parameters: { 'basic.simultaneous_threshold_milliseconds': number } }) =>
-          manipulator.parameters['basic.simultaneous_threshold_milliseconds'],
-      ),
+      jkRule.manipulators
+        .filter(
+          (manipulator: {
+            parameters?: { 'basic.simultaneous_threshold_milliseconds': number };
+          }) => manipulator.parameters,
+        )
+        .map(
+          (manipulator: {
+            parameters: { 'basic.simultaneous_threshold_milliseconds': number };
+          }) => manipulator.parameters['basic.simultaneous_threshold_milliseconds'],
+        ),
     ).toEqual([120, 120]);
+
+    const repeatFallbacks = jkRule.manipulators.filter(
+      (manipulator: {
+        from: { key_code?: string };
+        to: Array<{ key_code?: string; repeat?: boolean }>;
+      }) =>
+        ['j', 'k'].includes(manipulator.from.key_code ?? '') &&
+        manipulator.to[0]?.key_code === manipulator.from.key_code &&
+        manipulator.to[0]?.repeat === true,
+    );
+    expect(repeatFallbacks.map((manipulator: { from: { key_code: string } }) => manipulator.from.key_code))
+      .toEqual(['j', 'k']);
 
     const serializedRules = JSON.stringify(rules);
     expect(serializedRules).toContain('frontmost_application_if');
