@@ -229,23 +229,31 @@ exit 1
     expect(seshPickerSh).toContain('[[ -z "$selection" ]] && exit 0');
   });
 
-  it("uses slash for search and escape to return to navigation", () => {
+  it("uses slash for search, returns to navigation on empty input, and closes with escape", () => {
     expect(seshPickerSh).toContain("/:enable-search+change-prompt(Search ›  )+unbind(j,k,q,/)");
-    expect(seshPickerSh).toContain("esc:clear-query+reload($sesh_bin list -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)");
+    expect(seshPickerSh).toContain("change:transform:");
+    expect(seshPickerSh).toContain("reload($sesh_bin list -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)");
+    expect(seshPickerSh).toContain("esc:abort");
     expect(seshPickerSh).not.toContain("--no-sort");
   });
 
-  it("labels picker regions and exposes explicit session filters", () => {
+  it("shows focused session details and exposes explicit session filters", () => {
     expect(seshPickerSh).toContain("--input-label ' Search '");
     expect(seshPickerSh).toContain("--list-label ' Results '");
     expect(seshPickerSh).toContain("--preview-label ' Details '");
-    expect(seshPickerSh).toContain("--preview-window 'right:42%,nowrap,border-rounded,<50(down:38%,nowrap,border-rounded)'");
-    expect(seshPickerSh).toContain("--footer ' nav j/k  / search  esc nav  q close  ↵ open '");
+    expect(seshPickerSh).toContain("--preview-window 'right:42%,nowrap,border-rounded,<50(down:50%,nowrap,border-rounded)'");
+    expect(seshPickerSh).toContain("--footer ' nav j/k  / search  esc close  ↵ open '");
+    expect(seshPickerSh).toContain("#{session_name}");
+    expect(seshPickerSh).toContain("#{?session_attached");
+    expect(seshPickerSh).toContain("#{pane_current_command}");
+    expect(seshPickerSh).toContain("#{pane_current_path}");
+    expect(seshPickerSh).toContain("#{?window_active,›, }");
+    expect(seshPickerSh).toContain("not running · Enter starts it");
     expect(seshPickerSh).toContain("ctrl-a:reload($sesh_bin list --icons --hide-duplicates)");
     expect(seshPickerSh).toContain("ctrl-t:reload($sesh_bin list -t --icons)");
     expect(seshPickerSh).toContain("ctrl-x:execute-silent(tmux kill-session");
     expect(seshPickerSh).toContain("ctrl-p:toggle-preview");
-    expect(seshPickerSh).toContain("tmux list-panes -s");
+    expect(seshPickerSh).not.toContain("tmux list-panes -s");
     expect(seshPickerSh).not.toContain("$sesh_bin preview");
   });
 

@@ -23,8 +23,8 @@ selection="$(
     --list-label ' Results ' \
     --preview-border=rounded \
     --preview-label ' Details ' \
-    --preview-window 'right:42%,nowrap,border-rounded,<50(down:38%,nowrap,border-rounded)' \
-    --footer ' nav j/k  / search  esc nav  q close  ↵ open ' \
+    --preview-window 'right:42%,nowrap,border-rounded,<50(down:50%,nowrap,border-rounded)' \
+    --footer ' nav j/k  / search  esc close  ↵ open ' \
     --footer-border=line \
     --info=inline-right \
     --prompt 'Nav ›  ' \
@@ -33,13 +33,14 @@ selection="$(
     --color 'bg:#303446,bg+:#414559,fg:#c6d0f5,fg+:#c6d0f5,hl:#8caaee,hl+:#8caaee,border:#737994,label:#ca9ee6,prompt:#99d1db,pointer:#99d1db,info:#a5adce,header:#a5adce' \
     --bind 'ctrl-j:down,ctrl-k:up,ctrl-p:toggle-preview' \
     --bind 'j:down,k:up,q:abort,/:enable-search+change-prompt(Search ›  )+unbind(j,k,q,/)' \
-    --bind "esc:clear-query+reload($sesh_bin list -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)" \
+    --bind 'esc:abort' \
+    --bind "change:transform:[[ -z \"\$FZF_QUERY\" ]] && echo \"reload($sesh_bin list -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)\"" \
     --bind "ctrl-x:execute-silent(tmux kill-session -t {2..})+reload($sesh_bin list -t --icons)+clear-query" \
     --bind "ctrl-a:reload($sesh_bin list --icons --hide-duplicates)+clear-query" \
     --bind "ctrl-t:reload($sesh_bin list -t --icons)+clear-query" \
     --bind "ctrl-g:reload($sesh_bin list -c --icons)+clear-query" \
     --bind "ctrl-z:reload($sesh_bin list -z --icons)+clear-query" \
-    --preview "if tmux has-session -t {2..} 2>/dev/null; then printf 'Windows\n\n'; tmux list-windows -t {2..} -F '  #I  #W  · #{window_panes} panes'; printf '\nPanes\n\n'; tmux list-panes -s -t {2..} -F '  #I.#P  #{pane_current_command}  · #{pane_current_path}'; else printf 'Project\n\n  %s\n' {2..}; fi"
+    --preview "if tmux has-session -t {2..} 2>/dev/null; then printf 'Session\n  '; tmux display-message -p -t {2..} '#{session_name}'; printf '  '; tmux display-message -p -t {2..} '#{?session_attached,attached,detached} · #{session_windows} windows'; printf '\nActive\n  '; tmux display-message -p -t {2..} '#{pane_current_command}'; printf '  '; tmux display-message -p -t {2..} '#{pane_current_path}'; printf '\nWindows\n'; tmux list-windows -t {2..} -F '  #{?window_active,›, } #I  #W  · #{window_panes} panes'; else printf 'Project\n  %s\n\nStatus\n  not running · Enter starts it\n' {2..}; fi"
 )" || exit 0
 
 [[ -z "$selection" ]] && exit 0
