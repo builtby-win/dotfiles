@@ -218,16 +218,21 @@ exit 1
     expect(result.stderr).toContain("tmux-smart: --root requires a path.");
   });
 
-  it("searches open tmux sessions by default and ranks matching sessions", () => {
+  it("starts in navigation mode with unmodified j and k", () => {
     expect(seshPickerSh).toContain('"$sesh_bin" list -t --icons | fzf \\');
-    expect(seshPickerSh).toContain("--layout=reverse");
-    expect(seshPickerSh).toContain("--highlight-line");
+    expect(seshPickerSh).toContain("--disabled");
+    expect(seshPickerSh).toContain("--prompt 'Nav ›  '");
+    expect(seshPickerSh).toContain("j:down,k:up,q:abort");
     expect(seshPickerSh).toContain("ctrl-j:down,ctrl-k:up");
-    expect(seshPickerSh).not.toContain("--disabled");
-    expect(seshPickerSh).not.toContain("--no-sort");
     expect(seshPickerSh).toContain('selection="$(');
     expect(seshPickerSh).toContain('|| exit 0');
     expect(seshPickerSh).toContain('[[ -z "$selection" ]] && exit 0');
+  });
+
+  it("uses slash for search and escape to return to navigation", () => {
+    expect(seshPickerSh).toContain("/:enable-search+change-prompt(Search ›  )+unbind(j,k,q,/)");
+    expect(seshPickerSh).toContain("esc:clear-query+reload($sesh_bin list -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)");
+    expect(seshPickerSh).not.toContain("--no-sort");
   });
 
   it("labels picker regions and exposes explicit session filters", () => {
@@ -235,7 +240,7 @@ exit 1
     expect(seshPickerSh).toContain("--list-label ' Results '");
     expect(seshPickerSh).toContain("--preview-label ' Details '");
     expect(seshPickerSh).toContain("--preview-window 'right:42%,nowrap,border-rounded,<50(down:38%,nowrap,border-rounded)'");
-    expect(seshPickerSh).toContain("--footer ' ↵ open  ^A all  ^T open  ^P preview  ^X kill '");
+    expect(seshPickerSh).toContain("--footer ' nav j/k  / search  esc nav  q close  ↵ open '");
     expect(seshPickerSh).toContain("ctrl-a:reload($sesh_bin list --icons --hide-duplicates)");
     expect(seshPickerSh).toContain("ctrl-t:reload($sesh_bin list -t --icons)");
     expect(seshPickerSh).toContain("ctrl-x:execute-silent(tmux kill-session");
