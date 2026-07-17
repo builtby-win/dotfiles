@@ -22,8 +22,8 @@ selection="$(
     --list-border=rounded \
     --list-label ' Results ' \
     --preview-border=rounded \
-    --preview-label ' Details ' \
-    --preview-window 'right:42%,nowrap,border-rounded,<50(down:50%,nowrap,border-rounded)' \
+    --preview-label ' Active pane ' \
+    --preview-window 'right:42%,follow,nowrap,border-rounded,<50(down:50%,follow,nowrap,border-rounded)' \
     --footer ' nav j/k  / search  esc close  ↵ open ' \
     --footer-border=line \
     --info=inline-right \
@@ -40,7 +40,7 @@ selection="$(
     --bind "ctrl-t:reload($sesh_bin list -t --icons)+clear-query" \
     --bind "ctrl-g:reload($sesh_bin list -c --icons)+clear-query" \
     --bind "ctrl-z:reload($sesh_bin list -z --icons)+clear-query" \
-    --preview "if tmux has-session -t {2..} 2>/dev/null; then printf 'Session\n  '; tmux display-message -p -t {2..} '#{session_name}'; printf '  '; tmux display-message -p -t {2..} '#{?session_attached,attached,detached} · #{session_windows} windows'; printf '\nActive\n  '; tmux display-message -p -t {2..} '#{pane_current_command}'; printf '  '; tmux display-message -p -t {2..} '#{pane_current_path}'; printf '\nWindows\n'; tmux list-windows -t {2..} -F '  #{?window_active,›, } #I  #W  · #{window_panes} panes'; else printf 'Project\n  %s\n\nStatus\n  not running · Enter starts it\n' {2..}; fi"
+    --preview "if tmux has-session -t {2..} 2>/dev/null; then tmux capture-pane -ep -t {2..}; else printf 'Project\n  %s\n\nStatus\n  not running · Enter starts it\n' {2..}; fi"
 )" || exit 0
 
 [[ -z "$selection" ]] && exit 0

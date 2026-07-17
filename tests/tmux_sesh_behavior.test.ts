@@ -237,23 +237,20 @@ exit 1
     expect(seshPickerSh).not.toContain("--no-sort");
   });
 
-  it("shows focused session details and exposes explicit session filters", () => {
+  it("previews the selected session's active pane and exposes explicit session filters", () => {
     expect(seshPickerSh).toContain("--input-label ' Search '");
     expect(seshPickerSh).toContain("--list-label ' Results '");
-    expect(seshPickerSh).toContain("--preview-label ' Details '");
-    expect(seshPickerSh).toContain("--preview-window 'right:42%,nowrap,border-rounded,<50(down:50%,nowrap,border-rounded)'");
+    expect(seshPickerSh).toContain("--preview-label ' Active pane '");
+    expect(seshPickerSh).toContain("--preview-window 'right:42%,follow,nowrap,border-rounded,<50(down:50%,follow,nowrap,border-rounded)'");
     expect(seshPickerSh).toContain("--footer ' nav j/k  / search  esc close  ↵ open '");
-    expect(seshPickerSh).toContain("#{session_name}");
-    expect(seshPickerSh).toContain("#{?session_attached");
-    expect(seshPickerSh).toContain("#{pane_current_command}");
-    expect(seshPickerSh).toContain("#{pane_current_path}");
-    expect(seshPickerSh).toContain("#{?window_active,›, }");
+    expect(seshPickerSh).toContain("tmux capture-pane -ep -t {2..}");
     expect(seshPickerSh).toContain("not running · Enter starts it");
     expect(seshPickerSh).toContain("ctrl-a:reload($sesh_bin list --icons --hide-duplicates)");
     expect(seshPickerSh).toContain("ctrl-t:reload($sesh_bin list -t --icons)");
     expect(seshPickerSh).toContain("ctrl-x:execute-silent(tmux kill-session");
     expect(seshPickerSh).toContain("ctrl-p:toggle-preview");
-    expect(seshPickerSh).not.toContain("tmux list-panes -s");
+    expect(seshPickerSh).not.toContain("tmux list-windows");
+    expect(seshPickerSh).not.toContain("tmux list-panes");
     expect(seshPickerSh).not.toContain("$sesh_bin preview");
   });
 
