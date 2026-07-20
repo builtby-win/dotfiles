@@ -323,7 +323,7 @@ pnpm run setup
 - `docs/modules/hammerspoon.md` — Hyper launcher, Ghostty pane hotkeys, Lua modules
 - `docs/modules/karabiner.md` — Karabiner config, chords, app-aware bindings, Neru
 - `docs/modules/ghostty.md` — Ghostty terminal config and theme
-- `docs/modules/back2vibing.md` — Back2Vibing focus modes and workflow (if docs exist)
+- Back2Vibing — Focus modes and workflow guide at [back2vibing.builtby.win](https://back2vibing.builtby.win)
 - `docs/modules/chezmoi.md` — Chezmoi structure, templates, state management
 - `docs/modules/app-backups.md` — macOS app export/restore, sync workflows
 - `docs/modules/mackup.md` — Mackup setup (legacy/reference)
