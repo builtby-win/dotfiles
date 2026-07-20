@@ -98,11 +98,12 @@ This is ideal if you want to add pieces over time.
 | Neovim | `bb setup nvim` | bleeding-edge vim.pack config for Neovim 0.12+ | `docs/modules/nvim.md` |
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS chords, app-aware Command/tmux behavior, Hyper, and Neru modes | `docs/modules/karabiner.md` |
+| Neru | Auto-loaded with Karabiner | App context grid launcher for macOS | `docs/modules/karabiner.md` |
 | iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
 | Ghostty | `bb setup ghostty` | optional terminal config | `docs/modules/ghostty.md` |
 | App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
 | AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
-| Back2Vibing | `bb setup back2vibing` | Focus & productivity for AI devs | `back2vibing.builtby.win` |
+| Back2Vibing | `bb setup back2vibing` | Focus modes, workflow transitions, and context for AI devs | `docs/modules/back2vibing.md` |
 
 ## Onboarding tips
 
@@ -163,13 +164,25 @@ dotfiles/
 ├── bootstrap.sh          # Entry installer (chezmoi apply + interactive setup)
 ├── bootstrap-linux.sh    # Linux bootstrap shim (chezmoi apply + interactive setup)
 ├── bootstrap.ps1         # Main installer (Windows)
-├── chezmoi/              # Chezmoi-managed source state
-├── setup.ts              # Interactive setup (macOS/Linux)
-├── setup-windows.ts      # Interactive setup (Windows)
-├── shell/                # Zsh config, aliases, functions, tips
+├── DESIGN.md             # UX design principles and product promise
+├── AGENTS.md             # Multi-agent workflow and collaboration rules
+├── WINDOWS_README.md     # Windows-specific setup guide and recovery
+│
+├── chezmoi/              # Chezmoi-managed source state (dotfiles, configs, scripts)
+├── setup.ts              # Interactive setup orchestration (macOS/Linux)
+├── setup-windows.ts      # Interactive setup orchestration (Windows)
+├── shell/                # Zsh config, aliases, functions, tips, agent setup
+├── lib/                  # TypeScript utilities (config builders, manifest management)
+├── scripts/              # Helper scripts (chezmoi apply, app sync/restore, defaults)
+│
+├── templates/            # Copy-managed configs for AI tools (Claude, Gemini, OpenCode)
+├── agents/               # Agent config templates and symlink helpers
+├── apps/                 # Brewfile for macOS app installation
 ├── assets/app-exports/   # Native restore artifacts for macOS apps
-├── templates/            # Copy-managed configs for AI tools
-└── docs/                 # Module documentation
+├── windows/              # Windows-specific configs (profiles, kanata, packages)
+│
+├── tests/                # Test suite (bootstrap, modules, setup flows, platforms)
+└── docs/                 # Module documentation and planning
 ```
 
 ## macOS app restore artifacts
@@ -200,6 +213,79 @@ bb restore bettertouchtool
 
 OpenCode is installed by default in the recommended setup, with styling copy-managed from `templates/opencode/`. Codex CLI is available as an optional checkbox. See `docs/modules/opencode.md`.
 
+## Agent configs and symlinks
+
+Agent configuration templates live in `agents/` and can be symlinked to any git repository for consistent rules across projects:
+
+```bash
+agent-link              # Interactive: select agents to link
+agent-link claude       # Link just Claude Code config
+agent-link all          # Link all agents (Claude, Gemini, OpenCode)
+agent-update            # Pull latest agent configs from dotfiles
+agent-status            # Check which repos have which configs
+```
+
+Each template pulls from a shared base (`agents/shared/base.md`) plus agent-specific extensions. See `agents/README.md` for details.
+
+## AI tool configs
+
+When you run `bb setup`, AI tool configurations are automatically copied from `templates/`:
+
+- `templates/claude/` → Claude Code settings
+- `templates/gemini/` → Gemini/Antigravity settings  
+- `templates/opencode/` → OpenCode styling and extensions
+
+These are copy-managed, so edits in the dotfiles will copy on next setup run without overwriting local changes during active development.
+
+## Development & Contributing
+
+### Understanding the design
+
+Before modifying setup flows or UX, read `DESIGN.md`. It documents the product promise, UX principles (make the next step obvious, show consequences before changes), and how to keep recovery paths clear.
+
+### Multi-agent workflows
+
+`AGENTS.md` covers the mandatory workflow for multi-agent sessions: quality gates, pushing to remote, cleanup, and handoff. Work is not complete until `git push` succeeds.
+
+### Testing
+
+Run the test suite to validate bootstrap flows, module configs, platform support, and setup edge cases:
+
+```bash
+pnpm test              # Run all tests
+pnpm test shell        # Run shell config tests
+pnpm test karabiner    # Run Karabiner module tests
+pnpm test windows      # Run Windows-specific tests
+```
+
+Key test files:
+- `tests/bootstrap_chezmoi.test.ts` — Chezmoi apply and structure
+- `tests/linux*.test.ts` — Linux bootstrap and package flows
+- `tests/windows*.test.ts` — Windows-specific bootstrap, profile, autostart
+- `tests/setup*.test.ts` — Setup orchestration and manifest management
+- `tests/*_module.test.ts` — Individual module (Karabiner, Hammerspoon, Neovim, etc.) validation
+
+### Scripts and helpers
+
+Utility scripts in `scripts/`:
+
+- `apply-chezmoi.sh` — Apply chezmoi state without running full setup
+- `sync-karabiner.sh` — Sync Karabiner configs to/from repo
+- `sync-macos-app-backups.sh` — Backup and restore macOS app configs
+- `restore-macos-app-backups.sh` — Restore saved app exports
+- `setup-iterm-defaults.sh` — Apply iTerm2 key binding defaults
+
+### Windows development
+
+Windows-specific files live in `windows/`:
+
+- `install.ps1` — Main Windows setup and package installation
+- `kanata.kbd` — Keybindings config for Windows equivalent of Karabiner
+- `kanata-autostart.ps1` — Autostart kanata as a service
+- `Microsoft.PowerShell_profile.ps1` — PowerShell profile (aliases, functions, shell setup)
+- `packages.json` — Winget/scoop package list
+- `profile/` — Windows profile directory structure
+
 ## Manual setup (if you prefer)
 
 ```bash
@@ -225,17 +311,31 @@ pnpm run setup
 
 ## Docs
 
-- `docs/modules/shell.md`
-- `docs/modules/tmux.md`
-- `docs/modules/nvim.md`
-- `docs/modules/hammerspoon.md`
-- `docs/modules/karabiner.md`
-- `docs/modules/ghostty.md`
-- `docs/modules/chezmoi.md`
-- `docs/modules/app-backups.md`
-- `docs/modules/mackup.md`
-- `docs/modules/ai.md`
-- `agents/README.md`
+### Top-level guidance
+- `DESIGN.md` — UX design system and product principles
+- `AGENTS.md` — Agent workflow, landing the plane, multi-session collaboration
+- `WINDOWS_README.md` — Windows setup, prompts, recovery paths
+
+### Module docs
+- `docs/modules/shell.md` — Zsh, zinit, starship, aliases, PATH management
+- `docs/modules/tmux.md` — Tmux config, sesh integration, key bindings
+- `docs/modules/nvim.md` — Neovim config, vim.pack structure, bleeding-edge setup
+- `docs/modules/hammerspoon.md` — Hyper launcher, Ghostty pane hotkeys, Lua modules
+- `docs/modules/karabiner.md` — Karabiner config, chords, app-aware bindings, Neru
+- `docs/modules/ghostty.md` — Ghostty terminal config and theme
+- `docs/modules/back2vibing.md` — Back2Vibing focus modes and workflow (if docs exist)
+- `docs/modules/chezmoi.md` — Chezmoi structure, templates, state management
+- `docs/modules/app-backups.md` — macOS app export/restore, sync workflows
+- `docs/modules/mackup.md` — Mackup setup (legacy/reference)
+- `docs/modules/ai.md` — AI tool config templates and setup
+
+### Guides and content
+- `docs/content/why-tmux.md` — Philosophy and benefits of tmux
+- `docs/content/tmux-quickstart.md` — Tmux quick reference
+- `docs/content/tmux-b2v-video-script.md` — Back2Vibing tmux integration video
+
+### Agent config
+- `agents/README.md` — Agent template system, symlink helpers, shared base rules
 
 ## License
 
