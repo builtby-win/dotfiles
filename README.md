@@ -49,13 +49,44 @@ The default bootstrap applies the chezmoi-managed source state, then launches th
 Open a new shell and run:
 
 ```bash
-bb help
+exec zsh
 ```
 
-`bb` is a lightweight wrapper that makes common tasks discoverable.
-If `bb` is not found, run `bash scripts/apply-chezmoi.sh` and restart your shell.
+You now have a new shell with dotfiles applied. Next steps:
 
-If something looks wrong, run `bb setup revert`. The installer records backups and the setup manifest under `~/.config/dotfiles/`.
+```bash
+bb setup       # Change your selections (add/remove tools)
+bb tip         # See a quick tip each day
+bb help        # See all available commands
+```
+
+If something looks wrong, restore from backups:
+
+```bash
+bb setup revert
+```
+
+The installer records backups and setup info under `~/.config/dotfiles/`.
+
+## Getting started
+
+**First 5 minutes:**
+- Your shell is ready to use with new aliases and tools
+- Try `bb tip` to see quick tips
+- Run `exec zsh` again if you don't see the prompt change
+
+**First week:**
+- Use `bb help` to see available commands
+- `bb setup` to add/remove optional tools (Codex, Ghostty, etc.)
+- Check out your new keybindings (tmux prefix is Ctrl+b, see `bb tip`)
+
+**Changing things later:**
+- Add a new module: `bb setup nvim` or `bb setup karabiner`
+- Update everything: `bb update`
+- Undo changes: `bb setup revert`
+
+**If bb is not found:**
+Run `bash scripts/apply-chezmoi.sh` and restart your shell.
 
 ## Setup
 
