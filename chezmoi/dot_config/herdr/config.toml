@@ -1,0 +1,64 @@
+# =============================================================================
+# builtby.win herdr config
+# Keybindings aligned with tmux builtby/basic.conf
+# =============================================================================
+
+onboarding = false
+
+[theme]
+name = "catppuccin"
+
+[keys]
+prefix = "ctrl+b"
+
+# --- Tab/window (matches tmux window binds) ---
+new_tab = "prefix+t"
+previous_tab = "prefix+q"
+next_tab = "prefix+e"
+switch_tab = "alt+1..9"
+close_tab = "prefix+shift+x"
+
+# --- Pane splits (tmux: d=side-by-side, Alt+-=stacked) ---
+split_vertical = "prefix+d"
+split_horizontal = "prefix+minus"
+
+# --- Pane navigation (matches tmux h/j/k/l) ---
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# --- Pane management ---
+close_pane = "prefix+x"
+zoom = "prefix+z"
+swap_pane_down = "prefix+>"
+swap_pane_up = "prefix+<"
+
+# --- Copy mode (tmux: prefix+v and prefix+u) ---
+copy_mode = ["prefix+v", "prefix+u"]
+
+# --- Session/detach (tmux: uppercase Q) ---
+detach = "prefix+shift+q"
+
+# --- Config reload (tmux: prefix+r) ---
+reload_config = "prefix+r"
+
+# --- Displaced defaults (actions whose default key was reassigned above) ---
+# resize_mode was prefix+r, moved to prefix+shift+r
+resize_mode = "prefix+shift+r"
+# edit_scrollback was prefix+e, moved to prefix+shift+e
+edit_scrollback = "prefix+shift+e"
+
+# --- Herdr-native (no tmux equivalent, keep useful defaults) ---
+help = "prefix+?"
+settings = "prefix+s"
+goto = "prefix+g"
+workspace_picker = "prefix+w"
+toggle_sidebar = "prefix+b"
+
+# --- Lazygit (zoomed pane) ---
+[[keys.command]]
+key = "prefix+alt+g"
+type = "pane"
+command = "lazygit"
+description = "lazygit"
