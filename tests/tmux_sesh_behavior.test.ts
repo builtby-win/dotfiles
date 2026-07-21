@@ -15,6 +15,13 @@ describe("tmux and sesh workflow", () => {
     join(process.cwd(), "chezmoi", "dot_config", "tmux", "executable_sesh-picker.sh"),
     "utf-8",
   );
+  const sessionOrderPath = join(
+    process.cwd(),
+    "chezmoi",
+    "dot_config",
+    "tmux",
+    "executable_session-order.sh",
+  );
   const gitignore = readFileSync(join(process.cwd(), ".gitignore"), "utf-8");
   const tempDirs: string[] = [];
 
@@ -219,7 +226,7 @@ exit 1
   });
 
   it("starts in navigation mode with unmodified j and k", () => {
-    expect(seshPickerSh).toContain('"$sesh_bin" list -t --icons | fzf \\');
+    expect(seshPickerSh).toContain('"$session_order" list "$sesh_bin" -t --icons | fzf \\');
     expect(seshPickerSh).toContain("--disabled");
     expect(seshPickerSh).toContain("--prompt 'Nav ›  '");
     expect(seshPickerSh).toContain("j:down,k:up,q:abort");
@@ -232,7 +239,7 @@ exit 1
   it("uses slash for search, returns to navigation on empty input, and closes with escape", () => {
     expect(seshPickerSh).toContain("/:enable-search+change-prompt(Search ›  )+unbind(j,k,q,/)");
     expect(seshPickerSh).toContain("change:transform:");
-    expect(seshPickerSh).toContain("reload($sesh_bin list -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)");
+    expect(seshPickerSh).toContain("reload($session_order list $sesh_bin -t --icons)+disable-search+change-prompt(Nav ›  )+rebind(j,k,q,/)");
     expect(seshPickerSh).toContain("esc:abort");
     expect(seshPickerSh).not.toContain("--no-sort");
   });
@@ -245,13 +252,59 @@ exit 1
     expect(seshPickerSh).toContain("--footer ' nav j/k  / search  esc close  ↵ open '");
     expect(seshPickerSh).toContain("tmux capture-pane -ep -t {2..}");
     expect(seshPickerSh).toContain("not running · Enter starts it");
-    expect(seshPickerSh).toContain("ctrl-a:reload($sesh_bin list --icons --hide-duplicates)");
-    expect(seshPickerSh).toContain("ctrl-t:reload($sesh_bin list -t --icons)");
+    expect(seshPickerSh).toContain("ctrl-a:reload($session_order list $sesh_bin --icons --hide-duplicates)");
+    expect(seshPickerSh).toContain("ctrl-t:reload($session_order list $sesh_bin -t --icons)");
     expect(seshPickerSh).toContain("ctrl-x:execute-silent(tmux kill-session");
     expect(seshPickerSh).toContain("ctrl-p:toggle-preview");
     expect(seshPickerSh).not.toContain("tmux list-windows");
     expect(seshPickerSh).not.toContain("tmux list-panes");
     expect(seshPickerSh).not.toContain("$sesh_bin preview");
+  });
+
+  it("preserves the sesh picker order when restored sessions have tied timestamps", () => {
+    const fixtureDir = mkdtempSync(join(tmpdir(), "sesh-order-"));
+    const binDir = join(fixtureDir, "bin");
+    const stateDir = join(fixtureDir, "state");
+    tempDirs.push(fixtureDir);
+    mkdirSync(binDir, { recursive: true });
+
+    const seshPath = createExecutable(
+      binDir,
+      "sesh",
+      `#!/usr/bin/env bash
+if [[ "$*" == "list -t" ]]; then
+  printf 'beta\\nalpha\\ngamma\\n'
+else
+  printf ' alpha\\n beta\\n gamma\\n ~/project\\n'
+fi
+`,
+    );
+
+    createExecutable(
+      binDir,
+      "tmux",
+      `#!/usr/bin/env bash
+printf '100\\talpha\\n100\\tbeta\\n100\\tgamma\\n'
+`,
+    );
+
+    const env = {
+      ...process.env,
+      HOMEBREW_PREFIX: join(fixtureDir, "missing-homebrew"),
+      PATH: `${binDir}:${process.env.PATH ?? ""}`,
+      XDG_STATE_HOME: stateDir,
+    };
+
+    const save = spawnSync(sessionOrderPath, ["save"], { encoding: "utf-8", env });
+    expect(save.status).toBe(0);
+
+    const list = spawnSync(sessionOrderPath, ["list", seshPath, "--icons"], {
+      encoding: "utf-8",
+      env,
+    });
+
+    expect(list.status).toBe(0);
+    expect(list.stdout).toBe(" beta\n alpha\n gamma\n ~/project\n");
   });
 
   it("prefers a real sesh binary over the applied shim", () => {
