@@ -13,10 +13,6 @@ describe("tmux profile split", () => {
     "utf-8",
   );
   const bootstrapBasicConf = readFileSync(join(tmuxDir, "bootstrap.basic.conf"), "utf-8");
-  const workmuxConfigTemplate = readFileSync(
-    join(process.cwd(), "templates", "workmux", "config.yaml"),
-    "utf-8",
-  );
 
   it("keeps beginner remaps in basic profile", () => {
     expect(basicConf).toContain("bind d split-window -h -c \"#{pane_current_path}\"");
@@ -24,28 +20,7 @@ describe("tmux profile split", () => {
     expect(basicConf).toContain("bind w if-shell");
   });
 
-  it("adds workmux dashboard and quick-add bindings", () => {
-    expect(basicConf).toContain("unbind n");
-    expect(basicConf).toContain("unbind s");
-    expect(basicConf).toContain('bind-key n command-prompt -p "worktree name"');
-    expect(basicConf).toContain('bind-key -n M-n command-prompt -p "worktree name"');
-    expect(basicConf).toContain("workmux add --open-if-exists %%%");
-    expect(basicConf).toContain('bind-key s display-popup -E -w 92% -h 85% -d "#{pane_current_path}" "workmux dashboard"');
-  });
 
-  it("uses a single 50/50 workmux layout with opencode on the right", () => {
-    expect(workmuxConfigTemplate).toContain("nerdfont: true");
-    expect(workmuxConfigTemplate).toContain("merge_strategy: rebase");
-    expect(workmuxConfigTemplate).toContain("window_prefix: wm-");
-    expect(workmuxConfigTemplate).toContain("agent: opencode");
-    expect(workmuxConfigTemplate).toContain("mode: session");
-    expect(workmuxConfigTemplate).toContain("command: opencode run");
-    expect(workmuxConfigTemplate).toContain("- name: work");
-    expect(workmuxConfigTemplate).toContain("- command: opencode");
-    expect(workmuxConfigTemplate).toContain("split: horizontal");
-    expect(workmuxConfigTemplate).toContain("percentage: 50");
-    expect(workmuxConfigTemplate).toContain("focus: true");
-  });
 
   it("keeps pro profile non-invasive for keybinds", () => {
     expect(proConf).not.toMatch(/^\s*bind(?:-key)?\b/m);
@@ -210,38 +185,12 @@ describe("tmux setup safety", () => {
     expect(setupTs).not.toContain('".config/tmux/builtby/pro.conf"');
   });
 
-  it("updates local workmux config from templates during setup", () => {
-    expect(setupTs).toContain('const DOTFILES_BACKUP_DIR = getBuiltbyBackupDir(HOME)');
-    expect(setupTs).toContain('const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml")');
-    expect(setupTs).toContain('const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml")');
-    expect(setupTs).toContain("function ensureLocalWorkmuxConfig(): void");
-    expect(setupTs).toContain('const safeName = getSafeBackupName(filePath, HOME)');
-    expect(setupTs).toContain("function pruneBackupFiles(prefix: string, keep = 1): void");
-    expect(setupTs).toContain('pruneBackupFiles(`${safeName}.dotfiles-backup.`)');
-    expect(setupTs).toContain('const backupPath = backupExistingPath(filePath, HOME)');
-    expect(setupTs).toContain('copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH)');
-    expect(setupTs).toContain('backupFile(WORKMUX_CONFIG_PATH)');
-    expect(setupTs).toContain('addToManifest({ original: WORKMUX_CONFIG_PATH, backup: backupPath, type: "file" })');
-    expect(setupTs).toContain('Updated local workmux config at ${WORKMUX_CONFIG_PATH}');
-    expect(setupTs).toContain('Created local workmux config at ${WORKMUX_CONFIG_PATH}');
-  });
 
   it("restores directory backups with recursive removal", () => {
     expect(setupTs).toContain('rmSync(entry.original, { recursive: true, force: true })');
     expect(setupTs).not.toContain('unlinkSync(entry.original);');
   });
 
-  it("syncs workmux config from bb setup tmux and bb update", () => {
-    expect(functionsSh).toContain('_sync_workmux_config()');
-    expect(functionsSh).toContain('templates/workmux/config.yaml');
-    expect(functionsSh).toContain('_bb_prune_backups()');
-    expect(functionsSh).toContain('local backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups/workmux"');
-    expect(functionsSh).toContain('mkdir -p "$backup_dir"');
-    expect(functionsSh).toContain('local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"');
-    expect(functionsSh).toContain('_bb_prune_backups "$backup_dir" "config.yaml.dotfiles-backup." 1');
-    expect(functionsSh).toContain('_sync_workmux_config "$dotfiles_dir"');
-    expect(functionsSh).toContain('command tmux source-file "$HOME/.tmux.conf"');
-  });
 
   it("documents tmux package version guidance for the custom sesh workflow", () => {
     expect(tmuxDocs).toContain('fzf >= 0.34');

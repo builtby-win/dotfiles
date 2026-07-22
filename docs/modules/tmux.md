@@ -80,24 +80,6 @@ tmux-smart --root ~/code/client-a --new
 - `--root` targets another directory explicitly
 - `--new` forces a fresh session name for that root without giving up the same cwd
 
-## Workmux
-
-`bb setup tmux` and `bb update` keep a local workmux config at
-`~/.config/workmux/config.yaml` in sync with dotfiles. If the file already
-exists, it is backed up to `~/.local/state/dotfiles/backups/workmux/`, older
-copies are pruned, and then the file is updated. This file is machine-local and
-not symlinked. To clean older dotfiles backups manually, run
-`bb backups-clean --yes`.
-
-For shell-backed tools that need to start in the current project directory,
-wrap the pane command in a login shell. Example: `command: "bash -lc 'hydra'"`.
-
-| Binding | Action |
-| --- | --- |
-| `Leader+n` | Prompt for worktree name, then `workmux add --open-if-exists` |
-| `Alt+n` | Same quick worktree flow without prefix |
-| `Leader+s` | Open `workmux dashboard` in a popup |
-
 ## Windows
 
 On native Windows, use psmux as the tmux equivalent:

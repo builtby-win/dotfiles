@@ -164,38 +164,6 @@ _dotfiles_dir() {
   return 1
 }
 
-_sync_workmux_config() {
-  local dotfiles_dir="$1"
-  local template_path="$dotfiles_dir/templates/workmux/config.yaml"
-  local target_dir="$HOME/.config/workmux"
-  local target_path="$target_dir/config.yaml"
-
-  if [[ ! -f "$template_path" ]]; then
-    echo "Workmux template not found. Skipping local workmux config sync."
-    return 0
-  fi
-
-  mkdir -p "$target_dir"
-
-  if [[ -f "$target_path" ]]; then
-    if cmp -s "$template_path" "$target_path"; then
-      echo "Workmux config already up to date."
-      return 0
-    fi
-
-    local backup_dir="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups/workmux"
-    mkdir -p "$backup_dir"
-    local backup_path="$backup_dir/config.yaml.dotfiles-backup.$(date +%s)"
-    cp "$target_path" "$backup_path"
-    _bb_prune_backups "$backup_dir" "config.yaml.dotfiles-backup." 1
-    cp "$template_path" "$target_path"
-    echo "Updated workmux config: $target_path (backup: $backup_path)"
-    return 0
-  fi
-
-  cp "$template_path" "$target_path"
-  echo "Created workmux config: $target_path"
-}
 
 _bb_prune_backups() {
   local backup_dir="$1"
@@ -390,7 +358,6 @@ _bb_backups_clean() {
   fi
 
   _bb_prune_backup_groups "$base_dir" 1 "$auto_yes"
-  _bb_prune_backups "$base_dir/workmux" "config.yaml.dotfiles-backup." 1 "$auto_yes"
 }
 
 # Update dotfiles
@@ -410,7 +377,6 @@ bbup() {
     
     if git pull --rebase --autostash; then
       echo "Dotfiles updated successfully."
-      _sync_workmux_config "$dotfiles_dir"
       echo "Reapplying base chezmoi state..."
       if [[ -x "$dotfiles_dir/scripts/apply-chezmoi.sh" ]]; then
         bash "$dotfiles_dir/scripts/apply-chezmoi.sh"
@@ -536,7 +502,6 @@ bb() {
             return $?
           fi
           if [[ "$module" == "tmux" ]]; then
-            _sync_workmux_config "$dotfiles_dir"
           fi
           echo "bb setup ${module}: applying chezmoi-managed dotfiles."
           bb apply || return $?

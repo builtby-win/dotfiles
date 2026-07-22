@@ -117,9 +117,6 @@ const DOTFILES_BACKUP_DIR = getBuiltbyBackupDir(HOME);
 const DOTFILES_CONFIG_DIR = join(HOME, ".config", "dotfiles");
 const DOTFILES_PATH_FILE = join(DOTFILES_CONFIG_DIR, "path");
 const DOTFILES_LOCAL_SHELL_FILE = join(DOTFILES_CONFIG_DIR, "local.sh");
-const WORKMUX_CONFIG_DIR = join(HOME, ".config", "workmux");
-const WORKMUX_CONFIG_PATH = join(WORKMUX_CONFIG_DIR, "config.yaml");
-const WORKMUX_CONFIG_TEMPLATE_SOURCE = join(DOTFILES_DIR, "templates", "workmux", "config.yaml");
 const TMUX_BOOTSTRAP_BASIC_SOURCE = join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "bootstrap.basic.conf");
 const TMUX_BASIC_CONF_SOURCE = join(DOTFILES_DIR, "chezmoi", "dot_config", "tmux", "builtby", "basic.conf");
 const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ===";
@@ -892,7 +889,6 @@ function selectedManagedTargetPaths(configs: string[]): string[] {
 
   if (configs.includes("tmux")) {
     paths.add(join(HOME, ".tmux.conf"));
-    paths.add(WORKMUX_CONFIG_PATH);
     paths.add(join(HOME, ".tmux", "plugins", "tpm"));
   }
 
@@ -1007,33 +1003,6 @@ function ensureLocalShellOverridesFile(): void {
   log.success(`Created local shell overrides at ${DOTFILES_LOCAL_SHELL_FILE}`);
 }
 
-function ensureLocalWorkmuxConfig(): void {
-  if (!existsSync(WORKMUX_CONFIG_TEMPLATE_SOURCE)) {
-    log.warning("workmux template config not found - skipping local workmux config setup");
-    return;
-  }
-
-  if (!existsSync(WORKMUX_CONFIG_DIR)) {
-    mkdirSync(WORKMUX_CONFIG_DIR, { recursive: true });
-  }
-
-  if (!existsSync(WORKMUX_CONFIG_PATH)) {
-    copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH);
-    log.success(`Created local workmux config at ${WORKMUX_CONFIG_PATH}`);
-    return;
-  }
-
-  const currentConfig = readFileSync(WORKMUX_CONFIG_PATH, "utf-8");
-  const templateConfig = readFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, "utf-8");
-  if (currentConfig === templateConfig) {
-    return;
-  }
-
-  const backupPath = backupFile(WORKMUX_CONFIG_PATH);
-  addToManifest({ original: WORKMUX_CONFIG_PATH, backup: backupPath, type: "file" });
-  copyFileSync(WORKMUX_CONFIG_TEMPLATE_SOURCE, WORKMUX_CONFIG_PATH);
-  log.success(`Updated local workmux config at ${WORKMUX_CONFIG_PATH}`);
-}
 
 function setupZshEntrypoint(): void {
   const zshrcPath = join(HOME, ".zshrc");
@@ -1236,7 +1205,6 @@ async function setupManagedConfigs(configs: string[]): Promise<void> {
   }
 
   if (configs.includes("tmux")) {
-    ensureLocalWorkmuxConfig();
     const shouldContinue = await setupTmuxEntrypoint();
     if (!shouldContinue) {
       log.info("Skipping tmux entrypoint changes");

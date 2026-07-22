@@ -268,7 +268,6 @@ describe('Linux bootstrap workflow', () => {
     expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal and OpenCode as the default AI coding CLI. You can also select Codex before install.');
     expect(content).toContain('Will modify or create:');
     expect(content).toContain('DOTFILES_PATH_FILE');
-    expect(content).toContain('WORKMUX_CONFIG_PATH');
     expect(content).toContain('Restore later with: bb setup revert');
     expect(content).toContain('Apply these installs and file changes?');
     expect(content).toContain('Change or restore setup later:');

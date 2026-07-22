@@ -68,15 +68,6 @@
     ],
     "Notification": [
       {
-        "matcher": "permission_prompt|elicitation_dialog",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "workmux set-window-status waiting"
-          }
-        ]
-      },
-      {
         "matcher": "",
         "hooks": [
           {
@@ -105,14 +96,6 @@
       }
     ],
     "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "workmux set-window-status working"
-          }
-        ]
-      },
       {
         "matcher": "",
         "hooks": [
@@ -249,14 +232,6 @@
     ],
     "Stop": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "workmux set-window-status done"
-          }
-        ]
-      },
-      {
         "matcher": "",
         "hooks": [
           {
@@ -314,14 +289,6 @@
       }
     ],
     "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "workmux set-window-status working"
-          }
-        ]
-      },
       {
         "matcher": "",
         "hooks": [
