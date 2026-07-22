@@ -52,6 +52,11 @@ edit_scrollback = "prefix+shift+e"
 # --- Herdr-native ---
 # Create and open a Git worktree.
 new_worktree = "prefix+n"
+# New worktrees are opened and focused by Herdr.
+# Remove the focused worktree when archiving or cleaning up a track.
+remove_worktree = "prefix+shift+n"
+# Close a non-worktree workspace without deleting its checkout.
+close_workspace = "prefix+shift+d"
 # Searchable workspace/tab/pane tree (press / to fuzzy-filter).
 goto = "prefix+space"
 # Persistent navigation mode; j/k switch workspaces.
