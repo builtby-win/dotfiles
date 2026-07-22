@@ -18,8 +18,8 @@ next_tab = "prefix+e"
 switch_tab = "alt+1..9"
 close_tab = "prefix+shift+x"
 
-# --- Pane splits (tmux: d=side-by-side, Alt+-=stacked) ---
-split_vertical = "prefix+d"
+# --- Pane splits (tmux: Shift+D=side-by-side, Alt+-=stacked) ---
+split_vertical = "prefix+shift+d"
 split_horizontal = "prefix+minus"
 
 # --- Pane navigation (matches tmux leader+hjkl and Alt+hjkl) ---
@@ -30,6 +30,8 @@ focus_pane_right = ["prefix+l", "alt+l"]
 
 # --- Pane management ---
 close_pane = ["prefix+w", "prefix+x", "alt+w"]
+# Return to the previously focused pane.
+last_pane = "prefix+tab"
 zoom = "prefix+z"
 swap_pane_down = "prefix+>"
 swap_pane_up = "prefix+<"
@@ -56,7 +58,7 @@ new_worktree = "prefix+n"
 # Remove the focused worktree when archiving or cleaning up a track.
 remove_worktree = "prefix+shift+n"
 # Close a non-worktree workspace without deleting its checkout.
-close_workspace = "prefix+shift+d"
+close_workspace = "prefix+shift+w"
 # Searchable workspace/tab/pane tree (press / to fuzzy-filter).
 goto = "prefix+space"
 # Persistent navigation mode; j/k switch workspaces.
