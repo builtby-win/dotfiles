@@ -22,14 +22,14 @@ close_tab = "prefix+shift+x"
 split_vertical = "prefix+d"
 split_horizontal = "prefix+minus"
 
-# --- Pane navigation (matches tmux h/j/k/l) ---
-focus_pane_left = "prefix+h"
-focus_pane_down = "prefix+j"
-focus_pane_up = "prefix+k"
-focus_pane_right = "prefix+l"
+# --- Pane navigation (matches tmux leader+hjkl and Alt+hjkl) ---
+focus_pane_left = ["prefix+h", "alt+h"]
+focus_pane_down = ["prefix+j", "alt+j"]
+focus_pane_up = ["prefix+k", "alt+k"]
+focus_pane_right = ["prefix+l", "alt+l"]
 
 # --- Pane management ---
-close_pane = "prefix+x"
+close_pane = ["prefix+w", "prefix+x", "alt+w"]
 zoom = "prefix+z"
 swap_pane_down = "prefix+>"
 swap_pane_up = "prefix+<"
@@ -49,11 +49,17 @@ resize_mode = "prefix+shift+r"
 # edit_scrollback was prefix+e, moved to prefix+shift+e
 edit_scrollback = "prefix+shift+e"
 
-# --- Herdr-native (no tmux equivalent, keep useful defaults) ---
+# --- Herdr-native ---
+# Searchable workspace/tab/pane tree (press / to fuzzy-filter).
+goto = "prefix+space"
+# Persistent navigation mode; j/k switch workspaces.
+workspace_picker = "prefix+g"
+navigate_workspace_down = "j"
+navigate_workspace_up = "k"
+navigate_pane_down = "ctrl+j"
+navigate_pane_up = "ctrl+k"
 help = "prefix+?"
 settings = "prefix+s"
-goto = "prefix+g"
-workspace_picker = "prefix+w"
 toggle_sidebar = "prefix+b"
 
 # --- Lazygit (zoomed pane) ---
