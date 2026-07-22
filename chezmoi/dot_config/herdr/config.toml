@@ -50,6 +50,8 @@ resize_mode = "prefix+shift+r"
 edit_scrollback = "prefix+shift+e"
 
 # --- Herdr-native ---
+# Matches tmux/workmux: create and open a Git worktree.
+new_worktree = "prefix+n"
 # Searchable workspace/tab/pane tree (press / to fuzzy-filter).
 goto = "prefix+space"
 # Persistent navigation mode; j/k switch workspaces.
