@@ -13,7 +13,7 @@ describe("Herdr workspace lifecycle", () => {
     const content = fs.readFileSync(configPath, "utf-8");
 
     expect(content).toContain('new_worktree = "prefix+n"');
-    expect(content).toContain('remove_worktree = "prefix+shift+n"');
+    expect(content).toContain('new_workspace = "prefix+shift+n"');
     expect(content).toContain('close_workspace = "prefix+shift+w"');
     expect(content).toContain('split_vertical = "prefix+shift+d"');
     expect(content).toContain('last_pane = "prefix+tab"');
