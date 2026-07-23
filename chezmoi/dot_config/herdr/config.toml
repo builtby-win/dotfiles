@@ -34,7 +34,7 @@ focus_pane_up = ["prefix+k", "alt+k"]
 focus_pane_right = ["prefix+l", "alt+l"]
 
 # --- Pane management ---
-close_pane = ["prefix+w", "prefix+x", "alt+w"]
+close_pane = ["prefix+w", "prefix+shift+w", "prefix+x", "alt+w"]
 # Return to the previously focused pane.
 last_pane = "prefix+tab"
 zoom = "prefix+z"
@@ -61,8 +61,8 @@ edit_scrollback = "prefix+shift+e"
 new_workspace = "prefix+shift+n"
 # Create and open a Git worktree.
 new_worktree = "prefix+n"
-# Close a non-worktree workspace without deleting its checkout.
-close_workspace = "prefix+shift+w"
+# Keep workspace closing off the keyboard to avoid accidental teardown.
+close_workspace = ""
 # Searchable workspace/tab/pane tree (press / to fuzzy-filter).
 goto = "prefix+space"
 # Persistent navigation mode; j/k switch workspaces.
