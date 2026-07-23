@@ -15,6 +15,14 @@ All tasks follow a strict lifecycle:
 
 ### Standard Task Workflow
 
+### Herdr Workspace Lifecycle
+
+Conductor workspaces use `./herdr-lifecycle.sh`:
+
+- On startup, run `./herdr-lifecycle.sh start <repo> <label>`. This creates and focuses the Herdr workspace, opens Ghostty, and prints the workspace ID.
+- Store that workspace ID with the track metadata.
+- On archive, run `./herdr-lifecycle.sh archive <workspace-id>`. This closes and removes the Herdr workspace without deleting the Git checkout.
+
 1. **Select Task:** Choose the next available task from `plan.md` in sequential order
 
 2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
