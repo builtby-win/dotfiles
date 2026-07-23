@@ -13,10 +13,14 @@ prefix = "ctrl+b"
 
 # --- Tab/window (matches tmux window binds) ---
 new_tab = "prefix+t"
+rename_tab = "prefix+comma"
 previous_tab = "prefix+q"
 next_tab = "prefix+e"
 switch_tab = "alt+1..9"
 switch_workspace = "prefix+1..9"
+previous_workspace = "alt+("
+next_workspace = "alt+)"
+focus_agent = "prefix+alt+1..9"
 close_tab = "prefix+shift+x"
 
 # --- Pane splits (matches tmux and Ghostty: d=right, Shift+D=down) ---
