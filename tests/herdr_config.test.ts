@@ -3,6 +3,10 @@ import fs from "fs";
 import path from "path";
 
 const configPath = path.resolve(__dirname, "../chezmoi/dot_config/herdr/config.toml");
+const balanceScriptPath = path.resolve(
+  __dirname,
+  "../chezmoi/dot_local/bin/executable_herdr-balance-panes",
+);
 
 describe("Herdr workspace lifecycle", () => {
   it("focuses new worktrees and exposes cleanup actions", () => {
@@ -14,5 +18,8 @@ describe("Herdr workspace lifecycle", () => {
     expect(content).toContain('split_vertical = "prefix+shift+d"');
     expect(content).toContain('last_pane = "prefix+tab"');
     expect(content).toContain('switch_workspace = "prefix+1..9"');
+    expect(content).toContain('key = "prefix+b"');
+    expect(content).toContain('command = "herdr-balance-panes"');
+    expect(fs.statSync(balanceScriptPath).mode & 0o111).not.toBe(0);
   });
 });

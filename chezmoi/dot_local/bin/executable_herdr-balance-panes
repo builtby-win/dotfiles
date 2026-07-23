@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+import json
+import os
+import subprocess
+
+herdr = os.environ.get("HERDR_BIN_PATH", "herdr")
+active = os.environ.get("HERDR_ACTIVE_PANE_ID")
+target = ["--pane", active] if active else ["--current"]
+layout = json.loads(
+    subprocess.check_output([herdr, "pane", "layout", *target], text=True)
+)["result"]["layout"]
+panes = layout["panes"]
+
+for split in sorted(
+    layout["splits"], key=lambda item: item["rect"]["width"] * item["rect"]["height"], reverse=True
+):
+    area = split["rect"]
+    inside = [
+        pane
+        for pane in panes
+        if pane["rect"]["x"] >= area["x"]
+        and pane["rect"]["y"] >= area["y"]
+        and pane["rect"]["x"] + pane["rect"]["width"] <= area["x"] + area["width"]
+        and pane["rect"]["y"] + pane["rect"]["height"] <= area["y"] + area["height"]
+    ]
+    horizontal = split["direction"] == "right"
+    axis, size = (("x", "width") if horizontal else ("y", "height"))
+    boundary = area[axis] + round(area[size] * split["ratio"])
+    first = [pane for pane in inside if pane["rect"][axis] + pane["rect"][size] <= boundary]
+    second = [pane for pane in inside if pane["rect"][axis] >= boundary]
+    if not first or not second:
+        continue
+
+    desired = len(first) / len(inside)
+    delta = desired - split["ratio"]
+    if abs(delta) < 0.001:
+        continue
+
+    candidates = first if delta > 0 else second
+    source = min(candidates, key=lambda pane: abs((pane["rect"][axis] + (pane["rect"][size] if delta > 0 else 0)) - boundary))
+    direction = ("right" if delta > 0 else "left") if horizontal else ("down" if delta > 0 else "up")
+    subprocess.run(
+        [herdr, "pane", "resize", "--pane", source["pane_id"], "--direction", direction, "--amount", str(abs(delta))],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )

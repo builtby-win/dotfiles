@@ -70,7 +70,14 @@ navigate_pane_down = "ctrl+j"
 navigate_pane_up = "ctrl+k"
 help = "prefix+?"
 settings = "prefix+s"
-toggle_sidebar = "prefix+b"
+toggle_sidebar = "prefix+shift+b"
+
+# Equalize pane sizes in the focused tab.
+[[keys.command]]
+key = "prefix+b"
+type = "shell"
+command = "herdr-balance-panes"
+description = "balance panes"
 
 # --- Lazygit (zoomed pane) ---
 [[keys.command]]
