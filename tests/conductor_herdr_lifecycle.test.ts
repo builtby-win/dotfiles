@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import fs from "fs";
 import path from "path";
 
-const helperPath = path.resolve(__dirname, "../conductor/herdr-lifecycle.sh");
+const helperPath = path.resolve(__dirname, "../scripts/herdr-lifecycle.sh");
 const workflowPath = path.resolve(__dirname, "../conductor/workflow.md");
 
 describe("Conductor Herdr lifecycle", () => {
@@ -14,7 +14,7 @@ describe("Conductor Herdr lifecycle", () => {
     expect(helper).toContain("herdr workspace focus");
     expect(helper).toContain("open -a Ghostty");
     expect(helper).toContain('herdr workspace close "$1"');
-    expect(workflow).toContain("./herdr-lifecycle.sh start <repo> <label>");
-    expect(workflow).toContain("./herdr-lifecycle.sh archive <workspace-id>");
+    expect(workflow).toContain("./scripts/herdr-lifecycle.sh start <repo> <label>");
+    expect(workflow).toContain("./scripts/herdr-lifecycle.sh archive <workspace-id>");
   });
 });
