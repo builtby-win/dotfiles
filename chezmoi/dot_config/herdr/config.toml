@@ -19,9 +19,9 @@ switch_tab = "alt+1..9"
 switch_workspace = "prefix+1..9"
 close_tab = "prefix+shift+x"
 
-# --- Pane splits (tmux: Shift+D=side-by-side, Alt+-=stacked) ---
-split_vertical = "prefix+shift+d"
-split_horizontal = "prefix+minus"
+# --- Pane splits (matches tmux and Ghostty: d=right, Shift+D=down) ---
+split_vertical = "prefix+d"
+split_horizontal = "prefix+shift+d"
 
 # --- Pane navigation (matches tmux leader+hjkl and Alt+hjkl) ---
 focus_pane_left = ["prefix+h", "alt+h"]
