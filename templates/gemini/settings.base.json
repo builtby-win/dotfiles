@@ -1,0 +1,35 @@
+{
+  "hooksConfig": {
+    "enabled": true
+  },
+  "experimental": {
+    "enableAgents": true
+  },
+  "general": {
+    "defaultApprovalMode": "plan",
+    "enableNotifications": true,
+    "preferredEditor": "neovim",
+    "previewFeatures": true,
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": "30d",
+      "warningAcknowledged": true
+    },
+    "vimMode": true
+  },
+  "model": {
+    "name": "auto-gemini-3"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "tools": {
+    "enableHooks": true
+  },
+  "ui": {
+    "showHomeDirectoryWarning": false,
+    "showStatusInTitle": true
+  }
+}

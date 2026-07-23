@@ -345,6 +345,67 @@ const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?
   },
 };
 
+const PLATFORM_JSON_CONFIGS: Record<string, string> = {
+  "claude/settings.json": "settings",
+  "codex/hooks.json": "hooks",
+  "gemini/settings.json": "settings",
+  "opencode/opencode.json": "opencode",
+};
+
+function mergeConfigObjects(base: Record<string, unknown>, overlay: Record<string, unknown>): Record<string, unknown> {
+  const merged = { ...base };
+
+  for (const [key, value] of Object.entries(overlay)) {
+    const existing = merged[key];
+    if (
+      value !== null && typeof value === "object" && !Array.isArray(value) &&
+      existing !== null && typeof existing === "object" && !Array.isArray(existing)
+    ) {
+      merged[key] = mergeConfigObjects(existing as Record<string, unknown>, value as Record<string, unknown>);
+    } else {
+      merged[key] = value;
+    }
+  }
+
+  return merged;
+}
+
+function renderPlatformJsonConfig(config: string, template: string): string {
+  const templateName = PLATFORM_JSON_CONFIGS[`${config}/${template}`];
+  if (!templateName) throw new Error(`No platform template registered for ${config}/${template}`);
+
+  const templateDir = join(DOTFILES_DIR, "templates", config);
+  const currentPlatform = getCurrentPlatform();
+  const basePath = join(templateDir, `${templateName}.base.json`);
+  const platformPath = join(templateDir, `${templateName}.${currentPlatform}.json`);
+
+  if (!existsSync(basePath) || !existsSync(platformPath)) {
+    throw new Error(`${config} config templates are incomplete for ${currentPlatform}`);
+  }
+
+  const base = JSON.parse(readFileSync(basePath, "utf-8")) as Record<string, unknown>;
+  const overlay = JSON.parse(readFileSync(platformPath, "utf-8")) as Record<string, unknown>;
+  return `${JSON.stringify(mergeConfigObjects(base, overlay), null, 2)}\n`;
+}
+
+/**
+ * Codex settings include host-specific paths and integrations. Keep the
+ * portable defaults separate from the platform overlay so installing the
+ * dotfiles on a remote Linux host never copies macOS-only MCP servers.
+ */
+function renderCodexConfig(): string {
+  const templateDir = join(DOTFILES_DIR, "templates", "codex");
+  const currentPlatform = getCurrentPlatform();
+  const basePath = join(templateDir, "config.base.toml");
+  const platformPath = join(templateDir, `config.${currentPlatform}.toml`);
+
+  if (!existsSync(basePath) || !existsSync(platformPath)) {
+    throw new Error(`Codex config templates are incomplete for ${currentPlatform}`);
+  }
+
+  return `${readFileSync(basePath, "utf-8").trimEnd()}\n\n${readFileSync(platformPath, "utf-8").trim()}\n`;
+}
+
 async function handleFileConflict(targetPath: string): Promise<"backup" | "skip" | "overwrite"> {
   if (!existsSync(targetPath)) return "overwrite";
 
@@ -1414,7 +1475,14 @@ async function setupAIConfigs(configs: string[]): Promise<void> {
     }
 
     for (const template of configInfo.templates) {
-      const sourcePath = join(templateDir, template);
+      const isCodexConfig = config === "codex" && template === "config.toml";
+      const isPlatformJsonConfig = `${config}/${template}` in PLATFORM_JSON_CONFIGS;
+      const platformJsonTemplateName = PLATFORM_JSON_CONFIGS[`${config}/${template}`];
+      const sourcePath = isCodexConfig
+        ? join(templateDir, "config.base.toml")
+        : isPlatformJsonConfig
+          ? join(templateDir, `${platformJsonTemplateName}.base.json`)
+          : join(templateDir, template);
       const targetPath = join(targetDir, template);
 
       if (!existsSync(sourcePath)) {
@@ -1430,7 +1498,13 @@ async function setupAIConfigs(configs: string[]): Promise<void> {
         addToManifest({ original: targetPath, backup: backupPath, type: "file" });
       }
 
-      copyFileSync(sourcePath, targetPath);
+      if (isCodexConfig) {
+        writeFileSync(targetPath, renderCodexConfig());
+      } else if (isPlatformJsonConfig) {
+        writeFileSync(targetPath, renderPlatformJsonConfig(config, template));
+      } else {
+        copyFileSync(sourcePath, targetPath);
+      }
       log.success(`${configInfo.name}: ${template} installed`);
     }
   }
