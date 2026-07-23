@@ -25,9 +25,17 @@ for split in sorted(
     ]
     horizontal = split["direction"] == "right"
     axis, size = (("x", "width") if horizontal else ("y", "height"))
-    boundary = area[axis] + round(area[size] * split["ratio"])
-    first = [pane for pane in inside if pane["rect"][axis] + pane["rect"][size] <= boundary]
-    second = [pane for pane in inside if pane["rect"][axis] >= boundary]
+    boundary = area[axis] + area[size] * split["ratio"]
+    first = [
+        pane
+        for pane in inside
+        if pane["rect"][axis] + pane["rect"][size] / 2 <= boundary
+    ]
+    second = [
+        pane
+        for pane in inside
+        if pane["rect"][axis] + pane["rect"][size] / 2 > boundary
+    ]
     if not first or not second:
         continue
 
