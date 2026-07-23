@@ -51,5 +51,7 @@ describe('Windows Configuration Linking (install.ps1)', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
     expect(content).toContain('templates/claude');
     expect(content).toContain('templates/cursor');
+    expect(content).toContain('templates/codex/config.base.toml');
+    expect(content).toContain('templates/codex/config.windows.toml');
   });
 });

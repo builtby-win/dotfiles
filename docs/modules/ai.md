@@ -17,6 +17,16 @@ Use the interactive setup to copy templates based on the apps you select. OpenCo
 bb setup
 ```
 
+## Platform overlays
+
+Codex and the other managed agent configurations are rendered from a shared
+base file plus one OS-specific overlay: `.macos`, `.linux`, or `.windows`.
+Put portable settings in the base file. Put local paths, desktop integrations,
+and MCP servers in the appropriate overlay; this prevents macOS-only commands
+from being installed on Linux SSH remotes or Windows. The current non-macOS
+overlays are intentionally empty until a platform-specific integration is
+explicitly needed.
+
 ## Repo-level agent instructions
 
 For per-repo agent rules and instructions, use `agent-link` from `agents/`:

@@ -272,15 +272,35 @@ if (Test-Path $tmuxSourceDir) {
     Set-DotfileLink $tmuxBootstrapSource $tmuxBootstrapDest
 }
 
-# 4.2 AI Tools (Claude & Cursor)
+# 4.2 AI Tools (Claude, Codex & Cursor)
 $appData = $env:APPDATA
 $localAppData = $env:LOCALAPPDATA
 
-# Claude (typically in %APPDATA%/claude-code)
+# Claude (typically in %APPDATA%/claude-code; portable base plus Windows overlay)
 $claudeConfigDir = Join-Path $appData "claude-code"
 if (!(Test-Path $claudeConfigDir)) { New-Item -ItemType Directory $claudeConfigDir }
-Write-Host "Copying Claude templates..." -ForegroundColor Yellow
-Copy-Item -Path (Join-Path $dotfilesDir "templates/claude/*") -Destination $claudeConfigDir -Recurse -Force
+$claudeBaseTemplate = Join-Path $dotfilesDir "templates/claude/settings.base.json"
+$claudeWindowsTemplate = Join-Path $dotfilesDir "templates/claude/settings.windows.json"
+if ((Test-Path $claudeBaseTemplate) -and (Test-Path $claudeWindowsTemplate)) {
+    Write-Host "Rendering Windows Claude config..." -ForegroundColor Yellow
+    # Windows overlay is intentionally a complete JSON object. Future settings
+    # should be added here rather than copied from another OS.
+    Copy-Item -Path $claudeBaseTemplate -Destination (Join-Path $claudeConfigDir "settings.json") -Force
+}
+
+# Codex CLI (base config plus the Windows-specific overlay)
+$codexConfigDir = Join-Path $HOME ".codex"
+if (!(Test-Path $codexConfigDir)) { New-Item -ItemType Directory -Path $codexConfigDir -Force | Out-Null }
+$codexBaseTemplate = Join-Path $dotfilesDir "templates/codex/config.base.toml"
+$codexWindowsTemplate = Join-Path $dotfilesDir "templates/codex/config.windows.toml"
+if ((Test-Path $codexBaseTemplate) -and (Test-Path $codexWindowsTemplate)) {
+    Write-Host "Rendering Windows Codex config..." -ForegroundColor Yellow
+    @(
+        Get-Content -Path $codexBaseTemplate
+        ""
+        Get-Content -Path $codexWindowsTemplate
+    ) | Set-Content -Path (Join-Path $codexConfigDir "config.toml")
+}
 
 # Cursor (typically in %APPDATA%/Cursor/User)
 $cursorConfigDir = Join-Path $appData "Cursor/User"

@@ -1,12 +1,5 @@
-model = "gpt-5.4"
-model_reasoning_effort = "medium"
+# macOS-only integrations and local paths.
 notify = ["\"/Users/winstonzhao/Library/Application Support/back2vibing/resources/b2v-agent-event.sh\" openai-codex --event Notification"]
-personality = "pragmatic"
-web_search = "live"
-
-[features]
-multi_agent = true
-shell_tool = true
 
 [marketplaces.openai-bundled]
 last_updated = "2026-04-23T06:17:54Z"
@@ -33,17 +26,6 @@ args = [
     "mcp",
 ]
 command = "/Users/winstonzhao/.local/bin/cua-driver"
-
-[notice]
-"hide_gpt-5.1-codex-max_migration_prompt" = true
-hide_gpt5_1_migration_prompt = true
-
-[notice.model_migrations]
-"gpt-5.1-codex-max" = "gpt-5.2-codex"
-"gpt-5.3-codex" = "gpt-5.4"
-
-[plugins."github@openai-curated"]
-enabled = true
 
 [projects."/Users/winstonzhao"]
 trust_level = "trusted"
