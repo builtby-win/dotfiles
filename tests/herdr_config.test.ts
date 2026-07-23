@@ -13,5 +13,6 @@ describe("Herdr workspace lifecycle", () => {
     expect(content).toContain('close_workspace = "prefix+shift+w"');
     expect(content).toContain('split_vertical = "prefix+shift+d"');
     expect(content).toContain('last_pane = "prefix+tab"');
+    expect(content).toContain('switch_workspace = "prefix+1..9"');
   });
 });

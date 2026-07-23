@@ -16,6 +16,7 @@ new_tab = "prefix+t"
 previous_tab = "prefix+q"
 next_tab = "prefix+e"
 switch_tab = "alt+1..9"
+switch_workspace = "prefix+1..9"
 close_tab = "prefix+shift+x"
 
 # --- Pane splits (tmux: Shift+D=side-by-side, Alt+-=stacked) ---
