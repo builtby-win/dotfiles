@@ -15,14 +15,6 @@ All tasks follow a strict lifecycle:
 
 ### Standard Task Workflow
 
-### Herdr Workspace Lifecycle
-
-Conductor workspaces use `./scripts/herdr-lifecycle.sh`:
-
-- On startup, run `./scripts/herdr-lifecycle.sh start <repo> <label>`. This creates and focuses the Herdr workspace, opens Ghostty, and prints the workspace ID.
-- Store that workspace ID with the track metadata.
-- On archive, run `./scripts/herdr-lifecycle.sh archive <workspace-id>`. This closes and removes the Herdr workspace without deleting the Git checkout.
-
 1. **Select Task:** Choose the next available task from `plan.md` in sequential order
 
 2. **Mark In Progress:** Before beginning work, edit `plan.md` and change the task from `[ ]` to `[~]`
@@ -73,7 +65,6 @@ Conductor workspaces use `./scripts/herdr-lifecycle.sh`:
 11. **Commit Plan Update:**
     - **Action:** Stage the modified `plan.md` file.
     - **Action:** Commit this change with a descriptive message (e.g., `conductor(plan): Mark task 'Create user model' as complete`).
-
 ### Phase Completion Verification and Checkpointing Protocol
 
 **Trigger:** This protocol is executed immediately after a task is completed that also concludes a phase in `plan.md`.
