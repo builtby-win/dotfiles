@@ -15,6 +15,7 @@ describe("Conductor Herdr lifecycle", () => {
     expect(script).toContain("herdr workspace create");
     expect(script).toContain("herdr workspace focus");
     expect(script).toContain("open -a Ghostty");
+    expect(script.lastIndexOf('herdr workspace focus "$workspace_id"')).toBeLessThan(script.lastIndexOf("open -a Ghostty"));
     expect(script).toContain('herdr workspace close "$workspace_id"');
   });
 });

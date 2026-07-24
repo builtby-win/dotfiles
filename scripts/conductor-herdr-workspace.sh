@@ -21,7 +21,6 @@ workspace_label() {
 
 setup() {
   mkdir -p "$state_dir"
-  open -a Ghostty
 
   label=$(workspace_label)
 
@@ -65,6 +64,7 @@ for w in data.get("result", {}).get("workspaces", []):
   fi
   if [ -n "$workspace_id" ]; then
     herdr workspace focus "$workspace_id" >/dev/null
+    open -a Ghostty
   fi
 }
 
