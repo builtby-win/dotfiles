@@ -76,6 +76,10 @@ quick-terminal-screen = main
 # Forward Shift+Enter as CSI-u so pi/tmux can distinguish it from plain Enter.
 keybind = shift+enter=text:\x1b[13;2u
 
+# Tab navigation
+keybind = ctrl+tab=next_tab
+keybind = ctrl+shift+tab=previous_tab
+
 # Performance optimizations
 # Smooth out rendering for high-throughput tools (Claude Code/Gemini)
 
