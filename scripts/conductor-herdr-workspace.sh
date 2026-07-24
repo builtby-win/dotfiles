@@ -6,15 +6,10 @@ state_key=$(printf '%s' "${CONDUCTOR_WORKSPACE_PATH:?}" | python3 -c 'import has
 state_file="$state_dir/$state_key"
 
 resolve_repo_name() {
-  if [ -n "${CONDUCTOR_REPO_NAME:-}" ]; then
-    printf '%s\n' "$CONDUCTOR_REPO_NAME"
-    return
-  fi
-
   repo_path="${CONDUCTOR_REPO_PATH:-${CONDUCTOR_PROJECT_PATH:-$CONDUCTOR_WORKSPACE_PATH}}"
-  toplevel=$(git -C "$repo_path" rev-parse --show-toplevel 2>/dev/null || true)
-  if [ -n "$toplevel" ]; then
-    basename "$toplevel"
+  git_common_dir=$(git -C "$repo_path" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)
+  if [ -n "$git_common_dir" ]; then
+    basename "$(dirname "$git_common_dir")"
   else
     basename "$repo_path"
   fi
