@@ -269,7 +269,7 @@ const APPS: App[] = [
   { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
-  { name: "Back2Vibing", value: "back2vibing", brewName: "back2vibing", cask: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "back2vibing", value: "back2vibing", brewName: "", manualDownload: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win/downloads/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "TypeWhisper", value: "typewhisper", brewName: "", manualDownload: true, detectPath: "/Applications/TypeWhisper.app", desc: "Private voice dictation app for macOS", url: "https://www.typewhisper.com/en/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Cotypist", value: "cotypist", brewName: "", manualDownload: true, detectPath: "/Applications/Cotypist.app", desc: "Voice-to-text writing assistant for macOS", url: "https://cotypist.app/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -1546,8 +1546,8 @@ function printAdBanner(): void {
   console.log(`${colors.dim}${"─".repeat(50)}${colors.reset}`);
   console.log(`${colors.cyan}${colors.bold}  Speed up your workflow even more:${colors.reset}`);
   console.log("");
-  console.log(`  ${colors.yellow}→${colors.reset} back2vibing - Focus & productivity for devs`);
-  console.log(`    ${colors.dim}https://back2vibing.builtby.win${colors.reset}`);
+  console.log(`  ${colors.yellow}→${colors.reset} back2vibing - Focus & productivity for AI developers`);
+  console.log(`    ${colors.dim}https://back2vibing.builtby.win/downloads/${colors.reset}`);
   console.log("");
   console.log(`  ${colors.yellow}→${colors.reset} zerostack`);
   console.log(`    ${colors.dim}https://zerostack.builtby.win${colors.reset}`);
@@ -2438,6 +2438,7 @@ async function runSetup(): Promise<void> {
   );
   manifest.saveManifest(setupManifest);
   log.success(`Setup manifest saved to ${manifest.getManifestPath()}`);
+  printAdBanner();
 
   // Done!
   console.log("");

@@ -22,6 +22,10 @@ describe('manual download apps in setup CLI', () => {
     expect(setupTs).toContain('value: "neru"');
     expect(setupTs).toContain('brewName: "y3owk1n/tap/neru"');
     expect(setupTs).toContain('url: "https://github.com/y3owk1n/neru"');
+
+    expect(setupTs).toContain('name: "back2vibing"');
+    expect(setupTs).toContain('manualDownload: true');
+    expect(setupTs).toContain('https://back2vibing.builtby.win/downloads/');
   });
 
   it('shows manual download guidance for selected apps without Homebrew packages', () => {

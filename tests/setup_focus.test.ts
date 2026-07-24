@@ -57,6 +57,14 @@ describe('focused setup defaults', () => {
     expect(content).toContain('selectedApps = selectedApps.filter((app) => !app.startsWith("__category_"));');
   });
 
+  it('shows product links after setup completes', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('printAdBanner();');
+    expect(content).toContain('https://back2vibing.builtby.win/downloads/');
+    expect(content).toContain('https://zerostack.builtby.win');
+  });
+
   it('runs setup directly instead of showing the old dashboard menu first', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
