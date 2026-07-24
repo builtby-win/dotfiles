@@ -47,6 +47,16 @@ describe('focused setup defaults', () => {
     expect(content).not.toContain('selectedApps = ["back2vibing", "tmux", "sesh", "fzf", "ghostty", "starship", "zoxide"]');
   });
 
+  it('expands selected groups into individually described app choices', () => {
+    const content = fs.readFileSync(setupPath, 'utf-8');
+
+    expect(content).toContain('Select groups to expand');
+    expect(content).toContain('each item includes a description and link');
+    expect(content).toContain('app.desc');
+    expect(content).toContain('app.url');
+    expect(content).toContain('selectedApps.push(...categoryApps);');
+  });
+
   it('runs setup directly instead of showing the old dashboard menu first', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 
