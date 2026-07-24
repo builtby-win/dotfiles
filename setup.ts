@@ -235,6 +235,7 @@ interface App {
   platforms?: PlatformSupport; // Platform support (default: all platforms)
   installCommand?: string;     // Custom installer for tools without a package manager entry
   linuxInstallCommand?: string; // Custom Linux installer when Homebrew is unavailable
+  brewTap?: { name: string; url: string }; // Optional tap required before a Homebrew package
   category: AppCategory;   // Category for grouped display
 }
 
@@ -269,7 +270,7 @@ const APPS: App[] = [
   { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
-  { name: "back2vibing", value: "back2vibing", brewName: "", manualDownload: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win/downloads/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "back2vibing", value: "back2vibing", brewName: "back2vibing", brewTap: { name: "builtby-win/back2vibing", url: "https://github.com/builtby-win/back2vibing" }, cask: true, detectPath: "/Applications/back2vibing.app", desc: "Focus & productivity for AI developers", url: "https://back2vibing.builtby.win/downloads/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Raycast", value: "raycast", brewName: "raycast", cask: true, checked: true, detectPath: "/Applications/Raycast.app", desc: "Spotlight replacement with extensions", url: "https://raycast.com", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "TypeWhisper", value: "typewhisper", brewName: "", manualDownload: true, detectPath: "/Applications/TypeWhisper.app", desc: "Private voice dictation app for macOS", url: "https://www.typewhisper.com/en/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Cotypist", value: "cotypist", brewName: "", manualDownload: true, detectPath: "/Applications/Cotypist.app", desc: "Voice-to-text writing assistant for macOS", url: "https://cotypist.app/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -786,6 +787,17 @@ async function installApps(apps: string[]): Promise<void> {
     }
 
     for (const app of appsToInstall) {
+      if (platform === "macos" && app.brewTap) {
+        const { name, url } = app.brewTap;
+        if (!runCommand(`brew tap-info "${name}"`, true)) {
+          log.info(`Adding Homebrew tap ${name}...`);
+          if (!runCommand(`brew tap "${name}" "${url}"`, false)) {
+            log.warning(`Failed to add Homebrew tap ${name}`);
+          }
+        }
+        // Homebrew may mark third-party taps untrusted; trust only this selected tap.
+        runCommand(`brew trust --tap "${name}"`, true);
+      }
       if (app.brewName && !(platform === "linux" && app.linuxInstallCommand)) {
         installPackage(app.brewName, app.cask);
       }

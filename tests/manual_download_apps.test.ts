@@ -24,7 +24,8 @@ describe('manual download apps in setup CLI', () => {
     expect(setupTs).toContain('url: "https://github.com/y3owk1n/neru"');
 
     expect(setupTs).toContain('name: "back2vibing"');
-    expect(setupTs).toContain('manualDownload: true');
+    expect(setupTs).toContain('brewName: "back2vibing"');
+    expect(setupTs).toContain('brewTap: { name: "builtby-win/back2vibing", url: "https://github.com/builtby-win/back2vibing" }');
     expect(setupTs).toContain('https://back2vibing.builtby.win/downloads/');
   });
 
