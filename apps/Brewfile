@@ -21,6 +21,10 @@ brew "jq"             # JSON processor
 brew "gh"             # GitHub CLI
 brew "tmux"           # Terminal multiplexer
 brew "sesh"           # Smart tmux session manager
+brew "herdr"           # Agent-aware terminal multiplexer
+
+# AI & Agent Workflows
+cask "conductor"       # Parallel coding agents in isolated workspaces
 
 # Terminals & Editors
 cask "iterm2"

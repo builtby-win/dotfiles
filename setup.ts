@@ -233,6 +233,8 @@ interface App {
   desc?: string;           // Short description for info display
   url?: string;            // Project URL
   platforms?: PlatformSupport; // Platform support (default: all platforms)
+  installCommand?: string;     // Custom installer for tools without a package manager entry
+  linuxInstallCommand?: string; // Custom Linux installer when Homebrew is unavailable
   category: AppCategory;   // Category for grouped display
 }
 
@@ -247,6 +249,9 @@ const APPS: App[] = [
   { name: "eza", value: "eza", brewName: "eza", desc: "Modern ls with colors and icons", url: "https://github.com/eza-community/eza", category: "cli" },
   { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide", category: "cli" },
   { name: "sesh", value: "sesh", brewName: "sesh", desc: "Smart session manager for tmux", url: "https://github.com/joshmedeski/sesh", category: "cli" },
+  { name: "Herdr", value: "herdr", brewName: "herdr", linuxInstallCommand: "curl -fsSL https://herdr.dev/install.sh | sh", checked: true, detectCmd: "command -v herdr", desc: "Agent-aware terminal multiplexer", url: "https://herdr.dev", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
+  { name: "Conductor", value: "conductor", brewName: "conductor", cask: true, detectPath: "/Applications/Conductor.app", desc: "Run parallel coding agents in isolated workspaces", url: "https://www.conductor.build/", platforms: { macos: true, linux: false, windows: false }, category: "productivity" },
+
   { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
 
   // Terminals & Editors
@@ -260,6 +265,7 @@ const APPS: App[] = [
   { name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true, detectCmd: "command -v claude", desc: "Anthropic's AI coding assistant for terminal", url: "https://docs.anthropic.com/en/docs/claude-code", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
   { name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: true, detectCmd: "command -v opencode", desc: "Default AI coding assistant CLI by opencode.ai", url: "https://opencode.ai", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
   { name: "Codex CLI", value: "codex", brewName: "", configs: ["codex"], checked: false, detectCmd: "command -v codex", desc: "Optional OpenAI coding assistant CLI", url: "https://github.com/openai/codex", category: "ai" },
+  { name: "Oh My Pi", value: "omp", brewName: "", checked: true, detectCmd: "command -v omp", installCommand: "curl -fsSL https://omp.sh/install | sh", desc: "Batteries-included terminal coding agent", url: "https://github.com/can1357/oh-my-pi", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
   { name: "Gemini CLI", value: "gemini", brewName: "", configs: ["gemini"], checked: false, detectCmd: "command -v gemini", desc: "Google's AI coding assistant CLI", url: "https://gemini.google.com/app", platforms: { macos: true, linux: true, windows: false }, category: "ai" },
 
   // Productivity (macOS only)
@@ -769,20 +775,32 @@ function printManualDownloadApps(apps: App[]): void {
 async function installApps(apps: string[]): Promise<void> {
   if (apps.length === 0) return;
 
-  const appsToInstall = APPS.filter((a) => apps.includes(a.value) && a.brewName);
+  const appsToInstall = APPS.filter((a) => apps.includes(a.value) && (a.brewName || a.installCommand));
   const platform = getCurrentPlatform();
   if (appsToInstall.length > 0) {
     if (platform === "linux") {
       const manager = getLinuxPackageManager();
       log.step(`Installing commands via ${manager ?? "Linux package manager"}...`);
-    } else {
+    } else if (appsToInstall.some((app) => app.brewName)) {
       log.step("Installing apps via Homebrew...");
     }
 
     for (const app of appsToInstall) {
-      installPackage(app.brewName, app.cask);
+      if (app.brewName && !(platform === "linux" && app.linuxInstallCommand)) {
+        installPackage(app.brewName, app.cask);
+      }
+      const customInstallCommand = platform === "linux"
+        ? app.linuxInstallCommand ?? app.installCommand
+        : app.installCommand;
+      if (customInstallCommand) {
+        log.info(`Installing ${app.name}...`);
+        if (runCommand(customInstallCommand, false)) {
+          log.success(`${app.name} installed`);
+        } else {
+          log.warning(`Failed to install ${app.name}`);
+        }
+      }
 
-      // Install dependencies
       if (app.dependencies) {
         for (const dep of app.dependencies) {
           installPackage(dep);

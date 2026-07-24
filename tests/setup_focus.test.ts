@@ -21,6 +21,19 @@ describe('focused setup defaults', () => {
     expect(content).toContain('Installing Codex CLI...');
   });
 
+  it('offers Oh My Pi, Herdr, and Conductor through supported installers', () => {
+    const setup = fs.readFileSync(setupPath, 'utf-8');
+    const brewfile = fs.readFileSync(path.resolve(__dirname, '../apps/Brewfile'), 'utf-8');
+    const windowsSetup = fs.readFileSync(path.resolve(__dirname, '../setup-windows.ts'), 'utf-8');
+
+    expect(setup).toContain('installCommand: "curl -fsSL https://omp.sh/install | sh"');
+    expect(setup).toContain('{ name: "Herdr", value: "herdr", brewName: "herdr"');
+    expect(setup).toContain('{ name: "Conductor", value: "conductor", brewName: "conductor", cask: true');
+    expect(brewfile).toContain('brew "herdr"');
+    expect(brewfile).toContain('cask "conductor"');
+    expect(windowsSetup).toContain('irm https://omp.sh/install.ps1 | iex');
+  });
+
   it('lets focused setup use recommended defaults while keeping Codex and Ghostty optional', () => {
     const content = fs.readFileSync(setupPath, 'utf-8');
 

@@ -167,6 +167,7 @@ async function runSetup() {
     { name: "Gemini CLI (npm)", value: "gemini", command: "gemini.cmd" },
     { name: "Claude Code (PowerShell installer)", value: "claude", command: "claude.exe", checked: true },
     { name: "OpenCode CLI (npm)", value: "opencode", command: "opencode.cmd", checked: true },
+    { name: "Oh My Pi (PowerShell installer)", value: "omp", command: "omp.exe", checked: true },
   ]);
 
   const miscChoices = markInstalled([
@@ -257,6 +258,14 @@ async function runSetup() {
   if (selectedAiTools.includes("claude")) {
     log.step("Installing Claude Code...");
     runCommand("powershell -NoProfile -ExecutionPolicy Bypass -Command \"irm https://claude.ai/install.ps1 | iex\"");
+  }
+  if (selectedAiTools.includes("omp")) {
+    log.step("Installing Oh My Pi...");
+    if (runCommand("powershell -NoProfile -ExecutionPolicy Bypass -Command \"irm https://omp.sh/install.ps1 | iex\"")) {
+      log.ok("Oh My Pi installed");
+    } else {
+      log.warn("Oh My Pi install failed");
+    }
   }
 
   if (npmOk) {
