@@ -2117,61 +2117,44 @@ async function runSetup(): Promise<void> {
 
   // Step navigation loop
   while (currentStep >= 1) {
-    // Step 1: Choose groups, then expand each selected group into individual apps
+    // Step 1: Show every app, grouped visually so each one can be selected
     if (currentStep === 1) {
       log.step(`[Step 1 of ${TOTAL_STEPS}] Select ${installItemLabel} to install`);
 
-      const categoryChoices = CATEGORY_ORDER.flatMap((category) => {
+      const appChoices: Array<{ name: string; value: string; checked?: boolean; disabled?: string | false }> = [];
+      for (const category of CATEGORY_ORDER) {
         const appsInCategory = selectableApps.filter((app) => app.category === category);
-        if (appsInCategory.length === 0) return [];
+        if (appsInCategory.length === 0) continue;
 
-        const installedCount = appsInCategory.filter((app) => appStates.get(app.value) === "installed").length;
-        const partialCount = appsInCategory.filter((app) => appStates.get(app.value) === "partial").length;
-        const toInstall = appsInCategory.length - installedCount - partialCount;
-        const status = [
-          installedCount > 0 ? `${installedCount} installed` : "",
-          partialCount > 0 ? `${partialCount} partial` : "",
-          toInstall > 0 ? `${toInstall} available` : "",
-        ].filter(Boolean).join(", ");
+        appChoices.push({
+          name: `${colors.cyan}${colors.bold}── ${CATEGORY_LABELS[category]} ──${colors.reset}`,
+          value: `__category_${category}__`,
+          disabled: " ",
+        });
 
-        return [{
-          name: `${CATEGORY_LABELS[category]} ${colors.dim}(${status})${colors.reset}`,
-          value: category,
-          checked: category !== "input" || installedCount > 0,
-          disabled: false,
-        }];
-      });
+        for (const app of appsInCategory) {
+          const state = appStates.get(app.value) ?? "not_installed";
+          const details = [
+            app.desc,
+            app.url ? `${colors.cyan}${app.url}${colors.reset}` : "",
+          ].filter(Boolean).join(` ${colors.dim}·${colors.reset} `);
+          appChoices.push({
+            name: `  ${formatAppChoiceName(app, state)}${details ? ` ${colors.dim}- ${details}${colors.reset}` : ""}`,
+            value: app.value,
+            checked: state !== "not_installed" || (app.checked ?? false),
+            disabled: state === "installed" ? "(already installed)" : false,
+          });
+        }
+      }
 
-      const selectedCategories = await checkbox({
-        message: `Select groups to expand (space to toggle, enter when done)${colors.reset}:`,
-        choices: categoryChoices,
-        pageSize: 15,
+      selectedApps = await checkbox({
+        message: `Select ${installItemLabel} individually (groups are shown as headings)${colors.reset}:`,
+        choices: appChoices,
+        pageSize: 20,
         loop: false,
       });
 
-      selectedApps = [];
-      for (const category of selectedCategories) {
-        const appsInCategory = selectableApps.filter((app) => app.category === category);
-        const categoryApps = await checkbox({
-          message: `Select ${CATEGORY_LABELS[category]} ${installItemLabel} (each item includes a description and link):`,
-          choices: appsInCategory.map((app) => {
-            const state = appStates.get(app.value) ?? "not_installed";
-            const details = [
-              app.desc,
-              app.url ? `${colors.cyan}${app.url}${colors.reset}` : "",
-            ].filter(Boolean).join(` ${colors.dim}·${colors.reset} `);
-            return {
-              name: `${formatAppChoiceName(app, state)}${details ? ` ${colors.dim}- ${details}${colors.reset}` : ""}`,
-              value: app.value,
-              checked: state !== "not_installed" || (app.checked ?? false),
-              disabled: state === "installed" ? "(already installed)" : false,
-            };
-          }),
-          pageSize: 20,
-          loop: false,
-        });
-        selectedApps.push(...categoryApps);
-      }
+      selectedApps = selectedApps.filter((app) => !app.startsWith("__category_"));
 
       for (const app of selectableApps) {
         const state = appStates.get(app.value);
