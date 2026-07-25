@@ -14,8 +14,6 @@ should_exit_after_passthrough = false
 "Cmd+Ctrl+Alt+Shift+Space" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+;" = "recursive_grid --cursor-selection-mode follow"
-"Cmd+Ctrl+Alt+Shift+'" = "grid --cursor-selection-mode follow"
 
 [theme.light]
 surface = "#EEF2FF"

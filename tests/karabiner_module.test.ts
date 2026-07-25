@@ -132,6 +132,8 @@ describe('Karabiner module wiring', () => {
     expect(neru).toContain('~/.local/bin/karabiner-layer scroll');
     expect(neru).toContain('~/.local/bin/karabiner-layer nudge');
     expect(neru).toContain('~/.local/bin/karabiner-layer off');
+    expect(neru).not.toContain('Cmd+Ctrl+Alt+Shift+;');
+    expect(neru).not.toContain("Cmd+Ctrl+Alt+Shift+'");
     const resetLines = neru.split('\n').filter((line) => line.includes('action reset'));
     expect(resetLines).toHaveLength(3);
     expect(resetLines.every((line) => line.includes('karabiner-layer off'))).toBe(true);
