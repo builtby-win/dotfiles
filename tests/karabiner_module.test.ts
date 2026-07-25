@@ -46,7 +46,7 @@ describe('Karabiner module wiring', () => {
     const rules = config.profiles[0].complex_modifications.rules;
     const descriptions = rules.map((rule: { description: string }) => rule.description);
 
-    expect(descriptions).toContain('Neru chords: fj grid, jl recursive grid, dk scroll, df hints');
+    expect(descriptions).toContain('Neru chords: fj grid, dk scroll, df hints');
     expect(descriptions).toContain('jk chord: terminal leader or next-key Command');
     expect(descriptions).not.toContain('Hold j then Space for repeating Backspace outside GUI Vim editors');
     expect(descriptions).toContain('One-shot modifiers with Microsoft Sculpt layout parity');

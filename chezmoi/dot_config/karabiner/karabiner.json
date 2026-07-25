@@ -290,7 +290,7 @@
                         ]
                     },
                     {
-                        "description": "Neru chords: fj grid, jl recursive grid, dk scroll, df hints",
+                        "description": "Neru chords: fj grid, dk scroll, df hints",
                         "manipulators": [
                             {
                                 "type": "basic",
@@ -331,57 +331,6 @@
                                     },
                                     {
                                         "key_code": "k",
-                                        "modifiers": [
-                                            "left_command",
-                                            "left_control",
-                                            "left_option",
-                                            "left_shift"
-                                        ]
-                                    }
-                                ],
-                                "parameters": {
-                                    "basic.simultaneous_threshold_milliseconds": 75
-                                }
-                            },
-                            {
-                                "type": "basic",
-                                "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "simultaneous": [
-                                        {
-                                            "key_code": "j"
-                                        },
-                                        {
-                                            "key_code": "l"
-                                        }
-                                    ],
-                                    "simultaneous_options": {
-                                        "detect_key_down_uninterruptedly": false,
-                                        "key_down_order": "insensitive",
-                                        "key_up_order": "insensitive",
-                                        "key_up_when": "any"
-                                    },
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "neru_mode",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "key_code": "semicolon",
                                         "modifiers": [
                                             "left_command",
                                             "left_control",
