@@ -20,13 +20,6 @@ args = [
 ]
 command = "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64"
 
-[mcp_servers.posthog]
-args = [
-    "-y",
-    "mcp-remote@latest",
-    "https://mcp.posthog.com/sse",
-]
-command = "npx"
 
 [mcp_servers."cua-driver"]
 args = [

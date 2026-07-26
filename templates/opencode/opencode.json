@@ -23,18 +23,6 @@
     }
   },
   "mcp": {
-    "google-analytics": {
-      "type": "remote",
-      "url": "https://server.smithery.ai/google_analytics"
-    },
-    "chrome-devtools": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ]
-    },
     "pencil": {
       "command": [
         "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64",
@@ -49,19 +37,6 @@
         "/Users/winstonzhao/.local/bin/cua-driver",
         "mcp"
       ],
-      "enabled": true,
-      "type": "local"
-    },
-    "davinci-resolve": {
-      "command": [
-        "/Users/winstonzhao/builtby.win/davinci-resolve-mcp/venv/bin/python",
-        "/Users/winstonzhao/builtby.win/davinci-resolve-mcp/src/server.py"
-      ],
-      "env": {
-        "RESOLVE_SCRIPT_API": "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting",
-        "RESOLVE_SCRIPT_LIB": "/Applications/DaVinci Resolve/DaVinci Resolve.app/Contents/Libraries/Fusion/fusionscript.so",
-        "PYTHONPATH": "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/Modules"
-      },
       "enabled": true,
       "type": "local"
     }
