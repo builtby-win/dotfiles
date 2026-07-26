@@ -126,6 +126,8 @@ describe('Karabiner module wiring', () => {
     const helper = readRepoFile('chezmoi/dot_local/bin/executable_karabiner-layer');
     const neru = readRepoFile('chezmoi/dot_config/neru/config.toml');
     const setup = readRepoFile('setup.ts');
+    const config = JSON.parse(readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'));
+    const rules = config.profiles[0].complex_modifications.rules;
 
     expect(helper).toContain('karabiner_cli');
     expect(helper).toContain('--set-variables');
@@ -134,6 +136,11 @@ describe('Karabiner module wiring', () => {
     expect(neru).toContain('~/.local/bin/karabiner-layer off');
     expect(neru).not.toContain('Cmd+Ctrl+Alt+Shift+;');
     expect(neru).not.toContain("Cmd+Ctrl+Alt+Shift+'");
+    const semicolonRule = rules.find(
+      (candidate: { description: string }) => candidate.description === 'Double-tap semicolon opens AltTab',
+    );
+    expect(semicolonRule.manipulators.every((manipulator: { from: { modifiers?: unknown } }) => !manipulator.from.modifiers))
+      .toBe(true);
     const resetLines = neru.split('\n').filter((line) => line.includes('action reset'));
     expect(resetLines).toHaveLength(3);
     expect(resetLines.every((line) => line.includes('karabiner-layer off'))).toBe(true);
