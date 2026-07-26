@@ -1,9 +1,11 @@
 #!/bin/sh
 set -eu
 
-state_dir="$HOME/.conductor-herdr-workspaces"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/conductor-herdr-workspaces"
+legacy_state_dir="$HOME/.conductor-herdr-workspaces"
 state_key=$(printf '%s' "${CONDUCTOR_WORKSPACE_PATH:?}" | python3 -c 'import hashlib, sys; print(hashlib.sha256(sys.stdin.buffer.read()).hexdigest()[:16])')
 state_file="$state_dir/$state_key"
+legacy_state_file="$legacy_state_dir/$state_key"
 
 resolve_repo_name() {
   # Conductor workspaces are always grouped as <repo>/<workspace>.
@@ -28,6 +30,9 @@ for pane in data.get("result", {}).get("panes", []):
 
 setup() {
   mkdir -p "$state_dir"
+  if [ ! -f "$state_file" ] && [ -f "$legacy_state_file" ]; then
+    cp "$legacy_state_file" "$state_file"
+  fi
 
   label=$(workspace_label)
 
@@ -80,6 +85,9 @@ for w in data.get("result", {}).get("workspaces", []):
 }
 
 archive() {
+  if [ ! -f "$state_file" ] && [ -f "$legacy_state_file" ]; then
+    state_file="$legacy_state_file"
+  fi
   workspace_id=
   if [ -f "$state_file" ]; then
     workspace_id=$(cat "$state_file")
@@ -110,7 +118,7 @@ for w in data.get("result", {}).get("workspaces", []):
   if [ -n "$workspace_id" ]; then
     herdr workspace close "$workspace_id" >/dev/null 2>&1 || true
   fi
-  rm -f "$state_file"
+  rm -f "$state_file" "$legacy_state_file"
 }
 
 case "${1:-}" in

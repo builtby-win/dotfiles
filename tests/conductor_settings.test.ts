@@ -27,6 +27,8 @@ describe("Conductor Herdr lifecycle", () => {
     expect(script).toContain('herdr workspace close "$workspace_id"');
     expect(script).toContain("find_workspace_by_path");
     expect(script).toContain("Keep labels managed by conductor-workspace-summary intact.");
+    expect(script).toContain("${XDG_STATE_HOME:-$HOME/.local/state}/conductor-herdr-workspaces");
+    expect(script).toContain("legacy_state_file");
   });
   it("installs a daily updater that preserves descriptive labels", () => {
     const summary = fs.readFileSync(summaryPath, "utf-8");
