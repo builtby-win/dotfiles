@@ -410,8 +410,5 @@
     }
   },
   "permissions": {
-    "allow": [
-      "mcp__pencil"
-    ]
   }
 }

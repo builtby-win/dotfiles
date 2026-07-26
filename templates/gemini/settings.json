@@ -127,14 +127,6 @@
       "description": "Hydra multi-agent orchestration",
       "timeout": 600000
     },
-    "pencil": {
-      "args": [
-        "--app",
-        "desktop"
-      ],
-      "command": "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64",
-      "env": {}
-    },
     "cua-driver": {
       "args": [
         "mcp"

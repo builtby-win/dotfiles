@@ -13,13 +13,6 @@ last_updated = "2026-04-23T06:17:54Z"
 source = "/Users/winstonzhao/.codex/.tmp/bundled-marketplaces/openai-bundled"
 source_type = "local"
 
-[mcp_servers.pencil]
-args = [
-    "--app",
-    "desktop",
-]
-command = "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64"
-
 
 [mcp_servers."cua-driver"]
 args = [
