@@ -98,6 +98,8 @@ curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap
 
 This applies chezmoi-managed dotfiles and orchestrates apps, configs, and optional features.
 
+Claude Code users can use the bundled `dotfiles-setup` skill for a conversational install or customization flow. It asks about intent, setup profile, apps, managed configs, optional features, and shell handoff, then maps the answers to the existing bootstrap or `bb setup` commands.
+
 Change selections later:
 
 ```bash

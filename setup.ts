@@ -331,7 +331,7 @@ const OPTIONAL_FEATURES = [
 const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?: string }> = {
   claude: {
     name: "Claude Code",
-    templates: ["settings.json", "settings.local.json"],
+    templates: ["settings.json", "settings.local.json", "skills/dotfiles-setup/SKILL.md"],
   },
   codex: {
     name: "Codex CLI",
@@ -1449,6 +1449,11 @@ async function setupAIConfigs(configs: string[]): Promise<void> {
 
       if (!existsSync(sourcePath)) {
         continue;
+      }
+
+      const targetParentDir = dirname(targetPath);
+      if (!existsSync(targetParentDir)) {
+        mkdirSync(targetParentDir, { recursive: true });
       }
 
       const choice = await handleFileConflict(targetPath);
