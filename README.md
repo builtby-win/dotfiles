@@ -98,7 +98,7 @@ curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap
 
 This applies chezmoi-managed dotfiles and orchestrates apps, configs, and optional features.
 
-Claude Code users can use the bundled `dotfiles-setup` skill for a conversational install or customization flow. It asks about intent, setup profile, apps, managed configs, optional features, and shell handoff, then maps the answers to the existing bootstrap or `bb setup` commands.
+Claude Code and OpenCode users can use the bundled `setup` skill from `~/.claude/skills/setup/skill.md` or `~/.agents/skills/setup/skill.md` for a conversational install or customization flow. The skill is installed when the corresponding AI CLI is selected, asks about intent, setup profile, apps, managed configs, optional features, and shell handoff, then maps the answers to the existing bootstrap or `bb setup` commands.
 
 Change selections later:
 

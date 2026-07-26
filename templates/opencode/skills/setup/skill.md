@@ -1,11 +1,15 @@
 ---
-name: dotfiles-setup
+name: setup
 description: Install, configure, customize, or recover builtby.win dotfiles interactively. Use when a user asks to set up or change their shell, terminals, apps, AI tools, keybindings, or dotfiles backups.
 ---
 
 # Dotfiles Setup
 
-Replace the raw curl-first experience with a conversational setup. Ask the user what they want, explain the consequence of each choice, then run the existing `bb` flow rather than recreating installer logic.
+Replace the raw curl-first experience with a conversational setup. Ask what the user wants, explain the consequence of each choice, then run the existing `bb` flow instead of recreating installer logic.
+
+## Prerequisites
+
+This skill is installed with the selected Claude Code or OpenCode configuration. If neither CLI is installed, use the bootstrap flow first; do not pretend this skill can run before an agent is available.
 
 ## Safety and discovery
 
@@ -20,7 +24,7 @@ Replace the raw curl-first experience with a conversational setup. Ask the user 
 
 ## AskUserQuestions checklist
 
-Use `AskUserQuestion` for the choices below. Ask only questions relevant to the user's platform and request; do not force users through every question. If the user already answered a question, skip it.
+Use the agent's interactive question tool for the choices below. Ask only questions relevant to the platform and request; do not force users through every question. If the user already answered a question, skip it.
 
 1. **Intent** — What should happen?
    - First-time install

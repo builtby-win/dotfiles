@@ -328,10 +328,16 @@ const OPTIONAL_FEATURES = [
 ];
 
 // AI tool configs (template-based)
-const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?: string }> = {
+const AI_CONFIGS: Record<string, {
+  name: string;
+  templates: string[];
+  targetDir?: string;
+  skill?: { template: string; targetDir: string };
+}> = {
   claude: {
     name: "Claude Code",
-    templates: ["settings.json", "settings.local.json", "skills/dotfiles-setup/SKILL.md"],
+    templates: ["settings.json", "settings.local.json"],
+    skill: { template: "skills/setup/skill.md", targetDir: ".claude" },
   },
   codex: {
     name: "Codex CLI",
@@ -341,6 +347,7 @@ const AI_CONFIGS: Record<string, { name: string; templates: string[]; targetDir?
     name: "OpenCode",
     templates: ["opencode.json", "oh-my-openagent.json", "tui.json"],
     targetDir: ".config/opencode",
+    skill: { template: "skills/setup/skill.md", targetDir: ".agents" },
   },
   gemini: {
     name: "Gemini CLI",
@@ -964,6 +971,10 @@ function selectedAIConfigPaths(configs: string[]): string[] {
     for (const template of configInfo.templates) {
       paths.add(join(targetDir, template));
     }
+
+    if (configInfo.skill) {
+      paths.add(join(HOME, configInfo.skill.targetDir, configInfo.skill.template));
+    }
   }
 
   return [...paths].sort();
@@ -1467,6 +1478,27 @@ async function setupAIConfigs(configs: string[]): Promise<void> {
 
       copyFileSync(sourcePath, targetPath);
       log.success(`${configInfo.name}: ${template} installed`);
+    }
+
+    if (configInfo.skill) {
+      const skillSourcePath = join(templateDir, configInfo.skill.template);
+      const skillTargetPath = join(HOME, configInfo.skill.targetDir, configInfo.skill.template);
+      if (existsSync(skillSourcePath)) {
+        const skillParentDir = dirname(skillTargetPath);
+        if (!existsSync(skillParentDir)) {
+          mkdirSync(skillParentDir, { recursive: true });
+        }
+
+        const choice = await handleFileConflict(skillTargetPath);
+        if (choice === "backup" && existsSync(skillTargetPath)) {
+          const backupPath = backupFile(skillTargetPath);
+          addToManifest({ original: skillTargetPath, backup: backupPath, type: "file" });
+        }
+        if (choice !== "skip") {
+          copyFileSync(skillSourcePath, skillTargetPath);
+          log.success(`${configInfo.name}: ${configInfo.skill.template} installed`);
+        }
+      }
     }
   }
 }
