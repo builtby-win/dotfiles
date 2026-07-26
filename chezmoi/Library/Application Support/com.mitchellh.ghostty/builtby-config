@@ -33,6 +33,7 @@ keybind = ctrl+shift+tab=previous_tab
 keybind = cmd+d=new_split:right
 keybind = cmd+shift+d=new_split:down
 keybind = cmd+enter=toggle_fullscreen
+keybind = cmd+a=select_all
 
 # Clipboard
 clipboard-read = allow
