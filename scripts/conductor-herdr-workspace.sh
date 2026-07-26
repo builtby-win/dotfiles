@@ -6,13 +6,8 @@ state_key=$(printf '%s' "${CONDUCTOR_WORKSPACE_PATH:?}" | python3 -c 'import has
 state_file="$state_dir/$state_key"
 
 resolve_repo_name() {
-  repo_path="${CONDUCTOR_REPO_PATH:-${CONDUCTOR_PROJECT_PATH:-$CONDUCTOR_WORKSPACE_PATH}}"
-  git_common_dir=$(git -C "$repo_path" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)
-  if [ -n "$git_common_dir" ]; then
-    basename "$(dirname "$git_common_dir")"
-  else
-    basename "$repo_path"
-  fi
+  # Conductor workspaces are always grouped as <repo>/<workspace>.
+  basename "$(dirname "$CONDUCTOR_WORKSPACE_PATH")"
 }
 
 workspace_label() {
