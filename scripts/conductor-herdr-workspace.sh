@@ -13,6 +13,18 @@ resolve_repo_name() {
 workspace_label() {
   printf '%s-%s\n' "$(resolve_repo_name)" "$CONDUCTOR_WORKSPACE_NAME"
 }
+find_workspace_by_path() {
+  herdr pane list 2>/dev/null | python3 -c '
+import json, sys
+target = sys.argv[1]
+data = json.load(sys.stdin)
+for pane in data.get("result", {}).get("panes", []):
+    if pane.get("cwd") == target or pane.get("foreground_cwd") == target:
+        print(pane.get("workspace_id", ""))
+        break
+' "$CONDUCTOR_WORKSPACE_PATH"
+}
+
 
 setup() {
   mkdir -p "$state_dir"
@@ -25,6 +37,10 @@ setup() {
     if ! herdr workspace get "$workspace_id" >/dev/null 2>&1; then
       workspace_id=
     fi
+  fi
+
+  if [ -z "$workspace_id" ]; then
+    workspace_id=$(find_workspace_by_path || true)
   fi
 
   if [ -z "$workspace_id" ]; then
@@ -54,7 +70,7 @@ for w in data.get("result", {}).get("workspaces", []):
       printf '%s\n' "$workspace_id" > "$state_file"
     fi
   else
-    herdr workspace rename "$workspace_id" "$label" >/dev/null 2>&1 || true
+    # Keep labels managed by conductor-workspace-summary intact.
     printf '%s\n' "$workspace_id" > "$state_file"
   fi
   if [ -n "$workspace_id" ]; then
@@ -67,6 +83,10 @@ archive() {
   workspace_id=
   if [ -f "$state_file" ]; then
     workspace_id=$(cat "$state_file")
+  fi
+
+  if [ -z "$workspace_id" ]; then
+    workspace_id=$(find_workspace_by_path || true)
   fi
 
   if [ -z "$workspace_id" ]; then

@@ -25,6 +25,8 @@ describe("Conductor Herdr lifecycle", () => {
     expect(script).toContain("open -a Ghostty");
     expect(script.lastIndexOf('herdr workspace focus "$workspace_id"')).toBeLessThan(script.lastIndexOf("open -a Ghostty"));
     expect(script).toContain('herdr workspace close "$workspace_id"');
+    expect(script).toContain("find_workspace_by_path");
+    expect(script).toContain("Keep labels managed by conductor-workspace-summary intact.");
   });
   it("installs a daily updater that preserves descriptive labels", () => {
     const summary = fs.readFileSync(summaryPath, "utf-8");
