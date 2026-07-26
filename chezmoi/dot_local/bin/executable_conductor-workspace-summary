@@ -1,0 +1,106 @@
+#!/bin/sh
+set -eu
+
+# Report and optionally rename generic Herdr workspaces from their live git state.
+# Only labels that still look like generated worktree names are changed.
+
+mode=report
+case "${1:-}" in
+  --apply) mode=apply ;;
+  --report|"") ;;
+  *) printf 'usage: %s [--report|--apply]\n' "$0" >&2; exit 2 ;;
+esac
+
+herdr_bin=${HERDR_BIN_PATH:-herdr}
+python3 - "$mode" "$herdr_bin" <<'PY'
+import json
+import os
+import re
+import subprocess
+import sys
+
+mode, herdr = sys.argv[1:]
+try:
+    payload = json.loads(subprocess.check_output([herdr, "pane", "list"], text=True))
+except (OSError, subprocess.CalledProcessError, json.JSONDecodeError):
+    print("conductor-workspace-summary: unable to read herdr panes", file=sys.stderr)
+    raise SystemExit(1)
+
+panes = payload.get("result", {}).get("panes", [])
+workspaces = {}
+for pane in panes:
+    workspace_id = pane.get("workspace_id")
+    cwd = pane.get("cwd") or pane.get("foreground_cwd")
+    if workspace_id and cwd and workspace_id not in workspaces:
+        workspaces[workspace_id] = {
+            "cwd": cwd,
+            "label": "",
+            "status": pane.get("agent_status", "unknown"),
+        }
+
+try:
+    workspace_payload = json.loads(subprocess.check_output([herdr, "workspace", "list"], text=True))
+    for workspace in workspace_payload.get("result", {}).get("workspaces", []):
+        item = workspaces.get(workspace.get("workspace_id"))
+        if item:
+            item["label"] = workspace.get("label", "")
+            item["status"] = workspace.get("agent_status", item["status"])
+except (OSError, subprocess.CalledProcessError, json.JSONDecodeError):
+    pass
+
+def git(cwd, *args):
+    try:
+        return subprocess.check_output(
+            ["git", "-C", cwd, *args], stderr=subprocess.DEVNULL, text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+
+def generic(label, basename):
+    if not label:
+        return True
+    normalized = label.lower()
+    base = basename.lower()
+    return (
+        normalized in {base, f"{base}-{base}", "private"}
+        or normalized.endswith(f"-{base}")
+        or bool(re.fullmatch(r"[a-z0-9-]+-v\d+(?:-[a-z0-9-]+)?", normalized))
+    )
+
+def clean_branch(branch):
+    branch = re.sub(r"^[^/]+/", "", branch)
+    return branch.replace("/", " · ").replace("-", " ").strip()
+
+def shorten(value, limit=72):
+    value = " ".join(value.split())
+    return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
+
+for workspace_id, item in sorted(workspaces.items()):
+    cwd = item["cwd"]
+    basename = os.path.basename(os.path.normpath(cwd))
+    label = item["label"] or basename
+    branch = git(cwd, "branch", "--show-current")
+    subject = git(cwd, "log", "-1", "--pretty=%s")
+    dirty = bool(git(cwd, "status", "--porcelain"))
+    if generic(label, basename):
+        branch_name = branch.rsplit("/", 1)[-1]
+        generated_branch = branch_name.lower() in {
+            basename.lower(),
+            "main",
+            "master",
+        } or bool(re.fullmatch(r"[a-z0-9-]+-v\d+(?:-[a-z0-9-]+)?", branch_name.lower()))
+        title = subject if generated_branch else clean_branch(branch)
+        title = shorten(title or branch or basename)
+        if mode == "apply" and title and title != label:
+            subprocess.run(
+                [herdr, "workspace", "rename", workspace_id, title],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            print(f"renamed  {label} -> {title}")
+    else:
+        title = label
+    state = "dirty" if dirty else "clean"
+    print(f"{item['status']:7} {state:5} {title:72}  {cwd}")
+PY
