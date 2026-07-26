@@ -1,16 +1,7 @@
-# Claude Code Instructions
+# Claude Code template reference
 
-## Development Workflow
-- Don't run typecheck or lint automatically unless I ask
-- Prefer simple, focused solutions over complex ones
-- Ask clarifying questions when requirements are ambiguous
+Setup installs Claude's `settings.json` and `settings.local.json`; repo-level instructions come from `agents/claude/CLAUDE.md`.
 
-## Code Style
-- Follow existing patterns in the codebase
-- Keep functions small and focused
-- Prefer composition over inheritance
+Use judgment and prefer the smallest change that satisfies the request. Match the repository's existing patterns and keep unrelated work out of the diff.
 
-## Communication
-- Be concise in responses
-- Show code changes clearly
-- Explain reasoning when making non-obvious choices
+Inspect before editing and verify changed behavior with the narrowest useful check. Keep machine-specific paths, permissions, integrations, and secrets in local configuration.

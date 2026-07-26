@@ -413,6 +413,5 @@
     "allow": [
       "mcp__pencil"
     ]
-  },
-  "skipDangerousModePermissionPrompt": true
+  }
 }

@@ -1,49 +1,11 @@
-# Shared Agent Rules
+# Shared agent principles
 
-These rules apply to ALL AI coding agents. Agent-specific configs should include this content.
+These principles apply to every supported coding agent:
 
----
-
-## Session Completion (Landing the Plane)
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-### Mandatory Workflow
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-4. **Clean up** - Clear stashes, prune remote branches
-5. **Verify** - All changes committed AND pushed
-6. **Hand off** - Provide context for next session
-
-### Critical Rules
-
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-
----
-
-## Code Style
-
-- Follow existing patterns in the codebase
-- Keep functions small and focused
-- Prefer composition over inheritance
-- Don't run typecheck or lint automatically unless asked
-- Prefer simple, focused solutions over complex ones
-
----
-
-## Communication
-
-- Be concise in responses
-- Show code changes clearly
-- Explain reasoning when making non-obvious choices
-- Ask clarifying questions when requirements are ambiguous
+- Use judgment and prefer the smallest change that satisfies the request.
+- Match the repository's existing patterns and keep unrelated work out of the diff.
+- Inspect before editing; state assumptions when requirements are ambiguous.
+- Verify changed behavior with the narrowest useful check before claiming completion.
+- Run broader quality gates when the repository or delivery task requires them.
+- Keep machine-specific paths, permissions, integrations, and secrets in local configuration.
+- Publishing is explicit; use the shipping workflow when delivery is requested.

@@ -1,22 +1,9 @@
-# Agent Instructions
+# Dotfiles agent guidance
 
-## Landing the Plane (Session Completion)
+This repository distributes shell, application, and AI-agent configuration. Keep shared templates portable and preserve existing backup/revert behavior in setup flows.
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+Match the repository's conventions and keep changes focused. When changing setup or templates, verify the affected configuration and installation mapping.
 
-**MANDATORY WORKFLOW:**
-1. **Run quality gates** (if code changed) - Tests, linters, builds
-2. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-3. **Clean up** - Clear stashes, prune remote branches
-4. **Verify** - All changes committed AND pushed
-5. **Hand off** - Provide context for next session
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
+When adding or changing shared templates, keep machine-specific paths, permissions, integrations, and secrets in local configuration. Existing application templates may contain user-specific integrations; migrate them only when the target tool supports a safe merge.
+
+Publishing is explicit. Use the shipping workflow when the user asks to commit, push, open a PR, or clean up branches. Reviews and investigations may remain read-only.

@@ -2,12 +2,15 @@
 
 AI tool configs are copied from `templates/` because these tools rewrite their files.
 
-## Included templates
+## Included application templates
 
 - Claude Code
 - OpenCode
 - Codex CLI
 - Cursor
+- Gemini CLI
+
+These are copy-managed application settings, not repo-level instruction files.
 
 ## Install
 

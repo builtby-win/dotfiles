@@ -39,22 +39,23 @@ agents/
     └── AGENTS.md       # OpenCode config
 ```
 
-## How It Works
+## How it works
 
-1. **Symlinks, not copies** - Changes in dotfiles propagate instantly
-2. **Shared base** - Common rules in `shared/base.md` are included in each template
-3. **Agent-specific** - Each agent has its own formatting and extensions
+`agent-link` creates symlinks from supported agent-specific files into the current repository. The three adapters currently supported are Claude, Gemini, and OpenCode.
 
-## Adding a New Agent
+The adapters intentionally stay short and mirror the principles in `shared/base.md`. There is no runtime include mechanism, so update the adapters when changing the shared principles.
 
-1. Create `agents/{agent}/` directory
-2. Add the config file (e.g., `CONFIG.md`)
-3. Update `shell/agents.sh` to include the new agent
+AI application settings under `templates/` are copy-managed by `setup.ts`; they are separate from repo-level agent instructions.
 
-## Best Practices
+## Adding a new agent
 
-Edit `shared/base.md` for rules that apply to ALL agents:
+1. Add an adapter under `agents/{agent}/`.
+2. Add its `agent:config_filename` entry to `shell/agents.sh`.
+3. Document its installation path and precedence.
+4. Keep machine-specific settings and permissions out of shared templates.
 
-- Git workflow (push, sync, etc.)
-- Code style preferences
-- Project-specific conventions
+Codex and Cursor currently have application templates but no repo-level instruction adapters. OMP uses its runtime-managed skills rather than a repository instruction file.
+
+## Editing principles
+
+Keep `shared/base.md` as the canonical checklist for supported adapters. Keep agent files short, positive, and specific to repository behavior. Put delivery, review, QA, and other long procedures in their respective skills.
