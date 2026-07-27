@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+# launchd gives this agent a bare PATH, so herdr, python3 and git need help.
+PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PATH
+
 # Report and optionally rename generic Herdr workspaces from their live git state.
 # Only labels that still look like generated worktree names are changed.
 

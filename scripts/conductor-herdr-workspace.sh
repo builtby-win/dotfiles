@@ -1,8 +1,23 @@
 #!/bin/sh
 set -eu
 
+# Conductor runs scripts without the interactive shell's PATH, so herdr and
+# python3 have to be found explicitly.
+PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PATH
+
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/conductor-herdr-workspaces"
 legacy_state_dir="$HOME/.conductor-herdr-workspaces"
+mkdir -p "$state_dir"
+
+# Conductor swallows script output, so send every diagnostic to a log instead.
+# ponytail: no rotation; two lines per workspace create, truncate by hand if it ever matters.
+action="${1:-}"
+exec 2>>"$state_dir/log"
+log() { printf '[%s] %s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$action" "$*" >&2; }
+trap 'rc=$?; if [ "$rc" = 0 ]; then log "ok"; else log "FAILED rc=$rc"; fi' EXIT
+log "start path=${CONDUCTOR_WORKSPACE_PATH:-unset} name=${CONDUCTOR_WORKSPACE_NAME:-unset}"
+
 state_key=$(printf '%s' "${CONDUCTOR_WORKSPACE_PATH:?}" | python3 -c 'import hashlib, sys; print(hashlib.sha256(sys.stdin.buffer.read()).hexdigest()[:16])')
 state_file="$state_dir/$state_key"
 legacy_state_file="$legacy_state_dir/$state_key"
@@ -29,7 +44,6 @@ for pane in data.get("result", {}).get("panes", []):
 
 
 setup() {
-  mkdir -p "$state_dir"
   if [ ! -f "$state_file" ] && [ -f "$legacy_state_file" ]; then
     cp "$legacy_state_file" "$state_file"
   fi
