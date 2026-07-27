@@ -1,0 +1,83 @@
+#!/bin/sh
+set -eu
+
+# Fuzzy workspace switcher for Herdr.
+#
+# Herdr's built-in navigator only matches a workspace's visible label, so a
+# renamed workspace can no longer be found by the repo, folder, branch or path
+# it lives on. This lists all of that and hands it to fzf, then focuses the
+# pick. Bound as a popup command in ~/.config/herdr/config.toml.
+
+PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PATH
+
+herdr=${HERDR_BIN_PATH:-herdr}
+
+# ponytail: one git call per workspace, ~20 workspaces, fast enough to skip caching.
+rows=$(python3 - "$herdr" <<'PY'
+import json
+import os
+import subprocess
+import sys
+
+herdr = sys.argv[1]
+
+
+def herdr_json(*args):
+    try:
+        return json.loads(subprocess.check_output([herdr, *args], text=True))
+    except (OSError, subprocess.CalledProcessError, json.JSONDecodeError):
+        return {}
+
+
+cwds = {}
+for pane in herdr_json("pane", "list").get("result", {}).get("panes", []):
+    workspace_id = pane.get("workspace_id")
+    cwd = pane.get("cwd") or pane.get("foreground_cwd")
+    if workspace_id and cwd:
+        cwds.setdefault(workspace_id, cwd)
+
+home = os.path.expanduser("~")
+for workspace in herdr_json("workspace", "list").get("result", {}).get("workspaces", []):
+    workspace_id = workspace.get("workspace_id", "")
+    cwd = (cwds.get(workspace_id) or "").rstrip("/")
+    branch = ""
+    if cwd:
+        try:
+            branch = subprocess.check_output(
+                ["git", "-C", cwd, "branch", "--show-current"],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+        except (OSError, subprocess.CalledProcessError):
+            pass
+    folder = os.path.basename(cwd)
+    repo = os.path.basename(os.path.dirname(cwd))
+    # The id leads the line so the accept can read it; fzf hides and ignores it.
+    print(
+        "\t".join(
+            (
+                workspace_id,
+                workspace.get("agent_status", "unknown"),
+                workspace.get("label", workspace_id),
+                f"{repo}/{folder}" if repo else folder,
+                branch,
+                cwd.replace(home, "~", 1) if cwd.startswith(home) else cwd,
+            )
+        )
+    )
+PY
+)
+
+[ -n "$rows" ] || exit 0
+
+pick=$(printf '%s\n' "$rows" | fzf \
+  --delimiter='\t' \
+  --with-nth=2.. \
+  --nth=2.. \
+  --height=100% \
+  --reverse \
+  --prompt='workspace > ' \
+  --header='state · label · repo/folder · branch · path') || exit 0
+
+printf '%s' "$pick" | cut -f1 | xargs "$herdr" workspace focus >/dev/null

@@ -13,14 +13,10 @@ prefix = "ctrl+b"
 
 # --- Tab/window (matches tmux window binds) ---
 new_tab = "prefix+t"
-rename_tab = "prefix+comma"
 previous_tab = "prefix+q"
 next_tab = "prefix+e"
 switch_tab = "alt+1..9"
 switch_workspace = "prefix+1..9"
-previous_workspace = "alt+("
-next_workspace = "alt+)"
-focus_agent = "prefix+alt+1..9"
 close_tab = "prefix+shift+x"
 
 # --- Pane splits (matches tmux and Ghostty: d=right, Shift+D=down) ---
@@ -34,7 +30,7 @@ focus_pane_up = ["prefix+k", "alt+k"]
 focus_pane_right = ["prefix+l", "alt+l"]
 
 # --- Pane management ---
-close_pane = ["prefix+w", "prefix+shift+w", "prefix+x", "alt+w"]
+close_pane = ["prefix+w", "prefix+x", "alt+w"]
 # Return to the previously focused pane.
 last_pane = "prefix+tab"
 zoom = "prefix+z"
@@ -61,10 +57,11 @@ edit_scrollback = "prefix+shift+e"
 new_workspace = "prefix+shift+n"
 # Create and open a Git worktree.
 new_worktree = "prefix+n"
-# Keep workspace closing off the keyboard to avoid accidental teardown.
-close_workspace = ""
+# Close a non-worktree workspace without deleting its checkout.
+close_workspace = "prefix+shift+w"
 # Searchable workspace/tab/pane tree (press / to fuzzy-filter).
-goto = "prefix+space"
+# Only matches the visible label, so prefix+space runs herdr-switch instead.
+goto = "prefix+f"
 # Persistent navigation mode; j/k switch workspaces.
 workspace_picker = "prefix+g"
 navigate_workspace_down = "j"
@@ -74,6 +71,15 @@ navigate_pane_up = "ctrl+k"
 help = "prefix+?"
 settings = "prefix+s"
 toggle_sidebar = "prefix+shift+b"
+
+# Fuzzy switch on label, repo/folder, branch and path.
+[[keys.command]]
+key = "prefix+space"
+type = "popup"
+command = "herdr-switch"
+description = "switch workspace"
+width = "80%"
+height = "80%"
 
 # Equalize pane sizes in the focused tab.
 [[keys.command]]
@@ -88,3 +94,15 @@ key = "prefix+alt+g"
 type = "pane"
 command = "lazygit"
 description = "lazygit"
+# --- Herdr Plus ---
+[[keys.command]]
+key = "prefix+up"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.projects"
+description = "herdr-plus: projects"
+
+[[keys.command]]
+key = "prefix+down"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.quick-actions"
+description = "herdr-plus: quick actions"
