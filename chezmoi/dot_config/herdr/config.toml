@@ -15,8 +15,10 @@ prefix = "ctrl+b"
 new_tab = "prefix+t"
 previous_tab = "prefix+q"
 next_tab = "prefix+e"
-switch_tab = "alt+1..9"
-switch_workspace = "prefix+1..9"
+switch_tab = "prefix+1..9"
+switch_workspace = "cmd+1..9"
+previous_workspace = "prefix+["
+next_workspace = "prefix+]"
 close_tab = "prefix+shift+x"
 
 # --- Pane splits (matches tmux and Ghostty: d=right, Shift+D=down) ---

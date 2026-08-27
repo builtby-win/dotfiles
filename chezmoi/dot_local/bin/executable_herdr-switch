@@ -1,83 +1,235 @@
 #!/bin/sh
 set -eu
 
-# Fuzzy workspace switcher for Herdr.
+# Fuzzy space and pane switcher for Herdr.
 #
-# Herdr's built-in navigator only matches a workspace's visible label, so a
-# renamed workspace can no longer be found by the repo, folder, branch or path
-# it lives on. This lists all of that and hands it to fzf, then focuses the
-# pick. Bound as a popup command in ~/.config/herdr/config.toml.
+# Herdr's built-in navigator only matches visible labels, so renamed spaces
+# cannot be found by repo, folder, branch or path.
 
 PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 export PATH
 
 herdr=${HERDR_BIN_PATH:-herdr}
+mode=${1:-pick}
 
-# ponytail: one git call per workspace, ~20 workspaces, fast enough to skip caching.
-rows=$(python3 - "$herdr" <<'PY'
+# ponytail: query Herdr once and parallelize branch reads.
+rows=$(python3 - "$herdr" "$mode" <<'PY'
+import concurrent.futures
 import json
 import os
+import socket
 import subprocess
 import sys
+import time
 
 herdr = sys.argv[1]
+mode = sys.argv[2]
+socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
+state_path = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"), "herdr-switch", "recent.json")
+try:
+    with open(state_path) as f:
+        focus_ts = json.load(f)
+except (OSError, ValueError):
+    focus_ts = {}
+focus_ts = {key: value for key, value in focus_ts.items() if key.startswith(("pane:", "space:"))}
 
 
-def herdr_json(*args):
+def snapshot():
     try:
-        return json.loads(subprocess.check_output([herdr, *args], text=True))
-    except (OSError, subprocess.CalledProcessError, json.JSONDecodeError):
-        return {}
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(2)
+            client.connect(socket_path)
+            client.sendall((json.dumps({"id": "herdr-switch", "method": "session.snapshot", "params": {}}) + "\n").encode())
+            return json.loads(client.makefile().readline())["result"]["snapshot"]
+    except (KeyError, OSError, ValueError):
+        return json.loads(subprocess.check_output([herdr, "api", "snapshot"], text=True))["result"]["snapshot"]
 
+
+def wait_for_change(data):
+    subscriptions = [{"type": event} for event in ("workspace.created", "workspace.updated", "workspace.renamed", "workspace.closed", "workspace.focused", "pane.created", "pane.closed", "pane.moved")]
+    subscriptions.extend({"type": "pane.agent_status_changed", "pane_id": pane["pane_id"]} for pane in data.get("panes", []) if pane.get("pane_id"))
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.connect(socket_path)
+            client.sendall((json.dumps({"id": "herdr-switch-watch", "method": "events.subscribe", "params": {"subscriptions": subscriptions}}) + "\n").encode())
+            stream = client.makefile()
+            acknowledgement = json.loads(stream.readline())
+            if "error" in acknowledgement:
+                raise OSError(acknowledgement["error"].get("message"))
+            stream.readline()
+    except (OSError, ValueError):
+        time.sleep(1)
+
+
+def branch_for(cwd):
+    try:
+        return subprocess.check_output(["git", "-C", cwd, "branch", "--show-current"], text=True, stderr=subprocess.DEVNULL).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
+
+
+def clean(value):
+    return " ".join(str(value or "").split())
+
+
+data = snapshot()
+if mode == "--watch":
+    wait_for_change(data)
+    data = snapshot()
+panes = data.get("panes", [])
+workspaces = data.get("workspaces", [])
+current_pane_id = os.environ.get("HERDR_PANE_ID") or os.environ.get("HERDR_ACTIVE_PANE_ID") or data.get("focused_pane_id")
+current_workspace_id = os.environ.get("HERDR_WORKSPACE_ID") or os.environ.get("HERDR_ACTIVE_WORKSPACE_ID") or data.get("focused_workspace_id")
 
 cwds = {}
-for pane in herdr_json("pane", "list").get("result", {}).get("panes", []):
+activity = {}
+pane_activity = {}
+for pane in panes:
     workspace_id = pane.get("workspace_id")
-    cwd = pane.get("cwd") or pane.get("foreground_cwd")
+    pane_id = pane.get("pane_id")
+    cwd = pane.get("cwd") or pane.get("foreground_cwd") or ""
     if workspace_id and cwd:
         cwds.setdefault(workspace_id, cwd)
+    session = (pane.get("agent_session") or {}).get("value")
+    mtime = 0
+    if session:
+        try:
+            mtime = os.path.getmtime(session)
+        except OSError:
+            pass
+    if pane_id:
+        pane_activity[pane_id] = mtime
+    if workspace_id:
+        activity[workspace_id] = max(activity.get(workspace_id, 0), mtime)
+
+now = time.time()
+if current_pane_id:
+    focus_ts[f"pane:{current_pane_id}"] = now
+if current_workspace_id:
+    focus_ts[f"space:{current_workspace_id}"] = now
+
+unique_cwds = sorted({(pane.get("cwd") or pane.get("foreground_cwd") or "").rstrip("/") for pane in panes if pane.get("cwd") or pane.get("foreground_cwd")})
+if unique_cwds:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(unique_cwds))) as pool:
+        branches = dict(zip(unique_cwds, pool.map(branch_for, unique_cwds)))
+else:
+    branches = {}
 
 home = os.path.expanduser("~")
-for workspace in herdr_json("workspace", "list").get("result", {}).get("workspaces", []):
-    workspace_id = workspace.get("workspace_id", "")
-    cwd = (cwds.get(workspace_id) or "").rstrip("/")
-    branch = ""
-    if cwd:
-        try:
-            branch = subprocess.check_output(
-                ["git", "-C", cwd, "branch", "--show-current"],
-                text=True,
-                stderr=subprocess.DEVNULL,
-            ).strip()
-        except (OSError, subprocess.CalledProcessError):
-            pass
+workspace_by_id = {workspace.get("workspace_id"): workspace for workspace in workspaces}
+rows = []
+
+
+def short(value, limit):
+    value = clean(value)
+    return value[: limit - 1] + "…" if len(value) > limit else value
+
+
+def add_row(kind, target_id, workspace_id, status, label, detail, cwd, recency, focus_recency, number, current):
+    cwd = cwd.rstrip("/")
     folder = os.path.basename(cwd)
     repo = os.path.basename(os.path.dirname(cwd))
-    # The id leads the line so the accept can read it; fzf hides and ignores it.
-    print(
-        "\t".join(
-            (
-                workspace_id,
-                workspace.get("agent_status", "unknown"),
-                workspace.get("label", workspace_id),
-                f"{repo}/{folder}" if repo else folder,
-                branch,
-                cwd.replace(home, "~", 1) if cwd.startswith(home) else cwd,
-            )
-        )
-    )
+    location = f"{repo}/{folder}" if repo else folder
+    label = short(label, 32)
+    detail = short(detail, 22)
+    status = clean(status or "unknown")
+    # Simplified: sort by recency only, no PR-status organization
+    key = (not current, -focus_recency, -recency, number)
+    glyph = {"working": "●", "idle": "○", "done": "✓", "blocked": "!"}.get(status, "·")
+    raw_branch = clean(branches.get(cwd, ""))
+    branch = "" if raw_branch in ("main", "master") else raw_branch
+    rows.append((key, (kind, target_id, workspace_id, f"→ {glyph} {status}" if current else f"  {glyph} {status}", label, short(branch, 18), detail, short(location, 20), clean(cwd.replace(home, "~", 1) if cwd.startswith(home) else cwd))))
+
+
+for pane in panes:
+    pane_id = pane.get("pane_id", "")
+    workspace_id = pane.get("workspace_id", "")
+    workspace = workspace_by_id.get(workspace_id, {})
+    cwd = (pane.get("cwd") or pane.get("foreground_cwd") or "").rstrip("/")
+    title = pane.get("terminal_title_stripped") or pane.get("terminal_title") or pane_id
+    add_row("pane", pane_id, workspace_id, pane.get("agent_status", "unknown"), workspace.get("label", workspace_id), title, cwd, pane_activity.get(pane_id, 0), focus_ts.get(f"pane:{pane_id}", 0), workspace.get("number", 0), pane_id == current_pane_id)
+
+rows.sort(key=lambda row: row[0])
+visible_indexes = (3, 4, 5, 6, 7)
+headers = ("STATUS", "WORKSPACE", "BRANCH", "PANE", "REPO")
+widths = [max(len(header), *(len(row[index]) for _, row in rows)) for index, header in zip(visible_indexes, headers)] if rows else []
+if rows and mode in ("pick", "--watch"):
+    print("\t".join(["", "", "", *(field.ljust(width) for field, width in zip(headers, widths))]).rstrip())
+for _, row in rows:
+    visible = [row[index].ljust(width) for index, width in zip(visible_indexes, widths)]
+    print("\t".join([row[0], row[1], row[2], *visible, row[8]]).rstrip())
+
+try:
+    os.makedirs(os.path.dirname(state_path), exist_ok=True)
+    with open(state_path, "w") as f:
+        json.dump(focus_ts, f)
+except OSError:
+    pass
 PY
 )
 
+if [ "$mode" != pick ]; then
+  printf '%s\n' "$rows"
+  exit 0
+fi
+
 [ -n "$rows" ] || exit 0
 
+# Nav-first: j/k and arrows move, w/d/i/b/u filter by agent state; / or Space enters free-text search.
 pick=$(printf '%s\n' "$rows" | fzf \
   --delimiter='\t' \
-  --with-nth=2.. \
-  --nth=2.. \
+  --nth=4..8 \
+  --with-nth=4..7 \
+  --header-lines=1 \
   --height=100% \
+  --track \
   --reverse \
-  --prompt='workspace > ' \
-  --header='state · label · repo/folder · branch · path') || exit 0
+  --prompt='herdr > ' \
+  --header='j/k move · / or space search · enter focus · alt-x close pane' \
+  --bind "load:reload-sync($0 --watch)" \
+  --bind 'start:unbind(y,n),j:down,k:up,q:abort' \
+  --bind 'w:change-query(working)' \
+  --bind 'd:change-query(done)' \
+  --bind 'i:change-query(idle)' \
+  --bind 'b:change-query(blocked)' \
+  --bind 'u:change-query(unknown)' \
+  --bind 'alt-x:rebind(y,n)+change-header(⚠ Close selected pane? y close · n or esc cancel)' \
+  --bind "y:execute-silent(herdr pane close {2} 2>/dev/null)+reload-sync($0 --watch)+change-header(j/k move · / or space search · enter focus · alt-x close pane)+unbind(y,n),n:abort" \
+  --bind '/:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
+  --bind 'space:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
+  --bind 'esc:transform:[ -n "$FZF_QUERY" ] && echo clear-query || echo abort') || exit 0
 
-printf '%s' "$pick" | cut -f1 | xargs "$herdr" workspace focus >/dev/null
+target_kind=$(printf '%s' "$pick" | cut -f1)
+target_id=$(printf '%s' "$pick" | cut -f2)
+python3 - "$target_kind" "$target_id" <<'PY'
+import json
+import os
+import socket
+import sys
+import time
+
+kind, target_id = sys.argv[1:]
+socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
+request = {"id": "herdr-switch", "method": "pane.focus" if kind == "pane" else "workspace.focus", "params": {"pane_id" if kind == "pane" else "workspace_id": target_id}}
+with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+    client.settimeout(2)
+    client.connect(socket_path)
+    client.sendall((json.dumps(request) + "\n").encode())
+    response = json.loads(client.makefile().readline())
+    if "error" in response:
+        raise SystemExit(response["error"].get("message", "unable to focus selection"))
+
+state_path = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"), "herdr-switch", "recent.json")
+try:
+    with open(state_path) as f:
+        focus_ts = json.load(f)
+except (OSError, ValueError):
+    focus_ts = {}
+focus_ts[f"{kind}:{target_id}"] = time.time()
+try:
+    os.makedirs(os.path.dirname(state_path), exist_ok=True)
+    with open(state_path, "w") as f:
+        json.dump(focus_ts, f)
+except OSError:
+    pass
+PY
