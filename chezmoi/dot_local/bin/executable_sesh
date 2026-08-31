@@ -6,7 +6,8 @@ self_path="$(cd "$(dirname "$0")" && pwd -P)/$(basename "$0")"
 for candidate in \
   "${HOMEBREW_PREFIX:-/opt/homebrew}/bin/sesh" \
   "/usr/local/bin/sesh" \
-  "/home/linuxbrew/.linuxbrew/bin/sesh"
+  "/home/linuxbrew/.linuxbrew/bin/sesh" \
+  "$HOME/.local/bin/sesh.bin"
 do
   if [[ -x "$candidate" && "$candidate" != "$self_path" ]]; then
     exec "$candidate" "$@"

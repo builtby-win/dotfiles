@@ -687,10 +687,23 @@ function installSeshOnLinux(): boolean {
     mkdirSync(localBin, { recursive: true });
   }
 
-  const installCommand = `curl -L "${url}" | tar -xz -C "${localBin}" sesh`;
-  if (!runCommand(installCommand)) {
-    log.error("Sesh binary download failed");
-    return false;
+  const directInstall = `curl -L "${url}" | tar -xz -O sesh > "${localBin}/sesh.bin" && chmod +x "${localBin}/sesh.bin"`;
+  if (!runCommand(directInstall)) {
+    const fallbackInstall = `curl -L "${url}" | tar -xz -C "${localBin}" sesh`;
+    if (!runCommand(fallbackInstall)) {
+      log.error("Sesh binary download failed");
+      return false;
+    }
+    try {
+      const shimPath = join(localBin, "sesh");
+      const binPath = join(localBin, "sesh.bin");
+      if (existsSync(shimPath) && !existsSync(binPath)) {
+        const content = readFileSync(shimPath, "utf-8").slice(0, 20);
+        if (!content.includes("#!/usr/bin/env bash")) {
+          renameSync(shimPath, binPath);
+        }
+      }
+    } catch {}
   }
 
   if (runCommand("command -v sesh", true)) {

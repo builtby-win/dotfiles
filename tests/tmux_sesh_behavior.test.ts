@@ -226,7 +226,7 @@ exit 1
   });
 
   it("starts in navigation mode with unmodified j and k", () => {
-    expect(seshPickerSh).toContain('"$session_order" list "$sesh_bin" -t --icons | fzf \\');
+    expect(seshPickerSh).toContain('"$session_order" list "$sesh_bin" -t --icons | fzf');
     expect(seshPickerSh).toContain("--disabled");
     expect(seshPickerSh).toContain("--prompt 'Nav ›  '");
     expect(seshPickerSh).toContain("j:down,k:up,q:abort");
