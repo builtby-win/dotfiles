@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Interactive confirmation modal for closing Herdr panes.
+
+Invoked via Herdr popup keybinding (e.g. prefix+w, prefix+x).
+- If the pane hosts an active working agent (e.g. status='working' or 'blocked'),
+  shows a modal dialog requiring explicit [y] confirmation to prevent accidental loss.
+- If the pane does not have an active working agent, closes the pane immediately
+  without prompting.
+"""
+
+import json
+import os
+import socket
+import subprocess
+import sys
+import termios
+import tty
+
+# Ensure standard user bin directories are in PATH
+home = os.path.expanduser("~")
+for extra_path in ("/opt/homebrew/bin", "/usr/local/bin", os.path.join(home, ".local", "bin")):
+    if extra_path not in os.environ.get("PATH", "").split(os.pathsep):
+        os.environ["PATH"] = extra_path + os.pathsep + os.environ.get("PATH", "")
+
+
+def get_snapshot(herdr_bin, socket_path):
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(1.5)
+            client.connect(socket_path)
+            client.sendall((json.dumps({"id": "herdr-confirm-close", "method": "session.snapshot", "params": {}}) + "\n").encode())
+            return json.loads(client.makefile().readline())["result"]["snapshot"]
+    except Exception:
+        try:
+            return json.loads(subprocess.check_output([herdr_bin, "api", "snapshot"], text=True))["result"]["snapshot"]
+        except Exception:
+            return None
+
+
+def close_pane(pane_id, herdr_bin, socket_path):
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(1.5)
+            client.connect(socket_path)
+            client.sendall((json.dumps({"id": "herdr-close", "method": "pane.close", "params": {"pane_id": pane_id}}) + "\n").encode())
+            resp = json.loads(client.makefile().readline())
+            if "error" not in resp:
+                return True
+    except Exception:
+        pass
+    try:
+        subprocess.run([herdr_bin, "pane", "close", pane_id], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except Exception:
+        return False
+
+
+def main():
+    herdr_bin = os.environ.get("HERDR_BIN_PATH") or "herdr"
+    socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
+
+    target_pane_id = sys.argv[1] if len(sys.argv) > 1 else (
+        os.environ.get("HERDR_ACTIVE_PANE_ID") or os.environ.get("HERDR_PANE_ID")
+    )
+
+    snap = get_snapshot(herdr_bin, socket_path)
+    if not target_pane_id and snap:
+        target_pane_id = snap.get("focused_pane_id")
+
+    if not target_pane_id:
+        return 0
+
+    pane_info = {}
+    if snap:
+        for p in snap.get("panes", []):
+            if p.get("pane_id") == target_pane_id:
+                pane_info = p
+                break
+
+    agent = pane_info.get("agent")
+    status = pane_info.get("agent_status")
+
+    # Only show the confirmation modal if an active agent is currently working or blocked
+    is_working_agent = (status == "working") or (bool(agent) and status in ("working", "blocked"))
+    if not is_working_agent:
+        close_pane(target_pane_id, herdr_bin, socket_path)
+        return 0
+
+    raw_title = pane_info.get("terminal_title_stripped") or pane_info.get("terminal_title") or pane_info.get("cwd") or ""
+    # Clean up single-line title
+    title = " ".join(raw_title.split())
+    if len(title) > 38:
+        title = title[:37] + "…"
+
+    # Render confirmation prompt in TTY
+    is_tty = sys.stdout.isatty() and sys.stdin.isatty()
+    if is_tty:
+        sys.stdout.write("\033[?25l\033[2J\033[H\r\n")
+        sys.stdout.write(f"  \033[1;33m⚠️  Close pane {target_pane_id}?\033[0m\r\n")
+        if agent:
+            status_str = f" ({status})" if status else ""
+            status_color = "\033[1;31m" if status == "working" else "\033[36m"
+            sys.stdout.write(f"     {status_color}{agent}{status_str}\033[0m\r\n")
+            if title:
+                sys.stdout.write(f"     \033[2m{title}\033[0m\r\n")
+            else:
+                sys.stdout.write("\r\n")
+        elif title:
+            sys.stdout.write(f"     \033[2m{title}\033[0m\r\n\r\n")
+        else:
+            sys.stdout.write("\r\n\r\n")
+        sys.stdout.write("  \033[1m[y]\033[0m close pane   \033[2m[any key] cancel\033[0m ")
+        sys.stdout.flush()
+
+    # Read single character confirmation
+    ch = ""
+    if is_tty:
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setcbreak(fd)
+            ch = sys.stdin.read(1)
+        except (KeyboardInterrupt, EOFError):
+            ch = ""
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            sys.stdout.write("\033[?25h\r\n")
+            sys.stdout.flush()
+    else:
+        try:
+            ch = sys.stdin.read(1)
+        except Exception:
+            ch = ""
+
+    if ch in ("y", "Y"):
+        close_pane(target_pane_id, herdr_bin, socket_path)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)

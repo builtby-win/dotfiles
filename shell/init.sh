@@ -63,7 +63,7 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 fi
 
 # Auto-attach tmux for SSH sessions (Termius)
-if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -z "$NO_AUTO_TMUX" ]]; then
+if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -z "$NO_AUTO_TMUX" && -z "$HERDR_PANE_ID" ]]; then
   if command -v tmux-smart &> /dev/null; then
     command tmux-smart --root "$HOME"
   elif command -v tmux &> /dev/null; then

@@ -57,6 +57,7 @@ def wait_for_change(data):
             if "error" in acknowledgement:
                 raise OSError(acknowledgement["error"].get("message"))
             stream.readline()
+            time.sleep(0.3)
     except (OSError, ValueError):
         time.sleep(1)
 
@@ -197,7 +198,7 @@ pick=$(printf '%s\n' "$rows" | fzf \
   --bind "y:execute-silent(herdr pane close {2} 2>/dev/null)+reload-sync($0 --watch)+change-header(j/k move · / or space search · enter focus · alt-x close pane)+unbind(y,n),n:abort" \
   --bind '/:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
   --bind 'space:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
-  --bind 'esc:transform:[ -n "$FZF_QUERY" ] && echo clear-query || echo abort') || exit 0
+  --bind 'esc:abort') || exit 0
 
 target_kind=$(printf '%s' "$pick" | cut -f1)
 target_id=$(printf '%s' "$pick" | cut -f2)

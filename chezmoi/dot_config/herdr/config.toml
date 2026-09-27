@@ -17,8 +17,8 @@ previous_tab = "prefix+q"
 next_tab = "prefix+e"
 switch_tab = "prefix+1..9"
 switch_workspace = "cmd+1..9"
-previous_workspace = "prefix+["
-next_workspace = "prefix+]"
+previous_workspace = ["prefix+[", "prefix+up"]
+next_workspace = ["prefix+]", "prefix+down"]
 close_tab = "prefix+shift+x"
 
 # --- Pane splits (matches tmux and Ghostty: d=right, Shift+D=down) ---
@@ -32,7 +32,8 @@ focus_pane_up = ["prefix+k", "alt+k"]
 focus_pane_right = ["prefix+l", "alt+l"]
 
 # --- Pane management ---
-close_pane = ["prefix+w", "prefix+x", "alt+w"]
+# Panes are closed safely via confirmation popup modal bound to prefix+w and prefix+x below.
+close_pane = []
 # Return to the previously focused pane.
 last_pane = "prefix+tab"
 zoom = "prefix+z"
@@ -66,10 +67,10 @@ close_workspace = "prefix+shift+w"
 goto = "prefix+f"
 # Persistent navigation mode; j/k switch workspaces.
 workspace_picker = "prefix+g"
-navigate_workspace_down = "j"
-navigate_workspace_up = "k"
-navigate_pane_down = "ctrl+j"
-navigate_pane_up = "ctrl+k"
+navigate_workspace_down = ["j", "down"]
+navigate_workspace_up = ["k", "up"]
+navigate_pane_down = ["ctrl+j", "ctrl+down"]
+navigate_pane_up = ["ctrl+k", "ctrl+up"]
 help = "prefix+?"
 settings = "prefix+s"
 toggle_sidebar = "prefix+shift+b"
@@ -96,15 +97,20 @@ key = "prefix+alt+g"
 type = "pane"
 command = "lazygit"
 description = "lazygit"
-# --- Herdr Plus ---
+
+# Confirmation popup modal before closing a pane (prevents accidental kill of active agents/shells).
 [[keys.command]]
-key = "prefix+up"
-type = "plugin_action"
-command = "cloudmanic.herdr-plus.projects"
-description = "herdr-plus: projects"
+key = "prefix+w"
+type = "popup"
+command = "herdr-confirm-close-pane"
+description = "confirm close pane"
+width = 50
+height = 8
 
 [[keys.command]]
-key = "prefix+down"
-type = "plugin_action"
-command = "cloudmanic.herdr-plus.quick-actions"
-description = "herdr-plus: quick actions"
+key = "prefix+x"
+type = "popup"
+command = "herdr-confirm-close-pane"
+description = "confirm close pane"
+width = 50
+height = 8
