@@ -62,14 +62,6 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
   export PATH="$PATH:$HOME/.local/bin"
 fi
 
-# Auto-attach tmux for SSH sessions (Termius)
-if [[ -n "$SSH_CONNECTION" && -z "$TMUX" && -z "$NO_AUTO_TMUX" && -z "$HERDR_PANE_ID" ]]; then
-  if command -v tmux-smart &> /dev/null; then
-    command tmux-smart --root "$HOME"
-  elif command -v tmux &> /dev/null; then
-    command tmux new-session -A -s main
-  fi
-fi
 
 # fnm (Fast Node Manager)
 if command -v fnm &> /dev/null; then
@@ -101,3 +93,7 @@ if [[ -f "$DOTFILES_SHELL_DIR/zinit.sh" ]]; then
 elif [[ -f "$DOTFILES_SHELL_DIR/oh-my-zsh.sh" ]]; then
   source "$DOTFILES_SHELL_DIR/oh-my-zsh.sh"
 fi
+
+# Auto-attach to herdr on SSH login (exec-replaces the shell; no-op locally).
+# Sourced LAST: everything above still applies to inner herdr shells.
+[[ -f "$DOTFILES_SHELL_DIR/herdr.sh" ]] && source "$DOTFILES_SHELL_DIR/herdr.sh"

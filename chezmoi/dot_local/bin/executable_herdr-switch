@@ -13,7 +13,7 @@ herdr=${HERDR_BIN_PATH:-herdr}
 mode=${1:-pick}
 
 # ponytail: query Herdr once and parallelize branch reads.
-rows=$(python3 - "$herdr" "$mode" <<'PY'
+rows=$(python3 - "$herdr" "$@" <<'PY'
 import concurrent.futures
 import json
 import os
@@ -23,7 +23,7 @@ import sys
 import time
 
 herdr = sys.argv[1]
-mode = sys.argv[2]
+mode = sys.argv[2] if len(sys.argv) > 2 else "pick"
 socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
 state_path = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"), "herdr-switch", "recent.json")
 try:
@@ -32,6 +32,20 @@ try:
 except (OSError, ValueError):
     focus_ts = {}
 focus_ts = {key: value for key, value in focus_ts.items() if key.startswith(("pane:", "space:"))}
+
+
+cursor_path = os.path.join(os.path.dirname(state_path), "cursor.json")
+try:
+    with open(cursor_path) as f:
+        cursor = json.load(f)
+except (OSError, ValueError):
+    cursor = {}
+
+
+def sessions_of(workspace_panes):
+    # Agent panes are the sessions; fall back to every pane for plain shells.
+    agents = [pane for pane in workspace_panes if pane.get("agent_status") not in (None, "unknown")]
+    return agents or workspace_panes
 
 
 def snapshot():
@@ -74,6 +88,20 @@ def clean(value):
 
 
 data = snapshot()
+if mode == "--cycle":
+    workspace_id, step = sys.argv[3], int(sys.argv[4])
+    group = sessions_of([pane for pane in data.get("panes", []) if pane.get("workspace_id") == workspace_id])
+    if group:
+        ids = [pane["pane_id"] for pane in group]
+        index = ids.index(cursor[workspace_id]) if cursor.get(workspace_id) in ids else 0
+        cursor[workspace_id] = ids[(index + step) % len(ids)]
+        try:
+            os.makedirs(os.path.dirname(cursor_path), exist_ok=True)
+            with open(cursor_path, "w") as f:
+                json.dump(cursor, f)
+        except OSError:
+            pass
+    raise SystemExit
 if mode == "--watch":
     wait_for_change(data)
     data = snapshot()
@@ -126,39 +154,50 @@ def short(value, limit):
     return value[: limit - 1] + "…" if len(value) > limit else value
 
 
-def add_row(kind, target_id, workspace_id, status, label, detail, cwd, recency, focus_recency, number, current):
-    cwd = cwd.rstrip("/")
-    folder = os.path.basename(cwd)
+glyphs = {"working": "●", "idle": "○", "done": "✓", "blocked": "!"}
+by_workspace = {}
+for pane in panes:
+    by_workspace.setdefault(pane.get("workspace_id", ""), []).append(pane)
+
+for workspace_id, workspace_panes in by_workspace.items():
+    workspace = workspace_by_id.get(workspace_id, {})
+    group = sessions_of(workspace_panes)
+    # Selected session: saved cursor, else the focused pane, else the first.
+    selected = next((pane for pane in group if pane.get("pane_id") == cursor.get(workspace_id)), None)
+    selected = selected or next((pane for pane in group if pane.get("pane_id") == current_pane_id), group[0])
+    current = workspace_id == current_workspace_id
+    cwd = (selected.get("cwd") or selected.get("foreground_cwd") or "").rstrip("/")
     repo = os.path.basename(os.path.dirname(cwd))
-    location = f"{repo}/{folder}" if repo else folder
-    label = short(label, 32)
-    detail = short(detail, 22)
-    status = clean(status or "unknown")
-    # Simplified: sort by recency only, no PR-status organization
-    key = (not current, -focus_recency, -recency, number)
-    glyph = {"working": "●", "idle": "○", "done": "✓", "blocked": "!"}.get(status, "·")
+    location = f"{repo}/{os.path.basename(cwd)}" if repo else os.path.basename(cwd)
+    strip = "".join(
+        f"[{glyphs.get(pane.get('agent_status'), '·')}]" if pane is selected else f" {glyphs.get(pane.get('agent_status'), '·')} "
+        for pane in group
+    )
+    position = f"{group.index(selected) + 1}/{len(group)}"
+    title = selected.get("terminal_title_stripped") or selected.get("terminal_title") or selected.get("pane_id", "")
     raw_branch = clean(branches.get(cwd, ""))
     branch = "" if raw_branch in ("main", "master") else raw_branch
-    rows.append((key, (kind, target_id, workspace_id, f"→ {glyph} {status}" if current else f"  {glyph} {status}", label, short(branch, 18), detail, short(location, 20), clean(cwd.replace(home, "~", 1) if cwd.startswith(home) else cwd))))
-
-
-for pane in panes:
-    pane_id = pane.get("pane_id", "")
-    workspace_id = pane.get("workspace_id", "")
-    workspace = workspace_by_id.get(workspace_id, {})
-    cwd = (pane.get("cwd") or pane.get("foreground_cwd") or "").rstrip("/")
-    title = pane.get("terminal_title_stripped") or pane.get("terminal_title") or pane_id
-    add_row("pane", pane_id, workspace_id, pane.get("agent_status", "unknown"), workspace.get("label", workspace_id), title, cwd, pane_activity.get(pane_id, 0), focus_ts.get(f"pane:{pane_id}", 0), workspace.get("number", 0), pane_id == current_pane_id)
+    recency = max((pane_activity.get(pane.get("pane_id"), 0) for pane in group), default=0)
+    key = (not current, -focus_ts.get(f"space:{workspace_id}", 0), -recency, workspace.get("number", 0))
+    status = clean(selected.get("agent_status") or "unknown")
+    rows.append((key, (
+        "pane", selected.get("pane_id", ""), workspace_id,
+        ("→ " if current else "  ") + strip + " " + position,
+        short(workspace.get("label", workspace_id), 24),
+        short(branch, 18),
+        short(title, 28),
+        clean(f"{status} {location} {cwd.replace(home, '~', 1) if cwd.startswith(home) else cwd}"),
+    )))
 
 rows.sort(key=lambda row: row[0])
-visible_indexes = (3, 4, 5, 6, 7)
-headers = ("STATUS", "WORKSPACE", "BRANCH", "PANE", "REPO")
+visible_indexes = (3, 4, 5, 6)
+headers = ("SESSIONS", "WORKSPACE", "BRANCH", "ACTIVE SESSION")
 widths = [max(len(header), *(len(row[index]) for _, row in rows)) for index, header in zip(visible_indexes, headers)] if rows else []
-if rows and mode in ("pick", "--watch"):
+if rows and mode in ("pick", "--watch", "--now"):
     print("\t".join(["", "", "", *(field.ljust(width) for field, width in zip(headers, widths))]).rstrip())
 for _, row in rows:
     visible = [row[index].ljust(width) for index, width in zip(visible_indexes, widths)]
-    print("\t".join([row[0], row[1], row[2], *visible, row[8]]).rstrip())
+    print("\t".join([row[0], row[1], row[2], *visible, row[7]]).rstrip())
 
 try:
     os.makedirs(os.path.dirname(state_path), exist_ok=True)
@@ -176,7 +215,7 @@ fi
 
 [ -n "$rows" ] || exit 0
 
-# Nav-first: j/k and arrows move, w/d/i/b/u filter by agent state; / or Space enters free-text search.
+# Nav-first: j/k and up/down move workspaces, left/right cycle that workspace's sessions, w/d/i/b/u filter by agent state; / or Space enters free-text search.
 pick=$(printf '%s\n' "$rows" | fzf \
   --delimiter='\t' \
   --nth=4..8 \
@@ -186,16 +225,18 @@ pick=$(printf '%s\n' "$rows" | fzf \
   --track \
   --reverse \
   --prompt='herdr > ' \
-  --header='j/k move · / or space search · enter focus · alt-x close pane' \
+  --header='j/k workspace · ←/→ session · / search · enter focus · alt-x close' \
   --bind "load:reload-sync($0 --watch)" \
   --bind 'start:unbind(y,n),j:down,k:up,q:abort' \
+  --bind "left:execute-silent($0 --cycle {3} -1)+reload-sync($0 --now)" \
+  --bind "right:execute-silent($0 --cycle {3} 1)+reload-sync($0 --now)" \
   --bind 'w:change-query(working)' \
   --bind 'd:change-query(done)' \
   --bind 'i:change-query(idle)' \
   --bind 'b:change-query(blocked)' \
   --bind 'u:change-query(unknown)' \
   --bind 'alt-x:rebind(y,n)+change-header(⚠ Close selected pane? y close · n or esc cancel)' \
-  --bind "y:execute-silent(herdr pane close {2} 2>/dev/null)+reload-sync($0 --watch)+change-header(j/k move · / or space search · enter focus · alt-x close pane)+unbind(y,n),n:abort" \
+  --bind "y:execute-silent(herdr pane close {2} 2>/dev/null)+reload-sync($0 --watch)+change-header(j/k workspace · ←/→ session · / search · enter focus · alt-x close)+unbind(y,n),n:abort" \
   --bind '/:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
   --bind 'space:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
   --bind 'esc:abort') || exit 0

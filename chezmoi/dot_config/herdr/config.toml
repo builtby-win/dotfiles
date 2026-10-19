@@ -8,6 +8,10 @@ onboarding = false
 [theme]
 name = "catppuccin"
 
+[ui]
+# Show a zoom indicator in the tab bar so a zoomed pane is not mistaken for the only pane.
+tab_bar_right = [{ type = "zoom" }]
+
 [keys]
 prefix = "ctrl+b"
 
@@ -26,10 +30,10 @@ split_vertical = "prefix+d"
 split_horizontal = "prefix+shift+d"
 
 # --- Pane navigation (matches tmux leader+hjkl and Alt+hjkl) ---
-focus_pane_left = ["prefix+h", "alt+h"]
+focus_pane_left = ["prefix+h", "prefix+left", "alt+h"]
 focus_pane_down = ["prefix+j", "alt+j"]
 focus_pane_up = ["prefix+k", "alt+k"]
-focus_pane_right = ["prefix+l", "alt+l"]
+focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 
 # --- Pane management ---
 # Panes are closed safely via confirmation popup modal bound to prefix+w and prefix+x below.
@@ -114,3 +118,16 @@ command = "herdr-confirm-close-pane"
 description = "confirm close pane"
 width = 50
 height = 8
+
+# --- herdr-nvim (nvim sidebar + file picker) ---
+[[keys.command]]
+key = "prefix+m"
+type = "shell"
+command = "herdr-plugin-action chmarax.herdr-nvim.toggle"
+description = "nvim sidebar"
+
+[[keys.command]]
+key = "prefix+o"
+type = "shell"
+command = "herdr-plugin-action chmarax.herdr-nvim.pick-file"
+description = "open file from agent output"

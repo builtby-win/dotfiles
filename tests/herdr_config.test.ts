@@ -25,6 +25,8 @@ describe("Herdr workspace lifecycle", () => {
     expect(content).toContain('switch_workspace = "cmd+1..9"');
     expect(content).toContain('close_pane = []');
     expect(content).not.toContain('"alt+w"');
+    expect(content).toContain('previous_workspace = ["prefix+[", "prefix+up"]');
+    expect(content).toContain('next_workspace = ["prefix+]", "prefix+down"]');
     expect(content).toContain('key = "prefix+b"');
     expect(content).toContain('command = "herdr-balance-panes"');
     expect(fs.statSync(balanceScriptPath).mode & 0o111).not.toBe(0);
@@ -55,5 +57,18 @@ describe("Herdr workspace lifecycle", () => {
     const content = fs.readFileSync(configPath, "utf-8");
     expect(content).toMatch(/navigate_workspace_down\s*=\s*\["j",\s*"down"\]/);
     expect(content).toMatch(/navigate_workspace_up\s*=\s*\["k",\s*"up"\]/);
+  });
+});
+
+describe("herdr-nvim sidebar", () => {
+  it("boots the sidebar in stock nvim so it loads the builtby config", () => {
+    const nvimConfigPath = path.resolve(__dirname, "../chezmoi/dot_config/herdr-nvim/config.toml");
+    const content = fs.readFileSync(nvimConfigPath, "utf-8");
+
+    // No nvim_env override: vanilla nvim reads ~/.config/nvim, the thin
+    // wrapper sourcing this repo. An appname would boot a different config.
+    expect(content).not.toContain("nvim_env");
+    expect(content).toContain('nvim_bin = "nvim"');
+    expect(content).toContain('position = "right"');
   });
 });

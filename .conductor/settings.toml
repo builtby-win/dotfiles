@@ -1,6 +1,6 @@
 "$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
 
 [scripts]
-setup = "./scripts/conductor-herdr-workspace.sh setup"
-archive = "./scripts/conductor-herdr-workspace.sh archive"
+setup = "./scripts/conductor-workspace.sh setup"
+archive = "./scripts/conductor-workspace.sh archive"
 run_mode = "concurrent"

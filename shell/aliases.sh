@@ -150,6 +150,7 @@ alias gmg='git merge'
 alias gbl='git blame'
 alias grv='git revert'
 alias gplom='git pull origin main'
+alias gpom='git pull origin main'
 
 # Directory jumping (zoxide)
 alias d="z"
@@ -176,4 +177,13 @@ fi
 # - args: pass through to tmux as-is
 tmux() {
   command tmux-smart "$@"
+}
+# Open omp with Muse Spark 1.3 and run /sync-main (extra args forwarded)
+sync() {
+  command -v omp >/dev/null 2>&1 || {
+    echo "sync: omp is not installed."
+    return 1
+  }
+
+  command omp --model opencode-go/muse-spark-1.3-contributor "/sync-main${1:+ $*}"
 }

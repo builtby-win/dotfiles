@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
+  "schemaVersion": 1,
+  "shortcuts": {
+    "bindings": {
+      "browserBack": null,
+      "browserForward": null,
+      "focusLeft": ["ctrl+b", "h"],
+      "focusRight": ["ctrl+b", "l"],
+      "focusUp": ["ctrl+b", "k"],
+      "focusDown": ["ctrl+b", "j"],
+      "globalSearch": ["ctrl+b", "space"],
+      "goToWorkspace": "cmd+alt+ctrl+shift+m",
+      "newWorkspace": ["ctrl+b", "shift+n"],
+      "prevSurface": ["ctrl+b", "q"],
+      "nextSurface": ["ctrl+b", "e"],
+      "selectSurfaceByNumber": ["ctrl+b", "1"],
+      "toggleTerminalCopyMode": ["ctrl+b", "v"],
+      "splitRight": ["ctrl+b", "d"],
+      "splitDown": ["ctrl+b", "shift+d"],
+      "toggleSplitZoom": ["ctrl+b", "z"],
+      "equalizeSplits": ["ctrl+b", "b"],
+      "closeWorkspace": ["ctrl+b", "shift+q"],
+      "openSettings": "cmd+,"
+    }
+  }
+}

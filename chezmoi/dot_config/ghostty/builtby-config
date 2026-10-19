@@ -79,6 +79,38 @@ keybind = shift+enter=text:\x1b[13;2u
 # Tab navigation
 keybind = ctrl+tab=next_tab
 keybind = ctrl+shift+tab=previous_tab
+keybind = cmd+1=csi:49;9u
+keybind = cmd+2=csi:50;9u
+keybind = cmd+3=csi:51;9u
+keybind = cmd+4=csi:52;9u
+keybind = cmd+5=csi:53;9u
+keybind = cmd+6=csi:54;9u
+keybind = cmd+7=csi:55;9u
+keybind = cmd+8=csi:56;9u
+keybind = cmd+9=csi:57;9u
+keybind = cmd+shift+m=unbind
+keybind = cmd+enter=unbind
+
+# Cmd-key layer for Neovim (F13–F24 bridge).
+# macOS Command never reaches terminal apps on its own, so each combo is
+# forwarded as the byte sequence of a high function key. Those need no
+# Kitty-protocol negotiation, so they survive herdr/tmux/ssh. The nvim side
+# maps F13–F24 back to actions (keymaps.lua, "Cmd-key layer").
+# NOTE: cmd+f overrides Ghostty's fullscreen toggle (still in the menu).
+keybind = cmd+shift+p=text:\x1b[1;2P
+keybind = cmd+shift+o=text:\x1b[1;2Q
+keybind = cmd+p=text:\x1b[1;2Q
+keybind = cmd+o=text:\x1b[1;2R
+keybind = cmd+s=text:\x1b[1;2S
+keybind = cmd+z=text:\x1b[15;2~
+keybind = cmd+shift+z=text:\x1b[17;2~
+keybind = cmd+a=text:\x1b[18;2~
+keybind = cmd+shift+f=text:\x1b[19;2~
+keybind = cmd+f=text:\x1b[20;2~
+keybind = cmd+b=text:\x1b[21;2~
+keybind = cmd+period=text:\x1b[23;2~
+keybind = cmd+shift+d=text:\x1b[24;2~
+keybind = cmd+slash=text:\x1f
 
 # Performance optimizations
 # Smooth out rendering for high-throughput tools (Claude Code/Gemini)

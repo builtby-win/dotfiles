@@ -11,6 +11,7 @@ should_exit_after_passthrough = false
 "Cmd+Ctrl+Alt+Shift+S" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+F" = "hints"
 "Cmd+Ctrl+Alt+Shift+L" = "hints"
+"Cmd+Ctrl+Alt+Shift+I" = "hints"
 "Cmd+Ctrl+Alt+Shift+Space" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
@@ -103,6 +104,7 @@ max_depth = 10
 "Tab" = "exec ~/.local/bin/karabiner-layer nudge"
 "s" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 "." = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
+"Shift+F" = "hints"
 "`" = "toggle-cursor-follow-selection"
 "Up" = "action move_mouse_relative --dx=0 --dy=-5"
 "Down" = "action move_mouse_relative --dx=0 --dy=5"
@@ -131,8 +133,8 @@ line_color = "#CC465FBC"
 highlight_color = "#11FFFFFF"
 
 [scroll]
-scroll_step = 40
-scroll_step_half = 500
+scroll_step = 140
+scroll_step_half = 650
 
 [scroll.hotkeys]
 "Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
@@ -159,14 +161,14 @@ scroll_step_half = 500
 "b" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "c" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "e" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
-"f" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"f" = "hints"
 "i" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "m" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "n" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "o" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "p" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "q" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
-"r" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"r" = "recursive_grid --cursor-selection-mode follow"
 "s" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "t" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "v" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
@@ -184,9 +186,10 @@ scroll_step_half = 500
 "7" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "8" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "9" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
-"Return" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
-"Tab" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
-"Space" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
+"Return" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Tab" = "recursive_grid --cursor-selection-mode follow"
+"Space" = "action page_down"
+"Shift+Space" = "action page_up"
 "Backspace" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 
 [mode_indicator.scroll]
@@ -217,3 +220,14 @@ move_mouse_enabled = true
 steps = 12
 max_duration = 180
 duration_per_pixel = 0.12
+
+[held_repeat]
+enabled = true
+initial_delay = 50
+interval = 18
+
+[smooth_scroll]
+enabled = true
+steps = 8
+max_duration = 80
+duration_per_pixel = 0.4

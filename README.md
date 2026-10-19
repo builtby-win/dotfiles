@@ -190,6 +190,26 @@ For the tmux workflow in this repo, keep these tools current:
 
 On macOS, `tmux-fingers` also needs working Xcode Command Line Tools before Homebrew can install it.
 
+## Conductor workspace lifecycle
+
+`scripts/conductor-workspace.sh setup` opens a Herdr workspace in Ghostty;
+`archive` closes the associated Herdr workspace. Conductor provides
+`CONDUCTOR_WORKSPACE_PATH` and `CONDUCTOR_WORKSPACE_NAME` to these hooks.
+
+Archive resolves stale saved IDs against live workspaces, then falls back to
+the workspace path (including symlink-equivalent paths and subdirectories)
+or its label. Ambiguous matches fail rather than closing an arbitrary workspace.
+A lookup or close failure returns a nonzero exit status and preserves saved
+state for retry. State is deleted only after the workspace is confirmed absent.
+An already absent workspace is safe to archive again.
+
+Diagnostics, including the workspace ID and Herdr errors, are written to
+`${XDG_STATE_HOME:-$HOME/.local/state}/conductor-herdr-workspaces/log`.
+If an archive fails, inspect that log and retry after resolving the reported
+error. Group-close errors are not automatically overridden: related workspaces
+must not be closed without an explicit decision.
+
+
 ## Structure
 
 ```

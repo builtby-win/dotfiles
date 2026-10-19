@@ -9,7 +9,5 @@ hyper = { 'ctrl', 'alt', 'cmd', 'shift' }
 hs.hotkey.bind(hyper, 'space', appLauncher.show)
 hs.hotkey.bind(hyper, '4', ghostty.fourPane)
 hs.hotkey.bind(hyper, 'r', hs.reload)
-
 spaceJLayer.start()
-
 hs.alert.show('Hammerspoon loaded')

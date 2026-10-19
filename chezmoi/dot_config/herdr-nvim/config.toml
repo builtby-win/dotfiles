@@ -1,0 +1,21 @@
+# herdr-nvim herdr-side config → ~/.config/herdr-nvim/config.toml
+# Managed here, synced live by plain copy (same as herdr/config.toml).
+# Sidebar intentionally has NO environment override: the default binary with
+# the default app name loads ~/.config/nvim, which is the thin wrapper
+# sourcing this repo's builtby config (oil, mini.pick, annotations on
+# <leader>h). Pinning a custom app name would boot a different config instead.
+# Daemon cwd comes from herdr per toggle (workspace dir → daemon spawn cwd),
+# so the sidebar always opens in the invoking workspace's directory. The
+# per-tab daemon persists across toggles: a daemon spawned before a plugin
+# upgrade keeps its old cwd until its socket dies. Sockets live in
+# $XDG_RUNTIME_DIR/herdr-nvim (fallback /tmp/herdr-nvim); delete them or
+# toggle twice after upgrading.
+
+[sidebar]
+nvim_bin = "nvim"
+position = "right"
+
+[picker]
+scan_lines = 300
+max_files = 20
+frecency = true

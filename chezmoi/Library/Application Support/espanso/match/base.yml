@@ -1,0 +1,27 @@
+# managed by builtby.win/dotfiles — edit here, then `bash scripts/apply-chezmoi.sh` to apply.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/espanso/espanso/dev/schemas/match.schema.json
+
+matches:
+  # Emails
+  - trigger: "@@"
+    replace: "ston@builtby.win"
+  - trigger: "@i"
+    replace: "winstonjzhao@icloud.com"
+  - trigger: "@g"
+    replace: "winston.j.zhao@gmail.com"
+
+  # Date / time
+  - trigger: ":date"
+    replace: "{{mydate}}"
+    vars:
+      - name: mydate
+        type: date
+        params:
+          format: "%Y-%m-%d"
+  - trigger: ":dt"
+    replace: "{{mydt}}"
+    vars:
+      - name: mydt
+        type: date
+        params:
+          format: "%Y-%m-%d %H:%M"

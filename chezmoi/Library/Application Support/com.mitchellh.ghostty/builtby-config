@@ -30,9 +30,22 @@ keybind = cmd+shift+]=next_tab
 keybind = cmd+shift+[=previous_tab
 keybind = ctrl+tab=next_tab
 keybind = ctrl+shift+tab=previous_tab
+keybind = cmd+1=unbind
+keybind = cmd+2=unbind
+keybind = cmd+3=unbind
+keybind = cmd+4=unbind
+keybind = cmd+5=unbind
+keybind = cmd+6=unbind
+keybind = cmd+7=unbind
+keybind = cmd+8=unbind
+keybind = cmd+9=unbind
+keybind = cmd+shift+p=unbind
+keybind = cmd+shift+m=unbind
+keybind = cmd+shift+a=unbind
+keybind = cmd+shift+o=unbind
 keybind = cmd+d=new_split:right
 keybind = cmd+shift+d=new_split:down
-keybind = cmd+enter=toggle_fullscreen
+keybind = cmd+enter=unbind
 
 # Clipboard
 clipboard-read = allow

@@ -46,6 +46,10 @@ describe('chezmoi source tree', () => {
 
     expect(xdgGhosttyConfig).not.toContain('keybind = super+a=text:\\x01');
     expect(macGhosttyConfig).not.toContain('keybind = super+a=text:\\x01');
+    expect(xdgGhosttyConfig).toContain('keybind = cmd+1=csi:49;9u');
+    expect(xdgGhosttyConfig).toContain('keybind = cmd+9=csi:57;9u');
+    expect(macGhosttyConfig).toContain('keybind = cmd+1=unbind');
+    expect(macGhosttyConfig).toContain('keybind = cmd+9=unbind');
   });
 
   it('exposes a path-filtered bb setup ghostty apply path', () => {

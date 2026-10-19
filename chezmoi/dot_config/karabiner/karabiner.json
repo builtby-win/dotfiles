@@ -1,5 +1,5 @@
 {
-    "_comment": "builtby.win/dotfiles \u2014 managed by chezmoi. Add personal modifications to complex_modifications.rules array. Chezmoi preserves local changes (--keep).",
+    "_comment": "builtby.win/dotfiles — managed by chezmoi. Add personal modifications to complex_modifications.rules array. Chezmoi preserves local changes (--keep).",
     "profiles": [
         {
             "complex_modifications": {
@@ -8,6 +8,179 @@
                     "basic.to_if_alone_timeout_milliseconds": 200
                 },
                 "rules": [
+                    {
+                        "description": "Click clears armed one-shot (sticky) modifiers",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "pointing_button": "button1",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "sticky_modifier": {
+                                            "left_control": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_shift": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_option": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_command": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_control": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_shift": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_option": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_command": "off"
+                                        }
+                                    },
+                                    {
+                                        "pointing_button": "button1"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "pointing_button": "button2",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "sticky_modifier": {
+                                            "left_control": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_shift": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_option": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_command": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_control": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_shift": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_option": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_command": "off"
+                                        }
+                                    },
+                                    {
+                                        "pointing_button": "button2"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "pointing_button": "button3",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "sticky_modifier": {
+                                            "left_control": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_shift": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_option": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "left_command": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_control": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_shift": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_option": "off"
+                                        }
+                                    },
+                                    {
+                                        "sticky_modifier": {
+                                            "right_command": "off"
+                                        }
+                                    },
+                                    {
+                                        "pointing_button": "button3"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
                     {
                         "description": "Neru external modes (Karabiner variable API)",
                         "manipulators": [
@@ -290,17 +463,10 @@
                         ]
                     },
                     {
-                        "description": "Neru chords: fj grid, dk scroll, df hints",
+                        "description": "Neru chords: fj grid, dk scroll, df hints, jl recursive_grid",
                         "manipulators": [
                             {
                                 "type": "basic",
-                                "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    }
-                                ],
                                 "from": {
                                     "simultaneous": [
                                         {
@@ -324,12 +490,6 @@
                                 },
                                 "to": [
                                     {
-                                        "set_variable": {
-                                            "name": "neru_mode",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
                                         "key_code": "k",
                                         "modifiers": [
                                             "left_command",
@@ -345,13 +505,6 @@
                             },
                             {
                                 "type": "basic",
-                                "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    }
-                                ],
                                 "from": {
                                     "simultaneous": [
                                         {
@@ -375,12 +528,6 @@
                                 },
                                 "to": [
                                     {
-                                        "set_variable": {
-                                            "name": "neru_mode",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
                                         "key_code": "s",
                                         "modifiers": [
                                             "left_command",
@@ -396,13 +543,6 @@
                             },
                             {
                                 "type": "basic",
-                                "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    }
-                                ],
                                 "from": {
                                     "simultaneous": [
                                         {
@@ -426,13 +566,46 @@
                                 },
                                 "to": [
                                     {
-                                        "set_variable": {
-                                            "name": "neru_mode",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
                                         "key_code": "i",
+                                        "modifiers": [
+                                            "left_command",
+                                            "left_control",
+                                            "left_option",
+                                            "left_shift"
+                                        ]
+                                    }
+                                ],
+                                "parameters": {
+                                    "basic.simultaneous_threshold_milliseconds": 75
+                                }
+                            }
+                            ,
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "simultaneous": [
+                                        {
+                                            "key_code": "j"
+                                        },
+                                        {
+                                            "key_code": "l"
+                                        }
+                                    ],
+                                    "simultaneous_options": {
+                                        "detect_key_down_uninterruptedly": false,
+                                        "key_down_order": "insensitive",
+                                        "key_up_order": "insensitive",
+                                        "key_up_when": "any"
+                                    },
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "j",
                                         "modifiers": [
                                             "left_command",
                                             "left_control",
@@ -453,11 +626,6 @@
                             {
                                 "type": "basic",
                                 "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    },
                                     {
                                         "type": "frontmost_application_if",
                                         "bundle_identifiers": [
@@ -510,11 +678,6 @@
                                 "type": "basic",
                                 "conditions": [
                                     {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    },
-                                    {
                                         "type": "frontmost_application_unless",
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
@@ -563,13 +726,6 @@
                             },
                             {
                                 "type": "basic",
-                                "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    }
-                                ],
                                 "from": {
                                     "key_code": "j",
                                     "modifiers": {
@@ -587,13 +743,6 @@
                             },
                             {
                                 "type": "basic",
-                                "conditions": [
-                                    {
-                                        "type": "variable_if",
-                                        "name": "neru_mode",
-                                        "value": 0
-                                    }
-                                ],
                                 "from": {
                                     "key_code": "k",
                                     "modifiers": {
@@ -635,7 +784,7 @@
                                     }
                                 ],
                                 "parameters": {
-                                    "basic.to_if_alone_timeout_milliseconds": 200
+                                    "basic.to_if_alone_timeout_milliseconds": 800
                                 }
                             }
                         ]
@@ -782,13 +931,6 @@
                                 "to": [
                                     {
                                         "key_code": "left_command"
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "sticky_modifier": {
-                                            "left_command": "toggle"
-                                        }
                                     }
                                 ]
                             },
@@ -1484,6 +1626,131 @@
                                 "parameters": {
                                     "basic.to_delayed_action_delay_milliseconds": 200
                                 }
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Control + n/p and h/j/k/l are arrow keys",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "n",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "shift",
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "down_arrow"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "p",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "shift",
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "up_arrow"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "h",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "shift",
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_arrow"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "shift",
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "down_arrow"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "shift",
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "up_arrow"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "shift",
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_arrow"
+                                    }
+                                ]
                             }
                         ]
                     }
