@@ -1,0 +1,6 @@
+{
+  "name": "Basic — essentials only",
+  "apps": ["gh", "starship", "fzf", "zoxide", "iterm2", "vscode", "codex", "docker"],
+  "configs": ["zsh", "iterm2"],
+  "features": ["tips"]
+}

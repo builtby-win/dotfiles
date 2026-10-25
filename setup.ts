@@ -89,6 +89,83 @@ function getBootstrapSetupPath(argv: string[]): SetupPathChoice | null {
   return null;
 }
 
+// ============================================
+// Preset configs (JSON: general presets in presets/, or any individualized file)
+// ============================================
+
+interface SetupPreset {
+  name?: string;
+  /** Full app selection; replaces the checked defaults when present. */
+  apps?: string[];
+  /** Added on top of the checked defaults (ignored when `apps` is present). */
+  addApps?: string[];
+  /** Removed from the selection (applied last). */
+  removeApps?: string[];
+  /** Managed config values; defaults to the checked defaults when absent. */
+  configs?: string[];
+  /** Optional feature values; defaults to the checked defaults when absent. */
+  features?: string[];
+}
+
+function getPresetRef(argv: string[]): string | null {
+  for (let index = 0; index < argv.length; index++) {
+    if (argv[index] === "--preset" && argv[index + 1]) return argv[index + 1];
+  }
+  return process.env.DOTFILES_PRESET || null;
+}
+
+function resolvePresetPath(ref: string): string {
+  // A name ("basic") resolves inside the repo's presets/; anything path-like is used as-is.
+  if (ref.endsWith(".json") || ref.includes("/") || ref.startsWith(".")) return ref;
+  return join(DOTFILES_DIR, "presets", `${ref}.json`);
+}
+
+function loadPreset(ref: string): SetupPreset {
+  const presetPath = resolvePresetPath(ref);
+  let raw: string;
+  try {
+    raw = readFileSync(presetPath, "utf-8");
+  } catch {
+    log.error(`Preset not found: ${presetPath}`);
+    log.error(`Pass a name from ${join(DOTFILES_DIR, "presets")} or a path to a preset JSON file.`);
+    process.exit(1);
+  }
+  try {
+    return JSON.parse(raw) as SetupPreset;
+  } catch {
+    log.error(`Preset is not valid JSON: ${presetPath}`);
+    process.exit(1);
+  }
+}
+
+function validatePresetValues(kind: string, values: string[] | undefined, valid: Set<string>): void {
+  if (!values) return;
+  const unknown = values.filter((value) => !valid.has(value));
+  if (unknown.length > 0) {
+    log.error(`Preset has unknown ${kind}: ${unknown.join(", ")}`);
+    log.error(`Valid ${kind}: ${[...valid].join(", ")}`);
+    process.exit(1);
+  }
+}
+
+/** General presets shipped in presets/, offered in the first-run CLI menu. */
+function listPresets(): Array<{ ref: string; label: string }> {
+  const presetsDir = join(DOTFILES_DIR, "presets");
+  if (!existsSync(presetsDir)) return [];
+  return readdirSync(presetsDir)
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .map((file) => {
+      const ref = file.replace(/\.json$/, "");
+      try {
+        const parsed = JSON.parse(readFileSync(join(presetsDir, file), "utf-8")) as SetupPreset;
+        return { ref, label: parsed.name ?? ref };
+      } catch {
+        return { ref, label: ref };
+      }
+    });
+}
+
 // Colors
 const colors = {
   reset: "\x1b[0m",
@@ -2072,21 +2149,30 @@ async function runSetup(): Promise<void> {
     const bootstrapSetupPath = getBootstrapSetupPath(process.argv.slice(2));
     const isFocusFlag = process.argv.includes("--focus");
     let setupPath: SetupPathChoice | "use_detected" = bootstrapSetupPath ?? (isFocusFlag ? "focus" : "focus");
+    let presetRef = getPresetRef(process.argv.slice(2));
+    let preset = presetRef ? loadPreset(presetRef) : null;
 
-    if (!bootstrapSetupPath && !isFocusFlag && hasDetectedItems) {
-      setupPath = await select({
-        message: "Use the recommended setup or keep what is already here?",
+    if (!bootstrapSetupPath && !isFocusFlag && !preset) {
+      const startingPoint = await select<string>({
+        message: "How should we set up this machine?",
         choices: [
           {
             name: "Recommended full AI/dev workflow",
             value: "focus",
             description: "iTerm2 and OpenCode are selected by default; optional alternatives like Codex can be checked."
           },
-          {
-            name: `Keep detected setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`,
-            value: "use_detected",
-            description: "Keeps only the tools and configs already found on this machine.",
-          },
+          ...listPresets().map((entry) => ({
+            name: `Preset: ${entry.label}`,
+            value: `preset:${entry.ref}`,
+            description: "Everything preselected by the preset file; goes straight to the review screen.",
+          })),
+          ...(hasDetectedItems
+            ? [{
+                name: `Keep detected setup (${detectedAppsOnPlatform.length} apps, ${detectedConfigsOnPlatform.length} configs)`,
+                value: "use_detected",
+                description: "Keeps only the tools and configs already found on this machine.",
+              }]
+            : []),
           {
             name: "Customize manually",
             value: "customize",
@@ -2095,9 +2181,39 @@ async function runSetup(): Promise<void> {
         ],
         default: "focus",
       });
+      if (startingPoint.startsWith("preset:")) {
+        presetRef = startingPoint.slice("preset:".length);
+        preset = loadPreset(presetRef);
+      } else {
+        setupPath = startingPoint as SetupPathChoice | "use_detected";
+      }
     }
 
-    if (setupPath === "use_detected") {
+    if (preset) {
+      // A preset file decides everything; the user only reviews the step 4 recap.
+      validatePresetValues("apps", [...(preset.apps ?? []), ...(preset.addApps ?? []), ...(preset.removeApps ?? [])], new Set(APPS.map((a) => a.value)));
+      validatePresetValues("configs", preset.configs, new Set(MANAGED_CONFIGS.map((c) => c.value)));
+      validatePresetValues("features", preset.features, new Set(OPTIONAL_FEATURES.map((f) => f.value)));
+      selectedApps = preset.apps
+        ? [...preset.apps]
+        : selectableApps
+            .filter((a) => (appStates.get(a.value) ?? "not_installed") !== "not_installed" || a.checked)
+            .map((a) => a.value);
+      for (const added of preset.addApps ?? []) {
+        if (!selectedApps.includes(added)) selectedApps.push(added);
+      }
+      selectedApps = selectedApps.filter(
+        (value) => !(preset.removeApps ?? []).includes(value) && selectableApps.some((a) => a.value === value),
+      );
+      selectedManagedConfigs = (preset.configs ?? selectableManagedConfigs.filter((c) => c.checked).map((c) => c.value))
+        .filter((value) => selectableManagedConfigs.some((c) => c.value === value));
+      selectedFeatures = preset.features ?? OPTIONAL_FEATURES.filter((f) => f.checked).map((f) => f.value);
+      skipToRecap = true;
+      currentStep = 4;
+      console.log("");
+      log.success(`Selected preset: ${preset.name ?? presetRef}`);
+      console.log("");
+    } else if (setupPath === "use_detected") {
       selectedApps = detectedAppsOnPlatform;
       selectedManagedConfigs = detectedConfigsOnPlatform;
       selectedFeatures = detectedFeaturesList;

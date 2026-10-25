@@ -37,6 +37,7 @@ Use the agent's interactive question tool for the choices below. Ask only questi
    - Minimal: shell essentials only
    - Customize: choose everything manually
    - AI agent: AI-focused tools and configs
+   - Preset (`--preset <name|path>`): a general preset from `presets/` in the dotfiles repo (`basic`, `pro`, … — also offered in the CLI menu) or any individualized JSON file by path; preselects apps/configs/features — use when onboarding someone live; do not ask the Apps/Managed configs questions for this path
 3. **Apps** — Which optional tools should be installed or kept?
    - CLI: tmux, btop, fzf, ripgrep, gh, bat, eza, zoxide, sesh, herdr, starship
    - Terminals/editors: iTerm2, Ghostty, Visual Studio Code, Cursor, Zed
@@ -66,7 +67,7 @@ On Windows, use the equivalent questions from `setup-windows.ts`: run `windows/i
 ## Command mapping
 
 - First install: clone/update the repository, then run the platform bootstrap listed above.
-- Full guided change: `bb setup` or `bb setup --setup-path <focus|standard|minimal|customize|ai_agent>`.
+- Full guided change: `bb setup` or `bb setup --setup-path <focus|standard|minimal|customize|ai_agent>` / `bb setup --preset <name|path>`.
 - One module: `bb setup shell`, `bb setup tmux`, `bb setup nvim`, `bb setup hammerspoon`, `bb setup karabiner`, `bb setup iterm2`, or `bb setup ghostty`.
 - Restore: `bb setup revert`.
 - Status/help: `bb status` and `bb help`.

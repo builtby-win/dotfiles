@@ -108,6 +108,13 @@ bb setup
 
 Advanced: pass `--setup-path standard`, `minimal`, `customize`, or `ai_agent` only when you intentionally want a non-default setup.
 
+Coached onboarding: use a preset — general ones ship in `presets/` (`basic`, `pro`; see `presets/README.md` for the schema), or pass any individualized JSON file by path. Everything is preselected and setup goes straight to a single review screen before anything installs. Presets also appear in the first-run setup menu:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --preset basic
+curl -fsSL https://raw.githubusercontent.com/builtby-win/dotfiles/main/bootstrap.sh | bash -s -- --preset ~/Downloads/their-setup.json
+```
+
 A la carte modules:
 
 ```bash

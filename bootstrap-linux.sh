@@ -245,11 +245,20 @@ parse_args() {
             ;;
         esac
         ;;
+      --preset)
+        shift
+        if [[ -z "${1:-}" ]]; then
+          print_error "--preset needs a preset name (see presets/ in the dotfiles repo) or a path to a preset JSON file"
+          exit 1
+        fi
+        export DOTFILES_PRESET="$1"
+        ;;
       -h|--help)
         echo "Usage: bootstrap-linux.sh [options]"
         echo "  -y, --yes   Run non-interactively (auto-approve all prompts)"
         echo "  --focus     Run focused Back2Vibing setup"
         echo "  --setup-path <path>  Use focus, standard, minimal, customize, or ai_agent"
+        echo "  --preset <name|path> Preset JSON from presets/ or a file path (skips selection checklists)"
         echo "  -h, --help  Show this help message"
         exit 0
         ;;

@@ -285,6 +285,16 @@ while [[ $# -gt 0 ]]; do
       esac
       shift
       ;;
+    --preset)
+      shift
+      if [[ -z "${1:-}" ]]; then
+        print_error "--preset needs a preset name (see presets/ in the dotfiles repo) or a path to a preset JSON file"
+        exit 1
+      fi
+      # setup.ts reads DOTFILES_PRESET; exporting survives every setup launch fallback below.
+      export DOTFILES_PRESET="$1"
+      shift
+      ;;
     *)
       FORWARDED_ARGS+=("$1")
       shift

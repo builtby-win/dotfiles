@@ -214,7 +214,7 @@ describe('Linux bootstrap workflow', () => {
     expect(macBootstrap).not.toContain('How would you like to proceed with setup?');
     expect(linuxBootstrap).not.toContain('How would you like to proceed with setup?');
     expect(setupContent).not.toContain('message: "Choose your setup path:"');
-    expect(setupContent).toContain('message: "Use the recommended setup or keep what is already here?"');
+    expect(setupContent).toContain('message: "How should we set up this machine?"');
   });
 
   it('only passes setup path handoff flags when bootstrap gets an explicit path', () => {

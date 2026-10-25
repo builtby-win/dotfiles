@@ -42,7 +42,7 @@ describe('focused setup defaults', () => {
     expect(content).toContain('checked: state !== "not_installed" || (app.checked ?? false),');
     expect(content).toContain('selectedApps = await selectFocusedWorkflowApps(selectableApps, appStates, installItemLabel);');
     expect(content).toContain('let setupPath: SetupPathChoice | "use_detected" = bootstrapSetupPath ?? (isFocusFlag ? "focus" : "focus");');
-    expect(content).toContain('message: "Use the recommended setup or keep what is already here?"');
+    expect(content).toContain('message: "How should we set up this machine?"');
     expect(content).toContain('default: "focus"');
     expect(content).not.toContain('selectedApps = ["back2vibing", "tmux", "sesh", "fzf", "ghostty", "starship", "zoxide"]');
   });
@@ -83,5 +83,38 @@ describe('focused setup defaults', () => {
     expect(macBootstrap).toContain('focus|standard|minimal|customize|ai_agent');
     expect(linuxBootstrap).toContain('focus|standard|minimal|customize|ai_agent');
     expect(functionsContent).toContain('pnpm exec tsx setup.ts "$dotfiles_dir" "$@"');
+  });
+
+  it('preset JSON preselects apps/configs and skips the checklists', () => {
+    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+    const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
+    const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
+
+    expect(setupContent).toContain('function getPresetRef(argv: string[])');
+    expect(setupContent).toContain('process.env.DOTFILES_PRESET');
+    expect(setupContent).toContain('function loadPreset(ref: string): SetupPreset');
+    expect(setupContent).toContain('validatePresetValues("apps"');
+    expect(macBootstrap).toContain('export DOTFILES_PRESET="$1"');
+    expect(linuxBootstrap).toContain('export DOTFILES_PRESET="$1"');
+
+    expect(setupContent).toContain('function listPresets()');
+    expect(setupContent).toContain('name: `Preset: ${entry.label}`');
+
+    // Same calm end-state as the other preset paths: straight to the review screen.
+    const presetBlock = setupContent.slice(setupContent.indexOf('if (preset) {'));
+    expect(presetBlock.slice(0, presetBlock.indexOf('} else if'))).toContain('skipToRecap = true;');
+
+    // Only general archetypes ship in the repo; per-person files are passed by path.
+    const basic = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '../presets/basic.json'), 'utf-8'),
+    ) as { apps?: string[]; configs?: string[] };
+    expect(basic.apps).toEqual(expect.arrayContaining(['codex', 'docker', 'gh']));
+    expect(basic.apps).not.toContain('opencode');
+    expect(basic.configs).toEqual(['zsh', 'iterm2']);
+    const pro = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '../presets/pro.json'), 'utf-8'),
+    ) as { addApps?: string[] };
+    expect(pro.addApps).toEqual(expect.arrayContaining(['codex', 'docker', 'ghostty']));
+    expect(fs.existsSync(path.resolve(__dirname, '../presets/arizona-wed.json'))).toBe(false);
   });
 });

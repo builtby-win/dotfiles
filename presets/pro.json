@@ -1,0 +1,6 @@
+{
+  "name": "Pro — full workflow, everything on",
+  "addApps": ["codex", "docker", "ghostty"],
+  "configs": ["zsh", "tmux", "iterm2", "ghostty"],
+  "features": ["tips"]
+}
