@@ -148,4 +148,44 @@ describe('Karabiner module wiring', () => {
     expect(setup).toContain('\".config/neru/config.toml\"');
   });
 
+  it('sends F1-F12 as standard function keys while MapleStory is frontmost', () => {
+    const config = JSON.parse(
+      readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'),
+    );
+    const fnKeys = config.profiles[0].fn_function_keys.map(
+      (entry: { from: { key_code: string } }) => entry.from.key_code,
+    );
+    expect(fnKeys).toEqual(['f3', 'f4', 'f5']);
+    const rule = config.profiles[0].complex_modifications.rules.find(
+      (candidate: { description: string }) =>
+        candidate.description === 'MapleStory Classic World: F1-F12 send as standard function keys',
+    );
+    expect(rule).toBeDefined();
+    expect(rule.manipulators[0].conditions[0].bundle_identifiers).toContain(
+      '^com\\.nexon\\.maplestoryna_classic_exe$',
+    );
+    const sculptF2 = rule.manipulators.find(
+      (manipulator: { from: { key_code?: string; modifiers?: { mandatory?: string[] } } }) =>
+        manipulator.from.key_code === 'tab' &&
+        manipulator.from.modifiers?.mandatory?.includes('option'),
+    );
+    expect(sculptF2?.to).toEqual([{ key_code: 'f2' }]);
+    for (let n = 1; n <= 12; n += 1) {
+      const entry = rule.manipulators.find(
+        (manipulator: { from: { key_code?: string } }) => manipulator.from.key_code === `f${n}`,
+      );
+      expect(entry?.to).toEqual([{ key_code: `f${n}` }]);
+    }
+    const mediaFallbacks = rule.manipulators.filter(
+      (manipulator: { from: { consumer_key_code?: string } }) => manipulator.from.consumer_key_code,
+    );
+    expect(mediaFallbacks.length).toBeGreaterThan(0);
+    for (const manipulator of rule.manipulators) {
+      const ids = manipulator.conditions.flatMap(
+        (condition: { bundle_identifiers?: string[] }) => condition.bundle_identifiers ?? [],
+      );
+      expect(ids.some((id: string) => id.includes('nexon'))).toBe(true);
+    }
+  });
+
 });

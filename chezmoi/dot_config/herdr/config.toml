@@ -11,6 +11,20 @@ name = "catppuccin"
 [ui]
 # Show a zoom indicator in the tab bar so a zoomed pane is not mistaken for the only pane.
 tab_bar_right = [{ type = "zoom" }]
+# Collapsed sidebar takes zero width (no dots rail). "compact" keeps the rail.
+sidebar_collapsed_mode = "hidden"
+
+[ui.toast]
+delivery = "off"
+
+[ui.sound]
+enabled = false
+
+[terminal]
+# Render pane images in Kitty graphics-compatible outer terminals (Ghostty).
+# omp requires this AND PI_FORCE_IMAGE_PROTOCOL=kitty: without it omp's
+# resolveImageProtocol() returns null inside Herdr (imagesRequireOverride).
+kitty_graphics = true
 
 [keys]
 prefix = "ctrl+b"
@@ -38,7 +52,9 @@ focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 # --- Pane management ---
 # Panes are closed safely via confirmation popup modal bound to prefix+w and prefix+x below.
 close_pane = []
-# Return to the previously focused pane.
+# Return to the previously focused pane (last active workspace).
+# cycle_pane_next defaults to prefix+tab, so unbind it to keep leader+tab unambiguous.
+cycle_pane_next = []
 last_pane = "prefix+tab"
 zoom = "prefix+z"
 swap_pane_down = "prefix+>"
@@ -69,8 +85,10 @@ close_workspace = "prefix+shift+w"
 # Searchable workspace/tab/pane tree (press / to fuzzy-filter).
 # Only matches the visible label, so prefix+space runs herdr-switch instead.
 goto = "prefix+f"
-# Persistent navigation mode; j/k switch workspaces.
-workspace_picker = "prefix+g"
+# Built-in navigate-mode picker is unbound: it is too cramped on small/phone
+# screens and can't show repo/branch/path. prefix+g opens the herdr-switch
+# popup instead (workspaces first, up wraps to the + new / tools… row).
+workspace_picker = ""
 navigate_workspace_down = ["j", "down"]
 navigate_workspace_up = ["k", "up"]
 navigate_pane_down = ["ctrl+j", "ctrl+down"]
@@ -80,8 +98,17 @@ settings = "prefix+s"
 toggle_sidebar = "prefix+shift+b"
 
 # Fuzzy switch on label, repo/folder, branch and path.
+# prefix+g mirrors prefix+space so the cramped built-in picker isn't needed.
 [[keys.command]]
 key = "prefix+space"
+type = "popup"
+command = "herdr-switch"
+description = "switch workspace"
+width = "80%"
+height = "80%"
+
+[[keys.command]]
+key = "prefix+g"
 type = "popup"
 command = "herdr-switch"
 description = "switch workspace"

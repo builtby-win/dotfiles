@@ -94,6 +94,12 @@ elif [[ -f "$DOTFILES_SHELL_DIR/oh-my-zsh.sh" ]]; then
   source "$DOTFILES_SHELL_DIR/oh-my-zsh.sh"
 fi
 
+# Terminal image protocol (omp): force Kitty graphics everywhere, including
+# inside Herdr/tmux. Herdr sets imagesRequireOverride, so omp disables images
+# unless forced; Ghostty renders Kitty (never Sixel). Harmless outside muxes
+# where omp would auto-detect Kitty anyway.
+export PI_FORCE_IMAGE_PROTOCOL="${PI_FORCE_IMAGE_PROTOCOL:-kitty}"
+
 # Auto-attach to herdr on SSH login (exec-replaces the shell; no-op locally).
 # Sourced LAST: everything above still applies to inner herdr shells.
 [[ -f "$DOTFILES_SHELL_DIR/herdr.sh" ]] && source "$DOTFILES_SHELL_DIR/herdr.sh"

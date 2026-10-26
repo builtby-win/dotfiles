@@ -167,7 +167,7 @@
       "BTTAppAutoInvertIcon" : 1,
       "BTTTriggers" : [
 
-      ]
+]
     },
     {
       "BTTAppBundleIdentifier" : "BT.G",
@@ -285,10 +285,802 @@
       "BTTAppAutoInvertIcon" : 1,
       "BTTTriggers" : [
 
+]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.mitchellh.ghostty",
+      "BTTAppName" : "Ghostty",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "056C7487-40F2-4210-BBD0-C383F211BD37",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "056C7487-40F2-4210-BBD0-C383F211BD37",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "AD77F219-A723-4C86-94B9-CF82FBA89D60",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "CB97A2EA-CF05-47E9-BC57-E3A243BF85B2",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "CB97A2EA-CF05-47E9-BC57-E3A243BF85B2",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "72983162-5A55-41BB-8196-1D75599379F6",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "B6AFB938-8BD7-47E6-B8BA-955B55CF4F6D",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "B6AFB938-8BD7-47E6-B8BA-955B55CF4F6D",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "A83E63C9-7FE2-462D-A85F-208CC0161580",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "3F517266-2B45-4D49-AAB8-5E96322D90AE",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "3F517266-2B45-4D49-AAB8-5E96322D90AE",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "59214AC4-0C8E-4B80-A16F-B413C2B3BC4F",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.apple.Terminal",
+      "BTTAppName" : "Terminal",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "86F480B8-8FA0-4552-8C99-B57B48469010",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "86F480B8-8FA0-4552-8C99-B57B48469010",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "FF617CCB-60B6-434A-9FBE-E26723B2F998",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "0C7560E3-443F-4595-A5F1-AA61156C89F5",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "0C7560E3-443F-4595-A5F1-AA61156C89F5",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "F0CBF735-F7B1-45E4-92E1-CB2BD83EE29B",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "4E9FDA81-7BF7-4D26-9F3E-240A62695161",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "4E9FDA81-7BF7-4D26-9F3E-240A62695161",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "0307160E-5F35-43DD-9AC4-01EDE5BDDF0E",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "CE7D5912-6955-4B5A-8E6C-709F77D1BD66",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "CE7D5912-6955-4B5A-8E6C-709F77D1BD66",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "3FC8BE16-3F90-40A3-BBCE-7104CC093478",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.googlecode.iterm2",
+      "BTTAppName" : "iTerm2",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "D0AA9678-73E9-48A1-88A1-E4E2E2D8A57F",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "D0AA9678-73E9-48A1-88A1-E4E2E2D8A57F",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "7DC72E5F-232B-4A17-8654-26F163E07A51",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "72036329-B63E-44BF-9336-258707AC31BC",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "72036329-B63E-44BF-9336-258707AC31BC",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "03A4428E-9221-44B3-8A2D-1BCD0C3CB975",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "FA62B81F-5FF6-4817-8267-C07AF427AE41",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "FA62B81F-5FF6-4817-8267-C07AF427AE41",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "A121DD60-2BC2-4764-9748-BF97B2BD49CD",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "E58CB612-3DAF-41F4-A956-F1F33E7FB979",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "E58CB612-3DAF-41F4-A956-F1F33E7FB979",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "CE60D4A6-E396-46A2-94CE-47C4EE87969E",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "com.github.wez.wezterm",
+      "BTTAppName" : "WezTerm",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "8F163939-5160-4546-88E4-B34CDDAF838C",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "8F163939-5160-4546-88E4-B34CDDAF838C",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "4E3BF259-ADEA-4406-BBEB-BE11E663D71E",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "59B9EB05-57BF-43FA-8D5F-7A226FAAFAC1",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "59B9EB05-57BF-43FA-8D5F-7A226FAAFAC1",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "D13429BC-1A9A-4A33-BFC0-5FE7E332BF97",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "234A3811-A887-4487-9521-947511B524D5",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "234A3811-A887-4487-9521-947511B524D5",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "9223B0F7-225E-4084-8E46-387D224B9467",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "27291CEA-8F4F-4911-B465-8A6E418F5AD4",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "27291CEA-8F4F-4911-B465-8A6E418F5AD4",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "E46F115A-EB05-492B-BDF6-EED7EBC52C72",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "dev.warp.Warp-Stable",
+      "BTTAppName" : "Warp",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "377AE269-FFF9-42CE-9EB8-5500E637EC49",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "377AE269-FFF9-42CE-9EB8-5500E637EC49",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "814035A0-F2B4-42C2-8FCB-4E7C24C4670E",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "967FFFAB-1714-45EC-BC94-496109E8B696",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "967FFFAB-1714-45EC-BC94-496109E8B696",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "D4346F2E-9A60-411A-B13B-9B08A5C09416",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "53A0E1B5-C755-4032-A922-67F3946B2118",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "53A0E1B5-C755-4032-A922-67F3946B2118",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "243CF8A3-36B6-4531-BAFB-B9CA6E73A7CA",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "4DCAE9CB-A520-4A28-A2F2-B475E1533088",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "4DCAE9CB-A520-4A28-A2F2-B475E1533088",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "51B695C0-0C79-4EE2-B122-AC2D88171433",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "org.alacritty",
+      "BTTAppName" : "Alacritty",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "95A022A6-9E34-4565-BED6-C098DA4718B7",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "95A022A6-9E34-4565-BED6-C098DA4718B7",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "0C0A11E5-AB40-48EA-A287-6954AE2F214D",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "49450F5B-86B4-4B3D-95C9-FF23432EA9AD",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "49450F5B-86B4-4B3D-95C9-FF23432EA9AD",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "A2DC0E80-4948-478D-BA06-52B735EAD25C",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "74C4964E-FD2D-4E24-BEF0-7044ECDF739A",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "74C4964E-FD2D-4E24-BEF0-7044ECDF739A",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "D64CE4F9-C517-4951-A14C-466FDE0CEFB6",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "87BE8C64-F740-47ED-AB16-9633C4C84585",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "87BE8C64-F740-47ED-AB16-9633C4C84585",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "DF5A33AF-C33E-4B22-B8AE-5249B8539902",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "io.alacritty",
+      "BTTAppName" : "Alacritty",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "7FF1FCF9-870F-4223-84D8-084596805194",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "7FF1FCF9-870F-4223-84D8-084596805194",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "0DAEDEE2-04B6-4FE6-9A80-8D2ED30FD80F",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "F5B015A7-A0FC-43FB-9ABD-96B5253F56BA",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "F5B015A7-A0FC-43FB-9ABD-96B5253F56BA",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "217633FE-6CA0-4171-9D25-3D5C672A52FF",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "DE4F76ED-81E4-4144-B317-67C60D88CD50",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "DE4F76ED-81E4-4144-B317-67C60D88CD50",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "E8099E2D-4FAE-4098-AD8E-007C84603D6F",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "18578FFE-3578-4BCB-A69C-C144A4EA9920",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "18578FFE-3578-4BCB-A69C-C144A4EA9920",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "40885057-6AEA-4624-A4F5-56DF5A2FDDB8",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "BTTAppBundleIdentifier" : "net.kovidgoyal.kitty",
+      "BTTAppName" : "Kitty",
+      "BTTAppAutoInvertIcon" : 1,
+      "BTTTriggers" : [
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 159,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "CE448016-5CDC-4F97-9CAE-85E429DEEFA0",
+          "BTTOrder" : 0,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "CE448016-5CDC-4F97-9CAE-85E429DEEFA0",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "512D0C97-CF8A-4ED2-8F31-3C062CEC6733",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction left",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 0
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 160,
+          "BTTTriggerTypeDescription" : "2 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "2 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "4902EF7B-0918-4D65-9CA8-83F2BA828513",
+          "BTTOrder" : 1,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "4902EF7B-0918-4D65-9CA8-83F2BA828513",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "621A5E51-E57B-4FDE-9118-5C2A26D821A0",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the pane in the swipe direction. No-op when herdr is unavailable.\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\nherdr pane focus --direction right",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 1
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 100,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Left",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Left",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "8A7D3A26-53F3-4318-9DF5-DEE91B605E6F",
+          "BTTOrder" : 2,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "8A7D3A26-53F3-4318-9DF5-DEE91B605E6F",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "64C1C53E-F832-45B6-99E8-054F5A5D0283",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the previous tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"prev\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 2
+            }
+          ]
+        },
+        {
+          "BTTLastUpdatedAt" : 1792787745.8216991,
+          "BTTTriggerType" : 101,
+          "BTTTriggerTypeDescription" : "3 Finger Swipe Right",
+          "BTTTriggerTypeDescriptionReadOnly" : "3 Finger Swipe Right",
+          "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+          "BTTUUID" : "E5CF32FC-0857-4E14-9E38-2F656369001F",
+          "BTTOrder" : 3,
+          "BTTActionsToExecute" : [
+            {
+              "BTTLastUpdatedAt" : 1792787745.8216991,
+              "BTTTriggerParentUUID" : "E5CF32FC-0857-4E14-9E38-2F656369001F",
+              "BTTIsPureAction" : true,
+              "BTTTriggerClass" : "BTTTriggerTypeTouchpadAll",
+              "BTTUUID" : "E39D4E5B-4458-4272-9341-3B865583384E",
+              "BTTPredefinedActionType" : 206,
+              "BTTPredefinedActionName" : "Execute Shell Script / Task",
+              "BTTShellTaskActionScript" : "#!/bin/bash\n# Herdr: focus the next tab in the current workspace (wraps around).\nexport PATH=\"/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"\ncommand -v herdr >/dev/null 2>&1 || exit 0\npython3 - <<'PYEOF2'\nimport json, subprocess\ndirection = \"next\"\ntry:\n    out = subprocess.run([\"herdr\", \"tab\", \"list\"], capture_output=True, text=True, timeout=10).stdout\n    tabs = json.loads(out)[\"result\"][\"tabs\"]\nexcept Exception:\n    raise SystemExit(0)\nby_ws = {}\nfor t in tabs:\n    by_ws.setdefault(t[\"workspace_id\"], []).append(t)\ncur = next((t for t in tabs if t.get(\"focused\")), None)\nif cur is None:\n    raise SystemExit(0)\ngroup = sorted(by_ws[cur[\"workspace_id\"]], key=lambda t: t[\"number\"])\nids = [t[\"tab_id\"] for t in group]\ni = ids.index(cur[\"tab_id\"])\ntarget = ids[(i + 1) % len(ids)] if direction == \"next\" else ids[(i - 1) % len(ids)]\nif target != cur[\"tab_id\"]:\n    subprocess.run([\"herdr\", \"tab\", \"focus\", target])\nPYEOF2",
+              "BTTShellTaskActionConfig" : "/bin/bash:::-c:::-:::",
+              "BTTOrder" : 3
+            }
+          ]
+        }
       ]
     }
   ],
   "BTTPresetSnapAreas" : [
 
-  ]
+]
 }

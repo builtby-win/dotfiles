@@ -146,6 +146,7 @@ vim.keymap.set("n", "<leader>fh", with_mini_pick(function(MiniPick)
 end), { desc = "Help tags" })
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set("n", "<leader><Tab>", "<cmd>b#<cr>", { desc = "Last active buffer" })
 vim.keymap.set("n", "<leader>bd", "<cmd>bdelete<cr>", { desc = "Delete buffer" })
 vim.keymap.set("x", "/", search_visual_selection, { desc = "Search selection" })
 

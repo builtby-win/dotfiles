@@ -45,6 +45,7 @@ bb sync karabiner pull
 - `Fn` exposes raw function keys and taps as Control
 - Forward Delete becomes Escape
 - Double semicolon (`;;`) opens AltTab
+- `F1`–`F12` send as standard function keys while MapleStory Classic World is frontmost (media-key presses are remapped to `F7`–`F12`, and the Sculpt's `F2`-as-`⌥Tab` to `F2`); globally only `F3`–`F5` bypass `Fn`
 
 Neru calls `karabiner-layer` to switch between grid, scroll, nudge, and normal modes through Karabiner variables. App-specific behavior uses Karabiner's native foreground-application conditions; no polling agent is required.
 

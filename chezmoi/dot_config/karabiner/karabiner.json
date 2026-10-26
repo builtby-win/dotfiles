@@ -637,7 +637,8 @@
                                             "^org\\.alacritty$",
                                             "^io\\.alacritty$",
                                             "^com\\.github\\.wez\\.wezterm$",
-                                            "^com\\.cmuxterm\\.app$"
+                                            "^com\\.cmuxterm\\.app$",
+                                            "^com\\.kk2\\.rootshell$"
                                         ]
                                     }
                                 ],
@@ -688,7 +689,8 @@
                                             "^org\\.alacritty$",
                                             "^io\\.alacritty$",
                                             "^com\\.github\\.wez\\.wezterm$",
-                                            "^com\\.cmuxterm\\.app$"
+                                            "^com\\.cmuxterm\\.app$",
+                                            "^com\\.kk2\\.rootshell$"
                                         ]
                                     }
                                 ],
@@ -1749,6 +1751,342 @@
                                 "to": [
                                     {
                                         "key_code": "right_arrow"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "description": "MapleStory Classic World: F1-F12 send as standard function keys",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f1"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f1"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f2"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f2"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f3"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f3"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f4"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f4"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f5"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f5"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f6"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f6"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f7"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f7"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f8"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f8"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f9"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f9"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f10"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f10"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f11"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f11"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f12"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f12"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "consumer_key_code": "rewind"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f7"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "consumer_key_code": "play_or_pause"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f8"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "consumer_key_code": "fastforward"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f9"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "consumer_key_code": "mute"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f10"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "consumer_key_code": "volume_decrement"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f11"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "consumer_key_code": "volume_increment"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f12"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": ["^com\\.nexon\\.maplestoryna_classic_exe$", "^com\\.nexon\\.maplestoryna_exe$", "^com\\.nexon\\.plug\\.", "^com\\.nexon\\.maplestory\\.na\\.v1$"]
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "tab",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "option"
+                                        ],
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f2"
                                     }
                                 ]
                             }

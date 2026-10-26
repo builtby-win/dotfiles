@@ -39,6 +39,7 @@ Then verify the runtime state:
 - `<leader>fr` opens recent files
 - `<leader>fb` switches open buffers
 - `Shift+h` and `Shift+l` move to the previous and next buffer
+- `<leader><Tab>` jumps to the last active buffer (mirrors tmux `Leader+Tab` / herdr `prefix+Tab` for last session/workspace)
 - Buffer tabs are clickable with the mouse at the top of the window
 - `:Oil` is still available when you want a directory editor for renaming or moving files
 

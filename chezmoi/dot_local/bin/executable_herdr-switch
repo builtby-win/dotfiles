@@ -12,9 +12,24 @@ export PATH
 herdr=${HERDR_BIN_PATH:-herdr}
 mode=${1:-pick}
 
+# Prompt for one fork option value with the current value prefilled.
+# Enter sets it, empty + enter resets to auto, esc keeps the current value.
+ask_value() {
+  _ask=$(printf '' | fzf --print-query --prompt="$1 > " --query="$2" \
+    --header='enter set · empty clears to auto · esc keep current') || return 1
+  printf '%s' "$_ask" | head -n 1
+}
+
+# Narrow popups (phone): only the sessions and workspace columns are padded
+# and shown first, so workspace names get the width. The detail column stays
+# off-screen but searchable in deep mode.
+popup_cols=${HERDR_SWITCH_COLS:-$(tput cols 2>/dev/null || echo 0)}
+# Debug: log the real popup width so we can tune the narrow layout cutoff.
+echo "$(date +%s) cols=$popup_cols term=${TERM:-?}" >> "${XDG_STATE_HOME:-$HOME/.local/state}/herdr-switch/cols.log"
+export HERDR_SWITCH_COLS="$popup_cols"
+
 # ponytail: query Herdr once and parallelize branch reads.
-rows=$(python3 - "$herdr" "$@" <<'PY'
-import concurrent.futures
+rows=$(HERDR_SWITCH_COLS="$popup_cols" python3 - "$herdr" "$@" <<'PY'
 import json
 import os
 import socket
@@ -40,12 +55,27 @@ try:
         cursor = json.load(f)
 except (OSError, ValueError):
     cursor = {}
+if mode == "pick":
+    # Session cycling only lasts one picker run; a fresh run starts each
+    # workspace on its last-focused pane.
+    cursor = {}
+    try:
+        with open(cursor_path, "w") as f:
+            json.dump(cursor, f)
+    except OSError:
+        pass
 
 
-def sessions_of(workspace_panes):
+def sessions_of(workspace_panes, active_pane_id=None):
     # Agent panes are the sessions; fall back to every pane for plain shells.
     agents = [pane for pane in workspace_panes if pane.get("agent_status") not in (None, "unknown")]
-    return agents or workspace_panes
+    if not agents:
+        return list(workspace_panes)
+    if active_pane_id:
+        active_pane = next((pane for pane in workspace_panes if pane.get("pane_id") == active_pane_id), None)
+        if active_pane and active_pane not in agents:
+            return [active_pane] + agents
+    return agents
 
 
 def snapshot():
@@ -59,7 +89,7 @@ def snapshot():
         return json.loads(subprocess.check_output([herdr, "api", "snapshot"], text=True))["result"]["snapshot"]
 
 
-def wait_for_change(data):
+def wait_for_change(data, timeout):
     subscriptions = [{"type": event} for event in ("workspace.created", "workspace.updated", "workspace.renamed", "workspace.closed", "workspace.focused", "pane.created", "pane.closed", "pane.moved")]
     subscriptions.extend({"type": "pane.agent_status_changed", "pane_id": pane["pane_id"]} for pane in data.get("panes", []) if pane.get("pane_id"))
     try:
@@ -70,17 +100,47 @@ def wait_for_change(data):
             acknowledgement = json.loads(stream.readline())
             if "error" in acknowledgement:
                 raise OSError(acknowledgement["error"].get("message"))
+            client.settimeout(timeout)
             stream.readline()
             time.sleep(0.3)
+            return True
+    except socket.timeout:
+        return False
     except (OSError, ValueError):
         time.sleep(1)
+        return True
 
 
 def branch_for(cwd):
-    try:
-        return subprocess.check_output(["git", "-C", cwd, "branch", "--show-current"], text=True, stderr=subprocess.DEVNULL).strip()
-    except (OSError, subprocess.CalledProcessError):
-        return ""
+    curr = cwd
+    while curr and curr != "/":
+        git_path = os.path.join(curr, ".git")
+        if os.path.exists(git_path):
+            if os.path.isfile(git_path):
+                try:
+                    with open(git_path) as f:
+                        line = f.readline().strip()
+                    if line.startswith("gitdir:"):
+                        gitdir = line[7:].strip()
+                        if not os.path.isabs(gitdir):
+                            gitdir = os.path.normpath(os.path.join(curr, gitdir))
+                        git_path = gitdir
+                except Exception:
+                    return ""
+            head = os.path.join(git_path, "HEAD")
+            try:
+                with open(head) as f:
+                    content = f.readline().strip()
+                if content.startswith("ref: refs/heads/"):
+                    return content[16:]
+                return ""
+            except Exception:
+                return ""
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            break
+        curr = parent
+    return ""
 
 
 def clean(value):
@@ -88,27 +148,28 @@ def clean(value):
 
 
 data = snapshot()
-if mode == "--cycle":
-    workspace_id, step = sys.argv[3], int(sys.argv[4])
-    group = sessions_of([pane for pane in data.get("panes", []) if pane.get("workspace_id") == workspace_id])
-    if group:
-        ids = [pane["pane_id"] for pane in group]
-        index = ids.index(cursor[workspace_id]) if cursor.get(workspace_id) in ids else 0
-        cursor[workspace_id] = ids[(index + step) % len(ids)]
+if mode == "--follow":
+    import urllib.request
+    port, script, parent = sys.argv[3:6]
+    while True:
         try:
-            os.makedirs(os.path.dirname(cursor_path), exist_ok=True)
-            with open(cursor_path, "w") as f:
-                json.dump(cursor, f)
+            os.kill(int(parent), 0)
+        except OSError:
+            raise SystemExit
+        if not wait_for_change(data, 2):
+            continue
+        data = snapshot()
+        try:
+            urllib.request.urlopen(f"http://127.0.0.1:{port}", data=f"reload-sync({script} --now)".encode(), timeout=10).read()
         except OSError:
             pass
-    raise SystemExit
-if mode == "--watch":
-    wait_for_change(data)
-    data = snapshot()
 panes = data.get("panes", [])
 workspaces = data.get("workspaces", [])
+workspace_by_id = {workspace.get("workspace_id"): workspace for workspace in workspaces}
 current_pane_id = os.environ.get("HERDR_PANE_ID") or os.environ.get("HERDR_ACTIVE_PANE_ID") or data.get("focused_pane_id")
 current_workspace_id = os.environ.get("HERDR_WORKSPACE_ID") or os.environ.get("HERDR_ACTIVE_WORKSPACE_ID") or data.get("focused_workspace_id")
+focused_in_tab = {layout.get("tab_id"): layout.get("focused_pane_id") for layout in data.get("layouts", [])}
+tab_labels = {tab.get("tab_id"): tab.get("label") for tab in data.get("tabs", [])}
 
 cwds = {}
 activity = {}
@@ -137,14 +198,73 @@ if current_pane_id:
 if current_workspace_id:
     focus_ts[f"space:{current_workspace_id}"] = now
 
+status_order = {
+    "waiting": 0,
+    "blocked": 0,
+    "ready": 1,
+    "done": 1,
+    "working": 2,
+    "idle": 3,
+}
+glyphs = {"waiting": "!", "blocked": "!", "ready": "✓", "done": "✓", "working": "●", "idle": "○"}
+
+
+def get_status_order(status):
+    return status_order.get(clean(status).lower(), 4)
+
+
+def order_sessions(workspace_id, workspace_panes):
+    workspace = workspace_by_id.get(workspace_id, {})
+    focused_pane_id = focused_in_tab.get(workspace.get("active_tab_id"))
+    active_pane_id = current_pane_id if workspace_id == current_workspace_id else focused_pane_id
+    group = sessions_of(workspace_panes, active_pane_id)
+    if not group:
+        return []
+    # Current / MRU pane is first so opening the switcher remains on the MRU pane.
+    current_pane = (
+        next((pane for pane in group if pane.get("pane_id") == current_pane_id), None)
+        or next((pane for pane in group if pane.get("pane_id") == focused_pane_id), None)
+        or max(group, key=lambda pane: (focus_ts.get(f"pane:{pane.get('pane_id')}", 0), pane_activity.get(pane.get("pane_id"), 0)))
+    )
+    # Going right from current pane sorts other panes: waiting, ready, working, idle.
+    others = [pane for pane in group if pane.get("pane_id") != current_pane.get("pane_id")]
+    others.sort(
+        key=lambda pane: (
+            get_status_order(pane.get("agent_status")),
+            -focus_ts.get(f"pane:{pane.get('pane_id')}", 0),
+            -pane_activity.get(pane.get("pane_id"), 0),
+            pane.get("pane_id", ""),
+        )
+    )
+    return [current_pane] + others
+
+
+if mode == "--cycle":
+    workspace_id, step = sys.argv[3], int(sys.argv[4])
+    workspace_panes = [pane for pane in data.get("panes", []) if pane.get("workspace_id") == workspace_id]
+    group = order_sessions(workspace_id, workspace_panes)
+    if group:
+        ids = [pane["pane_id"] for pane in group]
+        index = ids.index(cursor[workspace_id]) if cursor.get(workspace_id) in ids else 0
+        cursor[workspace_id] = ids[(index + step) % len(ids)]
+        try:
+            os.makedirs(os.path.dirname(cursor_path), exist_ok=True)
+            with open(cursor_path, "w") as f:
+                json.dump(cursor, f)
+        except OSError:
+            pass
+
 unique_cwds = sorted({(pane.get("cwd") or pane.get("foreground_cwd") or "").rstrip("/") for pane in panes if pane.get("cwd") or pane.get("foreground_cwd")})
-if unique_cwds:
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, len(unique_cwds))) as pool:
-        branches = dict(zip(unique_cwds, pool.map(branch_for, unique_cwds)))
-else:
-    branches = {}
+branches = {cwd: branch_for(cwd) for cwd in unique_cwds}
 
 home = os.path.expanduser("~")
+try:
+    popup_cols = int(os.environ.get("HERDR_SWITCH_COLS") or 0)
+except ValueError:
+    popup_cols = 0
+# Narrow phone popup: compact strip, workspace takes the freed width.
+narrow = bool(popup_cols) and popup_cols < 100
+ws_limit = max(popup_cols - 16, 12) if narrow else 22
 workspace_by_id = {workspace.get("workspace_id"): workspace for workspace in workspaces}
 rows = []
 
@@ -154,47 +274,79 @@ def short(value, limit):
     return value[: limit - 1] + "…" if len(value) > limit else value
 
 
-glyphs = {"working": "●", "idle": "○", "done": "✓", "blocked": "!"}
 by_workspace = {}
 for pane in panes:
     by_workspace.setdefault(pane.get("workspace_id", ""), []).append(pane)
 
 for workspace_id, workspace_panes in by_workspace.items():
     workspace = workspace_by_id.get(workspace_id, {})
-    group = sessions_of(workspace_panes)
-    # Selected session: saved cursor, else the focused pane, else the first.
-    selected = next((pane for pane in group if pane.get("pane_id") == cursor.get(workspace_id)), None)
-    selected = selected or next((pane for pane in group if pane.get("pane_id") == current_pane_id), group[0])
+    group = order_sessions(workspace_id, workspace_panes)
+    if not group:
+        continue
+    # Selected session: cycled this run, else the first (current/MRU) pane.
+    selected = (
+        next((pane for pane in group if pane.get("pane_id") == cursor.get(workspace_id)), None)
+        or group[0]
+    )
     current = workspace_id == current_workspace_id
     cwd = (selected.get("cwd") or selected.get("foreground_cwd") or "").rstrip("/")
     repo = os.path.basename(os.path.dirname(cwd))
     location = f"{repo}/{os.path.basename(cwd)}" if repo else os.path.basename(cwd)
-    strip = "".join(
-        f"[{glyphs.get(pane.get('agent_status'), '·')}]" if pane is selected else f" {glyphs.get(pane.get('agent_status'), '·')} "
-        for pane in group
+    sel_index = group.index(selected)
+    rail = "".join(
+        f"[{glyphs.get(clean(pane.get('agent_status')).lower(), '·')}]"
+        if idx == sel_index
+        else glyphs.get(clean(pane.get("agent_status")).lower(), "·")
+        for idx, pane in enumerate(group)
     )
-    position = f"{group.index(selected) + 1}/{len(group)}"
-    title = selected.get("terminal_title_stripped") or selected.get("terminal_title") or selected.get("pane_id", "")
+    position = f"{sel_index + 1}/{len(group)}"
+    selected_glyph = glyphs.get(clean(selected.get("agent_status")).lower(), "·")
+    raw_title = selected.get("terminal_title_stripped") or selected.get("terminal_title") or selected.get("pane_id", "")
+    title = f"{selected_glyph} {raw_title}" if raw_title and not raw_title.startswith(selected_glyph) else (raw_title or selected_glyph)
     raw_branch = clean(branches.get(cwd, ""))
     branch = "" if raw_branch in ("main", "master") else raw_branch
     recency = max((pane_activity.get(pane.get("pane_id"), 0) for pane in group), default=0)
+    # Current workspace first, then by recency, so the second row is the
+    # workspace you were in before this one.
     key = (not current, -focus_ts.get(f"space:{workspace_id}", 0), -recency, workspace.get("number", 0))
     status = clean(selected.get("agent_status") or "unknown")
+    # Deep search also covers every session title and named tab in the workspace.
+    named = " ".join(dict.fromkeys(
+        clean(text)
+        for pane in workspace_panes
+        for text in (pane.get("terminal_title_stripped") or pane.get("terminal_title"), tab_labels.get(pane.get("tab_id")))
+        if text and not str(text).isdigit()
+    ))
     rows.append((key, (
         "pane", selected.get("pane_id", ""), workspace_id,
-        ("→ " if current else "  ") + strip + " " + position,
-        short(workspace.get("label", workspace_id), 24),
-        short(branch, 18),
-        short(title, 28),
-        clean(f"{status} {location} {cwd.replace(home, '~', 1) if cwd.startswith(home) else cwd}"),
+        ("→ " if current else "  ") + rail + " " + position,
+        short(workspace.get("label", workspace_id), ws_limit),
+        short(branch, 16),
+        short(title, 22),
+        clean(f"{status} {location} {cwd.replace(home, '~', 1) if cwd.startswith(home) else cwd} {named}"),
     )))
 
 rows.sort(key=lambda row: row[0])
-visible_indexes = (3, 4, 5, 6)
-headers = ("SESSIONS", "WORKSPACE", "BRANCH", "ACTIVE SESSION")
+# Tools row first so it renders at the top of the picker instead of buried
+# at the very bottom. Its text sits in the sessions column, which searches
+# never look at, so it can't show up as a match.
+rows.insert(0, (None, (
+    "action", "__tools__", "",
+    "  [+] new / tools",
+    "",
+    "",
+    "",
+    "",
+)))
+if narrow:
+    visible_indexes = (3, 4)
+    headers = ("SESSIONS", "WORKSPACE")
+else:
+    visible_indexes = (3, 4, 5, 6)
+    headers = ("SESSIONS", "WORKSPACE", "BRANCH", "ACTIVE SESSION")
 widths = [max(len(header), *(len(row[index]) for _, row in rows)) for index, header in zip(visible_indexes, headers)] if rows else []
-if rows and mode in ("pick", "--watch", "--now"):
-    print("\t".join(["", "", "", *(field.ljust(width) for field, width in zip(headers, widths))]).rstrip())
+if rows and mode in ("pick", "--watch", "--now", "--cycle"):
+    print("\t".join(["", "", "", *(field.ljust(width) for field, width in zip(headers, widths)), "DETAIL"]).rstrip())
 for _, row in rows:
     visible = [row[index].ljust(width) for index, width in zip(visible_indexes, widths)]
     print("\t".join([row[0], row[1], row[2], *visible, row[7]]).rstrip())
@@ -215,42 +367,124 @@ fi
 
 [ -n "$rows" ] || exit 0
 
-# Nav-first: j/k and up/down move workspaces, left/right cycle that workspace's sessions, w/d/i/b/u filter by agent state; / or Space enters free-text search.
+# Typing searches workspace names right away; up/down move, left/right cycle
+# that workspace's sessions. Tab flags a deep search (session titles, tab
+# names, branch, path); shift-tab returns to workspace names. Columns after
+# the three hidden id fields are 1 sessions, 2 workspace, 3.. everything else.
+# --id-nth (stable identity across reloads) needs a recent fzf; fall back to
+# plain --track on older distro builds.
+track_opt='--track'
+# fzf blocks key handling while a reload-sync command runs, so waiting for
+# Herdr events can't live inside a fzf reload. A sidecar waits and tells fzf
+# to reload over its --listen port; it exits once this shell is gone.
+port=$(python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])')
+"$0" --follow "$port" "$0" "$$" </dev/null >/dev/null 2>&1 &
+fzf --help 2>&1 | grep -q -- '--id-nth' && track_opt='--track --id-nth=3'
+# change-nth arrived in fzf 0.58; older builds only get workspace-name search.
+hint=''
+set --
+fzf_version=$(fzf --version | cut -d' ' -f1)
+if [ "$(printf '%s' "$fzf_version" | cut -d. -f1)" -gt 0 ] || [ "$(printf '%s' "$fzf_version" | cut -d. -f2)" -ge 58 ]; then
+  hint=' · tab deep search · shift-tab back'
+  # With a query the cursor goes to the top match; with none, past the
+  # tools row and the current workspace to the workspace you were in
+  # before this one.
+  land='transform([ -z "$FZF_QUERY" ] && echo first+down+down || echo first)'
+  set -- --bind "change:$land" --bind "tab:change-nth(2..)+change-prompt(deep > )+$land" --bind "btab:change-nth(2)+change-prompt(herdr > )+$land"
+fi
+# Identity is the workspace id (field 3): session cycling swaps the pane but
+# the cursor stays on the same workspace row across reloads.
+header="type to search workspace$hint · ←/→ session · enter focus · ctrl-f fork · alt-x close"
+# Fork the highlighted workspace row into a new linked worktree. Guarded to
+# pane rows so pressing it on the tools row is a no-op. Output is left
+# visible so a failed fork shows its error instead of silently doing nothing.
+fork_action='sh -c '\''[ "{1}" = pane ] && herdr worktree create --workspace "{3}" --focus'\'''
+# shellcheck disable=SC2086
 pick=$(printf '%s\n' "$rows" | fzf \
+  --listen="$port" \
   --delimiter='\t' \
-  --nth=4..8 \
-  --with-nth=4..7 \
+  --with-nth=4.. \
+  --nth=2 \
+  --tiebreak=begin,index \
+  --no-hscroll \
+  --cycle \
   --header-lines=1 \
   --height=100% \
-  --track \
+  $track_opt \
   --reverse \
   --prompt='herdr > ' \
-  --header='j/k workspace · ←/→ session · / search · enter focus · alt-x close' \
-  --bind "load:reload-sync($0 --watch)" \
-  --bind 'start:unbind(y,n),j:down,k:up,q:abort' \
-  --bind "left:execute-silent($0 --cycle {3} -1)+reload-sync($0 --now)" \
-  --bind "right:execute-silent($0 --cycle {3} 1)+reload-sync($0 --now)" \
-  --bind 'w:change-query(working)' \
-  --bind 'd:change-query(done)' \
-  --bind 'i:change-query(idle)' \
-  --bind 'b:change-query(blocked)' \
-  --bind 'u:change-query(unknown)' \
+  --header="$header" \
+  --bind 'start:unbind(y,n)' \
+  --bind 'load:down+down+unbind(load)' \
+  --bind 'change:first' \
+  --bind "left:reload-sync($0 --cycle {3} -1)" \
+  --bind "right:reload-sync($0 --cycle {3} 1)" \
+  --bind "alt-f:execute($fork_action)+abort" \
+  --bind "ctrl-f:execute($fork_action)+abort" \
   --bind 'alt-x:rebind(y,n)+change-header(⚠ Close selected pane? y close · n or esc cancel)' \
-  --bind "y:execute-silent(herdr pane close {2} 2>/dev/null)+reload-sync($0 --watch)+change-header(j/k workspace · ←/→ session · / search · enter focus · alt-x close)+unbind(y,n),n:abort" \
-  --bind '/:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
-  --bind 'space:unbind(/,space,j,k,q,w,d,i,b,u,o,x)+clear-query+change-prompt(search > )' \
+  --bind "y:execute-silent(herdr pane close {2} 2>/dev/null)+reload-sync($0 --now)+change-header($header)+unbind(y,n),n:abort" \
+  "$@" \
   --bind 'esc:abort') || exit 0
+
 
 target_kind=$(printf '%s' "$pick" | cut -f1)
 target_id=$(printf '%s' "$pick" | cut -f2)
-python3 - "$target_kind" "$target_id" <<'PY'
+target_ws=$(printf '%s' "$pick" | cut -f3)
+if [ "$target_kind" = action ]; then
+  tool=$(printf '%s\n' 'new workspace' 'fork workspace into worktree' 'new workspace from home' | fzf \
+    --reverse \
+    --prompt='tools > ' \
+    --header='enter run · esc back') || exit 0
+  case "$tool" in
+    'new workspace') exec herdr workspace create --focus ;;
+    'fork workspace into worktree')
+      ws_pick=$(printf '%s\n' "$rows" | grep '^pane' | fzf \
+        --delimiter='\t' \
+        --with-nth=4.. \
+        --reverse \
+        --prompt='fork > ' \
+        --header='pick workspace to fork into a new worktree · enter configure · esc back') || exit 0
+      ws_id=$(printf '%s' "$ws_pick" | cut -f3)
+      [ -n "$ws_id" ] || exit 0
+      ws_label=$(printf '%s' "$ws_pick" | cut -f5 | sed 's/^ *//;s/ *$//')
+      fork_branch='' fork_base='' fork_path='' fork_label=''
+      while true; do
+        fork_choice=$(printf '%s\n' \
+          "branch: ${fork_branch:-<auto>}" \
+          "base: ${fork_base:-<auto>}" \
+          "path: ${fork_path:-<auto>}" \
+          "label: ${fork_label:-$ws_label}" \
+          '>>> create fork' | fzf \
+          --reverse \
+          --prompt='fork options > ' \
+          --header='enter edit option · create fork runs it · esc back') || exit 0
+        case "$fork_choice" in
+          '>>> create fork') break ;;
+          branch:*) if _v=$(ask_value branch "$fork_branch"); then fork_branch=$_v; fi ;;
+          base:*) if _v=$(ask_value base "$fork_base"); then fork_base=$_v; fi ;;
+          path:*) if _v=$(ask_value path "$fork_path"); then fork_path=$_v; fi ;;
+          label:*) if _v=$(ask_value label "$fork_label"); then fork_label=$_v; fi ;;
+        esac
+      done
+      set -- worktree create --workspace "$ws_id" --focus
+      [ -n "$fork_branch" ] && set -- "$@" --branch "$fork_branch"
+      [ -n "$fork_base" ] && set -- "$@" --base "$fork_base"
+      [ -n "$fork_path" ] && set -- "$@" --path "$fork_path"
+      [ -n "$fork_label" ] && set -- "$@" --label "$fork_label"
+      # shellcheck disable=SC2086
+      exec $herdr "$@" ;;
+    'new workspace from home') exec herdr workspace create --cwd "$HOME" --focus ;;
+    *) exit 0 ;;
+  esac
+fi
+python3 - "$target_kind" "$target_id" "$target_ws" <<'PY'
 import json
 import os
 import socket
 import sys
 import time
 
-kind, target_id = sys.argv[1:]
+kind, target_id, workspace_id = sys.argv[1:]
 socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
 request = {"id": "herdr-switch", "method": "pane.focus" if kind == "pane" else "workspace.focus", "params": {"pane_id" if kind == "pane" else "workspace_id": target_id}}
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
@@ -268,6 +502,7 @@ try:
 except (OSError, ValueError):
     focus_ts = {}
 focus_ts[f"{kind}:{target_id}"] = time.time()
+focus_ts[f"space:{workspace_id}"] = time.time()
 try:
     os.makedirs(os.path.dirname(state_path), exist_ok=True)
     with open(state_path, "w") as f:

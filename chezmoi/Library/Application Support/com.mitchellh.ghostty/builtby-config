@@ -11,7 +11,8 @@ background-blur-radius = 20
 window-padding-x = 12
 window-padding-y = 12
 window-decoration = true
-macos-titlebar-style = hidden
+# Not `hidden`: that mode has no tab bar, so every new tab opens as a window.
+macos-titlebar-style = transparent
 
 # Cursor
 cursor-style = block
