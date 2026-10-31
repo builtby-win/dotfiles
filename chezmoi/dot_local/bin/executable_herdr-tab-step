@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""Move to the adjacent tab, crossing workspace boundaries when needed."""
+import json
+import subprocess
+import sys
+
+
+def call(*args):
+    return json.loads(subprocess.run(["herdr", *args], capture_output=True, text=True, check=True).stdout)["result"]
+
+
+direction = sys.argv[1]
+if direction not in ("prev", "next"):
+    raise SystemExit("usage: herdr-tab-step prev|next")
+
+snapshot = call("api", "snapshot")["snapshot"]
+workspaces = sorted(snapshot["workspaces"], key=lambda workspace: workspace["number"])
+current_workspace_id = snapshot["focused_workspace_id"]
+current_tab_id = snapshot["focused_tab_id"]
+workspace_index = next(i for i, item in enumerate(workspaces) if item["workspace_id"] == current_workspace_id)
+tabs = [tab for tab in snapshot["tabs"] if tab["workspace_id"] == current_workspace_id]
+tab_index = next(i for i, item in enumerate(tabs) if item["tab_id"] == current_tab_id)
+step = -1 if direction == "prev" else 1
+next_tab_index = tab_index + step
+
+if 0 <= next_tab_index < len(tabs):
+    target_tab = tabs[next_tab_index]
+else:
+    next_workspace_index = workspace_index + step
+    if not 0 <= next_workspace_index < len(workspaces):
+        raise SystemExit(0)
+    target_workspace_id = workspaces[next_workspace_index]["workspace_id"]
+    target_tabs = [tab for tab in snapshot["tabs"] if tab["workspace_id"] == target_workspace_id]
+    target_tab = target_tabs[0] if direction == "next" else target_tabs[-1]
+
+call("tab", "focus", target_tab["tab_id"])

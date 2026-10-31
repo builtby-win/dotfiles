@@ -31,8 +31,8 @@ prefix = "ctrl+b"
 
 # --- Tab/window (matches tmux window binds) ---
 new_tab = "prefix+t"
-previous_tab = "prefix+q"
-next_tab = "prefix+e"
+previous_tab = []
+next_tab = []
 switch_tab = "prefix+1..9"
 switch_workspace = "cmd+1..9"
 previous_workspace = ["prefix+[", "prefix+up"]
@@ -121,6 +121,19 @@ key = "prefix+b"
 type = "shell"
 command = "herdr-balance-panes"
 description = "balance panes"
+
+# Move between tabs, crossing into the adjacent workspace at either boundary.
+[[keys.command]]
+key = "prefix+q"
+type = "shell"
+command = "herdr-tab-step prev"
+description = "previous tab or workspace"
+
+[[keys.command]]
+key = "prefix+e"
+type = "shell"
+command = "herdr-tab-step next"
+description = "next tab or workspace"
 
 # --- Lazygit (zoomed pane) ---
 [[keys.command]]

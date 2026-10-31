@@ -11,6 +11,10 @@ const confirmScriptPath = path.resolve(
   __dirname,
   "../chezmoi/dot_local/bin/executable_herdr-confirm-close-pane",
 );
+const tabStepScriptPath = path.resolve(
+  __dirname,
+  "../chezmoi/dot_local/bin/executable_herdr-tab-step",
+);
 
 describe("Herdr workspace lifecycle", () => {
   it("focuses new worktrees and exposes cleanup actions", () => {
@@ -36,6 +40,11 @@ describe("Herdr workspace lifecycle", () => {
     expect(fs.statSync(balanceScriptPath).mode & 0o111).not.toBe(0);
     expect(content).toContain('command = "herdr-confirm-close-pane"');
     expect(fs.statSync(confirmScriptPath).mode & 0o111).not.toBe(0);
+    expect(content).toContain('key = "prefix+q"');
+    expect(content).toContain('command = "herdr-tab-step prev"');
+    expect(content).toContain('key = "prefix+e"');
+    expect(content).toContain('command = "herdr-tab-step next"');
+    expect(fs.statSync(tabStepScriptPath).mode & 0o111).not.toBe(0);
   });
 
 
