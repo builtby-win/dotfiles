@@ -147,20 +147,51 @@ def clean(value):
     return " ".join(str(value or "").split())
 
 
-data = snapshot()
+if mode == "--now" and len(sys.argv) > 3:
+    snapshot_file = sys.argv[3]
+    try:
+        with open(snapshot_file) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        data = snapshot()
+else:
+    data = snapshot()
 if mode == "--follow":
     import urllib.request
     port, script, parent = sys.argv[3:6]
+    snapshot_file = f"/tmp/herdr-switch-{parent}-{port}.json"
     while True:
         try:
             os.kill(int(parent), 0)
         except OSError:
+            try:
+                os.unlink(snapshot_file)
+            except OSError:
+                pass
             raise SystemExit
         if not wait_for_change(data, 2):
             continue
         data = snapshot()
+        snapshot_tmp = f"{snapshot_file}.{os.getpid()}.{time.time_ns()}.tmp"
+        snapshot_ready = False
         try:
-            urllib.request.urlopen(f"http://127.0.0.1:{port}", data=f"reload-sync({script} --now)".encode(), timeout=10).read()
+            fd = os.open(snapshot_tmp, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            with os.fdopen(fd, "w") as f:
+                json.dump(data, f)
+            os.replace(snapshot_tmp, snapshot_file)
+            snapshot_ready = True
+        except OSError:
+            try:
+                os.unlink(snapshot_tmp)
+            except OSError:
+                pass
+        reload_command = f"reload-sync({script} --now {snapshot_file})" if snapshot_ready else f"reload-sync({script} --now)"
+        try:
+            urllib.request.urlopen(
+                f"http://127.0.0.1:{port}",
+                data=reload_command.encode(),
+                timeout=10,
+            ).read()
         except OSError:
             pass
 panes = data.get("panes", [])
