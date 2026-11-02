@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Move to the adjacent tab, crossing workspace boundaries when needed."""
+"""Move to the adjacent tab, crossing workspace boundaries when needed.
+
+While the focused tab is zoomed, step between its panes instead (wrapping),
+keeping the zoom on the newly focused pane.
+"""
 import json
 import os
 import socket
@@ -31,6 +35,15 @@ workspace_index = next(i for i, item in enumerate(workspaces) if item["workspace
 tabs = [tab for tab in snapshot["tabs"] if tab["workspace_id"] == current_workspace_id]
 tab_index = next(i for i, item in enumerate(tabs) if item["tab_id"] == current_tab_id)
 step = -1 if direction == "prev" else 1
+
+layout = next((l for l in snapshot["layouts"] if l["tab_id"] == current_tab_id), None)
+if layout and layout.get("zoomed") and len(layout["panes"]) > 1:
+    pane_ids = [pane["pane_id"] for pane in layout["panes"]]
+    pane_index = pane_ids.index(layout["focused_pane_id"])
+    target_pane_id = pane_ids[(pane_index + step) % len(pane_ids)]
+    call("pane.focus", {"pane_id": target_pane_id})
+    call("pane.zoom", {"pane_id": target_pane_id, "mode": "on"})
+    raise SystemExit(0)
 next_tab_index = tab_index + step
 
 if 0 <= next_tab_index < len(tabs):
