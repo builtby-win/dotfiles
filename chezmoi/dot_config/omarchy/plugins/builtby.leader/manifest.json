@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "builtby.leader",
+  "name": "jk leader",
+  "version": "1.0.0",
+  "author": "builtby",
+  "description": "Shows a pill while the Hyprland jk leader submap is active",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "jk leader",
+    "description": "LEADER pill while the jk leader is waiting for a key",
+    "category": "Compositor",
+    "allowMultiple": false,
+    "defaultSection": "left"
+  }
+}
