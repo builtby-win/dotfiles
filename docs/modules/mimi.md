@@ -24,7 +24,7 @@ Grant Accessibility to mimi when asked.
 
 ## Editing
 
-`~/.config/mimi/config.toml` reloads when saved. Float rules (`[[tiling.rules]]`) keep windows such as Finder and System Settings out of the layout. Check what the layout would do with `mimi tiling preview | jq`.
+`~/.config/mimi/config.toml` reloads when saved. Tiling is an allowlist: a catch-all `[[tiling.rules]]` entry floats every app, then `manage = true` entries (last match wins) bring back only terminals and browsers. Everything else behaves like a normal macOS window. To tile another app, add a `manage = true` rule with its `bundle_id` (`osascript -e 'id of app "Name"'`). Check what the layout would do with `mimi tiling preview | jq`.
 
 ## Spaces menu bar
 

@@ -29,27 +29,117 @@ gap = 8
 [tiling.animation]
 enabled = false
 
-# Windows the layout never tiles.
+# Allowlist: only terminals and browsers tile. Every other window floats and
+# behaves like a normal macOS window. Rules are read in order and the last match
+# wins, so the catch-all comes first and the allowed apps take their windows back.
 [[tiling.rules]]
-app = "Finder"
+app = "*"
 manage = false
 
+# Terminals
 [[tiling.rules]]
-bundle_id = "com.apple.systempreferences"
-manage = false
+bundle_id = "com.mitchellh.ghostty"
+manage = true
 
 [[tiling.rules]]
-bundle_id = "com.apple.ActivityMonitor"
-manage = false
+bundle_id = "com.googlecode.iterm2"
+manage = true
 
 [[tiling.rules]]
-bundle_id = "com.1password.1password"
-manage = false
+bundle_id = "com.apple.Terminal"
+manage = true
 
 [[tiling.rules]]
-bundle_id = "org.hammerspoon.Hammerspoon"
-manage = false
+bundle_id = "dev.warp.Warp-Stable"
+manage = true
 
+[[tiling.rules]]
+bundle_id = "net.kovidgoyal.kitty"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "org.alacritty"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "io.alacritty"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.github.wez.wezterm"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.cmuxterm.app"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.kk2.rootshell"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.superlogical.rex"
+manage = true
+
+
+# Browsers
+[[tiling.rules]]
+bundle_id = "com.apple.Safari"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.apple.SafariTechnologyPreview"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.google.Chrome"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.google.Chrome.canary"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "company.thebrowser.Browser"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "company.thebrowser.dia"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "org.mozilla.firefox"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "org.mozilla.firefoxdeveloperedition"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.brave.Browser"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.microsoft.edgemac"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.vivaldi.Vivaldi"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.operasoftware.Opera"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "com.kagi.kagimacOS"
+manage = true
+
+[[tiling.rules]]
+bundle_id = "app.zen-browser.zen"
+manage = true
+
+# Small windows (popups, auth sheets, dialogs) float even in a tiled app. Last, so it wins.
 [[tiling.rules]]
 narrower_than = 400
 shorter_than = 300
