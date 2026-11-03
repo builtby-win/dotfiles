@@ -1,0 +1,56 @@
+# mimi (https://github.com/y3owk1n/mimi) -> ~/.config/mimi/config.toml
+# Native Spaces + Hyprland-style dwindle tiling, SIP left on. Driven by the jk
+# leader (chezmoi/dot_hammerspoon/modules/leader.lua), which shells out to
+# `mimi action ...` and `mimi tiling cmd ...`.
+#
+# Create the Spaces once in Mission Control (leader 1..0 jumps to Space N), and
+# turn off System Settings > Desktop & Dock > "Automatically rearrange Spaces
+# based on most recent use" so the numbers stay put.
+
+[systray]
+enabled = true
+show_workspace_number = false  # Hammerspoon's menu bar item lists the Spaces instead
+
+# The active-window ring.
+[border]
+enabled = true
+width = 4
+placement = "outside"
+active_color = "#8b5cf6"
+inactive_color = "#313244"
+
+[tiling]
+enabled = true
+layout = "~/.config/mimi/tiling/bsp.py"
+layout_mode = "resident"       # keeps the layout process warm between passes
+relayout_on_drag = true        # drag an edge to resize a split, drop on a window to swap
+gap = 8
+
+[tiling.animation]
+enabled = false
+
+# Windows the layout never tiles.
+[[tiling.rules]]
+app = "Finder"
+manage = false
+
+[[tiling.rules]]
+bundle_id = "com.apple.systempreferences"
+manage = false
+
+[[tiling.rules]]
+bundle_id = "com.apple.ActivityMonitor"
+manage = false
+
+[[tiling.rules]]
+bundle_id = "com.1password.1password"
+manage = false
+
+[[tiling.rules]]
+bundle_id = "org.hammerspoon.Hammerspoon"
+manage = false
+
+[[tiling.rules]]
+narrower_than = 400
+shorter_than = 300
+manage = false

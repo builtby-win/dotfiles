@@ -328,6 +328,7 @@ const APPS: App[] = [
   { name: "zoxide", value: "zoxide", brewName: "zoxide", desc: "Smarter cd that learns your habits", url: "https://github.com/ajeetdsouza/zoxide", category: "cli" },
   { name: "sesh", value: "sesh", brewName: "sesh", desc: "Smart session manager for tmux", url: "https://github.com/joshmedeski/sesh", category: "cli" },
   { name: "Herdr", value: "herdr", brewName: "herdr", linuxInstallCommand: "curl -fsSL https://herdr.dev/install.sh | sh", checked: true, detectCmd: "command -v herdr", desc: "Agent-aware terminal multiplexer", url: "https://herdr.dev", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
+  { name: "GitButler CLI", value: "gitbutler", brewName: "", detectCmd: "command -v but", installCommand: "curl -fsSL https://gitbutler.com/install.sh | sh", desc: "Stacked and parallel branches from the terminal (but)", url: "https://docs.gitbutler.com/cli-overview", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
   { name: "Conductor", value: "conductor", brewName: "conductor", cask: true, detectPath: "/Applications/Conductor.app", desc: "Run parallel coding agents in isolated workspaces", url: "https://www.conductor.build/", platforms: { macos: true, linux: false, windows: false }, category: "productivity" },
 
   { name: "starship", value: "starship", brewName: "starship", checked: true, desc: "Fast, customizable shell prompt", url: "https://starship.rs", platforms: { macos: true, linux: true, windows: false }, category: "cli" },
@@ -352,6 +353,7 @@ const APPS: App[] = [
   { name: "TypeWhisper", value: "typewhisper", brewName: "", manualDownload: true, detectPath: "/Applications/TypeWhisper.app", desc: "Private voice dictation app for macOS", url: "https://www.typewhisper.com/en/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Cotypist", value: "cotypist", brewName: "", manualDownload: true, detectPath: "/Applications/Cotypist.app", desc: "Voice-to-text writing assistant for macOS", url: "https://cotypist.app/", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Neru", value: "neru", brewName: "y3owk1n/tap/neru", cask: true, detectPath: "/Applications/Neru.app", desc: "Keyboard-driven screen navigation for macOS", url: "https://github.com/y3owk1n/neru", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
+  { name: "mimi", value: "mimi", brewName: "y3owk1n/tap/mimi", cask: true, detectPath: "/Applications/Mimi.app", desc: "Native Spaces + dwindle tiling CLI, SIP left on (driven by the jk leader)", url: "https://github.com/y3owk1n/mimi", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "AltTab", value: "alttab", brewName: "alt-tab", cask: true, detectPath: "/Applications/AltTab.app", desc: "Windows-style alt-tab window switcher", url: "https://alt-tab-macos.netlify.app", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "Ice", value: "ice", brewName: "jordanbaird-ice", cask: true, detectPath: "/Applications/Ice.app", desc: "Menu bar management - hide icons", url: "https://github.com/jordanbaird/Ice", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
   { name: "BetterTouchTool", value: "bettertouchtool", brewName: "bettertouchtool", cask: true, detectPath: "/Applications/BetterTouchTool.app", desc: "Customize trackpad, keyboard, and Touch Bar", url: "https://folivora.ai", platforms: { macos: true, windows: false, linux: false }, category: "productivity" },
@@ -388,8 +390,10 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "Shell config", value: "zsh", checked: true, desc: "zinit plugins, starship prompt, aliases, PATH setup" },
   { name: "Tmux", value: "tmux", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "core profile + optional basic keymap, preserves existing setups" },
   { name: "Neovim", value: "nvim", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Bleeding-edge vim.pack Neovim config (requires Neovim 0.12+)" },
-  { name: "Hammerspoon", value: "hammerspoon", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher and Ghostty automation" },
+  { name: "Hammerspoon", value: "hammerspoon", checked: false, platforms: { macos: true, windows: false, linux: false }, desc: "Hyper app launcher, Ghostty automation, and the jk window leader" },
   { name: "Karabiner Elements", value: "karabiner", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "App-aware chords, Hyper, and Neru keyboard modes" },
+  { name: "mimi", value: "mimi", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Dwindle tiling layout, active-window border, and Space number in the menu bar" },
+  { name: "Omarchy", value: "omarchy", checked: true, platforms: { macos: false, windows: false, linux: true }, desc: "Omarchy shell settings (idle/lock, bar layout) and the jk leader bar plugin" },
   { name: "iTerm2 defaults", value: "iterm2", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
   { name: "Ghostty", value: "ghostty", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for optional GPU terminal" },
 ];
@@ -985,6 +989,8 @@ const CHEZMOI_TARGETS: Record<string, string[]> = {
   ],
   nvim: [".config/nvim"],
   hammerspoon: [".hammerspoon"],
+  mimi: [".config/mimi"],
+  omarchy: [".config/omarchy/shell.json", ".config/omarchy/plugins/builtby.leader"],
   karabiner: [
     ".config/karabiner/karabiner.json",
     ".config/neru/config.toml",

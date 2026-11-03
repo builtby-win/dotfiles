@@ -37,7 +37,7 @@ bb sync karabiner pull
 - `j+l` opens the Neru recursive grid
 - `d+k` opens Neru scroll mode
 - `d+f` opens Neru hints
-- `j+k` sends `Ctrl+b` in terminals and arms Command for the next key elsewhere
+- `j+k` sends `Hyper+F13`, which the Hammerspoon leader module turns into the window leader (see `docs/modules/hammerspoon.md`)
 - Holding `j`, then pressing Space repeatedly, sends Backspace outside GUI Vim editors
 - Tapping Right Option arms Hyper for the next key; holding it holds Hyper
 - Tapping a modifier arms it for the next key; holding it behaves normally

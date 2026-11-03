@@ -139,6 +139,7 @@ This is ideal if you want to add pieces over time.
 | Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS chords, app-aware Command/tmux behavior, Hyper, and Neru modes | `docs/modules/karabiner.md` |
 | Neru | Auto-loaded with Karabiner | App context grid launcher for macOS | `docs/modules/karabiner.md` |
+| mimi | `bb setup mimi` | macOS dwindle tiling, native Spaces, active-window border (driven by the jk leader) | `docs/modules/mimi.md` |
 | iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
 | Ghostty | `bb setup ghostty` | optional terminal config | `docs/modules/ghostty.md` |
 | App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
