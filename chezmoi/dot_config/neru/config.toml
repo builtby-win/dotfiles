@@ -3,18 +3,17 @@ passthrough_unbounded_keys = true
 should_exit_after_passthrough = false
 
 [hotkeys]
-"Primary+Shift+Space" = "__disabled__"
-"Primary+Shift+G" = "__disabled__"
-"Primary+Shift+C" = "__disabled__"
-"Primary+Shift+S" = "__disabled__"
-"Cmd+Ctrl+Alt+Shift+K" = "grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+K" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+S" = ["exec ~/.local/bin/karabiner-layer scroll", "scroll"]
 "Cmd+Ctrl+Alt+Shift+F" = "hints"
-"Cmd+Ctrl+Alt+Shift+L" = "hints"
-"Cmd+Ctrl+Alt+Shift+I" = "hints"
+# Land-and-adjust: label only moves the cursor, mode stays active so
+# arrows/Tab(hjkl) can nudge before Space/Shift+Space/Shift+M clicks.
+"Cmd+Ctrl+Alt+Shift+I" = "hints --action move_mouse --repeat"
 "Cmd+Ctrl+Alt+Shift+Space" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
+"Cmd+;" = "grid --cursor-selection-mode follow"
+"Cmd+Ctrl+Alt+Shift+G" = "grid --cursor-selection-mode follow"
 
 [theme.light]
 surface = "#EEF2FF"
@@ -41,10 +40,24 @@ detect_mission_control = false
 # global on-idle hook, so we have to do this per binding.
 "Escape" = ["exec ~/.local/bin/karabiner-layer off", "idle"]
 "Backspace" = "action backspace"
+# Clicks (unified with grid/recursive_grid). Space-family keys are not hint characters.
+"Space" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
 "Return" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
-"Shift+L" = ["action left_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
-"Shift+R" = ["action right_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
-"Shift+Return" = "action left_click"
+"Shift+Space" = ["action right_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+Return" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"Shift+M" = ["action middle_click", "exec ~/.local/bin/karabiner-layer off", "idle"]
+"1" = "action mouse_down"
+"2" = "action mouse_up"
+# Adjust after landing. Tab enters the Karabiner nudge layer (hjkl -> arrows).
+"Tab" = "exec ~/.local/bin/karabiner-layer nudge"
+"Up" = "action move_mouse_relative --dx=0 --dy=-5"
+"Down" = "action move_mouse_relative --dx=0 --dy=5"
+"Left" = "action move_mouse_relative --dx=-5 --dy=0"
+"Right" = "action move_mouse_relative --dx=5 --dy=0"
+"Shift+Up" = "action move_mouse_relative --dx=0 --dy=-25"
+"Shift+Down" = "action move_mouse_relative --dx=0 --dy=25"
+"Shift+Left" = "action move_mouse_relative --dx=-25 --dy=0"
+"Shift+Right" = "action move_mouse_relative --dx=25 --dy=0"
 
 [hints.additional_ax_support]
 enable = true
