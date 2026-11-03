@@ -395,6 +395,7 @@ const MANAGED_CONFIGS: ManagedConfig[] = [
   { name: "mimi", value: "mimi", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Dwindle tiling layout, active-window border, and Space number in the menu bar" },
   { name: "Omarchy", value: "omarchy", checked: true, platforms: { macos: false, windows: false, linux: true }, desc: "Omarchy shell settings (idle/lock, bar layout) and the jk leader bar plugin" },
   { name: "iTerm2 defaults", value: "iterm2", checked: true, platforms: { macos: true, windows: false, linux: false }, desc: "Command-Backspace, word delete, prompt navigation, and terminal key hacks" },
+  { name: "Oh My Pi config", value: "omp", checked: true, platforms: { macos: true, linux: true, windows: false }, desc: "~/.omp/agent config, MCP settings, agent prompts, and extensions" },
   { name: "Ghostty", value: "ghostty", checked: false, platforms: { macos: true, linux: true, windows: false }, desc: "Font, theme, keybindings for optional GPU terminal" },
 ];
 
@@ -995,6 +996,20 @@ const CHEZMOI_TARGETS: Record<string, string[]> = {
     ".config/karabiner/karabiner.json",
     ".config/neru/config.toml",
     ".local/bin/karabiner-layer",
+  ],
+  omp: [
+    ".omp/agent/config.yml",
+    ".omp/agent/settings.json",
+    ".omp/agent/mcp.json",
+    ".omp/agent/RULES.md",
+    ".omp/agent/agents/reviewer.md",
+    ".omp/agent/agents/scout.md",
+    ".omp/agent/agents/security-reviewer.md",
+    ".omp/agent/agents/sonic.md",
+    ".omp/agent/agents/task.md",
+    ".omp/agent/extensions/agy-exec.ts",
+    ".omp/agent/extensions/herdr-children.ts",
+    ".omp/agent/extensions/herdr-omp-agent-state.ts",
   ],
   ghostty: process.platform === "darwin"
     ? [

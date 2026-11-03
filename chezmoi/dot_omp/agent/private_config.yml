@@ -1,0 +1,180 @@
+symbolPreset: nerd
+theme:
+  dark: titanium
+  light: light
+statusLine:
+  preset: custom
+  separator: powerline-thin
+  leftSegments:
+    - model
+    - mode
+    - path
+    - git
+    - pr
+  rightSegments:
+    - usage
+    - session_name
+    - context_pct
+  segmentOptions:
+    model:
+      showThinkingLevel: true
+    git:
+      showBranch: true
+      showStaged: true
+      showUnstaged: true
+      showUntracked: false
+setupVersion: 2
+modelProviderOrder:
+  - anthropic
+  - openai-codex
+modelRoles:
+  default: anthropic/claude-sonnet-5-5:medium
+  task: openai-codex/gpt-6-luna:auto
+  plan: anthropic/claude-opus-5.5:high
+  slow: openai-codex/gpt-6.1-sol:low
+  advisor: openai-codex/gpt-6.1-sol:low
+  designer: anthropic/claude-sonnet-5.5:high
+  vision: openai-codex/gpt-6.1-sol:low
+  smol: openai-codex/gpt-6-luna:auto
+  tiny: openai-codex/gpt-6-luna:off
+  commit: openai-codex/gpt-6-luna:off
+steeringMode: all
+autolearn:
+  enabled: false
+memory:
+  backend: mnemopi
+renderMermaid:
+  enabled: true
+github:
+  enabled: false
+dev:
+  autoqaConsent: granted
+commands:
+  enableClaudeUser: false
+  enableClaudeProject: false
+  enableOpencodeProject: false
+skills:
+  enableClaudeProject: false
+  enableClaudeUser: false
+  ignoredSkills:
+    - subagent-driven-development
+    - verification-before-completion
+    - writing-skills
+    - receiving-code-review
+    - requesting-code-review
+    - writing-plans
+    - brainstorming
+    - dispatching-parallel-agents
+    - executing-plans
+    - finishing-a-development-branch
+    - using-superpowers
+    - systematic-debugging
+    - test-driven-development
+    - using-git-worktrees
+  enabled: true
+  enableAgentsProject: true
+  enableAgentsUser: true
+  enablePiProject: true
+  enablePiUser: true
+defaultThinkingLevel: high
+browser:
+  cmux: false
+  enabled: false
+hideThinkingBlock: true
+composer:
+  shape: claude
+retry:
+  modelFallback: true
+  usageAwareFallback: true
+  usageReservePct: 10
+  fallbackChains:
+    default:
+      - openai-codex/gpt-6.1-sol:high
+      - anthropic/claude-opus-5.5:high
+      - openai-codex/gpt-6-luna:auto
+    slow:
+      - anthropic/claude-opus-5.5:high
+      - anthropic/claude-sonnet-5.5:high
+      - openai-codex/gpt-6-luna:auto
+    plan:
+      - anthropic/claude-opus-5.5:high
+      - openai-codex/gpt-6.1-sol:high
+      - anthropic/claude-sonnet-5.5:high
+      - openai-codex/gpt-6-luna:auto
+    task:
+      - anthropic/claude-sonnet-5.5:medium
+      - openai-codex/gpt-6-luna:auto
+      - openai-codex/gpt-6.1-sol:low
+    smol:
+      - openai-codex/gpt-6-luna:auto
+      - anthropic/claude-haiku-5-5:auto
+      - openai-codex/gpt-6.1-sol:low
+    openai-codex/gpt-6.1-sol:
+      - anthropic/claude-opus-5-5
+      - openai-codex/gpt-6-luna:auto
+    openai-codex/gpt-6-luna:
+      - anthropic/claude-sonnet-5.5:high
+      - openai-codex/gpt-6.1-sol:low
+    anthropic/claude-sonnet-5.5:
+      - openai-codex/gpt-6-luna:auto
+      - openai-codex/gpt-6.1-sol:low
+tools:
+  xdev: false
+  intentTracing: false
+codexResets:
+  autoRedeem: "no"
+mnemopi:
+  noEmbeddings: false
+  autoRecall: false
+skillful: true
+personality: none
+includeModelInPrompt: false
+inlineToolDescriptors: auto
+todo:
+  reminders: true
+debug:
+  enabled: false
+launch:
+  enabled: false
+archive:
+  enabled: false
+fetch:
+  enabled: true
+web_search:
+  enabled: false
+ask:
+  enabled: true
+ida:
+  enabled: false
+magicKeywords:
+  enabled: true
+  ultrathink: true
+  orchestrate: true
+  workflow: true
+  jevify: true
+recap:
+  enabled: false
+advisor:
+  enabled: true
+  syncBacklog: "3"
+goal:
+  enabled: true
+ttsr:
+  enabled: false
+lsp:
+  enabled: false
+eval:
+  tools:
+    enabled: true
+mcp:
+  enableProjectConfig: true
+task:
+  completionProbe: false
+  eager: preferred
+  agentModelOverrides:
+    reviewer: anthropic/claude-opus-5.5:high
+    security-reviewer: anthropic/claude-opus-5.5:high
+    task: anthropic/claude-sonnet-5.5:medium
+    sonic: openai-codex/gpt-6-luna:off
+    scout: openai-codex/gpt-6-luna:auto
+disabledExtensions: []
