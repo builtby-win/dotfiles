@@ -9,6 +9,13 @@ should_exit_after_passthrough = false
 # Land-and-adjust: label only moves the cursor, mode stays active so
 # arrows/Tab(hjkl) can nudge before Space/Shift+Space/Shift+M clicks.
 "Cmd+Ctrl+Alt+Shift+I" = "hints --action move_mouse --repeat"
+# Pick the click type first, then the label: one shot, back to idle.
+"Cmd+Ctrl+Alt+Shift+D" = "hints --action left_click,left_click"
+"Cmd+Ctrl+Alt+Shift+R" = "hints --action right_click"
+"Cmd+Ctrl+Alt+Shift+M" = "hints --action middle_click"
+# Same for recursive grid (action fires when the selection bottoms out; Space still clicks early).
+"Cmd+Ctrl+Alt+Shift+E" = "recursive_grid --action right_click"
+"Cmd+Ctrl+Alt+Shift+C" = "recursive_grid --action left_click,left_click"
 "Cmd+Ctrl+Alt+Shift+Space" = "__disabled__"
 "Cmd+Ctrl+Alt+Shift+j" = "recursive_grid --cursor-selection-mode follow"
 "Cmd+Ctrl+Alt+Shift+n" = "recursive_grid --cursor-selection-mode follow"
