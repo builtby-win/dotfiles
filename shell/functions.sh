@@ -439,6 +439,11 @@ bb() {
       echo "  bb sync macos-apps      Sync Raycast/Rectangle/BetterTouchTool configs"
       echo "  bb restore <target>     Show where app backups are stored"
       echo ""
+      echo "Clipboard Sync (Linux/macOS):"
+      echo "  bb clipsync             Install CopyQ + Syncthing and enable at login"
+      echo "  bb clipsync id          Show this machine's Syncthing device ID"
+      echo "  bb clipsync pair <id> [name]  Trust another machine and share the history"
+      echo ""
       echo "Info:"
       echo "  bb status               Show what was installed"
       echo "  bb help                 Show this help"
@@ -585,6 +590,15 @@ bb() {
       fi
 
       bash "$restore_script" "$target"
+      return $?
+      ;;
+    clipsync)
+      if [[ -z "$dotfiles_dir" || ! -d "$dotfiles_dir" ]]; then
+        echo "Error: Dotfiles directory not found. Set DOTFILES_DIR or run setup first."
+        return 1
+      fi
+
+      bash "$dotfiles_dir/scripts/setup-clipsync.sh" "$@"
       return $?
       ;;
     update)

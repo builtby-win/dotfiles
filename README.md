@@ -143,6 +143,7 @@ This is ideal if you want to add pieces over time.
 | iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
 | Ghostty | `bb setup ghostty` | optional terminal config | `docs/modules/ghostty.md` |
 | App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
+| Clipboard sync | `bb clipsync` | CopyQ history synced across Linux and macOS via Syncthing | `docs/modules/clipsync.md` |
 | AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
 | Back2Vibing | `bb setup back2vibing` | Focus modes, workflow transitions, and context for AI devs | `docs/modules/back2vibing.md` |
 
