@@ -18,6 +18,9 @@ Commands the layout answers (mimi gives them no meaning; this file does):
 
   mimi tiling cmd swap <left|right|up|down>   swap with the neighbour that way
   mimi tiling cmd togglesplit                 flip the focused window's split
+  mimi tiling cmd preselect <right|down>      the next new window splits the
+                                              focused one that way (Hyprland's
+                                              preselect), whatever its shape
   mimi tiling cmd ratio <delta>               grow (+) or shrink (-) the focused
                                               window's share of its split
   mimi tiling cmd togglefloat                 take the focused window out of the
@@ -149,18 +152,19 @@ def remove(node, number):
     return node
 
 
-def insert(node, target, number, rects):
-    """Split target's leaf to make room for number beside it."""
+def insert(node, target, number, rects, direction=None):
+    """Split target's leaf to make room for number beside it. direction ("h" or
+    "v") overrides the shape-based choice."""
     if node is None:
         return {"win": number}
     if "win" in node:
         if node["win"] != target:
             return node
         rect = rects.get(target, {"width": 1, "height": 0})
-        direction = "h" if rect["width"] >= rect["height"] else "v"
+        direction = direction or ("h" if rect["width"] >= rect["height"] else "v")
         return {"dir": direction, "ratio": 0.5, "a": node, "b": {"win": number}}
-    node["a"] = insert(node["a"], target, number, rects)
-    node["b"] = insert(node["b"], target, number, rects)
+    node["a"] = insert(node["a"], target, number, rects, direction)
+    node["b"] = insert(node["b"], target, number, rects, direction)
     return node
 
 
@@ -389,7 +393,8 @@ def main(inp):
             now = by_number[number]["frame"]
             centre = (now["x"] + now["width"] / 2, now["y"] + now["height"] / 2)
             target = leaf_at(rects, number, centre) or target
-        tree = insert(tree, target, number, rects) if target else {"win": number}
+        side = None if number in landing else state.pop("preselect", None)
+        tree = insert(tree, target, number, rects, side) if target else {"win": number}
 
     # The focused window is the one seen in its leaf. Everything below reads
     # the tree through rects, which hold only the window seen, so this is what
@@ -444,7 +449,9 @@ def main(inp):
         name, args = event.get("name"), event.get("args", [])
         path = path_to(tree, focused)
         parent = path[-1] if path else None
-        if name == "togglesplit" and parent:
+        if name == "preselect" and args and args[0] in ("right", "down"):
+            state["preselect"] = "h" if args[0] == "right" else "v"
+        elif name == "togglesplit" and parent:
             node, _ = parent
             node["dir"] = "v" if node["dir"] == "h" else "h"
         elif name == "ratio" and parent and args:

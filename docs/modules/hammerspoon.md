@@ -35,13 +35,15 @@ Mirrors `linux/hypr/leader.lua`. Press `j+k`; a `LEADER` pill appears in the top
 | --- | --- |
 | `h` `j` `k` `l` / arrows | focus the tile west / south / north / east (`mimi tiling cmd focus`) |
 | `Shift` + `h` `j` `k` `l` | swap with the tile that way (`mimi tiling cmd swap`) |
-| `t` / `Return` / `d` | new Ghostty window (the dwindle layout splits the focused tile) |
+| `t` / `Return` | new Ghostty window (the dwindle layout splits the focused tile) |
+| `d` / `Shift+d` | new Ghostty window split to the right / below (`mimi tiling cmd preselect`) |
 | `x` / `w` | close window |
 | `z` / `f` / `s` | maximize / toggle floating / toggle split |
 | `Space` | app launcher |
 | `1`–`0` | switch to Space N (`mimi action space`) |
 | `Shift` + `1`–`0` | move the window to Space N |
 | `q`/`[`, `e`/`]` | previous / next Space |
+| `Tab` | last Space (tracked by `modules/spaces_bar.lua`) |
 | `Shift+r` | resize mode (`RESIZE` pill; `h`/`k` shrink and `j`/`l` grow the focused tile's split, `Esc` or `Return` to leave) |
 | `j+k` again | send `Ctrl+b` to the app |
 

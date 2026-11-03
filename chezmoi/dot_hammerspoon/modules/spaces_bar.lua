@@ -7,6 +7,10 @@ local M = {}
 local MAX_SPACES = 10
 local item = hs.menubar.new()
 local pending = false
+local active, last -- active Space index and the one before it
+
+-- The Space the leader's tab key returns to.
+function M.previous() return last end
 
 local function render(json)
   local ok, data = pcall(hs.json.decode, json)
@@ -16,6 +20,9 @@ local function render(json)
   for _, space in ipairs(data.spaces) do
     if space.index <= MAX_SPACES then
       if space.visible then
+        if active ~= space.index then
+          last, active = active, space.index
+        end
         parts[#parts + 1] = '[' .. space.index .. ']'
       elseif #space.windows > 0 then
         parts[#parts + 1] = tostring(space.index)

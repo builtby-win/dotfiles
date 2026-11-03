@@ -185,11 +185,13 @@ hl.define_submap("leader", function()
     bind("SHIFT + " .. key, hl.dsp.window.move({ workspace = tostring(workspace) }))
   end
 
+  -- "r" steps through every workspace on the monitor, empty ones included;
+  -- "e" only visits workspaces that already hold windows, so it never moved.
   for _, key in ipairs({ "q", "bracketleft" }) do
-    bind(key, hl.dsp.focus({ workspace = "e-1" }))
+    bind(key, hl.dsp.focus({ workspace = "r-1" }))
   end
   for _, key in ipairs({ "e", "bracketright" }) do
-    bind(key, hl.dsp.focus({ workspace = "e+1" }))
+    bind(key, hl.dsp.focus({ workspace = "r+1" }))
   end
   bind("tab", hl.dsp.focus({ workspace = "previous" }))
 

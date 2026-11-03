@@ -9,11 +9,11 @@
 -- Ctrl+B); jk jk within a second cancels that prefix and opens this leader.
 --
 --   h j k l / arrows   focus window         shift+h/j/k/l   swap with the tile that way
---   t or return or d   new terminal         x or w          close window
+--   t or return        new terminal         d / shift+d     new terminal split right / down
 --   z                  maximize (zoom)      f               toggle floating
 --   s                  toggle split         space           launcher
 --   1..9, 0            Space                shift+1..9      move window there
---   q / e, [ / ]       previous / next Space
+--   q / e, [ / ]       previous / next Space   tab          last Space
 --   shift+r            resize mode (hjkl, esc or return to leave)
 --   jk jk jk           (leader open) send Ctrl+B to the app
 local appLauncher = require('modules.app_launcher')
@@ -122,6 +122,15 @@ local function newTerminal()
   end
 end
 
+-- The layout opens the next window on that side of the focused tile, like
+-- Hyprland's preselect.
+local function splitTerminal(side)
+  return function()
+    mimi('tiling', 'cmd', 'preselect', side)
+    newTerminal()
+  end
+end
+
 --------------------------------------------------------------------- keys --
 
 -- Each entry runs after the leader has closed. 'shift+' prefixes shifted keys.
@@ -132,7 +141,12 @@ local leaderActions = {
   ['s'] = tiling('togglesplit'),
   ['t'] = newTerminal,
   ['return'] = newTerminal,
-  ['d'] = newTerminal,
+  ['d'] = splitTerminal('right'),
+  ['shift+d'] = splitTerminal('down'),
+  ['tab'] = function()
+    local previous = spacesBar.previous()
+    if previous then mimi('action', 'space', tostring(previous)) end
+  end,
   ['space'] = appLauncher.show,
   ['q'] = action('space', 'prev'),
   ['['] = action('space', 'prev'),
