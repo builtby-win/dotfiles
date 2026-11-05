@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""Fuzzy session/tab switcher for Rex, shown in a floating pane on leader+space.
+
+One row per tab across every session: agent status, session, what the tab is
+running, branch and folder. The preview shows the tab's live screen.
+
+  rex-switch [CLIENT]   pick and switch (CLIENT: the Rex app to switch)
+  rex-switch --rows     print the rows (fzf reload)
+"""
+import json
+import os
+import shutil
+import subprocess
+import sys
+
+os.environ["PATH"] = os.pathsep.join(
+    ["/opt/homebrew/bin", "/usr/local/bin", os.path.expanduser("~/.local/bin"), os.environ.get("PATH", "")]
+)
+
+# One server round trip: every session, its tabs, and each terminal's
+# foreground process, title and program status.
+SNAPSHOT_LUA = r"""
+local terminal = "com.superlogical.terminal"
+local out = {}
+for _, s in ipairs(rex.call("session.list").sessions or {}) do
+  rex.call("session.attach", { session_id = s.session_id })
+  local view = rex.call("session.view", { session_id = s.session_id })
+  local windows = {}
+  for _, w in ipairs((view or {}).windows or {}) do
+    local blocks = {}
+    for _, layer in ipairs(w.layers or {}) do
+      for _, b in ipairs(layer.blocks or {}) do
+        if b.creator_name == terminal then
+          local args = { session_id = s.session_id, block_id = b.block_id }
+          local proc = rex.block.call(terminal, "process", args) or {}
+          local fg = proc.foreground or proc.child or {}
+          local status = rex.block.call(terminal, "program_status", args) or {}
+          local title = rex.block.call(terminal, "title", args) or {}
+          local states = {}
+          for _, r in ipairs(status.records or {}) do
+            states[#states + 1] = { state = r.state, app = r.effective_app or r.app }
+          end
+          blocks[#blocks + 1] = {
+            block_id = b.block_id, label = b.label, focused = b.block_id == w.focused_block_id,
+            cwd = fg.cwd, program = fg.name, title = title.title, states = states,
+          }
+        end
+      end
+    end
+    windows[#windows + 1] = { window_id = w.window_id, label = w.label, blocks = blocks }
+  end
+  out[#out + 1] = { session_id = s.session_id, label = s.label, active_window_id = (view or {}).active_window_id, windows = windows }
+end
+return { sessions = out }
+"""
+
+# Most urgent first, mirroring herdr-switch: needs you, ready, busy, at rest.
+URGENCY = {"blocked": 0, "error": 0, "done": 1, "working": 2, "idle": 3}
+GLYPHS = {"blocked": "!", "error": "✗", "done": "✓", "working": "●", "idle": "○"}
+COLORS = {"blocked": "31", "error": "31", "done": "32", "working": "33", "idle": "90"}
+HOME = os.path.expanduser("~")
+
+
+def items(value):
+    # rex.json encodes an empty Lua table as {}.
+    return value if isinstance(value, list) else []
+
+
+def clean(value):
+    return " ".join(str(value or "").split())
+
+
+def short(value, limit):
+    return value if len(value) <= limit else value[: limit - 1] + "…"
+
+
+def branch_for(cwd):
+    path = cwd
+    while path and path != "/":
+        git = os.path.join(path, ".git")
+        if os.path.exists(git):
+            try:
+                if os.path.isfile(git):
+                    with open(git) as f:
+                        gitdir = f.readline().strip().removeprefix("gitdir:").strip()
+                    git = os.path.normpath(os.path.join(path, gitdir))
+                with open(os.path.join(git, "HEAD")) as f:
+                    head = f.readline().strip()
+            except OSError:
+                return ""
+            return head.removeprefix("ref: refs/heads/") if head.startswith("ref: ") else ""
+        path = os.path.dirname(path)
+    return ""
+
+
+def block_state(block):
+    states = [s.get("state") for s in items(block.get("states"))]
+    return min(states, key=lambda s: URGENCY.get(s, 9)) if states else ""
+
+
+def rows():
+    snapshot = json.loads(subprocess.run(["rex", "do", "-"], input=SNAPSHOT_LUA, capture_output=True, text=True, check=True).stdout)
+    current_session = os.environ.get("REX_SESSION", "")
+    own_block = os.environ.get("REX_BLOCK", "")
+    branches = {}
+    entries = []
+    for session_index, session in enumerate(items(snapshot.get("sessions"))):
+        tabs = []
+        for tab_index, window in enumerate(items(session.get("windows"))):
+            blocks = [b for b in items(window.get("blocks")) if b.get("block_id") != own_block]
+            if not blocks:
+                continue
+            # Represent the tab by its most urgent agent, else its focused pane.
+            block = min(blocks, key=lambda b: (URGENCY.get(block_state(b), 9), not b.get("focused")))
+            state = block_state(block)
+            cwd = (block.get("cwd") or "").rstrip("/")
+            if cwd not in branches:
+                branches[cwd] = branch_for(cwd)
+            app = next((s.get("app") for s in items(block.get("states")) if s.get("app")), None) or block.get("program") or ""
+            title = clean(block.get("title")) or clean(block.get("label")) or app
+            folder = os.path.basename(cwd) or cwd
+            parent = os.path.basename(os.path.dirname(cwd))
+            tabs.append({
+                "ids": (session["session_id"], window["window_id"], block["block_id"]),
+                "state": state,
+                "active": window.get("window_id") == session.get("active_window_id"),
+                "cols": [clean(session.get("label")), title, branches[cwd], clean(app), f"{parent}/{folder}" if parent else folder],
+                "detail": cwd.replace(HOME, "~", 1),
+                "order": tab_index,
+            })
+        if not tabs:
+            continue
+        current = session["session_id"] == current_session
+        urgency = min(URGENCY.get(tab["state"], 9) for tab in tabs)
+        # Current session first, then sessions that need you, then creation order.
+        key = (not current, urgency, session_index)
+        for tab in tabs:
+            tab["current"] = current
+            entries.append((key, tab["order"], tab))
+    entries.sort(key=lambda entry: entry[:2])
+
+    # The tab title gets whatever the popup leaves after a glimpse of the
+    # session and branch; app and folder trail off the right edge if needed.
+    columns = int(os.environ.get("FZF_COLUMNS") or shutil.get_terminal_size().columns)
+    limits = (18, max(24, min(56, columns - 46)), 22, 12, 28)
+    headers = ("SESSION", "TAB", "BRANCH", "APP", "FOLDER")
+    widths = [
+        max([len(header)] + [len(short(entry[2]["cols"][i], limits[i])) for entry in entries])
+        for i, header in enumerate(headers)
+    ]
+    lines = ["\t".join(["", "", "", "   " + "  ".join(h.ljust(w) for h, w in zip(headers, widths))])]
+    previous_session = None
+    for _, _, tab in entries:
+        cols = [short(value, limit).ljust(width) for value, limit, width in zip(tab["cols"], limits, widths)]
+        # Repeat the session name on every tab so it stays searchable; dim the repeats.
+        session_color = "90" if tab["ids"][0] == previous_session else ("1;36" if tab["current"] else "1")
+        previous_session = tab["ids"][0]
+        glyph = GLYPHS.get(tab["state"], "·")
+        marker = "→" if tab["current"] and tab["active"] else " "
+        visible = (
+            f"{marker}\x1b[{COLORS.get(tab['state'], '90')}m{glyph}\x1b[0m "
+            f"\x1b[{session_color}m{cols[0]}\x1b[0m  {cols[1]}  \x1b[34m{cols[2]}\x1b[0m  "
+            f"\x1b[35m{cols[3]}\x1b[0m  \x1b[90m{cols[4]}  {tab['detail']}\x1b[0m"
+        )
+        lines.append("\t".join([*tab["ids"], visible]))
+    return "\n".join(lines)
+
+
+def main():
+    if sys.argv[1:] == ["--rows"]:
+        print(rows())
+        return
+    client = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("REX_CLIENT", "")
+    reload_cmd = f"{sys.executable} {os.path.abspath(__file__)} --rows"
+    preview = "rex capture -s {1} -b {3} --trim 2>/dev/null | tail -n \"$FZF_PREVIEW_LINES\""
+    pick = subprocess.run(
+        [
+            "fzf", "--ansi", "--reverse", "--cycle", "--no-hscroll", "--height=100%",
+            "--delimiter=\t", "--with-nth=4..", "--header-lines=1",
+            "--prompt=rex > ",
+            "--header=enter switch · ctrl-r refresh · ctrl-/ preview · esc close",
+            f"--preview={preview}", "--preview-window=down,45%,border-top,follow",
+            "--bind=ctrl-/:toggle-preview",
+            f"--bind=ctrl-r:reload({reload_cmd})",
+        ],
+        input=rows(), capture_output=False, stdout=subprocess.PIPE, text=True,
+    )
+    if pick.returncode != 0 or not pick.stdout.strip():
+        return
+    session_id, window_id, block_id = pick.stdout.split("\t")[:3]
+    subprocess.run(["rex", "focus", "-s", session_id, block_id], stdout=subprocess.DEVNULL, check=False)
+    client_args = ["-C", client] if client else []
+    subprocess.run(
+        ["rex", *client_args, "do", "session.select", f"session_id={session_id}", f"window_id={window_id}"],
+        stdout=subprocess.DEVNULL, check=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,11 @@
+id = "builtbywin.herdr-pane-hud"
+name = "Herdr Pane HUD"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Persistent top-right pane layout HUD for Herdr showing split topology and active pane highlight."
+platforms = ["macos", "linux"]
+
+[[actions]]
+id = "status"
+title = "Pane HUD: Status"
+command = ["./bin/herdr-pane-layout-status"]

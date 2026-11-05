@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Herdr tab bar status widget showing a visual pane layout mini-map.
+
+- Expresses split topology with pipe '│' for horizontal and '/' for vertical splits.
+- Active pane number remains the exact same raw digit size as non-active panes,
+  highlighted using ANSI reverse-video styling (\033[7;1m).
+- Appends active agent name if present (e.g. omp).
+"""
+
+import json
+import os
+import socket
+import sys
+
+# Ensure standard user bin directories are in PATH
+home = os.path.expanduser("~")
+for extra_path in ("/opt/homebrew/bin", "/usr/local/bin", os.path.join(home, ".local", "bin")):
+    if extra_path not in os.environ.get("PATH", "").split(os.pathsep):
+        os.environ["PATH"] = extra_path + os.pathsep + os.environ.get("PATH", "")
+
+socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
+
+
+def highlight_num(num, is_focused):
+    """Render the pane number. Active pane is marked with an asterisk (Rex style)."""
+    star = "*" if is_focused else ""
+    return f"{num}{star}"
+
+
+def format_tree(panes, focused_id, pid_to_num):
+    if len(panes) == 1:
+        p = panes[0]
+        num = pid_to_num[p["pane_id"]]
+        return highlight_num(num, p["pane_id"] == focused_id)
+
+    # 1. Look for vertical dividing lines (columns side-by-side: pipe '│')
+    x_positions = sorted(list(set(p["rect"]["x"] + p["rect"]["width"] for p in panes)))[:-1]
+    cut_x = []
+    for split_x in x_positions:
+        left = [p for p in panes if p["rect"]["x"] + p["rect"]["width"] <= split_x]
+        right = [p for p in panes if p["rect"]["x"] >= split_x]
+        if len(left) + len(right) == len(panes) and len(left) > 0 and len(right) > 0:
+            cut_x.append(split_x)
+
+    if cut_x:
+        bounds = [0] + cut_x + [999999]
+        cols = []
+        for i in range(len(bounds) - 1):
+            b1, b2 = bounds[i], bounds[i + 1]
+            col_panes = [p for p in panes if p["rect"]["x"] >= b1 and p["rect"]["x"] + p["rect"]["width"] <= b2]
+            if col_panes:
+                cols.append(col_panes)
+        parts = [format_tree(c, focused_id, pid_to_num) for c in cols]
+        return " │ ".join(parts)
+
+    # 2. Look for horizontal dividing lines (stacked rows: slash '/')
+    y_positions = sorted(list(set(p["rect"]["y"] + p["rect"]["height"] for p in panes)))[:-1]
+    cut_y = []
+    for split_y in y_positions:
+        top = [p for p in panes if p["rect"]["y"] + p["rect"]["height"] <= split_y]
+        bot = [p for p in panes if p["rect"]["y"] >= split_y]
+        if len(top) + len(bot) == len(panes) and len(top) > 0 and len(bot) > 0:
+            cut_y.append(split_y)
+
+    if cut_y:
+        bounds = [0] + cut_y + [999999]
+        rows = []
+        for i in range(len(bounds) - 1):
+            b1, b2 = bounds[i], bounds[i + 1]
+            row_panes = [p for p in panes if p["rect"]["y"] >= b1 and p["rect"]["y"] + p["rect"]["height"] <= b2]
+            if row_panes:
+                rows.append(row_panes)
+        parts = []
+        for r in rows:
+            formatted = format_tree(r, focused_id, pid_to_num)
+            if "│" in formatted:
+                formatted = f"({formatted})"
+            parts.append(formatted)
+        return "/".join(parts)
+
+    return "/".join(highlight_num(pid_to_num[p["pane_id"]], p["pane_id"] == focused_id) for p in panes)
+
+
+def get_layout_status():
+    req = {"id": "herdr-pane-layout-status", "method": "session.snapshot", "params": {}}
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+            s.settimeout(0.4)
+            s.connect(socket_path)
+            s.sendall((json.dumps(req) + "\n").encode())
+            raw = s.makefile().readline()
+            snap = json.loads(raw)["result"]["snapshot"]
+    except Exception:
+        return ""
+
+    tab_id = snap.get("focused_tab_id")
+    layouts = snap.get("layouts", [])
+    layout = next((l for l in layouts if l.get("tab_id") == tab_id), None)
+    if not layout:
+        return ""
+
+    panes = layout.get("panes", [])
+    if len(panes) <= 1:
+        return ""
+
+    focused_id = layout.get("focused_pane_id")
+    zoomed = layout.get("zoomed", False)
+    snap_panes = {p["pane_id"]: p for p in snap.get("panes", [])}
+
+    pid_to_num = {p["pane_id"]: i for i, p in enumerate(panes, 1)}
+
+    tree_str = format_tree(panes, focused_id, pid_to_num)
+    layout_matrix = f"[ {tree_str} ]"
+
+    foc_info = snap_panes.get(focused_id, {})
+    agent = foc_info.get("agent")
+    active_str = f" {agent}" if agent else ""
+
+    return f"{layout_matrix}{active_str}"
+
+
+if __name__ == "__main__":
+    status = get_layout_status()
+    if status:
+        print(status)

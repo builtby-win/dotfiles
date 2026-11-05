@@ -1,0 +1,51 @@
+#!/bin/sh
+set -eu
+
+# Leader+N: create (or reopen) a Git worktree and open it as a Rex session.
+#
+#   rex-new-worktree DIR [CLIENT]
+#
+# Same layout as `herdr worktree create`: ~/.herdr/worktrees/<repo>/<branch-slug>,
+# so Herdr and Rex find each other's worktrees. An existing local branch is
+# checked out; a new name branches from the current HEAD.
+
+PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
+export PATH
+
+dir=${1:-$PWD}
+client=${2:-${REX_CLIENT:-}}
+
+if ! common=$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+  printf 'Not a Git repository: %s\nPress any key.' "$dir"
+  read -r _ || true
+  exit 1
+fi
+repo_root=$(dirname "$common")
+repo=$(basename "$repo_root")
+
+# fzf exits 1 when the typed name matches no branch: that's a new branch.
+status=0
+picked=$(git -C "$repo_root" for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads |
+  fzf --print-query --reverse --prompt="$repo branch > " \
+    --header='type a new branch name, or pick an existing one · esc cancel') || status=$?
+[ "$status" -le 1 ] || exit 0
+branch=$(printf '%s\n' "$picked" | tail -n 1)
+[ -n "$branch" ] || exit 0
+slug=$(printf '%s' "$branch" | tr '/' '-')
+path="$HOME/.herdr/worktrees/$repo/$slug"
+
+if [ ! -d "$path" ]; then
+  mkdir -p "$(dirname "$path")"
+  if git -C "$repo_root" show-ref --verify --quiet "refs/heads/$branch"; then
+    git -C "$repo_root" worktree add "$path" "$branch"
+  else
+    git -C "$repo_root" worktree add -b "$branch" "$path" HEAD
+  fi
+fi
+
+session=$(rex new "$slug" -c "$path" --json | jq -er '.session_id')
+if [ -n "$client" ]; then
+  rex -C "$client" do session.select session_id="$session" >/dev/null
+else
+  rex do session.select session_id="$session" >/dev/null
+fi
