@@ -17,6 +17,9 @@ CLIENT_DIR="${CLIPCASCADE_CLIENT_DIR:-$HOME/.local/share/clipcascade}"
 PORT="${CLIPCASCADE_PORT:-8080}"
 MAX_MIB="${CLIPCASCADE_MAX_MIB:-20}"
 OS="$(uname -s)"
+# Upstream classifies Hyprland with DISPLAY and WAYLAND_DISPLAY both set as XWayland, which picks
+# GUI + xclip and misses native Wayland clipboard changes. Force CLI + wl-clipboard.
+LINUX_FLAGS="--gui false --xmode false"
 
 server() {
   [[ "$OS" == "Linux" ]] || { echo "Run the server on Linux" >&2; exit 1; }
@@ -62,14 +65,15 @@ client_linux() {
   local tmp
   tmp="$(mktemp -d)"
   curl -fsSL "$RELEASE_URL/ClipCascade_Linux.zip" -o "$tmp/linux.zip"
-  rm -rf "$CLIENT_DIR"
+  # Keep DATA (saved login/settings): the client stores it in its program directory.
   mkdir -p "$CLIENT_DIR"
+  find "$CLIENT_DIR" -mindepth 1 -maxdepth 1 ! -name DATA -exec rm -rf {} +
   unzip -q "$tmp/linux.zip" -d "$tmp/x"
   cp -R "$(dirname "$(find "$tmp/x" -name main.py | head -n1)")"/. "$CLIENT_DIR"
   rm -rf "$tmp"
 
   local hypr_autostart="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/autostart.lua"
-  local cmd="python3 $CLIENT_DIR/main.py --gui false"
+  local cmd="python3 $CLIENT_DIR/main.py $LINUX_FLAGS"
   if [[ -f "$hypr_autostart" ]]; then
     grep -qF 'ClipCascade' "$hypr_autostart" || printf '\n-- ClipCascade clipboard sync.\no.launch_on_start("%s")\n' "$cmd" >> "$hypr_autostart"
   else
@@ -108,6 +112,6 @@ client() {
 case "${1:-}" in
   server) server ;;
   client) client ;;
-  run) exec python3 "$CLIENT_DIR/main.py" --gui false ;;
+  run) exec python3 "$CLIENT_DIR/main.py" $LINUX_FLAGS ;;
   *) echo "Usage: setup-clipcascade.sh [server|client|run]" >&2; exit 1 ;;
 esac

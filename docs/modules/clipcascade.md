@@ -18,7 +18,7 @@ Log in at `http://<tailscale-ip>:8080` with `admin` / `admin123` and change the 
 bb clipcascade client
 ```
 
-- **Linux (Arch/Omarchy):** installs the dependencies, downloads the latest `ClipCascade_Linux.zip` to `~/.local/share/clipcascade`, and adds a launch entry to `~/.config/hypr/autostart.lua` (XDG autostart fallback). Run `bb clipcascade run` once to enter the server URL and credentials. On Hyprland/Wayland the client runs in CLI mode using `wl-paste --watch`.
+- **Linux (Arch/Omarchy):** installs the dependencies, downloads the latest `ClipCascade_Linux.zip` to `~/.local/share/clipcascade`, and adds a launch entry to `~/.config/hypr/autostart.lua` (XDG autostart fallback). Run `bb clipcascade run` once to enter the server URL and credentials. The client is launched with `--gui false --xmode false` (CLI, `wl-paste`), because upstream classifies Hyprland with `DISPLAY` set as XWayland and would otherwise pick `xclip`. Reinstalling keeps the saved login (`DATA`).
 - **macOS:** downloads the latest app to `/Applications/ClipCascade.app`, clears the quarantine flag, and opens it. Add it to Login Items to start at login.
 
 Enter `http://<tailscale-ip>:8080` as the server. If encryption is enabled, enable it on every device.
