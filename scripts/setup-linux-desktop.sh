@@ -54,9 +54,6 @@ if omarchy-shell shell ping >/dev/null 2>&1; then
   omarchy bar put builtby.leader --section left --after omarchy.workspaces
 fi
 
-echo "==> Setting up clipboard history sync (CopyQ + Syncthing)"
-bash "$DOTFILES_DIR/scripts/setup-clipsync.sh"
-
 echo "==> Starting vicinae"
 if ! pgrep -x vicinae >/dev/null; then
   setsid -f uwsm-app -- vicinae server >/dev/null 2>&1
