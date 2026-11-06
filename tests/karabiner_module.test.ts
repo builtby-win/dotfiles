@@ -167,9 +167,15 @@ describe('Karabiner module wiring', () => {
     const sculptF2 = rule.manipulators.find(
       (manipulator: { from: { key_code?: string; modifiers?: { mandatory?: string[] } } }) =>
         manipulator.from.key_code === 'tab' &&
-        manipulator.from.modifiers?.mandatory?.includes('option'),
+        manipulator.from.modifiers?.mandatory?.length === 1,
     );
     expect(sculptF2?.to).toEqual([{ key_code: 'f2' }]);
+    const hyperTab = rule.manipulators.find(
+      (manipulator: { from: { key_code?: string; modifiers?: { mandatory?: string[] } } }) =>
+        manipulator.from.key_code === 'tab' && manipulator.from.modifiers?.mandatory?.length === 4,
+    );
+    expect(hyperTab?.to[0].key_code).toBe('tab');
+    expect(rule.manipulators.indexOf(hyperTab)).toBeLessThan(rule.manipulators.indexOf(sculptF2));
     for (let n = 1; n <= 12; n += 1) {
       const entry = rule.manipulators.find(
         (manipulator: { from: { key_code?: string } }) => manipulator.from.key_code === `f${n}`,
