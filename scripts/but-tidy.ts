@@ -3,6 +3,7 @@
 //
 //   but-tidy plan  [--repo DIR] [--target origin/main]   classify branches, group unlanded commits by theme
 //   but-tidy clean [--repo DIR] [--target ...]           list landed branches (no deletion; `but` can't delete unapplied refs)
+//   but-tidy archive [--days 14] [--repo DIR] --yes      delete landed branches; tag archive/<name> then delete every landed branch and stale unlanded/review ones
 //   but-tidy group THEME [THEME...] [--repo DIR] --yes   copy a theme's commits onto work/<theme> (sources untouched)
 //
 // Safety: plan never mutates. clean lists branches where every commit has a patch-equivalent on the
@@ -107,6 +108,29 @@ if (cmd === "plan") {
   // checkout is dirty. Delete the ref by hand (or via GitHub/UI) after reviewing the list.
   const doomed = (await load()).filter((b) => b.landed && !b.worktree).map((b) => b.name);
   console.log(`${doomed.length} landed branches (ancestor of ${target}, or patch-equivalent with no merge commits):\n${doomed.join("\n")}`);
+} else if (cmd === "archive") {
+  // Landed: ref deleted (commits are on target). Unlanded/review and older than --days: tagged archive/<name>
+  // first, so nothing becomes unreachable. Worktree-checked-out and recent branches are kept.
+  const days = Number(flag("--days") ?? 14);
+  const cutoff = Date.now() / 1000 - days * 86400;
+  const tipTime = async (name: string) => Number(await git("log", "-1", "--format=%ct", name));
+  const keep = new Set(lines(await git("for-each-ref", "refs/heads", "--format=%(refname:short)|%(HEAD)")).filter((l) => l.endsWith("|*")).map((l) => l.split("|")[0]));
+  const del: string[] = [];
+  const arch: string[] = [];
+  for (const b of await load()) {
+    if (b.worktree || keep.has(b.name)) continue;
+    if (b.landed) del.push(b.name);
+    else if ((await tipTime(b.name)) < cutoff) arch.push(b.name);
+  }
+  console.log(`delete (landed): ${del.length}\narchive tag + delete (stale, >${days}d): ${arch.length}`);
+  if (!yes) console.log("\ndry run; pass --yes");
+  else {
+    const all = [...del, ...arch];
+    // Every deleted tip is tagged first (patch-equivalent tips keep their original history too).
+    for (const n of all) await $`git -C ${repo} tag archive/${n} ${n}`;
+    if (all.length) await $`git -C ${repo} branch -D ${all}`.quiet();
+    console.log(`done; restore with: git branch <name> archive/<name>`);
+  }
 } else if (cmd === "group") {
   const wanted = args.slice(1).filter((a) => !a.startsWith("--") && a !== repo && a !== target);
   const by = themes(await load());
@@ -126,6 +150,6 @@ if (cmd === "plan") {
   }
   if (!yes) console.log("\ndry run; pass --yes to pick");
 } else {
-  console.log("usage: but-tidy plan|clean|group THEME... [--repo DIR] [--target REF] [--yes (group only)]");
+  console.log("usage: but-tidy plan|clean|archive|group THEME... [--repo DIR] [--target REF] [--yes (group only)]");
   process.exit(1);
 }
