@@ -45,6 +45,8 @@ echo "==> Installing the Hyprland jk leader"
 HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
 install -Dm644 "$DOTFILES_DIR/linux/hypr/leader.lua" "$HYPR_DIR/leader.lua"
 grep -qxF 'require("hypr.leader")' "$HYPR_DIR/bindings.lua" || printf '\nrequire("hypr.leader")\n' >> "$HYPR_DIR/bindings.lua"
+install -Dm644 "$DOTFILES_DIR/linux/hypr/games.lua" "$HYPR_DIR/games.lua"
+grep -qxF 'require("hypr.games")' "$HYPR_DIR/bindings.lua" || printf 'require("hypr.games")\n' >> "$HYPR_DIR/bindings.lua"
 
 echo "==> Installing the jk leader bar indicator"
 bash "$DOTFILES_DIR/scripts/apply-chezmoi.sh" "$HOME/.config/omarchy/plugins/builtby.leader"

@@ -13,6 +13,16 @@ Apply: pick "Omarchy" in `bb setup`, or run `scripts/apply-chezmoi.sh ~/.config/
 
 `idle.screensaver` and `idle.lock` are seconds of idle time; `0` disables the action. Both are `0` here, so the screen never auto-locks. Manual lock (`omarchy system lock`) still works.
 
+## Games
+
+`linux/hypr/games.lua` (installed by `scripts/setup-linux-desktop.sh`, not chezmoi) sends every `steam_app_default` window (MapleStory and the Nexon launcher) to `GAMING_WORKSPACE` (2) and keeps it tiled. Omarchy's Steam rule floats these windows, and a floating MapleStory misplaces the cursor. The rule only applies when a window opens, so restart an already-floating game to pick it up.
+
+As soon as the window titled `MapleStory` appears it is made fullscreen (default fullscreen, not the scrolling layout's own), so it sits at `0,0` at monitor size and its in-game cursor matches the pointer. The launcher stays a normal tiled window. Leave fullscreen with `Cmd+Ctrl+F`. Cmd+Tab (hyprshell, `~/.config/hyprshell/config.toml`) stays in window mode (`switch_workspaces = false`).
+
+Both game windows also get `no_follow_mouse` and `focus_on_activate = false`. The fullscreen game covers the monitor, so after Cmd+Tab to another window on workspace 2 the pointer is still over MapleStory and `follow_mouse` would hand focus straight back on the first mouse move; Wine's own activation requests are ignored for the same reason. The game still takes focus from a click, Cmd+Tab, or a workspace switch.
+
+Both game windows also get `confine_pointer`, which confines the cursor to the focused window the way a pointer-locking app would; Wine under XWayland does not request that itself. The pointer cannot reach the bar or dock while a game has focus, and Cmd+Tab or a workspace switch releases it.
+
 ## Keeping the repo in sync
 
 `omarchy` commands (`omarchy bar put`, `omarchy plugin enable`, the settings panel) rewrite `~/.config/omarchy/shell.json` in place, and the next apply overwrites those edits. Pull live changes back into the repo first:
