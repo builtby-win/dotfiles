@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -10,7 +11,7 @@ function readRepoFile(relativePath: string): string {
 
 describe('manual download apps in setup CLI', () => {
   it('lists TypeWhisper, Cotypist, and Neru in setup.ts with install links', () => {
-    const setupTs = readRepoFile('setup.ts');
+    const setupTs = readSetupSource();
 
     expect(setupTs).toContain('name: "TypeWhisper"');
     expect(setupTs).toContain('value: "typewhisper"');
@@ -30,7 +31,7 @@ describe('manual download apps in setup CLI', () => {
   });
 
   it('shows manual download guidance for selected apps without Homebrew packages', () => {
-    const setupTs = readRepoFile('setup.ts');
+    const setupTs = readSetupSource();
 
     expect(setupTs).toContain('Manual download required');
     expect(setupTs).toContain('Download these manually:');

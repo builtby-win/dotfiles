@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
 describe('macOS app backup organization', () => {
   const readmePath = path.resolve(__dirname, '../README.md');
-  const setupPath = path.resolve(__dirname, '../setup.ts');
   const functionsPath = path.resolve(__dirname, '../shell/functions.sh');
   const restoreScriptPath = path.resolve(__dirname, '../scripts/restore-macos-app-backups.sh');
   const syncScriptPath = path.resolve(__dirname, '../scripts/sync-macos-app-backups.sh');
@@ -26,7 +26,7 @@ describe('macOS app backup organization', () => {
   });
 
   it('removes Mackup from the interactive config catalog', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).not.toContain('{ name: "Mackup", value: "mackup"');
     expect(content).not.toContain('mackup: [".mackup.cfg"]');
   });

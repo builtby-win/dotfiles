@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -37,7 +38,7 @@ describe('Hammerspoon module wiring', () => {
   });
 
   it('adds hammerspoon to setup.ts app and config catalogs', () => {
-    const setupTs = readRepoFile('setup.ts');
+    const setupTs = readSetupSource();
     expect(setupTs).toContain('value: "hammerspoon"');
     expect(setupTs).toContain('brewName: "hammerspoon"');
     expect(setupTs).toContain('{ name: "Hammerspoon", value: "hammerspoon"');

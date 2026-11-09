@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { readSetupSource } from './helpers/setup-source';
 import { readFileSync } from "fs";
 import { join } from "path";
 import { generateTmuxEntrypoint, normalizeTmuxEntrypoint } from "../lib/tmux-config";
@@ -148,7 +149,7 @@ describe("tmux profile split", () => {
 });
 
 describe("tmux setup safety", () => {
-  const setupTs = readFileSync(join(process.cwd(), "setup.ts"), "utf-8");
+  const setupTs = readSetupSource();
   const functionsSh = readFileSync(join(process.cwd(), "shell", "functions.sh"), "utf-8");
   const tmuxDocs = readFileSync(join(process.cwd(), "docs", "modules", "tmux.md"), "utf-8");
 

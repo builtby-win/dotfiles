@@ -11,3 +11,6 @@ node_modules/
 shell/local.sh
 shell/experimental/
 .gstack/
+.omo/
+.pi/
+.codegraph

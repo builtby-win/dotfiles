@@ -1,8 +1,6 @@
 local M = {}
 
-local appShortcuts = {
-  { key = 'g', app = 'Ghostty', label = 'Ghostty terminal' },
-  { key = 'c', app = 'Google Chrome', label = 'Google Chrome' },
+M.apps = {
   { key = 'v', app = 'Visual Studio Code', label = 'VS Code' },
   { key = 'u', app = 'Cursor', label = 'Cursor' },
   { key = 's', app = 'Slack', label = 'Slack' },
@@ -28,7 +26,7 @@ function M.show()
   end
 
   local choices = {}
-  for _, shortcut in ipairs(appShortcuts) do
+  for _, shortcut in ipairs(M.apps) do
     table.insert(choices, {
       text = shortcut.app,
       subText = shortcut.label,

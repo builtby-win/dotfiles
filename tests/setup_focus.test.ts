@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import fs from 'fs';
 import path from 'path';
 
-const setupPath = path.resolve(__dirname, '../setup.ts');
 const bootstrapPath = path.resolve(__dirname, '../bootstrap.sh');
 const linuxBootstrapPath = path.resolve(__dirname, '../bootstrap-linux.sh');
 const functionsPath = path.resolve(__dirname, '../shell/functions.sh');
 
 describe('focused setup defaults', () => {
   it('defaults Claude Code and OpenCode into AI/dev setup while keeping Codex optional', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('{ name: "Claude Code", value: "claude", brewName: "", configs: ["claude"], checked: true');
     expect(content).toContain('{ name: "OpenCode", value: "opencode", brewName: "", configs: ["opencode"], checked: true');
@@ -22,8 +22,8 @@ describe('focused setup defaults', () => {
   });
 
   it('offers Oh My Pi, Herdr, and Conductor through supported installers', () => {
-    const setup = fs.readFileSync(setupPath, 'utf-8');
-    const brewfile = fs.readFileSync(path.resolve(__dirname, '../apps/Brewfile'), 'utf-8');
+    const setup = readSetupSource();
+    const brewfile = fs.readFileSync(path.resolve(__dirname, '../Brewfile'), 'utf-8');
     const windowsSetup = fs.readFileSync(path.resolve(__dirname, '../setup-windows.ts'), 'utf-8');
 
     expect(setup).toContain('installCommand: "curl -fsSL https://omp.sh/install | sh"');
@@ -35,7 +35,7 @@ describe('focused setup defaults', () => {
   });
 
   it('lets focused setup use recommended defaults while keeping Codex and Ghostty optional', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('function selectFocusedWorkflowApps(');
     expect(content).toContain('Focused setup starts with the recommended AI/dev workflow selected, including OpenCode. Codex and Ghostty stay optional.');
@@ -48,7 +48,7 @@ describe('focused setup defaults', () => {
   });
 
   it('shows every app individually under visible group headings', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('Show every app, grouped visually');
     expect(content).toContain('groups are shown as headings');
@@ -58,7 +58,7 @@ describe('focused setup defaults', () => {
   });
 
   it('shows product links after setup completes', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('printAdBanner();');
     expect(content).toContain('https://back2vibing.builtby.win/downloads/');
@@ -66,7 +66,7 @@ describe('focused setup defaults', () => {
   });
 
   it('runs setup directly instead of showing the old dashboard menu first', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('if (action === "menu")');
     expect(content).toContain('await runSetup();');
@@ -74,7 +74,7 @@ describe('focused setup defaults', () => {
   });
 
   it('supports explicit AI Agent setup path from bootstrap and bb helper', () => {
-    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+    const setupContent = readSetupSource();
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
     const functionsContent = fs.readFileSync(functionsPath, 'utf-8');
@@ -86,7 +86,7 @@ describe('focused setup defaults', () => {
   });
 
   it('preset JSON preselects apps/configs and skips the checklists', () => {
-    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+    const setupContent = readSetupSource();
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
 

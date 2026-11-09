@@ -28,7 +28,7 @@ bb setup shell
 ## Directory Structure
 
 ```
-agents/
+ai/repo-rules/
 ├── shared/
 │   └── base.md         # Common rules for all agents
 ├── claude/
@@ -45,11 +45,11 @@ agents/
 
 The adapters intentionally stay short and mirror the principles in `shared/base.md`. There is no runtime include mechanism, so update the adapters when changing the shared principles.
 
-AI application settings under `templates/` are copy-managed by `setup.ts`; they are separate from repo-level agent instructions.
+AI application settings under `ai/tool-settings/` are copy-managed by `setup.ts`; they are separate from repo-level agent instructions.
 
 ## Adding a new agent
 
-1. Add an adapter under `agents/{agent}/`.
+1. Add an adapter under `ai/repo-rules/{agent}/`.
 2. Add its `agent:config_filename` entry to `shell/agents.sh`.
 3. Document its installation path and precedence.
 4. Keep machine-specific settings and permissions out of shared templates.

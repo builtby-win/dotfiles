@@ -1,10 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { readSetupSource } from './helpers/setup-source';
 
 describe("setup.ts beads removal", () => {
-  const setupPath = join(process.cwd(), "setup.ts");
-  const content = readFileSync(setupPath, "utf-8");
+  const content = readSetupSource();
 
   it("should not contain beads in OPTIONAL_FEATURES", () => {
     // This is a bit of a heuristic check on the file content itself

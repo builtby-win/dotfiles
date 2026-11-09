@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -125,7 +126,7 @@ describe('Karabiner module wiring', () => {
   it('wires Neru mode changes through the Karabiner CLI helper', () => {
     const helper = readRepoFile('chezmoi/dot_local/bin/executable_karabiner-layer');
     const neru = readRepoFile('chezmoi/dot_config/neru/config.toml');
-    const setup = readRepoFile('setup.ts');
+    const setup = readSetupSource();
     const config = JSON.parse(readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'));
     const rules = config.profiles[0].complex_modifications.rules;
 

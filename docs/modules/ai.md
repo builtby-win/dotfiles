@@ -1,6 +1,6 @@
 # AI configs
 
-AI tool configs are copied from `templates/` because these tools rewrite their files.
+AI tool configs are copied from `ai/tool-settings/` because these tools rewrite their files.
 
 ## Included application templates
 
@@ -22,7 +22,7 @@ bb setup
 
 ## Repo-level agent instructions
 
-For per-repo agent rules and instructions, use `agent-link` from `agents/`:
+For per-repo agent rules and instructions, use `agent-link` from `ai/repo-rules/`:
 
 ```bash
 agent-link
@@ -30,4 +30,4 @@ agent-link claude
 agent-link all
 ```
 
-Details: `agents/README.md`.
+Details: `ai/repo-rules/README.md`.

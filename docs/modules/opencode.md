@@ -1,12 +1,12 @@
 # OpenCode
 
-OpenCode config is copy-managed from `templates/opencode/` because the tool owns its local files.
+OpenCode config is copy-managed from `ai/tool-settings/opencode/` because the tool owns its local files.
 
 ## Files
 
-- `templates/opencode/opencode.json`
-- `templates/opencode/oh-my-openagent.json`
-- `templates/opencode/tui.json`
+- `ai/tool-settings/opencode/opencode.json`
+- `ai/tool-settings/opencode/oh-my-openagent.json`
+- `ai/tool-settings/opencode/tui.json`
 
 ## Current styling
 
@@ -26,4 +26,4 @@ bb setup --setup-path ai_agent
 
 ## Sync workflow
 
-If you tweak OpenCode locally and want those changes versioned here, copy the updated files back into `templates/opencode/` and commit them.
+If you tweak OpenCode locally and want those changes versioned here, copy the updated files back into `ai/tool-settings/opencode/` and commit them.
