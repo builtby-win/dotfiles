@@ -32,7 +32,7 @@ modelRoles:
   task: openai-codex/gpt-6-luna:auto
   plan: anthropic/claude-opus-5.5:high
   slow: openai-codex/gpt-6.1-sol:low
-  advisor: openai-codex/gpt-6.1-sol:high
+  advisor: openai-codex/gpt-6.1-sol:low
   designer: anthropic/claude-sonnet-5.5:high
   vision: openai-codex/gpt-6.1-sol:low
   smol: openai-codex/gpt-6-luna:auto
