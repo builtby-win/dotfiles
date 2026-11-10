@@ -28,8 +28,8 @@ bb setup --setup-path ai_agent
 
 If you tweak OpenCode locally and want those changes versioned here, copy the updated files back into `ai/tool-settings/opencode/` and commit them.
 
-## Free models first
+## Default model
 
-`opencode.json` defaults to `opencode/big-pickle` (small model: `opencode/deepseek-v4.1-flash-free`). In `oh-my-openagent.json` every agent and category uses `opencode/big-pickle` first, then `opencode/deepseek-v4.1-flash-free` and `opencode/glm-5.3-flash-free`, before falling back to the previous paid models.
+`opencode.json` and every agent/category in `oh-my-openagent.json` default to `opencode/muse-spark-1.3` (also the small model), with the previous paid models as fallbacks.
 
 Applying via `bb setup` replaces the live `opencode.json` (after a backup), dropping local-only settings such as custom agents, provider timeouts and the plugin pin. Merge `model`/`small_model` by hand if you have those.
