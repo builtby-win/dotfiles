@@ -11,22 +11,22 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         },
         {
-          "model": "opencode/kimi-k2.5"
+          "model": "opencode/kimi-k3"
         },
         {
           "model": "openai/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "opencode/glm-5"
+          "model": "opencode/glm-5.3"
         }
       ]
     },
@@ -40,10 +40,10 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "openai/gpt-5.4-mini"
+          "model": "openai/gpt-6-luna"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "medium"
         }
       ]
@@ -62,7 +62,7 @@
           "variant": "high"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "high"
         },
         {
@@ -70,7 +70,7 @@
           "variant": "high"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         }
       ]
@@ -85,13 +85,13 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "openai/gpt-5.4-mini-fast"
+          "model": "openai/gpt-6-luna-fast"
         },
         {
           "model": "opencode/claude-haiku-4-5"
         },
         {
-          "model": "openai/gpt-5.4-nano"
+          "model": "openai/gpt-6-luna"
         },
         {
           "model": "opencode/gpt-5.4-nano"
@@ -108,13 +108,13 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "openai/gpt-5.4-mini-fast"
+          "model": "openai/gpt-6-luna-fast"
         },
         {
           "model": "opencode/claude-haiku-4-5"
         },
         {
-          "model": "openai/gpt-5.4-nano"
+          "model": "openai/gpt-6-luna"
         },
         {
           "model": "opencode/gpt-5.4-nano"
@@ -122,27 +122,21 @@
       ]
     },
     "multimodal-looker": {
-      "model": "opencode/big-pickle",
+      "model": "opencode/mimo-v2.6-flash-free",
       "fallback_models": [
-        {
-          "model": "opencode/deepseek-v4.1-flash-free"
-        },
-        {
-          "model": "opencode/glm-5.3-flash-free"
-        },
         {
           "model": "openai/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "openai/gpt-5-nano"
+          "model": "openai/gpt-6-luna"
         },
         {
-          "model": "opencode/gpt-5-nano"
+          "model": "opencode/gpt-5.4-nano"
         }
       ]
     },
@@ -156,7 +150,7 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         },
         {
@@ -164,7 +158,7 @@
           "variant": "high"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "high"
         },
         {
@@ -182,7 +176,7 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         },
         {
@@ -190,7 +184,7 @@
           "variant": "high"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "high"
         }
       ]
@@ -209,11 +203,11 @@
           "variant": "xhigh"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "xhigh"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         },
         {
@@ -232,14 +226,14 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-sonnet-4-6"
+          "model": "opencode/claude-sonnet-5-5"
         },
         {
           "model": "openai/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "medium"
         }
       ]
@@ -254,14 +248,14 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-sonnet-4-6"
+          "model": "opencode/claude-sonnet-5-5"
         },
         {
           "model": "openai/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "medium"
         }
       ]
@@ -282,10 +276,10 @@
           "variant": "high"
         },
         {
-          "model": "opencode/glm-5"
+          "model": "opencode/glm-5.3"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         }
       ]
@@ -304,7 +298,7 @@
           "variant": "xhigh"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "xhigh"
         },
         {
@@ -312,7 +306,7 @@
           "variant": "high"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         }
       ]
@@ -327,14 +321,14 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "openai/gpt-5.4-mini"
+          "model": "openai/gpt-6-luna"
         },
         {
-          "model": "opencode/gpt-5.4",
+          "model": "opencode/gpt-5.5",
           "variant": "medium"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         },
         {
@@ -357,14 +351,14 @@
           "variant": "high"
         },
         {
-          "model": "opencode/claude-opus-4-7",
+          "model": "opencode/claude-opus-5-5",
           "variant": "max"
         },
         {
           "model": "openai/gpt-5.5"
         },
         {
-          "model": "opencode/gpt-5.4"
+          "model": "opencode/gpt-5.5"
         }
       ]
     },
@@ -378,7 +372,7 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "openai/gpt-5.4-mini"
+          "model": "openai/gpt-6-luna"
         },
         {
           "model": "opencode/gpt-5.4-mini"
@@ -387,10 +381,10 @@
           "model": "opencode/claude-haiku-4-5"
         },
         {
-          "model": "opencode/gemini-3-flash"
+          "model": "opencode/gemini-3.8-flash"
         },
         {
-          "model": "opencode/gpt-5-nano"
+          "model": "opencode/gpt-5.4-nano"
         }
       ]
     },
@@ -404,7 +398,7 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-sonnet-4-6"
+          "model": "opencode/claude-sonnet-5-5"
         },
         {
           "model": "openai/gpt-5.3-codex",
@@ -415,7 +409,7 @@
           "variant": "medium"
         },
         {
-          "model": "opencode/gemini-3-flash"
+          "model": "opencode/gemini-3.8-flash"
         }
       ]
     },
@@ -429,7 +423,7 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/claude-sonnet-4-6"
+          "model": "opencode/claude-sonnet-5-5"
         },
         {
           "model": "openai/gpt-5.3-codex",
@@ -440,7 +434,7 @@
           "variant": "medium"
         },
         {
-          "model": "opencode/gemini-3-flash"
+          "model": "opencode/gemini-3.8-flash"
         }
       ]
     },
@@ -454,10 +448,10 @@
           "model": "opencode/glm-5.3-flash-free"
         },
         {
-          "model": "opencode/gemini-3-flash"
+          "model": "opencode/gemini-3.8-flash"
         },
         {
-          "model": "opencode/claude-sonnet-4-6"
+          "model": "opencode/claude-sonnet-5-5"
         }
       ]
     }

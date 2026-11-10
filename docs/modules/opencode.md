@@ -31,3 +31,5 @@ If you tweak OpenCode locally and want those changes versioned here, copy the up
 ## Free models first
 
 `opencode.json` defaults to `opencode/big-pickle` (small model: `opencode/deepseek-v4.1-flash-free`). In `oh-my-openagent.json` every agent and category uses `opencode/big-pickle` first, then `opencode/deepseek-v4.1-flash-free` and `opencode/glm-5.3-flash-free`, before falling back to the previous paid models.
+
+Applying via `bb setup` replaces the live `opencode.json` (after a backup), dropping local-only settings such as custom agents, provider timeouts and the plugin pin. Merge `model`/`small_model` by hand if you have those.
