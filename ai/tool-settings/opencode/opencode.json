@@ -1,9 +1,10 @@
 {
-  "plugin": [
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [
     "oh-my-openagent@latest"
   ],
-  "$schema": "https://opencode.ai/config.json",
   "model": "opencode/deepseek-v4.1-flash-free",
+  "small_model": "opencode/deepseek-v4.1-flash-free",
   "theme": {
     "primary": "#6E82D6",
     "accent": "#8FA2F0",
@@ -31,6 +32,5 @@
       "enabled": true,
       "type": "local"
     }
-  },
-  "small_model": "opencode/deepseek-v4.1-flash-free"
+  }
 }
