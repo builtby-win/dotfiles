@@ -7,6 +7,6 @@ Use judgment and prefer the smallest change that satisfies the request. Match th
 
 Inspect before editing, state assumptions when requirements are ambiguous, and verify changed behavior with the narrowest useful check.
 
-Before non-trivial work, search available memory or notes for prior decisions and rejected approaches; afterward record new decisions and why alternatives were rejected.
+Before non-trivial work, search available memory or notes for prior decisions and rejected approaches.
 
 Keep machine-specific paths, permissions, integrations, and secrets in local configuration. Publishing is explicit; use the shipping workflow when delivery is requested.
