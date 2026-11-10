@@ -30,6 +30,6 @@ If you tweak OpenCode locally and want those changes versioned here, copy the up
 
 ## Default model
 
-`opencode.json` and every agent/category in `oh-my-openagent.json` default to `opencode/muse-spark-1.3` (also the small model), with the previous paid models as fallbacks.
+`opencode.json` defaults to `opencode/big-pickle` (free, works without credits). Every agent/category in `oh-my-openagent.json` prefers `opencode-go/muse-spark-1.3-contributor` (OpenCode Go plan; needs a valid API key) and falls back to `opencode/big-pickle`, then the previous paid models.
 
 Applying via `bb setup` replaces the live `opencode.json` (after a backup), dropping local-only settings such as custom agents, provider timeouts and the plugin pin. Merge `model`/`small_model` by hand if you have those.

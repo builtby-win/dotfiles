@@ -3,7 +3,7 @@
     "oh-my-openagent@latest"
   ],
   "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/muse-spark-1.3",
+  "model": "opencode/big-pickle",
   "theme": {
     "primary": "#6E82D6",
     "accent": "#8FA2F0",
@@ -32,5 +32,5 @@
       "type": "local"
     }
   },
-  "small_model": "opencode/muse-spark-1.3"
+  "small_model": "opencode/big-pickle"
 }
