@@ -96,10 +96,6 @@ retry:
       - anthropic/claude-opus-5.5:high
       - anthropic/claude-sonnet-5.5:high
       - openai-codex/gpt-6-luna:auto
-    advisor:
-      - openai-codex/gpt-6.1-sol:high
-      - anthropic/claude-opus-5.5:max
-      - anthropic/claude-sonnet-5.5:high
     plan:
       - anthropic/claude-opus-5.5:high
       - openai-codex/gpt-6.1-sol:high
