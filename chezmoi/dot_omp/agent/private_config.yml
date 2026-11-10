@@ -32,7 +32,7 @@ modelRoles:
   task: openai-codex/gpt-6-luna:auto
   plan: anthropic/claude-opus-5.5:high
   slow: openai-codex/gpt-6.1-sol:low
-  advisor: openai-codex/gpt-6.1-sol:low
+  advisor: anthropic/claude-opus-5.5:max
   designer: anthropic/claude-sonnet-5.5:high
   vision: openai-codex/gpt-6.1-sol:low
   smol: openai-codex/gpt-6-luna:auto
@@ -96,6 +96,10 @@ retry:
       - anthropic/claude-opus-5.5:high
       - anthropic/claude-sonnet-5.5:high
       - openai-codex/gpt-6-luna:auto
+    advisor:
+      - anthropic/claude-opus-5.5:max
+      - openai-codex/gpt-6.1-sol:high
+      - anthropic/claude-sonnet-5.5:high
     plan:
       - anthropic/claude-opus-5.5:high
       - openai-codex/gpt-6.1-sol:high
@@ -110,7 +114,7 @@ retry:
       - anthropic/claude-haiku-5-5:auto
       - openai-codex/gpt-6.1-sol:low
     openai-codex/gpt-6.1-sol:
-      - anthropic/claude-opus-5-5
+      - anthropic/claude-opus-5.5:max
       - openai-codex/gpt-6-luna:auto
     openai-codex/gpt-6-luna:
       - anthropic/claude-sonnet-5.5:high
