@@ -2,9 +2,18 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
   "agents": {
     "sisyphus": {
-      "model": "opencode/claude-opus-4-7",
-      "variant": "max",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-opus-4-7",
+          "variant": "max"
+        },
         {
           "model": "opencode/kimi-k2.5"
         },
@@ -18,15 +27,21 @@
         },
         {
           "model": "opencode/glm-5"
-        },
-        {
-          "model": "opencode/big-pickle"
         }
       ]
     },
     "hephaestus": {
-      "model": "openai/gpt-5.4-mini",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.4-mini"
+        },
         {
           "model": "opencode/gpt-5.4",
           "variant": "medium"
@@ -34,9 +49,18 @@
       ]
     },
     "oracle": {
-      "model": "openai/gpt-5.5",
-      "variant": "high",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "high"
+        },
         {
           "model": "opencode/gpt-5.4",
           "variant": "high"
@@ -52,8 +76,17 @@
       ]
     },
     "librarian": {
-      "model": "openai/gpt-5.4-mini-fast",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.4-mini-fast"
+        },
         {
           "model": "opencode/claude-haiku-4-5"
         },
@@ -66,8 +99,17 @@
       ]
     },
     "explore": {
-      "model": "openai/gpt-5.4-mini-fast",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.4-mini-fast"
+        },
         {
           "model": "opencode/claude-haiku-4-5"
         },
@@ -80,9 +122,18 @@
       ]
     },
     "multimodal-looker": {
-      "model": "openai/gpt-5.5",
-      "variant": "medium",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "medium"
+        },
         {
           "model": "opencode/gpt-5.4",
           "variant": "medium"
@@ -96,9 +147,18 @@
       ]
     },
     "prometheus": {
-      "model": "opencode/claude-opus-4-7",
-      "variant": "max",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-opus-4-7",
+          "variant": "max"
+        },
         {
           "model": "openai/gpt-5.5",
           "variant": "high"
@@ -113,9 +173,18 @@
       ]
     },
     "metis": {
-      "model": "opencode/claude-opus-4-7",
-      "variant": "max",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-opus-4-7",
+          "variant": "max"
+        },
         {
           "model": "openai/gpt-5.5",
           "variant": "high"
@@ -127,9 +196,18 @@
       ]
     },
     "momus": {
-      "model": "openai/gpt-5.5",
-      "variant": "xhigh",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "xhigh"
+        },
         {
           "model": "opencode/gpt-5.4",
           "variant": "xhigh"
@@ -145,8 +223,17 @@
       ]
     },
     "atlas": {
-      "model": "opencode/claude-sonnet-4-6",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-sonnet-4-6"
+        },
         {
           "model": "openai/gpt-5.5",
           "variant": "medium"
@@ -158,8 +245,17 @@
       ]
     },
     "sisyphus-junior": {
-      "model": "opencode/claude-sonnet-4-6",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-sonnet-4-6"
+        },
         {
           "model": "openai/gpt-5.5",
           "variant": "medium"
@@ -167,18 +263,24 @@
         {
           "model": "opencode/gpt-5.4",
           "variant": "medium"
-        },
-        {
-          "model": "opencode/big-pickle"
         }
       ]
     }
   },
   "categories": {
     "visual-engineering": {
-      "model": "opencode/gemini-3.1-pro",
-      "variant": "high",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/gemini-3.1-pro",
+          "variant": "high"
+        },
         {
           "model": "opencode/glm-5"
         },
@@ -189,9 +291,18 @@
       ]
     },
     "ultrabrain": {
-      "model": "openai/gpt-5.5",
-      "variant": "xhigh",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.5",
+          "variant": "xhigh"
+        },
         {
           "model": "opencode/gpt-5.4",
           "variant": "xhigh"
@@ -207,8 +318,17 @@
       ]
     },
     "deep": {
-      "model": "openai/gpt-5.4-mini",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.4-mini"
+        },
         {
           "model": "opencode/gpt-5.4",
           "variant": "medium"
@@ -224,9 +344,18 @@
       ]
     },
     "artistry": {
-      "model": "opencode/gemini-3.1-pro",
-      "variant": "high",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/gemini-3.1-pro",
+          "variant": "high"
+        },
         {
           "model": "opencode/claude-opus-4-7",
           "variant": "max"
@@ -240,8 +369,17 @@
       ]
     },
     "quick": {
-      "model": "openai/gpt-5.4-mini",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "openai/gpt-5.4-mini"
+        },
         {
           "model": "opencode/gpt-5.4-mini"
         },
@@ -257,8 +395,17 @@
       ]
     },
     "unspecified-low": {
-      "model": "opencode/claude-sonnet-4-6",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-sonnet-4-6"
+        },
         {
           "model": "openai/gpt-5.3-codex",
           "variant": "medium"
@@ -273,8 +420,17 @@
       ]
     },
     "unspecified-high": {
-      "model": "opencode/claude-sonnet-4-6",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/claude-sonnet-4-6"
+        },
         {
           "model": "openai/gpt-5.3-codex",
           "variant": "medium"
@@ -289,8 +445,17 @@
       ]
     },
     "writing": {
-      "model": "opencode/gemini-3-flash",
+      "model": "opencode/big-pickle",
       "fallback_models": [
+        {
+          "model": "opencode/deepseek-v4.1-flash-free"
+        },
+        {
+          "model": "opencode/glm-5.3-flash-free"
+        },
+        {
+          "model": "opencode/gemini-3-flash"
+        },
         {
           "model": "opencode/claude-sonnet-4-6"
         }

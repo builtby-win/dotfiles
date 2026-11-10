@@ -27,3 +27,7 @@ bb setup --setup-path ai_agent
 ## Sync workflow
 
 If you tweak OpenCode locally and want those changes versioned here, copy the updated files back into `ai/tool-settings/opencode/` and commit them.
+
+## Free models first
+
+`opencode.json` defaults to `opencode/big-pickle` (small model: `opencode/deepseek-v4.1-flash-free`). In `oh-my-openagent.json` every agent and category uses `opencode/big-pickle` first, then `opencode/deepseek-v4.1-flash-free` and `opencode/glm-5.3-flash-free`, before falling back to the previous paid models.
