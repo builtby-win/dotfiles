@@ -15,6 +15,9 @@ describe('Hammerspoon module wiring', () => {
       'chezmoi/dot_hammerspoon/init.lua',
       'chezmoi/dot_hammerspoon/builtby-init.lua',
       'chezmoi/dot_hammerspoon/modules/app_toggle.lua',
+      'chezmoi/dot_hammerspoon/modules/leader.lua',
+      'chezmoi/dot_hammerspoon/modules/workspaces.lua',
+      'chezmoi/dot_hammerspoon/modules/ui.lua',
     ];
 
     for (const file of expectedFiles) {
@@ -28,6 +31,7 @@ describe('Hammerspoon module wiring', () => {
     expect(initLua).not.toContain("'space'");
     expect(initLua).not.toContain('app_launcher');
     expect(initLua).not.toContain('fourPane');
+    expect(initLua).toContain('leader.start()');
   });
 
   it('adds hammerspoon to setup.ts app and config catalogs', () => {

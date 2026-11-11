@@ -1,6 +1,7 @@
 hs.window.animationDuration = 0
 
 local appToggle = require('modules.app_toggle')
+local leader = require('modules.leader')
 
 hyper = { 'ctrl', 'alt', 'cmd', 'shift' }
 
@@ -10,4 +11,5 @@ appToggle.bind(hyper, {
   { key = '\\', bundle = 'com.superlogical.rex' },
   { key = 'h', bundle = 'net.imput.helium' },
 })
+leader.start()
 hs.alert.show('Hammerspoon loaded')
