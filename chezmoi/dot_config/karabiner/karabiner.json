@@ -638,7 +638,8 @@
                                             "^com\\.github\\.wez\\.wezterm$",
                                             "^com\\.cmuxterm\\.app$",
                                             "^com\\.kk2\\.rootshell$",
-                                            "^com\\.superlogical\\.rex$"
+                                            "^com\\.superlogical\\.rex$",
+                                            "^dev\\.herdr\\.app$"
                                         ]
                                     },
                                     {
@@ -708,7 +709,8 @@
                                             "^com\\.github\\.wez\\.wezterm$",
                                             "^com\\.cmuxterm\\.app$",
                                             "^com\\.kk2\\.rootshell$",
-                                            "^com\\.superlogical\\.rex$"
+                                            "^com\\.superlogical\\.rex$",
+                                            "^dev\\.herdr\\.app$"
                                         ]
                                     }
                                 ],
