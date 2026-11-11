@@ -170,6 +170,12 @@ local function onKeyDown(event)
     return true
   end
 
+  -- Ctrl+B: in a terminal a third jk sends the herdr / tmux prefix through.
+  if event:getFlags().ctrl and key == 'b' then
+    setMode(nil)
+    return false
+  end
+
   -- leader / resize: every key is ours, whether or not it has an action.
   swallowedUp[code] = true
   local name = event:getFlags().shift and ('shift+' .. key) or key
