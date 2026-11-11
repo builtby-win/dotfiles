@@ -1,6 +1,6 @@
 # Hammerspoon module (macOS)
 
-Hammerspoon adds a Hyper-key app launcher, Ghostty/Rex/Helium toggles, and a Ghostty 4-pane layout hotkey.
+Hammerspoon adds Ghostty/Rex/Helium toggles on the Hyper key.
 
 ## Prerequisites
 
@@ -20,9 +20,7 @@ This applies `.hammerspoon` into your home directory from `chezmoi/dot_hammerspo
 
 ## Included hotkeys
 
-- `Hyper+Space`: app launcher chooser
 - `Hyper+Return` / `Hyper+\` / `Hyper+h`: toggle Ghostty / Rex / Helium (hide if frontmost, else focus or launch)
-- `Hyper+4`: focus Ghostty and build a 2x2 (4-pane) split layout
 - `Hyper+r`: reload Hammerspoon config
 
 `Hyper` is `Ctrl+Alt+Cmd+Shift`.

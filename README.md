@@ -136,7 +136,7 @@ This is ideal if you want to add pieces over time.
 | Shell (zsh) | `bb setup shell` | zinit, starship, aliases, PATH | `docs/modules/shell.md` |
 | Tmux | `bb setup tmux` | prefix Ctrl+b and sesh integration | `docs/modules/tmux.md` |
 | Neovim | `bb setup nvim` | bleeding-edge vim.pack config for Neovim 0.12+ | `docs/modules/nvim.md` |
-| Hammerspoon | `bb setup hammerspoon` | Hyper app launcher, Ghostty/Rex/Helium toggles, Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
+| Hammerspoon | `bb setup hammerspoon` | Hyper Ghostty/Rex/Helium toggles | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS chords, app-aware Command/tmux behavior, Hyper, and Neru modes | `docs/modules/karabiner.md` |
 | Neru | Auto-loaded with Karabiner | App context grid launcher for macOS | `docs/modules/karabiner.md` |
 | iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
