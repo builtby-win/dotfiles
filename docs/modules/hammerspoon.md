@@ -40,6 +40,7 @@ This applies `.hammerspoon` into your home directory from `chezmoi/dot_hammerspo
 | `1`..`9` / `shift+1`..`9` | switch workspace / move the frontmost app there |
 | `q` `e` `[` `]` / `tab` | previous / next / last workspace |
 | `a` | unhide every app (escape hatch) |
+| `space` | toggle the Vicinae launcher (apps it opens join the current workspace) |
 | `shift+r` | sticky resize mode (`hjkl`, `esc`/`return` to leave) |
 
 ## Workspaces

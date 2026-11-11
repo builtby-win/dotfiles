@@ -20,6 +20,7 @@ local EXEMPT = {
   ['com.apple.systempreferences'] = true,
   ['com.apple.Spotlight'] = true,
   ['com.raycast.macos'] = true,
+  ['com.vicinaehq.Vicinae'] = true,
   ['com.back2vibing.native'] = true,
 }
 

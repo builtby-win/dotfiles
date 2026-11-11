@@ -51,6 +51,10 @@ local function newTerminal()
   end
 end
 
+local function toggleLauncher()
+  hs.task.new('/Applications/Vicinae.app/Contents/MacOS/vicinae-cli', nil, { 'toggle' }):start()
+end
+
 local function sameFrame(a, b)
   return math.abs(a.x - b.x) < 4 and math.abs(a.y - b.y) < 4
     and math.abs(a.w - b.w) < 4 and math.abs(a.h - b.h) < 4
@@ -134,6 +138,7 @@ local leaderActions = {
   ['e'] = function() workspaces.step(1) end,
   [']'] = function() workspaces.step(1) end,
   ['a'] = workspaces.showAll,
+  ['space'] = toggleLauncher,
 }
 local resizeActions = {}
 for _, entry in ipairs(DIRECTIONS) do
