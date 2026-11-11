@@ -1,3 +1,4 @@
+require('hs.ipc')
 hs.window.animationDuration = 0
 
 local appToggle = require('modules.app_toggle')
