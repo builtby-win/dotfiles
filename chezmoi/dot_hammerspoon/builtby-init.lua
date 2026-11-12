@@ -2,7 +2,8 @@ require('hs.ipc')
 hs.window.animationDuration = 0
 
 local appToggle = require('modules.app_toggle')
-local leader = require('modules.leader')
+local workspaces = require('modules.workspaces')
+local ui = require('modules.ui')
 
 hyper = { 'ctrl', 'alt', 'cmd', 'shift' }
 
@@ -12,5 +13,6 @@ appToggle.bind(hyper, {
   { key = '\\', bundle = 'com.superlogical.rex' },
   { key = 'h', bundle = 'net.imput.helium' },
 })
-leader.start()
+workspaces.start()
+ui.start()
 hs.alert.show('Hammerspoon loaded')

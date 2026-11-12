@@ -1,5 +1,5 @@
 -- Workspace UI: a menu bar item (always visible, click to switch or move apps)
--- and a top-center HUD that shows the workspaces plus the leader mode.
+-- and a top-center HUD that flashes the workspaces on each switch.
 local workspaces = require('modules.workspaces')
 
 local M = {}
@@ -13,8 +13,6 @@ local COLORS = {
   panel = { red = 0.07, green = 0.08, blue = 0.1, alpha = 0.92 },
   idle = { red = 0.22, green = 0.24, blue = 0.3, alpha = 1 },
   active = { red = 0.54, green = 0.67, blue = 0.97, alpha = 1 },
-  leader = { red = 0.54, green = 0.67, blue = 0.97, alpha = 1 },
-  resize = { red = 0.90, green = 0.40, blue = 0.40, alpha = 1 },
   light = { red = 0.9, green = 0.92, blue = 0.97, alpha = 1 },
   dark = { red = 0.07, green = 0.08, blue = 0.1, alpha = 1 },
 }
@@ -22,7 +20,6 @@ local COLORS = {
 local menubar = hs.menubar.new()
 local hud
 local hudTimer
-local mode -- 'leader' | 'resize' | nil, set by the leader module
 
 local function summary(names)
   if #names == 0 then return '' end
@@ -60,9 +57,6 @@ end
 local function drawHud()
   local snapshot = workspaces.snapshot()
   local pills = {}
-  if mode then
-    table.insert(pills, { text = mode:upper(), fill = COLORS[mode], color = COLORS.dark })
-  end
   for workspace = 1, workspaces.COUNT do
     local names = snapshot.items[workspace]
     if workspace == snapshot.current or #names > 0 then
@@ -138,32 +132,15 @@ local function refreshMenubar()
   menubar:setTitle(string.format('◧ %d', workspaces.current()))
 end
 
--- Called by the leader as its mode changes. Leader and resize keep the HUD up;
--- leaving them hides it.
-function M.setMode(next)
-  mode = next
-  if mode then
-    if hudTimer then
-      hudTimer:stop()
-      hudTimer = nil
-    end
-    drawHud()
-  else
-    hideHud()
-  end
-end
-
 function M.start()
   menubar:setMenu(menuItems)
   refreshMenubar()
   workspaces.onChange = function()
     refreshMenubar()
     drawHud()
-    -- Leader modes own the HUD; a plain switch only flashes it.
-    if not mode then
-      if hudTimer then hudTimer:stop() end
-      hudTimer = hs.timer.doAfter(FLASH_SECONDS, hideHud)
-    end
+    -- A switch only flashes the HUD.
+    if hudTimer then hudTimer:stop() end
+    hudTimer = hs.timer.doAfter(FLASH_SECONDS, hideHud)
   end
 end
 

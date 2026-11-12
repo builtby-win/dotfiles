@@ -5,7 +5,7 @@
 -- switching hides every app assigned elsewhere and unhides the target's apps.
 -- Granularity is per app, not per window.
 --
--- Activation policy: an app activated from outside the leader (Cmd+Tab, Dock,
+-- Activation policy: an app activated from outside Hammerspoon (Cmd+Tab, Dock,
 -- a notification) switches to the workspace that owns it, as AeroSpace does. An
 -- app seen for the first time joins the current workspace.
 local M = {}
