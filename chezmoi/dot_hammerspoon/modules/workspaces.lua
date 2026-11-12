@@ -90,7 +90,8 @@ local function apply(activate)
 
   if activate then
     local id = state.last[tostring(state.current)]
-    local target = id and state.assign[id] == state.current and hs.application.get(id)
+    local app = id and hs.application.get(id)
+    local target = app and state.assign[id] == state.current and managed(app) and app
     target = target or appsIn(state.current)[1]
     if target then target:activate() end
   end
