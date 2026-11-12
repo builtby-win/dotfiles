@@ -111,7 +111,7 @@ def get_layout_status():
     tree_str = format_tree(panes, focused_id, pid_to_num)
     layout_matrix = f"[ {tree_str} ]"
 
-    return f"ZOOM {layout_matrix}" if zoomed else layout_matrix
+    return f"\033[7;1m ZOOM \033[0m {layout_matrix}" if zoomed else layout_matrix
 
 
 if __name__ == "__main__":
