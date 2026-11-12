@@ -1,6 +1,6 @@
 # Hammerspoon module (macOS)
 
-Hammerspoon adds the `jk` window leader (focus, swap, zoom, resize, workspaces) for floating windows, plus Ghostty/Rex/Helium toggles on the Hyper key.
+Hammerspoon adds the `jk` window leader (focus, swap, zoom, resize) for floating windows, a menu bar workspace switcher, plus Ghostty/Rex/Helium toggles on the Hyper key.
 
 ## Prerequisites
 
@@ -37,10 +37,8 @@ This applies `.hammerspoon` into your home directory from `chezmoi/dot_hammerspo
 | `x` / `w` | close window |
 | `` ` `` | previous window |
 | `t` / `return` | new Ghostty window |
-| `1`..`9` / `shift+1`..`9` | switch workspace / move the frontmost app there |
-| `q` `e` `[` `]` / `tab` | previous / next / last workspace |
 | `a` | unhide every app (escape hatch) |
-| `space` | toggle the Vicinae launcher (a new app joins the current workspace; an app owned by another workspace switches you there) |
+| `space` | toggle the Vicinae launcher |
 | `shift+r` | sticky resize mode (`hjkl`, `esc`/`return` to leave) |
 
 ## Workspaces
@@ -49,8 +47,8 @@ One macOS Space, workspaces by hiding apps (macOS cannot park a window fully off
 
 - Switching hides apps assigned elsewhere and unhides the target's apps.
 - An app activated from outside the leader (Cmd+Tab, Dock, notification) switches to its workspace; a new app joins the current one.
-- Raycast, Finder, Spotlight, System Settings and Back2Vibing are exempt (`EXEMPT` in `workspaces.lua`).
-- UI: menu bar item (`◧ 2`) lists workspaces, moves the frontmost app, shows all apps; a top-center HUD shows workspaces plus LEADER/RESIZE.
+- Raycast, Finder, Spotlight, System Settings, Back2Vibing, Vicinae and the Ghostty/Rex terminals are exempt (`EXEMPT` in `workspaces.lua`). Terminals open on whatever workspace is current and are never hidden or switched to.
+- UI: menu bar item (`◧ 2`) lists workspaces, moves the frontmost app, shows all apps; a top-center HUD shows workspaces plus LEADER/RESIZE. Workspaces are switched from the menu bar, not the leader.
 - Reloading or quitting Hammerspoon unhides every app. Assignments persist in `hs.settings`.
 
 ## Reloading

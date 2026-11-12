@@ -13,7 +13,9 @@ local M = {}
 local STORE = 'builtby.workspaces'
 local COUNT = 9
 
--- Apps that float above every workspace: never hidden, never assigned.
+-- Apps that float above every workspace: never hidden, never assigned. The
+-- terminals are here so their toggles show them wherever they are, without
+-- switching workspaces or being hidden with the rest.
 local EXEMPT = {
   ['org.hammerspoon.Hammerspoon'] = true,
   ['com.apple.finder'] = true,
@@ -22,12 +24,13 @@ local EXEMPT = {
   ['com.raycast.macos'] = true,
   ['com.vicinaehq.Vicinae'] = true,
   ['com.back2vibing.native'] = true,
+  ['com.mitchellh.ghostty'] = true,
+  ['com.superlogical.rex'] = true,
 }
 
 local saved = hs.settings.get(STORE) or {}
 local state = {
   current = saved.current or 1,
-  previous = saved.previous,
   assign = saved.assign or {}, -- bundle id -> workspace number
   last = saved.last or {}, -- tostring(workspace) -> bundle id focused last
 }
@@ -102,32 +105,11 @@ function M.switch(workspace)
   if workspace < 1 or workspace > COUNT then return end
   if workspace ~= state.current then
     claimUnassigned(state.current)
-    state.previous = state.current
     state.current = workspace
   end
   apply(true)
   save()
   M.onChange()
-end
-
-function M.last()
-  if state.previous then M.switch(state.previous) end
-end
-
--- Steps through the workspaces that hold apps (plus the current one).
-function M.step(delta)
-  local visited = {}
-  for workspace = 1, COUNT do
-    if workspace == state.current or #appsIn(workspace) > 0 then
-      table.insert(visited, workspace)
-    end
-  end
-  for index, workspace in ipairs(visited) do
-    if workspace == state.current then
-      M.switch(visited[(index - 1 + delta) % #visited + 1])
-      return
-    end
-  end
 end
 
 -- Assign the frontmost app to a workspace; it leaves view if that is not the

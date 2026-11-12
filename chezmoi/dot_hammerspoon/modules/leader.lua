@@ -9,8 +9,6 @@
 --   z                  zoom: toggle almost-maximized with a gap
 --   x or w             close window                `               previous window
 --   t or return        new terminal
---   1..9               workspace                   shift+1..9      move app to workspace
---   q / e, [ / ]       previous / next workspace   tab             last workspace
 --   a                  show every app (escape hatch if apps are hidden)
 --   shift+r            resize mode (hjkl, esc or return to leave)
 local workspaces = require('modules.workspaces')
@@ -132,11 +130,6 @@ local leaderActions = {
   ['`'] = lastWindow,
   ['t'] = newTerminal,
   ['return'] = newTerminal,
-  ['tab'] = workspaces.last,
-  ['q'] = function() workspaces.step(-1) end,
-  ['['] = function() workspaces.step(-1) end,
-  ['e'] = function() workspaces.step(1) end,
-  [']'] = function() workspaces.step(1) end,
   ['a'] = workspaces.showAll,
   ['space'] = toggleLauncher,
 }
@@ -147,10 +140,6 @@ for _, entry in ipairs(DIRECTIONS) do
     leaderActions['shift+' .. key] = swap(entry.name)
     resizeActions[key] = resize(entry.dw, entry.dh)
   end
-end
-for workspace = 1, workspaces.COUNT do
-  leaderActions[tostring(workspace)] = function() workspaces.switch(workspace) end
-  leaderActions['shift+' .. workspace] = function() workspaces.move(workspace) end
 end
 
 local function isLeaderChord(event, key)
