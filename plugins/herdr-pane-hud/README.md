@@ -6,7 +6,6 @@ Shows the visual split topology of the current tab directly on the top tab bar:
 - **`│` (pipe)**: separates horizontal splits (columns side-by-side)
 - **`/` (slash)**: separates vertical splits (stacked panes top/bottom)
 - **Active pane**: highlighted in place using standard ANSI reverse-video styling without changing the digit size or font metrics
-- **Agent name**: displays the occupant of the active pane (e.g. `omp`, `agy`, `claude`)
 
 ---
 
