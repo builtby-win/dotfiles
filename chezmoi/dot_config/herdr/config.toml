@@ -97,23 +97,21 @@ help = "prefix+?"
 settings = "prefix+s"
 toggle_sidebar = "prefix+shift+b"
 
+# Popups go through herdr-popup, which closes any open popup first: herdr
+# rejects a second popup, so a forgotten one would swallow the next keypress.
 # Fuzzy switch on label, repo/folder, branch and path.
 # prefix+g mirrors prefix+space so the cramped built-in picker isn't needed.
 [[keys.command]]
 key = "prefix+space"
-type = "popup"
-command = "herdr-switch"
+type = "shell"
+command = "herdr-popup switch"
 description = "switch workspace"
-width = "80%"
-height = "80%"
 
 [[keys.command]]
 key = "prefix+g"
-type = "popup"
-command = "herdr-switch"
+type = "shell"
+command = "herdr-popup switch"
 description = "switch workspace"
-width = "80%"
-height = "80%"
 
 # Equalize pane sizes in the focused tab.
 [[keys.command]]
@@ -145,19 +143,15 @@ description = "lazygit"
 # Confirmation popup modal before closing a pane (prevents accidental kill of active agents/shells).
 [[keys.command]]
 key = "prefix+w"
-type = "popup"
-command = "herdr-confirm-close-pane"
+type = "shell"
+command = "herdr-popup confirm-close-pane"
 description = "confirm close pane"
-width = 50
-height = 8
 
 [[keys.command]]
 key = "prefix+x"
-type = "popup"
-command = "herdr-confirm-close-pane"
+type = "shell"
+command = "herdr-popup confirm-close-pane"
 description = "confirm close pane"
-width = 50
-height = 8
 
 # --- herdr-nvim (nvim sidebar + file picker) ---
 [[keys.command]]

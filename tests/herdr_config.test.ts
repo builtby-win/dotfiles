@@ -38,7 +38,7 @@ describe("Herdr workspace lifecycle", () => {
     expect(content).toContain('key = "prefix+b"');
     expect(content).toContain('command = "herdr-balance-panes"');
     expect(fs.statSync(balanceScriptPath).mode & 0o111).not.toBe(0);
-    expect(content).toContain('command = "herdr-confirm-close-pane"');
+    expect(content).toContain('command = "herdr-popup confirm-close-pane"');
     expect(fs.statSync(confirmScriptPath).mode & 0o111).not.toBe(0);
     expect(content).toContain('key = "prefix+q"');
     expect(content).toContain('command = "herdr-tab-step prev"');
@@ -84,7 +84,26 @@ describe("Herdr workspace lifecycle", () => {
     const content = fs.readFileSync(configPath, "utf-8");
     expect(content).toMatch(/workspace_picker\s*=\s*""/);
     expect(content).toContain('key = "prefix+g"');
-    expect(content).toContain('command = "herdr-switch"');
+    expect(content).toContain('command = "herdr-popup switch"');
+  });
+
+  it("opens every popup through herdr-popup so a forgotten popup never blocks the next one", () => {
+    const content = fs.readFileSync(configPath, "utf-8");
+    const manifest = fs.readFileSync(
+      path.resolve(__dirname, "../chezmoi/dot_local/share/herdr-popups/herdr-plugin.toml"),
+      "utf-8",
+    );
+    const popupScript = path.resolve(__dirname, "../chezmoi/dot_local/bin/executable_herdr-popup");
+
+    // Herdr rejects a second popup (ui_busy), so no key may open one directly.
+    expect(content).not.toMatch(/type\s*=\s*"popup"/);
+    expect(fs.statSync(popupScript).mode & 0o111).not.toBe(0);
+    expect(fs.readFileSync(popupScript, "utf-8")).toContain('"method": "popup.close"');
+    for (const entrypoint of ["switch", "confirm-close-pane"]) {
+      expect(manifest).toContain(`id = "${entrypoint}"`);
+      expect(content).toContain(`command = "herdr-popup ${entrypoint}"`);
+    }
+    expect(manifest.match(/placement = "popup"/g)).toHaveLength(2);
   });
 
   it("sorts herdr-switch sessions with current pane first then waiting, ready, working, idle", () => {

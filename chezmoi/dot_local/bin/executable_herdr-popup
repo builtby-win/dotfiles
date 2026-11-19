@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# Open a herdr popup entrypoint (see ~/.local/share/herdr-popups) after closing
+# whichever popup is open. Herdr allows one popup per session and rejects a
+# second with "a popup pane is already open", so a forgotten popup would make
+# the next keybinding silently do nothing.
+#
+# Usage: herdr-popup <entrypoint>
+import json
+import os
+import socket
+import subprocess
+import sys
+import time
+
+PLUGIN_ID = "builtbywin.herdr-popups"
+PLUGIN_DIR = os.path.expanduser("~/.local/share/herdr-popups")
+
+herdr = os.environ.get("HERDR_BIN_PATH", "herdr")
+socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
+
+if len(sys.argv) != 2:
+    sys.exit("usage: herdr-popup <entrypoint>")
+entrypoint = sys.argv[1]
+
+
+def close_popup():
+    # popup_not_open just means nothing was in the way.
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(2)
+            client.connect(socket_path)
+            client.sendall((json.dumps({"id": "herdr-popup", "method": "popup.close", "params": {}}) + "\n").encode())
+            client.makefile().readline()
+    except OSError:
+        pass
+
+
+def open_popup():
+    result = subprocess.run(
+        [herdr, "plugin", "pane", "open", "--plugin", PLUGIN_ID, "--entrypoint", entrypoint, "--focus"],
+        capture_output=True,
+        text=True,
+    )
+    # The CLI prints its JSON error object to stdout.
+    return result.returncode, result.stdout + result.stderr
+
+
+close_popup()
+code, output = open_popup()
+
+if code != 0 and "plugin_not_found" in output:
+    # Fresh machine: the plugin ships with the dotfiles but is not registered yet.
+    subprocess.run([herdr, "plugin", "link", PLUGIN_DIR], capture_output=True)
+    code, output = open_popup()
+
+# The closed popup's process may still be exiting; retry briefly.
+for _ in range(10):
+    if code == 0 or "already open" not in output:
+        break
+    time.sleep(0.05)
+    code, output = open_popup()
+
+if code != 0:
+    sys.stderr.write(output)
+    sys.exit(code)

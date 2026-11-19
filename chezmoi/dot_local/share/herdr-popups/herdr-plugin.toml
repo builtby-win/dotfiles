@@ -1,0 +1,22 @@
+id = "builtbywin.herdr-popups"
+name = "Herdr Popups"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "Popup entrypoints opened through herdr-popup, which closes any open popup first."
+platforms = ["macos", "linux"]
+
+[[panes]]
+id = "switch"
+title = "Switch workspace"
+placement = "popup"
+width = "80%"
+height = "80%"
+command = ["herdr-switch"]
+
+[[panes]]
+id = "confirm-close-pane"
+title = "Confirm close pane"
+placement = "popup"
+width = 50
+height = 8
+command = ["herdr-confirm-close-pane"]
