@@ -65,3 +65,6 @@ hyprctl reload >/dev/null
 
 echo
 echo "Done. keyd is live on the Sculpt. Panic exit: Backspace + Escape + Enter."
+echo "Vicinae has no built-in kill-process command; install 'Process Manager' from the"
+echo "Vicinae store (root search -> Store -> 'Process Manager') for Kill Process:"
+echo "  vicinae://extensions/leonkohli/process-manager"

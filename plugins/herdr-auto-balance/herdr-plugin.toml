@@ -1,0 +1,17 @@
+id = "builtbywin.herdr-auto-balance"
+name = "Herdr Auto Balance"
+version = "0.2.0"
+min_herdr_version = "0.7.0"
+description = "Runs herdr-balance-panes on the tab where a pane was created or closed."
+platforms = ["macos", "linux"]
+
+[[startup]]
+command = ["./bin/auto-balance"]
+
+[[events]]
+on = "pane.created"
+command = ["./bin/auto-balance"]
+
+[[events]]
+on = "pane.closed"
+command = ["./bin/auto-balance"]

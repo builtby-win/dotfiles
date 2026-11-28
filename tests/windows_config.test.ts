@@ -49,7 +49,7 @@ describe('Windows Configuration Linking (install.ps1)', () => {
 
   it('should contain logic to copy AI tool templates', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');
-    expect(content).toContain('templates/claude');
-    expect(content).toContain('templates/cursor');
+    expect(content).toContain('ai/tool-settings/claude');
+    expect(content).toContain('ai/tool-settings/cursor');
   });
 });

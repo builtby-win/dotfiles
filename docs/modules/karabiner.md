@@ -37,15 +37,15 @@ bb sync karabiner pull
 - `j+l` opens the Neru recursive grid
 - `d+k` opens Neru scroll mode
 - `d+f` opens Neru hints
-- `j+k` sends `Hyper+F13`, which the Hammerspoon leader module turns into the window leader (see `docs/modules/hammerspoon.md`)
+- `j+k` sends the herdr/tmux prefix (`Ctrl+B`) in terminals and arms Command for the next key elsewhere
 - Holding `j`, then pressing Space repeatedly, sends Backspace outside GUI Vim editors
 - Tapping Right Option arms Hyper for the next key; holding it holds Hyper
 - Tapping a modifier arms it for the next key; holding it behaves normally
-- `Caps Lock` is Escape when tapped and Control when held
+- `Caps Lock` is Escape when tapped and Control when held; double-tap (within 300ms) opens Neru scroll mode (the first tap still sends Escape)
 - `Fn` exposes raw function keys and taps as Control
 - Forward Delete becomes Escape
 - Double semicolon (`;;`) opens AltTab
-- `F1`–`F12` send as standard function keys while MapleStory Classic World is frontmost (media-key presses are remapped to `F7`–`F12`, and the Sculpt's `F2`-as-`⌥Tab` to `F2`); globally only `F3`–`F5` bypass `Fn`
+- `F1`–`F12` send as standard function keys while MapleStory Classic World is frontmost (media-key presses are remapped to `F7`–`F12`, and the Sculpt's `F2`-as-`⌥Tab` to `F2`, except Hyper+Tab, which passes through so Hyper shortcuts still work); globally only `F3`–`F5` bypass `Fn`
 
 Neru calls `karabiner-layer` to switch between grid, scroll, nudge, and normal modes through Karabiner variables. App-specific behavior uses Karabiner's native foreground-application conditions; no polling agent is required.
 

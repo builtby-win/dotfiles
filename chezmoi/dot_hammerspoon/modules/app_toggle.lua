@@ -6,7 +6,15 @@ function M.toggle(bundleID)
   if front and front:bundleID() == bundleID then
     front:hide()
   else
-    hs.application.launchOrFocusByBundleID(bundleID)
+    -- No accessibility queries (mainWindow/allWindows): they block the main
+    -- thread for seconds on apps with a slow AX tree (Rex hits a 3s timeout).
+    local app = hs.application.get(bundleID)
+    if app then
+      app:unhide()
+      app:activate()
+    else
+      hs.application.launchOrFocusByBundleID(bundleID)
+    end
   end
 end
 

@@ -280,7 +280,7 @@ $localAppData = $env:LOCALAPPDATA
 $claudeConfigDir = Join-Path $appData "claude-code"
 if (!(Test-Path $claudeConfigDir)) { New-Item -ItemType Directory $claudeConfigDir }
 Write-Host "Copying Claude templates..." -ForegroundColor Yellow
-Copy-Item -Path (Join-Path $dotfilesDir "templates/claude/*") -Destination $claudeConfigDir -Recurse -Force
+Copy-Item -Path (Join-Path $dotfilesDir "ai/tool-settings/claude/*") -Destination $claudeConfigDir -Recurse -Force
 
 # Cursor (typically in %APPDATA%/Cursor/User)
 $cursorConfigDir = Join-Path $appData "Cursor/User"
@@ -291,7 +291,7 @@ if (!(Test-Path $cursorConfigDir)) {
 }
 if (Test-Path $cursorConfigDir) {
     Write-Host "Copying Cursor templates..." -ForegroundColor Yellow
-    Copy-Item -Path (Join-Path $dotfilesDir "templates/cursor/*") -Destination $cursorConfigDir -Recurse -Force
+    Copy-Item -Path (Join-Path $dotfilesDir "ai/tool-settings/cursor/*") -Destination $cursorConfigDir -Recurse -Force
 }
 
 # 5. Finalizing

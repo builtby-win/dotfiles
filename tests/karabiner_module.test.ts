@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -46,14 +47,14 @@ describe('Karabiner module wiring', () => {
     const rules = config.profiles[0].complex_modifications.rules;
     const descriptions = rules.map((rule: { description: string }) => rule.description);
 
-    expect(descriptions).toContain('Neru chords: fj grid, dk scroll, df hints, jl recursive_grid');
-    expect(descriptions).toContain('jk chord: terminal leader or next-key Command');
+    expect(descriptions).toContain('Neru chords: fj terminal grid / app hints, dk scroll, df hints, jl recursive_grid');
+    expect(descriptions).toContain('jk chord: window leader (Hyper+F13, handled by Hammerspoon leader module)');
     expect(descriptions).not.toContain('Hold j then Space for repeating Backspace outside GUI Vim editors');
     expect(descriptions).toContain('One-shot modifiers with Microsoft Sculpt layout parity');
     expect(descriptions).toContain('Right Option and Sculpt Menu: tap for next-key Hyper, hold for Hyper');
 
     const jkRule = rules.find(
-      (rule: { description: string }) => rule.description === 'jk chord: terminal leader or next-key Command',
+      (rule: { description: string }) => rule.description === 'jk chord: window leader (Hyper+F13, handled by Hammerspoon leader module)',
     );
     expect(
       jkRule.manipulators
@@ -67,7 +68,7 @@ describe('Karabiner module wiring', () => {
             parameters: { 'basic.simultaneous_threshold_milliseconds': number };
           }) => manipulator.parameters['basic.simultaneous_threshold_milliseconds'],
         ),
-    ).toEqual([120, 120]);
+    ).toEqual([120, 120, 120]);
 
     const repeatFallbacks = jkRule.manipulators.filter(
       (manipulator: {
@@ -125,7 +126,7 @@ describe('Karabiner module wiring', () => {
   it('wires Neru mode changes through the Karabiner CLI helper', () => {
     const helper = readRepoFile('chezmoi/dot_local/bin/executable_karabiner-layer');
     const neru = readRepoFile('chezmoi/dot_config/neru/config.toml');
-    const setup = readRepoFile('setup.ts');
+    const setup = readSetupSource();
     const config = JSON.parse(readRepoFile('chezmoi/dot_config/karabiner/karabiner.json'));
     const rules = config.profiles[0].complex_modifications.rules;
 
@@ -167,9 +168,15 @@ describe('Karabiner module wiring', () => {
     const sculptF2 = rule.manipulators.find(
       (manipulator: { from: { key_code?: string; modifiers?: { mandatory?: string[] } } }) =>
         manipulator.from.key_code === 'tab' &&
-        manipulator.from.modifiers?.mandatory?.includes('option'),
+        manipulator.from.modifiers?.mandatory?.length === 1,
     );
     expect(sculptF2?.to).toEqual([{ key_code: 'f2' }]);
+    const hyperTab = rule.manipulators.find(
+      (manipulator: { from: { key_code?: string; modifiers?: { mandatory?: string[] } } }) =>
+        manipulator.from.key_code === 'tab' && manipulator.from.modifiers?.mandatory?.length === 4,
+    );
+    expect(hyperTab?.to[0].key_code).toBe('tab');
+    expect(rule.manipulators.indexOf(hyperTab)).toBeLessThan(rule.manipulators.indexOf(sculptF2));
     for (let n = 1; n <= 12; n += 1) {
       const entry = rule.manipulators.find(
         (manipulator: { from: { key_code?: string } }) => manipulator.from.key_code === `f${n}`,

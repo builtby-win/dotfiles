@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { readSetupSource } from './helpers/setup-source';
 import { readFileSync } from "fs";
 import { join } from "path";
 import { generateTmuxEntrypoint, normalizeTmuxEntrypoint } from "../lib/tmux-config";
@@ -45,7 +46,8 @@ describe("tmux profile split", () => {
   });
 
   it("opens the sesh picker with mobile-friendly popup space", () => {
-    expect(basicConf).toContain('bind-key "Space" display-popup -E -w 90% -h 85% "$HOME/.config/tmux/sesh-picker.sh"');
+    expect(basicConf).toContain('bind-key "Space" if-shell "$HOME/.local/bin/b2v-running"');
+    expect(basicConf).toContain("display-popup -E -w 90% -h 85% '$HOME/.config/tmux/sesh-picker.sh'");
     expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 90% -h 85% "$HOME/.config/tmux/sesh-picker.sh"');
     expect(basicConf).toContain("unbind S");
     expect(basicConf).not.toContain('bind-key "S" display-popup');
@@ -148,7 +150,7 @@ describe("tmux profile split", () => {
 });
 
 describe("tmux setup safety", () => {
-  const setupTs = readFileSync(join(process.cwd(), "setup.ts"), "utf-8");
+  const setupTs = readSetupSource();
   const functionsSh = readFileSync(join(process.cwd(), "shell", "functions.sh"), "utf-8");
   const tmuxDocs = readFileSync(join(process.cwd(), "docs", "modules", "tmux.md"), "utf-8");
 

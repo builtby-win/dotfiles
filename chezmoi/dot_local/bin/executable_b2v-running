@@ -1,0 +1,3 @@
+#!/bin/sh
+# Exit 0 when a back2vibing app is running (same match b2v-open uses). Used to gate b2v-first keybindings.
+pgrep -f 'back2vibing\.app/Contents/MacOS/back2vibing$' >/dev/null

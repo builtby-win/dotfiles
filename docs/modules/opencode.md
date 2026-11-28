@@ -1,12 +1,12 @@
 # OpenCode
 
-OpenCode config is copy-managed from `templates/opencode/` because the tool owns its local files.
+OpenCode config is copy-managed from `ai/tool-settings/opencode/` because the tool owns its local files.
 
 ## Files
 
-- `templates/opencode/opencode.json`
-- `templates/opencode/oh-my-openagent.json`
-- `templates/opencode/tui.json`
+- `ai/tool-settings/opencode/opencode.json`
+- `ai/tool-settings/opencode/oh-my-openagent.json`
+- `ai/tool-settings/opencode/tui.json`
 
 ## Current styling
 
@@ -26,4 +26,10 @@ bb setup --setup-path ai_agent
 
 ## Sync workflow
 
-If you tweak OpenCode locally and want those changes versioned here, copy the updated files back into `templates/opencode/` and commit them.
+If you tweak OpenCode locally and want those changes versioned here, copy the updated files back into `ai/tool-settings/opencode/` and commit them.
+
+## Default model
+
+`opencode.json` defaults to `opencode/deepseek-v4.1-flash-free` (free, no credits needed). Every agent/category in `oh-my-openagent.json` prefers it, then falls back to `opencode/big-pickle`, `opencode-go/muse-spark-1.3-contributor` (OpenCode Go plan; needs a valid API key), then the previous paid models. Other free models verified working: `beam-free`, `flint-40b-free`, `glm-5.3-flash-free`, `iceman-free`, `inkling-2-small-free`, `longcat-2.5-free`, `mimo-v2.6-flash-free`.
+
+Applying via `bb setup` replaces the live `opencode.json` (after a backup), dropping local-only settings such as custom agents, provider timeouts and the plugin pin. Merge `model`/`small_model` by hand if you have those.

@@ -1,0 +1,66 @@
+# builtby.win/dotfiles - Brewfile
+# This is a reference list. The setup script installs apps interactively.
+
+# Taps
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+tap "joshmedeski/sesh"
+
+# CLI Tools
+brew "chezmoi"        # Dotfiles manager for the restore backbone
+brew "fnm"            # Fast Node Manager
+brew "fzf"            # Fuzzy finder
+brew "ripgrep"        # Fast grep
+brew "bat"            # Better cat
+brew "eza"            # Better ls
+brew "zoxide"         # Smart cd
+brew "starship"       # Fast shell prompt
+brew "diff-so-fancy"  # Better git diffs
+brew "yt-dlp"         # Video downloader
+brew "jq"             # JSON processor
+brew "gh"             # GitHub CLI
+brew "tmux"           # Terminal multiplexer
+brew "sesh"           # Smart tmux session manager
+brew "herdr"           # Agent-aware terminal multiplexer
+
+# AI & Agent Workflows
+cask "conductor"       # Parallel coding agents in isolated workspaces
+
+# Terminals & Editors
+cask "iterm2"
+cask "visual-studio-code"
+cask "cursor"
+
+# AI Tools
+
+# Productivity
+cask "vicinae"         # Default launcher (Raycast alternative)
+cask "antinote"
+cask "alt-tab"          # Windows-style alt-tab
+cask "jordanbaird-ice"  # Menu bar management
+cask "linearmouse"      # Mouse customization
+cask "bettertouchtool"  # Trackpad/keyboard customization
+
+# Security
+cask "bitwarden"        # Password manager
+
+# Browsers
+cask "google-chrome"
+cask "arc"
+cask "orion"
+
+# Input & Window Management
+cask "hammerspoon"         # Automation and hotkeys
+cask "karabiner-elements"  # Keyboard customization
+
+# Dev Tools
+cask "docker"
+cask "figma"
+
+# Communication
+cask "discord"
+
+# Fonts
+cask "font-fira-code"
+cask "font-jetbrains-mono"
+cask "font-sf-mono"

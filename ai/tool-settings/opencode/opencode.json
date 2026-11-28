@@ -1,0 +1,36 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [
+    "oh-my-openagent@latest"
+  ],
+  "model": "opencode/deepseek-v4.1-flash-free",
+  "small_model": "opencode/deepseek-v4.1-flash-free",
+  "theme": {
+    "primary": "#6E82D6",
+    "accent": "#8FA2F0",
+    "background": "#081022",
+    "surface": "#0A1338",
+    "text": "#E8EEFF"
+  },
+  "provider": {
+    "openai": {
+      "models": {
+        "gpt-5.3-codex": {
+          "options": {
+            "reasoningEffort": "high"
+          }
+        }
+      }
+    }
+  },
+  "mcp": {
+    "cua-driver": {
+      "command": [
+        "/Users/winstonzhao/.local/bin/cua-driver",
+        "mcp"
+      ],
+      "enabled": true,
+      "type": "local"
+    }
+  }
+}

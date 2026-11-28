@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -6,7 +7,6 @@ describe('Linux bootstrap workflow', () => {
   const bootstrapPath = path.resolve(__dirname, '../bootstrap.sh');
   const linuxBootstrapPath = path.resolve(__dirname, '../bootstrap-linux.sh');
   const readmePath = path.resolve(__dirname, '../README.md');
-  const setupPath = path.resolve(__dirname, '../setup.ts');
   const tipsPath = path.resolve(__dirname, '../shell/tips.txt');
   const shellInitPath = path.resolve(__dirname, '../shell/init.sh');
 
@@ -33,7 +33,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('uses Linux package manager logic in setup.ts', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('getLinuxPackageManager');
     expect(content).toContain('apt-get');
     expect(content).toContain('dnf');
@@ -89,7 +89,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('installs starship on Linux via official curl installer', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('starship", value: "starship"');
     expect(content).toContain('starship.rs');
     expect(content).toContain('platforms: { macos: true, linux: true, windows: false }');
@@ -101,12 +101,12 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('falls back gracefully when Linux package manager is unavailable', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('Skipping ${name}: no supported Linux package manager and no curl installer is configured');
   });
 
   it('applies selected configs through chezmoi instead of direct symlink fallback', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('function applyChezmoi(configs: string[]): boolean');
     expect(content).toContain('bash "${applyScript}" ${quotedTargets}');
     expect(content).not.toContain('setupConfigWithoutStow');
@@ -114,7 +114,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('keeps setup navigation Enter-friendly while preserving back actions', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('message: "Next step?"');
     expect(content).toContain('{ name: "Continue to step 2 (configs)", value: "next" as const },');
@@ -126,7 +126,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('makes selected configs drive the chezmoi targets that are applied', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('function selectedChezmoiApplyTargets(configs: string[]): string[]');
     expect(content).toContain('applyChezmoi(chezmoiConfigs)');
@@ -135,7 +135,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('uses action-first setup path labels', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('Recommended full AI/dev workflow');
     expect(content).toContain('Keep detected setup');
@@ -146,34 +146,34 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('migrates legacy ~/.zshrc symlinks to a local source file', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('const ZSHRC_MARKER_START = "# === Added from builtby.win/dotfiles (zsh) ==="');
     expect(content).toContain('source "$DOTFILES_DIR/shell/init.sh"');
     expect(content).toContain('unlinkSync(zshrcPath);');
   });
 
   it('backs up real managed targets before chezmoi apply', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('function backupRealManagedTargets(configs: string[]): void');
     expect(content).toContain('rmSync(targetPath, { recursive: true, force: true });');
     expect(content).toContain('type: "chezmoi"');
   });
 
   it('creates a machine-local shell overrides file during setup', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('const DOTFILES_LOCAL_SHELL_FILE = join(DOTFILES_CONFIG_DIR, "local.sh")');
     expect(content).toContain('Created local shell overrides at ${DOTFILES_LOCAL_SHELL_FILE}');
   });
 
   it('keeps unsupported Linux GUI app suggestions out of setup defaults', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('value: "vscode"');
     expect(content).toContain('value: "ghostty"');
     expect(content).toContain('platforms: { macos: true, linux: false, windows: false }');
   });
 
   it('filters Linux setup suggestions to command-line tools only', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('const linuxCommandCategories = new Set<AppCategory>(["cli", "ai"])');
     expect(content).toContain('platformApps.filter((app) => !app.cask && linuxCommandCategories.has(app.category))');
     expect(content).toContain('const selectableManagedConfigs = currentPlatform === "linux"');
@@ -181,7 +181,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('adds OpenCode CLI install path for Linux', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('name: "OpenCode"');
     expect(content).toContain('value: "opencode"');
     expect(content).toContain('detectCmd: "command -v opencode"');
@@ -189,7 +189,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('offers shell switch from bash to zsh in setup.ts', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('Set zsh as your default shell');
     expect(content).toContain('chsh -s');
   });
@@ -209,7 +209,7 @@ describe('Linux bootstrap workflow', () => {
   it('lets setup.ts own the simplified interactive setup by default', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+    const setupContent = readSetupSource();
 
     expect(macBootstrap).not.toContain('How would you like to proceed with setup?');
     expect(linuxBootstrap).not.toContain('How would you like to proceed with setup?');
@@ -220,7 +220,7 @@ describe('Linux bootstrap workflow', () => {
   it('only passes setup path handoff flags when bootstrap gets an explicit path', () => {
     const macBootstrap = fs.readFileSync(bootstrapPath, 'utf-8');
     const linuxBootstrap = fs.readFileSync(linuxBootstrapPath, 'utf-8');
-    const setupContent = fs.readFileSync(setupPath, 'utf-8');
+    const setupContent = readSetupSource();
 
     // SETUP_PATH is forwarded via bash parameter expansion in the login shell command
     expect(macBootstrap).not.toContain('SETUP_ARGS=( "$DOTFILES_DIR" --setup-path "$SETUP_PATH"');
@@ -263,7 +263,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('shows safety and recovery context in the setup review and success screens', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
 
     expect(content).toContain('Setup starts with the recommended full AI/dev workflow, with iTerm2 as the first terminal and OpenCode as the default AI coding CLI. You can also select Codex before install.');
     expect(content).toContain('Will modify or create:');
@@ -353,7 +353,7 @@ describe('Linux bootstrap workflow', () => {
   });
 
   it('prompts to set zsh as default shell in interactive setup', () => {
-    const content = fs.readFileSync(setupPath, 'utf-8');
+    const content = readSetupSource();
     expect(content).toContain('Set zsh as your default shell');
     expect(content).toContain('chsh -s');
     expect(content).toContain('installLinuxPackages(["zsh"])');

@@ -77,8 +77,14 @@
 # GitButler: commit every turn (local override, outside generated block)
 - Whenever a turn leaves file changes made by this session, you MUST end the turn by committing them with `but` (`but diff`, then `but commit -b <name>/<short-description> -m "type(scope): summary" <ids>`). Applies to trivial edits too; this overrides "when checks passed" wording above and any "NEVER run git subcommands" guidance (use `but`, not `git`).
 - Reuse this session's branch for later turns (`but commit -b <existing-branch> ...`). Commit only IDs this session changed. Never push or open PRs unless asked.
+- Never end a turn with uncommitted changes you or your subagents made: run `but diff` before yielding and commit every remaining ID of yours (explicit IDs or paths, never bare `but commit`/`absorb`/`discard @`). Uncommitted changes you did not make belong to an agent still mid-turn: do not commit, stash, discard or move them; mention them in one line.
+- Forking big work into a worktree: the fork never takes other agents' uncommitted edits. Unfinished work on parallel branches is not included by default: ask which in-flight branches (if any) to include. Procedure: `but-worktree` skill, section 4.
 
 # Big or long tasks: isolate in a GitButler worktree (local override, outside generated block)
 Reason: edits in the main checkout trigger hot reload/rebuilds. Procedure lives in the `but-worktree` skill (`skill://but-worktree`).
 - Big task at start (multi-file refactor/feature, subagent fan-out, likely >10 min): read the skill first and ask the user whether to work in an isolated worktree.
 - Any task you implement directly in the main checkout (including ones that looked small): before the first edit, pick a `<task-slug>` and run `F="${TMPDIR:-/tmp}/but-task-start-$(echo "$PWD" | shasum | cut -c1-8)-<task-slug>"; [ -e "$F" ] || date +%s > "$F"`. Before each later batch of edits or subagent dispatch, if `$(( $(date +%s) - $(cat "$F") ))` > 600 and work remains, read the skill and auto-migrate to a worktree without asking. Delete `$F` when the task ends (or after applying a worktree branch).
+
+# Decision memory (local override, outside generated block)
+- Before non-trivial work (design choices, refactors, anything touching an area with prior history), `recall` prior decisions and rejected approaches for the topic; do not rely on auto-injected memories.
+- After a decision is settled or an approach is rejected/failed, `retain` it with the why and the alternatives ruled out.

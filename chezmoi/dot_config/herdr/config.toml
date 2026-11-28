@@ -9,8 +9,12 @@ onboarding = false
 name = "catppuccin"
 
 [ui]
-# Show a zoom indicator in the tab bar so a zoomed pane is not mistaken for the only pane.
-tab_bar_right = [{ type = "zoom" }]
+# Top-right: pane layout HUD (focused pane highlighted), prefixed with ZOOM when zoomed.
+# mobile_width_threshold = 0 keeps the regular tab bar so tab_bar_right stays visible.
+mobile_width_threshold = 0
+tab_bar_right = [
+  { type = "command", command = "herdr-pane-layout-status", interval_seconds = 1 },
+]
 # Collapsed sidebar takes zero width (no dots rail). "compact" keeps the rail.
 sidebar_collapsed_mode = "hidden"
 
@@ -45,8 +49,8 @@ split_horizontal = "prefix+shift+d"
 
 # --- Pane navigation (matches tmux leader+hjkl and Alt+hjkl) ---
 focus_pane_left = ["prefix+h", "prefix+left", "alt+h"]
-focus_pane_down = ["prefix+j", "alt+j"]
-focus_pane_up = ["prefix+k", "alt+k"]
+focus_pane_down = ["prefix+j"]
+focus_pane_up = ["prefix+k"]
 focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 
 # --- Pane management ---
@@ -100,12 +104,13 @@ toggle_sidebar = "prefix+shift+b"
 # Popups go through herdr-popup, which closes any open popup first: herdr
 # rejects a second popup, so a forgotten one would swallow the next keypress.
 # Fuzzy switch on label, repo/folder, branch and path.
-# prefix+g mirrors prefix+space so the cramped built-in picker isn't needed.
+# prefix+space opens the b2v switcher directly (shell, not popup: a popup would flash herdr's frame first).
+# prefix+g is the herdr-switch popup for when back2vibing isn't running.
 [[keys.command]]
 key = "prefix+space"
 type = "shell"
-command = "herdr-popup switch"
-description = "switch workspace"
+command = "sh -c '$HOME/.local/bin/b2v-running && $HOME/.local/bin/b2v-open switcher'"
+description = "b2v switcher"
 
 [[keys.command]]
 key = "prefix+g"
@@ -132,6 +137,33 @@ key = "prefix+e"
 type = "shell"
 command = "herdr-tab-step next"
 description = "next tab or workspace"
+
+# Mobile swipe: always zoomed. Swipe left = next pane, swipe right = previous;
+# past the first/last pane it moves to the adjacent tab (zoomed). Not bound on desktop habits.
+[[keys.command]]
+key = "prefix+alt+left"
+type = "shell"
+command = "herdr-tab-step next swipe"
+description = "swipe left: next zoomed pane/tab"
+
+[[keys.command]]
+key = "prefix+alt+right"
+type = "shell"
+command = "herdr-tab-step prev swipe"
+description = "swipe right: previous zoomed pane/tab"
+
+# Option+j/k scroll the pane half a page down/up (vim ctrl-d/ctrl-u style).
+[[keys.command]]
+key = "alt+j"
+type = "shell"
+command = "herdr-scroll down"
+description = "scroll down"
+
+[[keys.command]]
+key = "alt+k"
+type = "shell"
+command = "herdr-scroll up"
+description = "scroll up"
 
 # --- Lazygit (zoomed pane) ---
 [[keys.command]]

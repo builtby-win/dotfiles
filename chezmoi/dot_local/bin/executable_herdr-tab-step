@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Move to the adjacent tab, crossing workspace boundaries when needed.
+"""Move to the adjacent tab, wrapping within the workspace.
 
-While the focused tab is zoomed, step between its panes instead (wrapping),
-keeping the zoom on the newly focused pane.
+While the focused tab is zoomed, step between its panes first (keeping the
+zoom on the newly focused pane); at the first/last pane, move to the adjacent tab.
+
+With "swipe" (mobile), the zoom is always applied: panes are stepped zoomed even
+if the tab was not zoomed, and the adjacent tab is entered zoomed on its first
+(next) or last (prev) pane.
 """
 import json
 import os
@@ -24,36 +28,33 @@ def call(method, params=None):
     return response["result"]
 
 direction = sys.argv[1]
-if direction not in ("prev", "next"):
-    raise SystemExit("usage: herdr-tab-step prev|next")
+if direction not in ("prev", "next") or sys.argv[2:] not in ([], ["swipe"]):
+    raise SystemExit("usage: herdr-tab-step prev|next [swipe]")
+swipe = sys.argv[2:] == ["swipe"]
 
 snapshot = call("session.snapshot")["snapshot"]
-workspaces = sorted(snapshot["workspaces"], key=lambda workspace: workspace["number"])
 current_workspace_id = snapshot["focused_workspace_id"]
 current_tab_id = snapshot["focused_tab_id"]
-workspace_index = next(i for i, item in enumerate(workspaces) if item["workspace_id"] == current_workspace_id)
 tabs = [tab for tab in snapshot["tabs"] if tab["workspace_id"] == current_workspace_id]
 tab_index = next(i for i, item in enumerate(tabs) if item["tab_id"] == current_tab_id)
 step = -1 if direction == "prev" else 1
 
 layout = next((l for l in snapshot["layouts"] if l["tab_id"] == current_tab_id), None)
-if layout and layout.get("zoomed") and len(layout["panes"]) > 1:
+if layout and (swipe or layout.get("zoomed")):
     pane_ids = [pane["pane_id"] for pane in layout["panes"]]
-    pane_index = pane_ids.index(layout["focused_pane_id"])
-    target_pane_id = pane_ids[(pane_index + step) % len(pane_ids)]
-    call("pane.focus", {"pane_id": target_pane_id})
-    call("pane.zoom", {"pane_id": target_pane_id, "mode": "on"})
-    raise SystemExit(0)
-next_tab_index = tab_index + step
-
-if 0 <= next_tab_index < len(tabs):
-    target_tab = tabs[next_tab_index]
-else:
-    next_workspace_index = workspace_index + step
-    if not 0 <= next_workspace_index < len(workspaces):
+    target_index = pane_ids.index(layout["focused_pane_id"]) + step
+    if 0 <= target_index < len(pane_ids):
+        call("pane.focus", {"pane_id": pane_ids[target_index]})
+        call("pane.zoom", {"pane_id": pane_ids[target_index], "mode": "on"})
         raise SystemExit(0)
-    target_workspace_id = workspaces[next_workspace_index]["workspace_id"]
-    target_tabs = [tab for tab in snapshot["tabs"] if tab["workspace_id"] == target_workspace_id]
-    target_tab = target_tabs[0] if direction == "next" else target_tabs[-1]
 
-call("tab.focus", {"tab_id": target_tab["tab_id"]})
+target_tab_id = tabs[(tab_index + step) % len(tabs)]["tab_id"]
+call("tab.focus", {"tab_id": target_tab_id})
+
+if swipe:
+    # Enter the new tab zoomed on the pane nearest the edge we crossed.
+    target = next((l for l in snapshot["layouts"] if l["tab_id"] == target_tab_id), None)
+    if target and target["panes"]:
+        pane_id = target["panes"][0 if step > 0 else -1]["pane_id"]
+        call("pane.focus", {"pane_id": pane_id})
+        call("pane.zoom", {"pane_id": pane_id, "mode": "on"})
