@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from 'fs';
 import * as path from 'path';
 
 describe('iTerm2 defaults', () => {
-  const setupPath = path.resolve(__dirname, '../setup.ts');
   const functionsPath = path.resolve(__dirname, '../shell/functions.sh');
   const scriptPath = path.resolve(__dirname, '../scripts/setup-iterm-defaults.sh');
 
@@ -25,7 +25,7 @@ describe('iTerm2 defaults', () => {
   });
 
   it('exposes iTerm2 defaults through setup and bb', () => {
-    const setup = fs.readFileSync(setupPath, 'utf-8');
+    const setup = readSetupSource();
     const functions = fs.readFileSync(functionsPath, 'utf-8');
 
     expect(setup).toContain('{ name: "iTerm2", value: "iterm2", brewName: "iterm2", cask: true, configs: ["iterm2"], checked: true');

@@ -80,7 +80,7 @@ agent-link() {
       continue
     fi
 
-    local source_path="$AGENTS_DOTFILES_DIR/agents/$agent/$config_file"
+    local source_path="$AGENTS_DOTFILES_DIR/ai/repo-rules/$agent/$config_file"
     local target_path="$repo_root/$config_file"
 
     if [[ ! -f "$source_path" ]]; then
@@ -108,7 +108,7 @@ agent-link() {
 
     # Create symlink
     ln -s "$source_path" "$target_path"
-    echo "✓ Linked $config_file → dotfiles/agents/$agent/"
+    echo "✓ Linked $config_file → dotfiles/ai/repo-rules/$agent/"
     ((linked++))
   done
 
@@ -155,7 +155,7 @@ agent-status() {
       if [[ -L "$target_path" ]]; then
         local link_target
         link_target=$(readlink "$target_path")
-        if [[ "$link_target" == *"dotfiles/agents"* ]]; then
+        if [[ "$link_target" == *"dotfiles/ai/repo-rules"* ]]; then
           echo "  ✓ $file (symlinked)"
         else
           echo "  ⚠ $file (symlink to: $link_target)"
@@ -171,7 +171,7 @@ agent-status() {
   fi
 
   echo ""
-  echo "Template source: $AGENTS_DOTFILES_DIR/agents/"
+  echo "Template source: $AGENTS_DOTFILES_DIR/ai/repo-rules/"
 }
 
 # Quick alias

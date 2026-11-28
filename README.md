@@ -136,15 +136,14 @@ This is ideal if you want to add pieces over time.
 | Shell (zsh) | `bb setup shell` | zinit, starship, aliases, PATH | `docs/modules/shell.md` |
 | Tmux | `bb setup tmux` | prefix Ctrl+b and sesh integration | `docs/modules/tmux.md` |
 | Neovim | `bb setup nvim` | bleeding-edge vim.pack config for Neovim 0.12+ | `docs/modules/nvim.md` |
-| Hammerspoon | `bb setup hammerspoon` | Hyper app launcher + Ghostty 4-pane hotkey | `docs/modules/hammerspoon.md` |
+| Hammerspoon | `bb setup hammerspoon` | Hyper Ghostty/Rex/Helium toggles | `docs/modules/hammerspoon.md` |
 | Karabiner | `bb setup karabiner` | macOS chords, app-aware Command/tmux behavior, Hyper, and Neru modes | `docs/modules/karabiner.md` |
 | Neru | Auto-loaded with Karabiner | App context grid launcher for macOS | `docs/modules/karabiner.md` |
-| mimi | `bb setup mimi` | macOS dwindle tiling, native Spaces, active-window border (driven by the jk leader) | `docs/modules/mimi.md` |
 | iTerm2 | `bb setup iterm2` | recommended first terminal key defaults | `docs/modules/app-backups.md` |
 | Ghostty | `bb setup ghostty` | optional terminal config | `docs/modules/ghostty.md` |
 | App backups | `bb sync macos-apps pull` | Raycast, Rectangle Pro, BetterTouchTool export sync + restore | `docs/modules/app-backups.md` |
 | Clipboard sync | `bb clipcascade` | ClipCascade text/image/file sync across Linux and macOS over Tailscale | `docs/modules/clipcascade.md` |
-| AI configs | `bb setup` | auto-copied from templates | `docs/modules/ai.md` |
+| AI configs | `bb setup` | auto-copied from `ai/tool-settings/` | `docs/modules/ai.md` |
 | Back2Vibing | `bb setup back2vibing` | Focus modes, workflow transitions, and context for AI devs | `docs/modules/back2vibing.md` |
 
 ## Onboarding tips
@@ -237,14 +236,15 @@ dotfiles/
 ├── lib/                  # TypeScript utilities (config builders, manifest management)
 ├── scripts/              # Helper scripts (chezmoi apply, app sync/restore, defaults)
 │
-├── templates/            # Copy-managed configs for AI tools (Claude, Gemini, OpenCode)
-├── agents/               # Agent config templates and symlink helpers
-├── apps/                 # Brewfile for macOS app installation
+├── ai/
+│   ├── tool-settings/    # Copied into ~/ by `bb setup` (Claude, Codex, Gemini, OpenCode, Cursor)
+│   └── repo-rules/       # Symlinked into repos by `agent-link` (CLAUDE.md, GEMINI.md, AGENTS.md)
+├── Brewfile              # macOS app installation
 ├── assets/app-exports/   # Native restore artifacts for macOS apps
 ├── windows/              # Windows-specific configs (profiles, kanata, packages)
 │
 ├── tests/                # Test suite (bootstrap, modules, setup flows, platforms)
-└── docs/                 # Module documentation and planning
+└── docs/                 # Module documentation; `docs/archive/` holds old plans
 ```
 
 ## macOS app restore artifacts
@@ -273,11 +273,11 @@ bb restore rectangle-pro
 bb restore bettertouchtool
 ```
 
-OpenCode is installed by default in the recommended setup, with styling copy-managed from `templates/opencode/`. Codex CLI is available as an optional checkbox. See `docs/modules/opencode.md`.
+OpenCode is installed by default in the recommended setup, with styling copy-managed from `ai/tool-settings/opencode/`. Codex CLI is available as an optional checkbox. See `docs/modules/opencode.md`.
 
 ## Agent configs and symlinks
 
-Agent configuration templates live in `agents/` and can be symlinked to any git repository for consistent rules across projects:
+Agent configuration templates live in `ai/repo-rules/` and can be symlinked to any git repository for consistent rules across projects:
 
 ```bash
 agent-link              # Interactive: select agents to link
@@ -287,15 +287,15 @@ agent-update            # Pull latest agent configs from dotfiles
 agent-status            # Check which repos have which configs
 ```
 
-Each template pulls from a shared base (`agents/shared/base.md`) plus agent-specific extensions. See `agents/README.md` for details.
+Each template pulls from a shared base (`ai/repo-rules/shared/base.md`) plus agent-specific extensions. See `ai/repo-rules/README.md` for details.
 
 ## AI tool configs
 
-When you run `bb setup`, AI tool configurations are automatically copied from `templates/`:
+When you run `bb setup`, AI tool configurations are automatically copied from `ai/tool-settings/`:
 
-- `templates/claude/` → Claude Code settings
-- `templates/gemini/` → Gemini/Antigravity settings  
-- `templates/opencode/` → OpenCode styling and extensions
+- `ai/tool-settings/claude/` → Claude Code settings
+- `ai/tool-settings/gemini/` → Gemini/Antigravity settings  
+- `ai/tool-settings/opencode/` → OpenCode styling and extensions
 
 These are copy-managed, so edits in the dotfiles will copy on next setup run without overwriting local changes during active development.
 
@@ -397,7 +397,7 @@ pnpm run setup
 - `docs/content/tmux-b2v-video-script.md` — Back2Vibing tmux integration video
 
 ### Agent config
-- `agents/README.md` — Agent template system, symlink helpers, shared base rules
+- `ai/repo-rules/README.md` — Agent template system, symlink helpers, shared base rules
 
 ## License
 

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { readSetupSource } from './helpers/setup-source';
 import * as fs from "fs";
 import * as path from "path";
 
@@ -44,7 +45,7 @@ describe("Neovim module wiring", () => {
   });
 
   it("adds nvim to setup catalogs and README", () => {
-    const setupTs = readRepoFile("setup.ts");
+    const setupTs = readSetupSource();
     const functionsSh = readRepoFile("shell/functions.sh");
     const readme = readRepoFile("README.md");
 
