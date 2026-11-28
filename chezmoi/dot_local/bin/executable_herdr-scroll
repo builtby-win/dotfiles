@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""Scroll the active Herdr pane by half a viewport: herdr-scroll up|down."""
+import json
+import os
+import socket
+import sys
+
+direction = sys.argv[1]
+pane = os.environ.get("HERDR_ACTIVE_PANE_ID") or os.environ["HERDR_PANE_ID"]
+socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser("~/.config/herdr/herdr.sock")
+
+
+def request(method, params):
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.settimeout(2)
+        client.connect(socket_path)
+        client.sendall((json.dumps({"id": "herdr-scroll", "method": method, "params": params}) + "\n").encode())
+        return json.loads(client.makefile().readline())["result"]["pane"]["scroll"]
+
+
+scroll = request("pane.get", {"pane_id": pane})
+step = max(scroll["viewport_rows"] // 2, 1)
+target = scroll["offset_from_bottom"] + (step if direction == "up" else -step)
+request("pane.scroll", {"pane_id": pane, "offset_from_bottom": min(max(target, 0), scroll["max_offset_from_bottom"])})

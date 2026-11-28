@@ -45,8 +45,8 @@ split_horizontal = "prefix+shift+d"
 
 # --- Pane navigation (matches tmux leader+hjkl and Alt+hjkl) ---
 focus_pane_left = ["prefix+h", "prefix+left", "alt+h"]
-focus_pane_down = ["prefix+j", "alt+j"]
-focus_pane_up = ["prefix+k", "alt+k"]
+focus_pane_down = ["prefix+j"]
+focus_pane_up = ["prefix+k"]
 focus_pane_right = ["prefix+l", "prefix+right", "alt+l"]
 
 # --- Pane management ---
@@ -132,6 +132,19 @@ key = "prefix+e"
 type = "shell"
 command = "herdr-tab-step next"
 description = "next tab or workspace"
+
+# Option+j/k scroll the pane half a page down/up (vim ctrl-d/ctrl-u style).
+[[keys.command]]
+key = "alt+j"
+type = "shell"
+command = "herdr-scroll down"
+description = "scroll down"
+
+[[keys.command]]
+key = "alt+k"
+type = "shell"
+command = "herdr-scroll up"
+description = "scroll up"
 
 # --- Lazygit (zoomed pane) ---
 [[keys.command]]
