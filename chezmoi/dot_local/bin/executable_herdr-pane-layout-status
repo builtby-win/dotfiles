@@ -4,7 +4,7 @@
 - Expresses split topology with pipe '│' for horizontal and '/' for vertical splits.
 - Active pane number remains the exact same raw digit size as non-active panes,
   highlighted using ANSI reverse-video styling (\033[7;1m).
-- Appends active agent name if present (e.g. omp).
+- Prefixes ZOOM when the tab is zoomed.
 """
 
 import json
@@ -105,18 +105,13 @@ def get_layout_status():
 
     focused_id = layout.get("focused_pane_id")
     zoomed = layout.get("zoomed", False)
-    snap_panes = {p["pane_id"]: p for p in snap.get("panes", [])}
 
     pid_to_num = {p["pane_id"]: i for i, p in enumerate(panes, 1)}
 
     tree_str = format_tree(panes, focused_id, pid_to_num)
     layout_matrix = f"[ {tree_str} ]"
 
-    foc_info = snap_panes.get(focused_id, {})
-    agent = foc_info.get("agent")
-    active_str = f" {agent}" if agent else ""
-
-    return f"{layout_matrix}{active_str}"
+    return f"\033[7;1m ZOOM \033[0m {layout_matrix}" if zoomed else layout_matrix
 
 
 if __name__ == "__main__":
