@@ -303,6 +303,81 @@ ensure_command() {
   print_success "${cmd} installed"
 }
 
+ensure_chezmoi() {
+  export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+  command -v chezmoi >/dev/null 2>&1 && return 0
+  print_step "Installing chezmoi..."
+  # Not packaged on Ubuntu 24.04 / Debian apt; use the official installer first.
+  mkdir -p "$HOME/.local/bin"
+  local installer
+  installer="$(mktemp)"
+  if curl -fsLS https://get.chezmoi.io -o "$installer" && [[ -s "$installer" ]]; then
+    sh "$installer" -b "$HOME/.local/bin" || true
+  fi
+  rm -f "$installer"
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_warning "Official chezmoi installer failed; trying ${LINUX_PKG_MANAGER}"
+    install_packages chezmoi || true
+    if ! command -v chezmoi >/dev/null 2>&1 && command -v snap >/dev/null 2>&1; then
+      sudo snap install chezmoi --classic || true
+    fi
+  fi
+  command -v chezmoi >/dev/null 2>&1 || { print_error "Failed to install chezmoi. See https://www.chezmoi.io/install/"; exit 1; }
+  print_success "chezmoi installed"
+}
+
+ensure_zsh() {
+  if ! command -v zsh >/dev/null 2>&1; then
+    print_step "Installing zsh..."
+    install_packages zsh
+    command -v zsh >/dev/null 2>&1 || { print_error "Failed to install zsh"; exit 1; }
+    print_success "zsh installed"
+  fi
+  # Best-effort: make zsh the login shell.
+  local zsh_path
+  zsh_path="$(command -v zsh)"
+  if [[ "$(basename "${SHELL:-}")" != "zsh" && "$NON_INTERACTIVE" -ne 1 ]]; then
+    grep -qx "$zsh_path" /etc/shells 2>/dev/null || echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null || true
+    sudo chsh -s "$zsh_path" "$(id -un)" 2>/dev/null \
+      && print_success "Default shell set to zsh (takes effect on next login)" \
+      || print_warning "Could not set default shell; run: chsh -s $zsh_path"
+  fi
+}
+
+# Tools the shell config (shell/*.sh, zinit.sh) relies on. Best-effort per tool:
+# a package missing from one distro's repos must not abort the bootstrap.
+ensure_shell_deps() {
+  export PATH="$HOME/.local/bin:$PATH"
+  mkdir -p "$HOME/.local/bin"
+  local tool
+  for tool in fzf zoxide eza bat jq tmux unzip; do
+    command -v "$tool" >/dev/null 2>&1 && continue
+    # Debian/Ubuntu ship bat's binary as batcat (handled in shell/aliases.sh)
+    [[ "$tool" == "bat" ]] && command -v batcat >/dev/null 2>&1 && continue
+    print_step "Installing ${tool}..."
+    install_packages "$tool" || print_warning "Could not install ${tool} via ${LINUX_PKG_MANAGER}"
+    if [[ "$tool" == "bat" ]] && command -v batcat >/dev/null 2>&1; then
+      continue
+    fi
+    command -v "$tool" >/dev/null 2>&1 || print_warning "${tool} unavailable; related shell features will be skipped"
+  done
+
+  if ! command -v starship >/dev/null 2>&1; then
+    print_step "Installing starship..."
+    local installer
+    installer="$(mktemp)"
+    if curl -fsSL https://starship.rs/install.sh -o "$installer" && [[ -s "$installer" ]]; then
+      sh "$installer" -y -b "$HOME/.local/bin" || true
+    fi
+    rm -f "$installer"
+    if command -v starship >/dev/null 2>&1; then
+      print_success "starship installed"
+    else
+      print_warning "starship unavailable; default prompt will be used"
+    fi
+  fi
+}
+
 # === Main flow ===
 
 [[ "$(uname -s)" != "Linux" ]] && { print_error "This script is for Linux only"; exit 1; }
@@ -333,7 +408,9 @@ mkdir -p "$DOTFILES_DIR" || { print_error "Failed to create ${DOTFILES_DIR}"; ex
 
 ensure_command git git
 ensure_command curl curl
-ensure_command chezmoi chezmoi
+ensure_chezmoi
+ensure_zsh
+ensure_shell_deps
 
 print_step "Preparing dotfiles repository..."
 if [[ -d "$DOTFILES_DIR/.git" ]]; then
