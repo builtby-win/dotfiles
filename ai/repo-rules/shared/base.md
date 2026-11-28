@@ -6,6 +6,7 @@ These principles apply to every supported coding agent:
 - Match the repository's existing patterns and keep unrelated work out of the diff.
 - Inspect before editing; state assumptions when requirements are ambiguous.
 - Verify changed behavior with the narrowest useful check before claiming completion.
+- Before non-trivial work, search available memory or notes for prior decisions and rejected approaches.
 - Run broader quality gates when the repository or delivery task requires them.
 - Keep machine-specific paths, permissions, integrations, and secrets in local configuration.
 - Publishing is explicit; use the shipping workflow when delivery is requested.
