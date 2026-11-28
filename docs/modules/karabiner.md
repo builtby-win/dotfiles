@@ -41,7 +41,7 @@ bb sync karabiner pull
 - Holding `j`, then pressing Space repeatedly, sends Backspace outside GUI Vim editors
 - Tapping Right Option arms Hyper for the next key; holding it holds Hyper
 - Tapping a modifier arms it for the next key; holding it behaves normally
-- `Caps Lock` is Escape when tapped and Control when held
+- `Caps Lock` is Escape when tapped and Control when held; double-tap (within 300ms) opens Neru scroll mode (the first tap still sends Escape)
 - `Fn` exposes raw function keys and taps as Control
 - Forward Delete becomes Escape
 - Double semicolon (`;;`) opens AltTab

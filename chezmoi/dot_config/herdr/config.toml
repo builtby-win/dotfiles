@@ -104,12 +104,13 @@ toggle_sidebar = "prefix+shift+b"
 # Popups go through herdr-popup, which closes any open popup first: herdr
 # rejects a second popup, so a forgotten one would swallow the next keypress.
 # Fuzzy switch on label, repo/folder, branch and path.
-# prefix+g mirrors prefix+space so the cramped built-in picker isn't needed.
+# prefix+space opens the b2v switcher directly (shell, not popup: a popup would flash herdr's frame first).
+# prefix+g is the herdr-switch popup for when back2vibing isn't running.
 [[keys.command]]
 key = "prefix+space"
 type = "shell"
-command = "herdr-popup switch"
-description = "switch workspace"
+command = "sh -c '$HOME/.local/bin/b2v-running && $HOME/.local/bin/b2v-open switcher'"
+description = "b2v switcher"
 
 [[keys.command]]
 key = "prefix+g"

@@ -47,14 +47,14 @@ describe('Karabiner module wiring', () => {
     const rules = config.profiles[0].complex_modifications.rules;
     const descriptions = rules.map((rule: { description: string }) => rule.description);
 
-    expect(descriptions).toContain('Neru chords: fj grid, dk scroll, df hints, jl recursive_grid');
-    expect(descriptions).toContain('jk chord: terminal leader or next-key Command');
+    expect(descriptions).toContain('Neru chords: fj terminal grid / app hints, dk scroll, df hints, jl recursive_grid');
+    expect(descriptions).toContain('jk chord: window leader (Hyper+F13, handled by Hammerspoon leader module)');
     expect(descriptions).not.toContain('Hold j then Space for repeating Backspace outside GUI Vim editors');
     expect(descriptions).toContain('One-shot modifiers with Microsoft Sculpt layout parity');
     expect(descriptions).toContain('Right Option and Sculpt Menu: tap for next-key Hyper, hold for Hyper');
 
     const jkRule = rules.find(
-      (rule: { description: string }) => rule.description === 'jk chord: terminal leader or next-key Command',
+      (rule: { description: string }) => rule.description === 'jk chord: window leader (Hyper+F13, handled by Hammerspoon leader module)',
     );
     expect(
       jkRule.manipulators
@@ -68,7 +68,7 @@ describe('Karabiner module wiring', () => {
             parameters: { 'basic.simultaneous_threshold_milliseconds': number };
           }) => manipulator.parameters['basic.simultaneous_threshold_milliseconds'],
         ),
-    ).toEqual([120, 120]);
+    ).toEqual([120, 120, 120]);
 
     const repeatFallbacks = jkRule.manipulators.filter(
       (manipulator: {

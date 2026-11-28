@@ -557,11 +557,12 @@ export async function runSetup(): Promise<void> {
     return state === "not_installed" || state === "partial";
   });
   const configsToInstall = selectedManagedConfigs.filter((config) => !installedConfigs.has(config));
+  let failedApps: string[] = [];
 
   if (appsToInstall.length === 0 && configsToInstall.length === 0 && aiConfigs.length === 0) {
     log.success("Everything is already installed!");
   } else {
-    await installApps(appsToInstall);
+    failedApps = await installApps(appsToInstall);
     console.log("");
 
     await setupManagedConfigs(configsToInstall);
@@ -592,7 +593,12 @@ export async function runSetup(): Promise<void> {
 
   // Done!
   console.log("");
-  console.log(`${colors.green}${colors.bold}✅ Your dotfiles are set up!${colors.reset}`);
+  if (failedApps.length > 0) {
+    console.log(`${colors.yellow}${colors.bold}⚠ Setup finished, but these installs failed: ${failedApps.join(", ")}${colors.reset}`);
+    console.log(`${colors.dim}  Scroll up for the brew error, fix it, then rerun: bb setup${colors.reset}`);
+  } else {
+    console.log(`${colors.green}${colors.bold}✅ Your dotfiles are set up!${colors.reset}`);
+  }
   console.log("");
   
   console.log(`  ${colors.bold}Next steps:${colors.reset}`);

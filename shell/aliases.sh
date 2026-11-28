@@ -74,19 +74,28 @@ alias pi-go="pi --provider opencode-go"
 alias pi-sonnet="pi --model claude-sonnet-4"
 alias pi-opus="pi --model claude-opus-4-7"
 
-# CLI tool shortcuts
-claude() {
-  command claude --dangerously-skip-permissions "$@"
+# CLI tool shortcuts — yolo mode (skip permission prompts) is on by default.
+# Opt out per shell/session: export AGENT_YOLO=0  (or call `command <tool>` directly)
+_yolo() {
+  local flag="$1" tool="$2"; shift 2
+  if [ "${AGENT_YOLO:-1}" = "0" ]; then
+    command "$tool" "$@"
+  else
+    command "$tool" "$flag" "$@"
+  fi
 }
+
+claude() { _yolo --dangerously-skip-permissions claude "$@"; }
 
 c() {
   claude "$@"
 }
 
 alias o="opencode"
-gemini() {
-  command gemini --yolo "$@"
-}
+gemini() { _yolo --yolo gemini "$@"; }
+agy() { _yolo --yolo agy "$@"; }
+omp() { _yolo --auto-approve omp "$@"; }
+opencode() { _yolo --auto opencode "$@"; }
 
 g() {
   gemini "$@"
@@ -98,7 +107,7 @@ function kiro() {
 }
 alias spark="command codex -m gpt-5.3-codex-spark"
 codex() {
-  B2V_BYPASS_AGENT_WIZARD=1 command codex --dangerously-bypass-approvals-and-sandbox "$@"
+  B2V_BYPASS_AGENT_WIZARD=1 _yolo --dangerously-bypass-approvals-and-sandbox codex "$@"
 }
 
 alias co-="git checkout -"
@@ -170,6 +179,9 @@ fi
 
 if command -v bat &> /dev/null; then
   alias cat="bat"
+elif command -v batcat &> /dev/null; then
+  # Debian/Ubuntu ship bat as batcat
+  alias cat="batcat"
 fi
 
 # Smart tmux launcher:

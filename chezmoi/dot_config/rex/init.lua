@@ -198,6 +198,11 @@ rex.action{
   title = "Switch Session or Tab…",
   keywords = "session tab workspace picker fzf",
   run = function(ctx)
+    local status = os.execute(BIN .. "b2v-running")
+    if status == true or status == 0 then
+      os.execute(BIN .. "b2v-open switcher")
+      return
+    end
     float("switcher", { BIN .. "rex-switch", ctx.client_id })
   end,
 }

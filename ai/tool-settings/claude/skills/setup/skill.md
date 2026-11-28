@@ -42,7 +42,7 @@ Use `AskUserQuestion` for the choices below. Ask only questions relevant to the 
    - CLI: tmux, btop, fzf, ripgrep, gh, bat, eza, zoxide, sesh, herdr, starship
    - Terminals/editors: iTerm2, Ghostty, Visual Studio Code, Cursor, Zed
    - AI: Claude Code, OpenCode, Codex CLI, Oh My Pi, Gemini CLI
-   - macOS productivity/input: Raycast, back2vibing, TypeWhisper, Cotypist, Neru, AltTab, Ice, BetterTouchTool, Hammerspoon, Karabiner Elements, LinearMouse
+   - macOS productivity/input: Vicinae, back2vibing, TypeWhisper, Cotypist, Neru, AltTab, Ice, BetterTouchTool, Hammerspoon, Karabiner Elements, LinearMouse
    - Other macOS apps: Bitwarden, Chrome, Arc, Orion, Docker, Figma, Discord
 4. **Managed configs** — Which dotfiles should be applied?
    - Shell (`zsh`)

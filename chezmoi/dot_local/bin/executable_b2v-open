@@ -1,0 +1,11 @@
+#!/bin/sh
+# Open a b2v:// link in one specific running back2vibing, not whichever LaunchServices picks: the dev build
+# and /Applications share a bundle id and URL scheme. Prefers a running dev build (its bundle is not under
+# /Applications), then the installed app; with none running, falls back to the installed app.
+# -g: never raise the app; the link decides what to bring forward.
+# usage: b2v-open <path>   e.g. b2v-open switcher, b2v-open action/toggle-changes
+exec_paths=$(pgrep -fl 'back2vibing\.app/Contents/MacOS/back2vibing$' | sed 's/^[0-9]* //')
+dev=$(printf '%s\n' "$exec_paths" | grep -v '^/Applications/' | head -1)
+bundle=${dev%/Contents/MacOS/back2vibing}
+[ -n "$bundle" ] || bundle=/Applications/back2vibing.app
+exec open -g -a "$bundle" "b2v://$1"

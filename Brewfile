@@ -34,7 +34,7 @@ cask "cursor"
 # AI Tools
 
 # Productivity
-cask "raycast"
+cask "vicinae"         # Default launcher (Raycast alternative)
 cask "antinote"
 cask "alt-tab"          # Windows-style alt-tab
 cask "jordanbaird-ice"  # Menu bar management

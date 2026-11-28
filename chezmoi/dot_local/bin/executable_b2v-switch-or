@@ -1,0 +1,5 @@
+#!/bin/sh
+# Open the b2v switcher if back2vibing is running, otherwise exec the given fallback command.
+# usage: b2v-switch-or <fallback> [args...]
+if b2v-running 2>/dev/null; then exec b2v-open switcher; fi
+exec "$@"

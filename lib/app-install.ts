@@ -179,7 +179,8 @@ export function installPackage(name: string, cask = false): boolean {
 
   log.info(`Installing ${name}...`);
   const cmd = cask ? `brew install --cask ${name}` : `brew install ${name}`;
-  if (runCommand(cmd, true)) {
+  // Not silent: casks may prompt for sudo and failures must be visible.
+  if (runCommand(cmd, false)) {
     log.success(`${name} installed`);
     return true;
   }
@@ -206,8 +207,20 @@ export function printManualDownloadApps(apps: App[]): void {
   console.log("");
 }
 
-export async function installApps(apps: string[]): Promise<void> {
-  if (apps.length === 0) return;
+function ensureBrewInPath(): void {
+  if (getCurrentPlatform() !== "macos" || runCommand("command -v brew", true)) return;
+  for (const prefix of ["/opt/homebrew", "/usr/local"]) {
+    if (existsSync(`${prefix}/bin/brew`)) {
+      process.env.PATH = `${prefix}/bin:${prefix}/sbin:${process.env.PATH ?? ""}`;
+      return;
+    }
+  }
+}
+
+export async function installApps(apps: string[]): Promise<string[]> {
+  const failed: string[] = [];
+  ensureBrewInPath();
+  if (apps.length === 0) return failed;
 
   const appsToInstall = APPS.filter((a) => apps.includes(a.value) && (a.brewName || a.installCommand));
   const platform = getCurrentPlatform();
@@ -232,7 +245,7 @@ export async function installApps(apps: string[]): Promise<void> {
         runCommand(`brew trust --tap "${name}"`, true);
       }
       if (app.brewName && !(platform === "linux" && app.linuxInstallCommand)) {
-        installPackage(app.brewName, app.cask);
+        if (!installPackage(app.brewName, app.cask)) failed.push(app.name);
       }
       const customInstallCommand = platform === "linux"
         ? app.linuxInstallCommand ?? app.installCommand
@@ -243,12 +256,13 @@ export async function installApps(apps: string[]): Promise<void> {
           log.success(`${app.name} installed`);
         } else {
           log.warning(`Failed to install ${app.name}`);
+          failed.push(app.name);
         }
       }
 
       if (app.dependencies) {
         for (const dep of app.dependencies) {
-          installPackage(dep);
+          if (!installPackage(dep)) failed.push(`${app.name} dependency ${dep}`);
         }
       }
     }
@@ -266,6 +280,7 @@ export async function installApps(apps: string[]): Promise<void> {
       log.success("Claude Code CLI installed");
     } else {
       log.warning("Failed to install Claude Code CLI");
+      failed.push("Claude Code CLI");
     }
   }
 
@@ -275,6 +290,7 @@ export async function installApps(apps: string[]): Promise<void> {
       log.success("Gemini CLI installed");
     } else {
       log.warning("Failed to install Gemini CLI");
+      failed.push("Gemini CLI");
     }
   }
 
@@ -284,6 +300,7 @@ export async function installApps(apps: string[]): Promise<void> {
       log.success("Codex CLI installed");
     } else {
       log.warning("Failed to install Codex CLI");
+      failed.push("Codex CLI");
     }
   }
 
@@ -296,7 +313,9 @@ export async function installApps(apps: string[]): Promise<void> {
       log.success("OpenCode CLI installed");
     } else {
       log.warning("Failed to install OpenCode CLI");
+      failed.push("OpenCode CLI");
     }
   }
 
+  return failed;
 }

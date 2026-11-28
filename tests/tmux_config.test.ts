@@ -46,7 +46,8 @@ describe("tmux profile split", () => {
   });
 
   it("opens the sesh picker with mobile-friendly popup space", () => {
-    expect(basicConf).toContain('bind-key "Space" display-popup -E -w 90% -h 85% "$HOME/.config/tmux/sesh-picker.sh"');
+    expect(basicConf).toContain('bind-key "Space" if-shell "$HOME/.local/bin/b2v-running"');
+    expect(basicConf).toContain("display-popup -E -w 90% -h 85% '$HOME/.config/tmux/sesh-picker.sh'");
     expect(basicConf).toContain('[Sessions] ::: Session Picker ::: Leader + Space ::: tmux display-popup -E -w 90% -h 85% "$HOME/.config/tmux/sesh-picker.sh"');
     expect(basicConf).toContain("unbind S");
     expect(basicConf).not.toContain('bind-key "S" display-popup');
