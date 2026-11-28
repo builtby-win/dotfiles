@@ -110,7 +110,7 @@ retry:
       - anthropic/claude-haiku-5-5:auto
       - openai-codex/gpt-6.1-sol:low
     openai-codex/gpt-6.1-sol:
-      - anthropic/claude-opus-5-5
+      - anthropic/claude-opus-5.5:max
       - openai-codex/gpt-6-luna:auto
     openai-codex/gpt-6-luna:
       - anthropic/claude-sonnet-5.5:high
