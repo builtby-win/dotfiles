@@ -9,6 +9,779 @@
                 },
                 "rules": [
                     {
+                        "description": "MacBook: F1-F7 raw, Fn/Ctrl = system shortcuts; F8-F12 media, Fn/Ctrl = raw F-keys",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f1",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "display_brightness_decrement"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f1",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "display_brightness_decrement"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f2",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "display_brightness_increment"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f2",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "display_brightness_increment"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "apple_vendor_keyboard_key_code": "mission_control"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "apple_vendor_keyboard_key_code": "mission_control"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f4",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "apple_vendor_keyboard_key_code": "spotlight"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f4",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "apple_vendor_keyboard_key_code": "spotlight"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "dictation"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "dictation"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "rewind"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "rewind"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f8",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f8"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f8",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f8"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f9",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f9"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f9",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f9"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f10",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f10"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f10",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f10"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f11",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f11"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f11",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f11"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f12",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "fn"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f12"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f12",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "control"
+                                        ],
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "f12"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f8",
+                                    "modifiers": {
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "play_or_pause"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f9",
+                                    "modifiers": {
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "fast_forward"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f10",
+                                    "modifiers": {
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "mute"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f11",
+                                    "modifiers": {
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "volume_decrement"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "f12",
+                                    "modifiers": {
+                                        "optional": [
+                                            "caps_lock"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "consumer_key_code": "volume_increment"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "device_if",
+                                        "identifiers": [
+                                            {
+                                                "is_built_in_keyboard": true
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "description": "Click clears armed one-shot (sticky) modifiers",
                         "manipulators": [
                             {
@@ -463,9 +1236,75 @@
                         ]
                     },
                     {
-                        "description": "Neru chords: fj grid, dk scroll, df hints, jl recursive_grid",
+                        "description": "Neru chords: fj terminal grid / app hints, dk scroll, df hints, jl recursive_grid",
                         "manipulators": [
                             {
+                                "type": "basic",
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": [
+                                            "^com\\.mitchellh\\.ghostty$",
+                                            "^com\\.googlecode\\.iterm2$",
+                                            "^com\\.apple\\.Terminal$",
+                                            "^dev\\.warp\\.Warp-Stable$",
+                                            "^net\\.kovidgoyal\\.kitty$",
+                                            "^org\\.alacritty$",
+                                            "^com\\.superlogical\\.rex$"
+                                        ]
+                                    }
+                                ],
+                                "from": {
+                                    "simultaneous": [
+                                        {
+                                            "key_code": "f"
+                                        },
+                                        {
+                                            "key_code": "j"
+                                        }
+                                    ],
+                                    "simultaneous_options": {
+                                        "detect_key_down_uninterruptedly": false,
+                                        "key_down_order": "insensitive",
+                                        "key_up_order": "insensitive",
+                                        "key_up_when": "any"
+                                    },
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "g",
+                                        "modifiers": [
+                                            "left_command",
+                                            "left_control",
+                                            "left_option",
+                                            "left_shift"
+                                        ]
+                                    }
+                                ],
+                                "parameters": {
+                                    "basic.simultaneous_threshold_milliseconds": 75
+                                }
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.mitchellh\\.ghostty$",
+                                            "^com\\.googlecode\\.iterm2$",
+                                            "^com\\.apple\\.Terminal$",
+                                            "^dev\\.warp\\.Warp-Stable$",
+                                            "^net\\.kovidgoyal\\.kitty$",
+                                            "^org\\.alacritty$",
+                                            "^com\\.superlogical\\.rex$"
+                                        ]
+                                    }
+                                ],
                                 "type": "basic",
                                 "from": {
                                     "simultaneous": [
@@ -490,7 +1329,7 @@
                                 },
                                 "to": [
                                     {
-                                        "key_code": "k",
+                                        "key_code": "f",
                                         "modifiers": [
                                             "left_command",
                                             "left_control",
